@@ -64,7 +64,7 @@ function ConvertTo-NeoIPCPatientSelection {
                 if ($null -eq $o -or $o -is [string] -or $o -is [System.ValueType]) { return New-SelectionFailure 'InputShape' "Piped input '$o' is no patient record. $hint" }
                 foreach ($name in 'EnrollmentId', 'EventId') {
                     if (Test-NeoIPCPatientRemovalMember -InputObject $o -Name $name) {
-                        return New-SelectionFailure 'InputShape' "A piped object carries $name, so it is an enrolment or event record: deleting by it would delete its whole patient. Pipe patient records, or reduce the records first with | Select-Object TrackedEntityId, OrgUnitId."
+                        return New-SelectionFailure 'InputShape' "A piped object carries $name, so it is an enrolment or event record: deleting by it would delete its whole patient. Pipe patient records, such as Read-PatientInfo's output, or select the patients with -OrgUnitCode and -NeoIpcId or -TrackedEntityId."
                     }
                 }
                 $uid = Get-NeoIPCPatientRemovalMember -InputObject $o -Name 'TrackedEntityId'
@@ -263,8 +263,9 @@ function Resolve-NeoIPCPatientMatch {
 function ConvertFrom-NeoIPCTrackerImportResponse {
     # DHIS2's answer to a synchronous tracker import that deletes tracked entities, read for the UIDs the request
     # carried: whether the body is an import report at all (some failures come back as a plain WebMessage), its status,
-    # the error codes and messages per UID, the UIDs it reports as deleted, and every UID it names that the request did
-    # not carry. Matched by UID, never by an object report's index, which is not the position in the request.
+    # the error codes and messages per UID, every UID its tracked-entity object reports name (ReportedUids), those of
+    # them the request carried (DeletedUids), and every UID it names that the request did not carry. Matched by UID,
+    # never by an object report's index, which is not the position in the request.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -277,6 +278,7 @@ function ConvertFrom-NeoIPCTrackerImportResponse {
     $errorCodes = [System.Collections.Generic.Dictionary[string, System.Collections.Generic.List[string]]]::new($ordinal)
     $errorMessages = [System.Collections.Generic.Dictionary[string, System.Collections.Generic.List[string]]]::new($ordinal)
     $deleted = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    $reported = [System.Collections.Generic.List[string]]::new()
     $foreign = [System.Collections.Generic.List[string]]::new()
     $structured = $null -ne $Body -and $Body -isnot [string] -and $Body -isnot [System.ValueType]
     $isReport = $structured -and (Test-NeoIPCPatientRemovalMember $Body 'status') -and
@@ -298,6 +300,7 @@ function ConvertFrom-NeoIPCTrackerImportResponse {
         foreach ($or in @($objectReports)) {
             if ($null -eq $or) { continue }
             $uid = [string](Get-NeoIPCPatientRemovalMember $or 'uid')
+            $reported.Add($uid)
             if ($asked.Contains($uid)) { [void]$deleted.Add($uid) } else { $foreign.Add($uid) }
         }
     }
@@ -311,6 +314,7 @@ function ConvertFrom-NeoIPCTrackerImportResponse {
         ResponseType   = $(if ($response) { [string](Get-NeoIPCPatientRemovalMember $response 'responseType') } else { $null })
         ErrorCodes     = $errorCodes
         ErrorMessages  = $errorMessages
+        ReportedUids   = $reported.ToArray()
         DeletedUids    = $deleted
         ForeignUids    = $foreign.ToArray()
     }
@@ -342,7 +346,9 @@ function Get-NeoIPCTrackerDeleteAnswer {
     function New-Answer([string]$Kind, [string]$Message, [string[]]$Codes = @()) {
         [pscustomobject]@{ Kind = $Kind; Message = $Message; ErrorCodes = $Codes; HttpStatusCode = $(if ($Response) { $Response.HttpStatusCode } else { $null }) }
     }
-    if ($TransportFailure -or $null -eq $Response) { return New-Answer 'NoAnswer' "No answer from DHIS2: $TransportFailure" }
+    # A lead and the text DHIS2 or the transport gave with it, which a proxy's answer can leave empty.
+    function Join-Detail([string]$Lead, [string]$Detail) { if ([string]::IsNullOrWhiteSpace($Detail)) { "$Lead." } else { "${Lead}: $($Detail.Trim())" } }
+    if ($TransportFailure -or $null -eq $Response) { return New-Answer 'NoAnswer' (Join-Detail 'No answer from DHIS2' $TransportFailure) }
     $code = $Response.HttpStatusCode
     if ($Response.IsReport) {
         $codes = @()
@@ -351,33 +357,46 @@ function Get-NeoIPCTrackerDeleteAnswer {
             $codes = @($Response.ErrorCodes[$TrackedEntityId] | Where-Object { $seen.Add($_) })
         }
         if ($Response.ForeignUids.Count -gt 0) { return New-Answer 'Foreign' ("DHIS2's report names UIDs the request did not carry: {0}." -f ($Response.ForeignUids -join ', ')) $codes }
-        if ($codes.Count -gt 0) { return New-Answer 'Refused' ("DHIS2 refused the deletion: {0}" -f ($Response.ErrorMessages[$TrackedEntityId] -join ' / ')) $codes }
+        if ($codes.Count -gt 0) { return New-Answer 'Refused' (Join-Detail 'DHIS2 refused the deletion' (@($Response.ErrorMessages[$TrackedEntityId] | Where-Object { $_ }) -join ' / ')) $codes }
         if ($Response.Status -ceq 'OK' -and $null -ne $code -and $code -ge 200 -and $code -lt 300 -and $Response.DeletedUids.Contains($TrackedEntityId)) {
             return New-Answer 'Reported' 'DHIS2 reported the patient deleted.'
         }
-        if ($Response.Status -ceq 'ERROR') { return New-Answer 'CommitFailed' "DHIS2 reported an error without refusing the patient: $($Response.Message)" }
+        if ($Response.Status -ceq 'ERROR') { return New-Answer 'CommitFailed' (Join-Detail 'DHIS2 reported an error without refusing the patient' $Response.Message) }
         return New-Answer 'Unclear' "DHIS2 answered status $($Response.Status), HTTP $code, without reporting the patient deleted or refused."
     }
-    if ($code -in 401, 403) { return New-Answer 'AccessDenied' "DHIS2 refused the request with HTTP ${code}: $($Response.Message)" }
+    if ($code -in 401, 403) { return New-Answer 'AccessDenied' (Join-Detail "DHIS2 refused the request with HTTP $code" $Response.Message) }
     if ($Response.ResponseType -ceq 'TrackerJob' -or $Response.Message -ceq 'Tracker job added') { return New-Answer 'AsyncJob' 'DHIS2 queued the deletion as a job instead of running it.' }
-    if (-not $Response.Structured -or $null -eq $code -or $code -in 502, 503, 504) { return New-Answer 'NoAnswer' "No usable answer from DHIS2 (HTTP $code): $($Response.Message)" }
-    if ($code -ge 500) { return New-Answer 'ServerError' "DHIS2 failed with HTTP ${code}: $($Response.Message)" }
-    if ($code -ge 400) { return New-Answer 'Rejected' "DHIS2 rejected the request with HTTP ${code}: $($Response.Message)" }
+    if (-not $Response.Structured -or $null -eq $code -or $code -in 502, 503, 504) { return New-Answer 'NoAnswer' (Join-Detail "No usable answer from DHIS2 (HTTP $code)" $Response.Message) }
+    if ($code -ge 500) { return New-Answer 'ServerError' (Join-Detail "DHIS2 failed with HTTP $code" $Response.Message) }
+    if ($code -ge 400) { return New-Answer 'Rejected' (Join-Detail "DHIS2 rejected the request with HTTP $code" $Response.Message) }
     New-Answer 'Unclear' "DHIS2 answered HTTP $code without an import report."
 }
 
 function Get-NeoIPCPatientReadBackState {
-    # What the read-back after a patient's deletion proves:
+    # What the read-back after a patient's deletion proves, against the preview's read, which included deleted data:
     #   ProvenDeleted both reads agree: the list read with includeDeleted shows the patient and every enrolment and
-    #                 event the preview showed as deleted, and the single read answers 404. Neither proves it alone:
-    #                 from 2.42 the single read answers 404 for a patient the caller cannot see as well, and the list
-    #                 read shows only what the caller can read.
-    #   Live          the list read shows the patient, and every enrolment and event the preview showed, not deleted,
-    #                 while the single read finds it. A patient can survive a failed request without all of its data:
-    #                 on 2.42 and later a commit that fails on a checked exception (a NotFoundException, when a record
-    #                 disappeared between DHIS2's preheat and its commit) keeps what it deleted before, while any other
-    #                 failure rolls the request back.
-    #   Unknown       anything else.
+    #                 event the preview showed live as deleted, and the single read answers 404. Neither proves it
+    #                 alone: from 2.42 the single read answers 404 for a patient the caller cannot see as well, and the
+    #                 list read shows only what the caller can read. Unpreviewed names what the deletion took that the
+    #                 preview did not show, or showed elsewhere, and DHIS2's cascade took unchecked by the removal's
+    #                 rules: an enrolment or event added, or moved to another org unit, after the preview read the
+    #                 patient; its registration moved; and a program owner added or moved. An owner shows an enrolment
+    #                 in a program the caller cannot read too, since DHIS2 returns the owners of every program and
+    #                 creates one with a patient's first enrolment in a program.
+    #   Live          the list read shows the patient, and every enrolment and event the preview showed live, not
+    #                 deleted, and no deleted enrolment or event the preview did not show, while the single read finds
+    #                 it. A patient can survive a failed request without all of its data: on 2.42 and later a commit
+    #                 that fails on a checked exception (a NotFoundException, when a record disappeared between DHIS2's
+    #                 preheat and its commit) keeps what it deleted before, while any other failure rolls the request
+    #                 back.
+    #   Unknown       anything else. The list read alone shows a deletion that ran in part, whether the single read
+    #                 answers or fails: a deleted patient whose read does not show every enrolment and event the preview
+    #                 showed live as deleted is CascadeIncomplete, and a live patient whose read does not show them all
+    #                 live, or shows deleted data the preview did not show, is PartialDeletion. A deleted patient whose
+    #                 single read fails or answers otherwise than 404 reads ReadBackFailed, naming what the list read
+    #                 shows taken that the preview did not show, or showed elsewhere.
+    # ReadsDeleted says, whatever the state, whether the list read showed the patient itself deleted. $Failure is
+    # whichever read failed first, and with a record it is the single read's.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -386,18 +405,46 @@ function Get-NeoIPCPatientReadBackState {
         [AllowNull()]$SingleReadStatus,
         [AllowNull()][AllowEmptyString()][string]$Failure
     )
-    function New-State([string]$State, [string]$Reason, [string]$Message) { [pscustomobject]@{ State = $State; Reason = $(if ($Reason) { $Reason } else { $null }); Message = $Message } }
-    if ($Failure) { return New-State 'Unknown' 'ReadBackFailed' "Reading the patient back failed: $Failure" }
-    if ($null -eq $Record) { return New-State 'Unknown' 'ReadBackFailed' 'The read-back did not return the patient.' }
+    # ReadsDeleted comes from $Record, a parameter and so always defined here: a variable of the same name in a
+    # caller's scope can never stand in for it.
+    function New-State([string]$State, [string]$Reason, [string]$Message, [string[]]$Unpreviewed = @()) {
+        [pscustomobject]@{ State = $State; Reason = $(if ($Reason) { $Reason } else { $null }); Message = $Message; Unpreviewed = $Unpreviewed
+            ReadsDeleted = $null -ne $Record -and $Record.Deleted -eq $true }
+    }
+    if ($null -eq $Record) {
+        return New-State 'Unknown' 'ReadBackFailed' $(if ($Failure) { "Reading the patient back failed: $($Failure.Trim().TrimEnd('.'))." } else { 'The read-back did not return the patient.' })
+    }
     if (-not $Record.Complete) { return New-State 'Unknown' 'ReadBackFailed' 'The read-back lacked fields the removal checks.' }
     $ordinal = [System.StringComparer]::Ordinal
+    $previewedChildren = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
+    foreach ($en in $Previewed.Enrollments) {
+        $previewedChildren["enrollment|$($en.EnrollmentId)"] = $en
+        foreach ($ev in $en.Events) { $previewedChildren["event|$($ev.EventId)"] = $ev }
+    }
     $deletedChildren = [System.Collections.Generic.HashSet[string]]::new($ordinal)
     $liveChildren = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    # $unpreviewed holds the deleted enrolments and events the preview did not show at all, $moved what it showed
+    # elsewhere: deleted enrolments and events now in another org unit, the registration, and the program owners.
+    # $moved counts only beside the patient's deletion; beside a live patient, its deleted enrolments and events show
+    # as gone anyway.
+    $unpreviewed = [System.Collections.Generic.List[string]]::new()
+    $moved = [System.Collections.Generic.List[string]]::new()
+    function Add-Child([string]$Key, [string]$Label, $Child) {
+        if (-not $Child.Deleted) { [void]$liveChildren.Add($Key); return }
+        [void]$deletedChildren.Add($Key)
+        if (-not $previewedChildren.ContainsKey($Key)) { $unpreviewed.Add($Label) }
+        elseif (-not $previewedChildren[$Key].Deleted -and $previewedChildren[$Key].OrgUnitId -cne $Child.OrgUnitId) { $moved.Add("$Label (moved to org unit $($Child.OrgUnitId))") }
+    }
     foreach ($en in $Record.Enrollments) {
-        if ($en.Deleted) { [void]$deletedChildren.Add("enrollment|$($en.EnrollmentId)") } else { [void]$liveChildren.Add("enrollment|$($en.EnrollmentId)") }
-        foreach ($ev in $en.Events) {
-            if ($ev.Deleted) { [void]$deletedChildren.Add("event|$($ev.EventId)") } else { [void]$liveChildren.Add("event|$($ev.EventId)") }
-        }
+        Add-Child "enrollment|$($en.EnrollmentId)" "enrolment $($en.EnrollmentId)" $en
+        foreach ($ev in $en.Events) { Add-Child "event|$($ev.EventId)" "event $($ev.EventId)" $ev }
+    }
+    if ($Record.OrgUnitId -cne $Previewed.OrgUnitId) { $moved.Add("the patient's registration (moved to org unit $($Record.OrgUnitId))") }
+    $previewedOwners = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
+    foreach ($owner in $Previewed.Owners) { $previewedOwners[$owner.ProgramId] = $owner.OrgUnitId }
+    foreach ($owner in $Record.Owners) {
+        if (-not $previewedOwners.ContainsKey($owner.ProgramId)) { $moved.Add("data in program $($owner.ProgramId) (owned by org unit $($owner.OrgUnitId))") }
+        elseif ($previewedOwners[$owner.ProgramId] -cne $owner.OrgUnitId) { $moved.Add("the ownership in program $($owner.ProgramId) (moved to org unit $($owner.OrgUnitId))") }
     }
     $previewedLive = Get-NeoIPCPatientLiveData -Record $Previewed
     # The data the preview showed live that the read-back does not show in the given set, as 'enrolment X' and 'event Y'.
@@ -408,12 +455,24 @@ function Get-NeoIPCPatientReadBackState {
     if ($Record.Deleted) {
         $missing = @(Get-Absent $deletedChildren)
         if ($missing.Count -gt 0) { return New-State 'Unknown' 'CascadeIncomplete' ("The patient reads as deleted, but not all of its data: {0}." -f ($missing -join ', ')) }
-        if ($SingleReadStatus -ne 404) { return New-State 'Unknown' 'ReadBackFailed' "The patient reads as deleted, but its single read answered HTTP $SingleReadStatus instead of 404." }
-        return New-State 'ProvenDeleted' $null 'The read-back shows the patient and its data deleted.'
+        $taken = [string[]]@($unpreviewed) + [string[]]@($moved)
+        if ($Failure -or $SingleReadStatus -ne 404) {
+            $why = if ($Failure) { "its single read failed: $($Failure.Trim().TrimEnd('.'))" } else { "its single read answered HTTP $SingleReadStatus instead of 404" }
+            $also = if ($taken.Count -gt 0) { " The list read also shows data the preview did not show, or showed elsewhere: $($taken -join ', ')." } else { '' }
+            return New-State 'Unknown' 'ReadBackFailed' "The patient reads as deleted, but $why.$also"
+        }
+        return New-State 'ProvenDeleted' $null 'The read-back shows the patient and its data deleted.' $taken
     }
+    $gone = @(Get-Absent $liveChildren)
+    if ($gone.Count -gt 0 -or $unpreviewed.Count -gt 0) {
+        $parts = @(
+            if ($gone.Count -gt 0) { 'not all of the data the preview showed does ({0})' -f ($gone -join ', ') }
+            if ($unpreviewed.Count -gt 0) { 'data the preview did not show reads as deleted ({0})' -f ($unpreviewed -join ', ') }
+        )
+        return New-State 'Unknown' 'PartialDeletion' ('The patient reads as not deleted, but {0}.' -f ($parts -join ', and '))
+    }
+    if ($Failure) { return New-State 'Unknown' 'ReadBackFailed' "The patient reads as not deleted, but its single read failed: $($Failure.Trim().TrimEnd('.'))." }
     if ($null -ne $SingleReadStatus -and [int]$SingleReadStatus -ge 200 -and [int]$SingleReadStatus -lt 300) {
-        $gone = @(Get-Absent $liveChildren)
-        if ($gone.Count -gt 0) { return New-State 'Unknown' 'PartialDeletion' ("The patient reads as not deleted, but not all of the data the preview showed does: {0}." -f ($gone -join ', ')) }
         return New-State 'Live' $null 'The read-back shows the patient and its data not deleted.'
     }
     New-State 'Unknown' 'ReadBackFailed' "The patient reads as not deleted, but its single read answered HTTP $SingleReadStatus."
@@ -424,21 +483,37 @@ function Get-NeoIPCPatientRemovalOutcome {
     # the read-back can make a patient Deleted. A run carries on after a failure that concerns this patient alone, which
     # the read-back finds with the data the preview showed, and after a deletion the read-back proves while its answer
     # was lost or failed. It stops, with a Reason naming the cause even beside Deleted, when the failure concerns every
-    # patient, when DHIS2's answer contradicts the request or the read-back, when DHIS2 queued the deletion as a job,
-    # and when the deletion may still be running or ran in part.
+    # patient; when DHIS2's answer contradicts the request or the read-back; when DHIS2 queued the deletion as a job;
+    # when the deletion took data the preview did not show, or showed elsewhere; and when the deletion may still be
+    # running or ran in part.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)]$Answer, [Parameter(Mandatory)]$ReadBack)
     function New-Outcome([string]$Outcome, [string]$Reason, [bool]$Stop, [string]$Message, [string]$Warning = $null) {
         [pscustomobject]@{ Outcome = $Outcome; Reason = $(if ($Reason) { $Reason } else { $null }); Stop = $Stop; Message = $Message; Warning = $Warning }
     }
+    # Messages as sentences: an answer's message often ends in DHIS2's own words, without a full stop.
+    function Join-Sentence([string[]]$Part) { (@($Part | ForEach-Object { "$_".Trim() } | Where-Object { $_ }) | ForEach-Object { if ($_ -match '[.!?]$') { $_ } else { "$_." } }) -join ' ' }
+    # A 401 or 403 changes nothing: DHIS2 answers so before the import runs, or after rolling it back. The patient is
+    # then still there when the read-back finds it live, or fails, as it does under the same refusal, but not when the
+    # list read shows it deleted, or its data deleted in part: no refusal did that, and the read-back's verdict stands.
+    if ($Answer.Kind -eq 'AccessDenied' -and -not $ReadBack.ReadsDeleted -and
+        ($ReadBack.State -eq 'Live' -or ($ReadBack.State -eq 'Unknown' -and $ReadBack.Reason -eq 'ReadBackFailed'))) {
+        return New-Outcome 'Failed' 'AccessDenied' $true $Answer.Message
+    }
     switch ($ReadBack.State) {
         'ProvenDeleted' {
-            if ($Answer.Kind -eq 'Reported') { return New-Outcome 'Deleted' $null $false $ReadBack.Message }
-            # A Foreign report may list the patient as deleted: what it gets wrong is the UIDs it adds.
-            $warning = if ($Answer.Kind -eq 'Foreign') { "$($Answer.Message) The read-back proves the patient deleted." }
-            else { "DHIS2's answer did not report the deletion ($($Answer.Message)), but the read-back proves it." }
+            $unpreviewed = @(if ($ReadBack.PSObject.Properties['Unpreviewed']) { $ReadBack.Unpreviewed | Where-Object { $_ } })
+            $warnings = @(
+                # A Foreign report may list the patient as deleted: what it gets wrong is the UIDs it adds.
+                if ($Answer.Kind -eq 'Foreign') { Join-Sentence $Answer.Message, 'The read-back proves the patient deleted.' }
+                elseif ($Answer.Kind -ne 'Reported') { "DHIS2's answer did not report the deletion ($("$($Answer.Message)".Trim().TrimEnd('.'))), but the read-back proves it." }
+                if ($unpreviewed.Count -gt 0) { "The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: $($unpreviewed -join ', ')." }
+            )
+            $warning = if ($warnings.Count -gt 0) { $warnings -join ' ' } else { $null }
+            if ($unpreviewed.Count -gt 0) { return New-Outcome 'Deleted' 'UnpreviewedData' $true $ReadBack.Message $warning }
             switch ($Answer.Kind) {
+                'Reported' { return New-Outcome 'Deleted' $null $false $ReadBack.Message }
                 { $_ -in 'NoAnswer', 'ServerError' } { return New-Outcome 'Deleted' $null $false $ReadBack.Message $warning }
                 'AsyncJob' { return New-Outcome 'Deleted' 'AsyncJob' $true $ReadBack.Message $warning }
                 default { return New-Outcome 'Deleted' 'ReportMismatch' $true $ReadBack.Message $warning }
@@ -450,15 +525,14 @@ function Get-NeoIPCPatientRemovalOutcome {
                 'CommitFailed' { return New-Outcome 'Failed' 'CommitFailed' $false $Answer.Message }
                 'ServerError' { return New-Outcome 'Failed' 'ServerError' $false $Answer.Message }
                 'Rejected' { return New-Outcome 'Failed' 'Rejected' $false $Answer.Message }
-                'AccessDenied' { return New-Outcome 'Failed' 'AccessDenied' $true $Answer.Message }
                 'Reported' { return New-Outcome 'Failed' 'ReportMismatch' $true "DHIS2 reported the patient deleted, but the read-back finds it." }
-                { $_ -in 'Unclear', 'Foreign' } { return New-Outcome 'Failed' 'ReportMismatch' $true "$($Answer.Message) The read-back finds the patient." }
-                'AsyncJob' { return New-Outcome 'Unverified' 'AsyncJob' $true "$($Answer.Message) It may still be running." }
-                default { return New-Outcome 'Unverified' 'ResponseLost' $true "$($Answer.Message) The deletion may still be running." }
+                { $_ -in 'Unclear', 'Foreign' } { return New-Outcome 'Failed' 'ReportMismatch' $true (Join-Sentence $Answer.Message, 'The read-back finds the patient.') }
+                'AsyncJob' { return New-Outcome 'Unverified' 'AsyncJob' $true (Join-Sentence $Answer.Message, 'It may still be running.') }
+                default { return New-Outcome 'Unverified' 'ResponseLost' $true (Join-Sentence $Answer.Message, 'The deletion may still be running.') }
             }
         }
     }
-    New-Outcome 'Unverified' $ReadBack.Reason $true "$($Answer.Message) $($ReadBack.Message)"
+    New-Outcome 'Unverified' $ReadBack.Reason $true (Join-Sentence $Answer.Message, $ReadBack.Message)
 }
 
 function Format-NeoIPCPatientRemovalPrompt {
@@ -486,7 +560,7 @@ function Format-NeoIPCPatientRemovalPrompt {
 }
 
 function New-NeoIPCPatientRemovalResult {
-    # The object a run emits for one selected item. Its TrackedEntityId, OrgUnitId and NeoIpcId are what a later run
+    # The object a run emits for one selected item. Its TrackedEntityId, OrgUnitId, and NeoIpcId are what a later run
     # takes from the pipeline, so a reviewed -WhatIf result can be fed back.
     [CmdletBinding()]
     [OutputType([pscustomobject])]

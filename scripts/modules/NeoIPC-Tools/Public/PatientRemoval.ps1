@@ -1,12 +1,12 @@
 #Requires -Version 7.6
 # Remove-NeoIPCPatient: deletes patients entered in error, each with all its enrolments and events, after a preview,
-# DHIS2's own dry run and one confirmation, and proves each deletion by reading it back. The rules it applies, and the
+# DHIS2's own dry run, and one confirmation, and proves each deletion by reading it back. The rules it applies, and the
 # DHIS2 behaviour they answer to, are in Private/PatientRemoval.ps1.
 
 function Remove-NeoIPCPatient {
     <#
     .SYNOPSIS
-        Delete NeoIPC patients, each with all its enrolments and events, after a preview, DHIS2's own dry run and one
+        Delete NeoIPC patients, each with all its enrolments and events, after a preview, DHIS2's own dry run, and one
         confirmation.
     .DESCRIPTION
         Selects the patients in one of three ways, each naming the department they belong to:
@@ -14,29 +14,30 @@ function Remove-NeoIPCPatient {
           2. -OrgUnitCode with -TrackedEntityId: the patients' DHIS2 UIDs;
           3. objects piped to -InputObject that carry TrackedEntityId and OrgUnitId, and optionally NeoIpcId, which
              must then be the patient's: Read-PatientInfo's output, or a reviewed -WhatIf result read back with
-             Import-Csv. Enrolment and event records carry TrackedEntityId too and are refused, so that a list of
-             events can never select their patients.
+             Import-Csv. Enrolment and event records carry TrackedEntityId too; piped as they come, they are refused,
+             so that a list of events piped by mistake does not select their patients.
 
         A run then:
           1. checks the selection before any request: exact duplicates collapse; selectors that differ only in case,
-             contradict each other or are malformed are refused; more than -MaximumCount patients end the run;
+             contradict each other, or are malformed are refused; more than -MaximumCount patients end the run;
           2. checks that the DHIS2 release is one the removal was verified on (see -AllowUnverifiedVersion), and
              resolves by code the program NEOIPC_CORE, the tracked-entity type NEOIPC_PATIENT, the attribute
-             NEOIPC_PATIENT_ID and the department, which must be a member of the org-unit group NEO_DEPARTMENT; a piped
+             NEOIPC_PATIENT_ID, and the department, which must be a member of the org-unit group NEO_DEPARTMENT; a piped
              OrgUnitId must name such a department, the same one as -OrgUnitCode if both are given; and a patient ID
-             holding more than one '/' is refused before DHIS2 2.42, which cannot look it up: select such a patient
-             by its UID;
+             holding more than one '/' is refused before DHIS2 2.42, which may look it up as another patient ID:
+             select such a patient by its UID;
           3. reads each patient with its enrolments and events, and refuses one whose patient ID matches more than one
              patient (DHIS2 compares patient IDs ignoring case, the run exactly), that is registered or owned outside
              the department, that has an enrolment or program owner in another program, or that has an enrolment or
              event in another org unit: DHIS2 deletes every live enrolment and event of a patient with it, in every
              program, without checking them;
           4. asks DHIS2 to validate the deletion of every remaining patient without carrying it out
-             (importMode=VALIDATE), so that DHIS2's own refusals show before anything is deleted;
+             (importMode=VALIDATE), so that DHIS2's own refusals show before anything is deleted; an answer that
+             reports any patient as deleted ends the run at once (DryRunDeleted);
           5. shows the preview, and asks once, with the totals;
           6. deletes the patients one request each, so that a refusal or a failure stays with its patient, and reads
              each back: a patient counts as Deleted only when the read with includeDeleted shows it, and every
-             enrolment and event the preview showed, deleted, and its own read answers 404.
+             enrolment and event the preview showed live, deleted, and its own read answers 404.
         -WhatIf runs steps 1 to 4, which change nothing, and the preview of step 5, and writes no error: its results
         carry the outcomes.
 
@@ -52,11 +53,15 @@ function Remove-NeoIPCPatient {
         A run carries on after a failure that concerns one patient. It stops, naming the cause in the Reason of the
         patient it stopped at, when DHIS2 refuses access (HTTP 401 or 403), queues the deletion as a job, or gives an
         answer that contradicts the request or the read-back; when DHIS2's answer is lost and the read-back does not
-        prove the deletion; and when the read-back fails or finds the patient's data deleted in part. A later run is
-        safe: a deleted patient comes back AlreadyDeleted by UID and NotFound by patient ID, since DHIS2 removes its
-        attribute values.
+        prove the deletion; when the read-back fails or finds the patient's data deleted in part; and when the deletion
+        took data the preview did not show, or showed elsewhere, which DHIS2 deletes with the patient unchecked
+        (Deleted, with the Reason UnpreviewedData): an enrolment or event added, or moved to another org unit, after
+        the preview read the patient; its registration moved; or its program ownership changed. The read-back sees the
+        enrolments and events you can read, and the program owners of every program, so an enrolment added in a
+        program you cannot read shows through its owner. A later run is safe: a deleted patient comes back
+        AlreadyDeleted by UID and NotFound by patient ID, since DHIS2 removes its attribute values.
 
-        Every result other than WouldDelete, Declined, Deleted and AlreadyDeleted writes a non-terminating error whose
+        Every result other than WouldDelete, Declined, Deleted, and AlreadyDeleted writes a non-terminating error whose
         TargetObject is the result, except under -WhatIf. Refusals are written before the first deletion, so
         -ErrorAction Stop deletes nothing while any selected patient is refused or not found; failures are written
         after the last deletion, so that they never cut a confirmed run short.
@@ -65,7 +70,7 @@ function Remove-NeoIPCPatient {
         carries and ALL includes, or DHIS2 refuses it (E1100). The patient's registration org unit must lie within your
         data-capture org units, on DHIS2 2.40 to 2.42 even for a superuser (E1000). Without ALL, a deletion also needs
         data-write access to the NeoIPC Patient type and to a program of it, and ownership: the owner of the CLOSED
-        program NEOIPC_CORE must lie within your data-capture org units (E1003; on 2.43 E1001, E1323 or E1324). The
+        program NEOIPC_CORE must lie within your data-capture org units (E1003; on 2.43 E1001, E1323, or E1324). The
         preview counts only the enrolments and events you can read, while DHIS2 deletes every live one. Patients
         selected by UID are looked for within your data-capture org units, and on 2.43 for a superuser in every org
         unit.
@@ -75,8 +80,8 @@ function Remove-NeoIPCPatient {
         import report, and the patient ends Failed. From 2.42 DHIS2 deletes such notifications with the patient. When
         http.security.csrf.enabled is on (DHIS2 2.42 and later), DHIS2 refuses every deletion.
 
-        What DHIS2 keeps. The deletion is logical: the patient, its enrolments (set to CANCELLED) and its events stay in
-        the database flagged as deleted, the events with all their data values, and so do its notes and
+        What DHIS2 keeps. The deletion is logical: the patient, its enrolments (set to CANCELLED), and its events stay
+        in the database flagged as deleted, the events with all their data values, and so do its notes and
         program-ownership records. Its attribute values, the NeoIPC patient ID among them, are removed; DHIS2 2.40 and
         2.41 keep each removed value in the attribute-value audit (while changelog.tracker is on, as by default), and
         2.42 and later clear the patient's attribute change log, though rows an upgrade did not migrate can remain in
@@ -88,7 +93,7 @@ function Remove-NeoIPCPatient {
         tracker data, a separate decision this cmdlet never takes: it removes every soft-deleted patient on the
         instance, not only these, and needs ALL or F_PERFORM_MAINTENANCE. Run it from the Data Administration app, or
         as POST /api/maintenance with softDeletedRelationshipRemoval, softDeletedEventRemoval,
-        softDeletedEnrollmentRemoval and softDeletedTrackedEntityRemoval (softDeletedTrackedEntityInstanceRemoval on
+        softDeletedEnrollmentRemoval, and softDeletedTrackedEntityRemoval (softDeletedTrackedEntityInstanceRemoval on
         2.40) set to true together, since the tracked-entity removal alone can fail on records the others remove.
     .PARAMETER OrgUnitCode
         The code of the department the patients belong to. Mandatory with -NeoIpcId and -TrackedEntityId; with
@@ -112,12 +117,13 @@ function Remove-NeoIPCPatient {
         The most patients one run may select, checked before any request. Default 25.
     .PARAMETER AllowUnverifiedVersion
         Run on a DHIS2 release the removal was not verified on. The DHIS2 behaviour it relies on was read in the source
-        of 2.40.12, 2.41.10, 2.42.6 and 2.43.2, and a removal run against a synthetic instance of each confirmed it; a
+        of 2.40.12, 2.41.10, 2.42.6, and 2.43.2, and a removal run against a synthetic instance of each confirmed it; a
         later patch of one of these lines counts as verified. Any other release is refused before a patient is read
-        unless this switch is given.
+        unless this switch is given. On such a release DHIS2's dry run is unverified as well: should its answer report
+        any patient as deleted, the run ends at once, though what the dry run did cannot be undone.
     .OUTPUTS
         One [pscustomobject] per selected patient: TrackedEntityId, NeoIpcId, OrgUnitId, OrgUnitCode, EnrollmentIds and
-        EventIds (the live ones the preview showed), Outcome, Reason, ErrorCodes, HttpStatusCode and Message.
+        EventIds (the live ones the preview showed), Outcome, Reason, ErrorCodes, HttpStatusCode, and Message.
     .EXAMPLE
         Remove-NeoIPCPatient -OrgUnitCode NEO_DE_01 -NeoIpcId 'NEO-0042', 'NEO-0043' -Auth $auth -Hostname neoipc.example.org -WhatIf
 
@@ -241,7 +247,7 @@ function Remove-NeoIPCPatient {
         $items = @($selection.Items)
         if ($items.Count -eq 0) { return }
 
-        # ---- 2. version, metadata and departments ------------------------------------------------------------------------
+        # ---- 2. version, metadata, and departments -----------------------------------------------------------------------
         # Every read passes -WhatIf:$false: the GET helper asks ShouldProcess, and a -WhatIf given to this cmdlet reaches it,
         # which would leave the preview nothing to read.
         try { $info = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false }
@@ -318,15 +324,18 @@ function Remove-NeoIPCPatient {
         foreach ($item in $items) {
             # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Test-NeoIPCTrackerFilterValue in Private/TrackerDialect.ps1.
             if (-not $item.Outcome -and $item.Kind -eq 'NeoIpcId' -and -not (Test-NeoIPCTrackerFilterValue -Dialect $dialect -Value $item.Value)) {
-                Set-Refusal $item 'InvalidInput' "DHIS2 $versionText cannot look up a patient ID that holds more than one '/'; select this patient by its UID."
+                Set-Refusal $item 'InvalidInput' "DHIS2 $versionText may look a patient ID that holds more than one '/' up as another one; select this patient by its UID."
             }
         }
 
         # ---- 3. the patients --------------------------------------------------------------------------------------------
+        # Every read takes deleted data too, so that the read-back can tell data deleted before the run from data the
+        # deletion took that the preview never showed. A deleted patient cannot match a patient ID: DHIS2 removes its
+        # attribute values.
         foreach ($item in @($items | Where-Object { -not $_.Outcome -and $_.Kind -eq 'NeoIpcId' })) {
             try {
                 $found = Get-NeoIPCTrackedEntityList -Endpoint $endpoint -Dialect $dialect -TrackedEntityTypeId $typeId -OrgUnitMode 'SELECTED' `
-                    -OrgUnitId $item.Department.Id -AttributeId $attributeId -AttributeValue $item.Value -Fields $fields
+                    -OrgUnitId $item.Department.Id -AttributeId $attributeId -AttributeValue $item.Value -IncludeDeleted -Fields $fields
             }
             catch { Stop-PatientRemoval 'PreflightFailed' "Looking up the NeoIPC patient ID '$($item.Value)' failed: $($_.Exception.Message) Nothing was deleted." }
             $records = @($found | ForEach-Object { ConvertTo-NeoIPCPatientRecord -TrackedEntity $_ -PatientIdAttributeId $attributeId })
@@ -363,6 +372,11 @@ function Remove-NeoIPCPatient {
             $dry = ConvertFrom-NeoIPCTrackerImportResponse -StatusCode $response.StatusCode -Body $response.Body -TrackedEntityId $uids
             if (-not $dry.IsReport) {
                 Stop-PatientRemoval 'PreflightFailed' "DHIS2's dry run answered HTTP $($dry.HttpStatusCode) without an import report: $($dry.Message) Nothing was deleted."
+            }
+            # A validation persists nothing, so its report lists no object. One that does means the release carried the
+            # deletion out, and no outcome but this stop would be true.
+            if ($dry.ReportedUids.Count -gt 0) {
+                Stop-PatientRemoval 'DryRunDeleted' ("DHIS2's dry run reports {0} as deleted, so this release may have carried the deletion out instead of only validating it. Check these patients on the instance; the run sent nothing further." -f ($dry.ReportedUids -join ', ')) 'InvalidResult'
             }
             if ($dry.ForeignUids.Count -gt 0) {
                 Stop-PatientRemoval 'PreflightFailed' ("DHIS2's dry run named UIDs it was not asked about ({0}). Nothing was deleted." -f ($dry.ForeignUids -join ', '))
@@ -451,7 +465,7 @@ function Remove-NeoIPCPatient {
             Write-Progress -Activity 'Deleting NeoIPC patients' -Completed
         }
 
-        # ---- the results, errors and summary ----------------------------------------------------------------------------
+        # ---- the results, errors, and summary ---------------------------------------------------------------------------
         $results = @($items | ForEach-Object { New-NeoIPCPatientRemovalResult -Item $_ })
         $results
         foreach ($item in $items) {

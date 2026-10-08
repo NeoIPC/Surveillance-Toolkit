@@ -9,21 +9,25 @@
     read-back, all free of I/O), the tracked-entity read and the filter escaping in Private/TrackerDialect.ps1, and
     Public/PatientRemoval.ps1, which drives DHIS2.
 
-    The cmdlet tests run against a small in-memory DHIS2 that models what the source of 2.40.12, 2.41.10, 2.42.6 and
-    2.43.2 says of the tracked-entity read: the parameter names each version reads (2.40: orgUnit, ouMode and
-    trackedEntity joined with ';', the list under 'instances'; 2.41: those and orgUnits, orgUnitMode and
+    The cmdlet tests run against a small in-memory DHIS2 that models what the source of 2.40.12, 2.41.10, 2.42.6, and
+    2.43.2 says of the tracked-entity read: the parameter names each version reads (2.40: orgUnit, ouMode, and
+    trackedEntity joined with ';', the list under 'instances'; 2.41: those and orgUnits, orgUnitMode, and
     trackedEntities joined with ',', answering 400 to both forms of one; 2.42 and later: only the new names, ignoring
     the old ones, which widens the read); the attribute filter's unescaping, which before 2.42 puts escaped slashes
     back in hash order, and its comparison ignoring case; the org-unit match, per program of the type, against the
     program owner or, where that program has no owner for the entity, its registration org unit; and includeDeleted,
     without which soft-deleted entities and children stay hidden. A DELETE import soft-deletes the entity with its
-    enrolments and events and removes its attribute values; a VALIDATE import reports E1063, E1114 or a refusal per
-    UID and deletes nothing; and the single read answers 404 for a deleted entity. Each commit can be told to answer
-    the way DHIS2 does when it refuses, vetoes (2.40: 409 with an Exception message and no stats; 2.41: HTTP 500
-    without a report), lies, names UIDs it was not sent, queues a job, denies access, deletes in part (2.42 and later:
-    409 without a report, keeping what it deleted), or loses its answer. The caller it models reads every program of the type and captures in both departments; DHIS2's sharing and
-    ownership checks are not modelled. Like the real helpers, every mock but the status read sends and returns nothing
-    under an inherited -WhatIf, so a read that forgets -WhatIf:$false fails the preview tests.
+    enrolments and events and removes its attribute values; a VALIDATE import reports E1063, E1114, or a refusal per
+    UID and deletes nothing, unless told to carry the deletion out as a release that ignored importMode would; and the
+    single read of api/tracker/trackedEntities/<uid> answers 404 for a deleted entity. Each commit can be told to
+    answer the way DHIS2 does when it refuses, vetoes (2.40: 409 with an Exception message and no stats; 2.41: HTTP 500
+    without a report), lies, names UIDs it was not sent, queues a job, denies access (403, or 401 with every later
+    request refused too), deletes in part (2.42 and later: 409 without a report, keeping what it deleted), deletes
+    data added or moved after the preview, or loses its answer. The caller it models reads every program the
+    patients are enrolled in and captures in both departments, and a program only a patient's owner names stands for
+    one it cannot read; DHIS2's sharing and ownership checks are not modelled. Like the real helpers, every mock but
+    the status read sends and returns nothing under an inherited -WhatIf, so a read that forgets -WhatIf:$false fails
+    the preview tests.
 
     Self-contained: no live instance is needed and no API call is made.
 
@@ -65,6 +69,8 @@ InModuleScope 'NeoIPC-Tools' {
                 DropField      = $null
                 DryRun         = $null
                 ThrowRead      = $false
+                ThrowStatus    = $false
+                Unauthorized   = $false
             }
             $script:Fake.OrgUnits.Add(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; groups = @('NEO_DEPARTMENT') })
             $script:Fake.OrgUnits.Add(@{ id = 'OuDeptB0001'; code = 'DEPT_B'; groups = @('NEO_DEPARTMENT') })
@@ -106,7 +112,7 @@ InModuleScope 'NeoIPC-Tools' {
             }
         }
 
-        # A DELETE import's effect: the entity, its live enrolments and their live events deleted, its attributes gone.
+        # A DELETE import's effect: the entity, its live enrolments, and their live events deleted, its attributes gone.
         function Remove-FakePatient([string]$Uid, [switch]$KeepFirstEvent) {
             $p = $script:Fake.Patients[$Uid]
             $p['deleted'] = $true
@@ -138,7 +144,7 @@ InModuleScope 'NeoIPC-Tools' {
         # position lands in a bucket that already holds eight; the tree such a bucket turns into from 64 on is not
         # modelled. The rest splits at every ':' that is not escaped, which must leave one operator and one value
         # (DHIS2 also reads two operator-value pairs, which no test sends), and '/,' and '/:' lose their slash. From
-        # 2.42 (FilterParser) '//', '/,' and '/:' lose a slash, in that order.
+        # 2.42 (FilterParser) '//', '/,', and '/:' lose a slash, in that order.
         function ConvertFrom-FakeFilter([string]$Filter) {
             $attribute, $rest = $Filter -split ':', 2
             if ((Get-FakeVersion) -ge [version]'2.42') {
@@ -245,7 +251,7 @@ InModuleScope 'NeoIPC-Tools' {
             [pscustomobject]@{ StatusCode = $Code; Body = ($body | ConvertTo-Json -Depth 100 | ConvertFrom-Json) }
         }
         # 2.40.12's answer to an import that throws (ImportReport.withError): an empty validation report, the timings
-        # reportMode=FULL asks for and the message, but neither stats nor a bundle report.
+        # reportMode=FULL asks for, and the message, but neither stats nor a bundle report.
         function New-Fake240ErrorReport([string]$Message) {
             $body = [ordered]@{ status = 'ERROR'; validationReport = [ordered]@{ errorReports = @(); warningReports = @() }
                 timingsStats = [ordered]@{ timers = [ordered]@{ preheat = '0.010 sec.'; totalImport = '0.020 sec.' } }; message = $Message }
@@ -258,6 +264,7 @@ InModuleScope 'NeoIPC-Tools' {
             Mock Invoke-NeoIPCDhis2Get {
                 if ($WhatIfPreference) { return }
                 $script:Fake.Requests.Add(@{ Kind = 'GET'; Path = $Path; Query = $QueryParameters; Filter = $Filter; Fields = $Fields; Hostname = $Hostname })
+                if ($script:Fake.Unauthorized) { throw "Failed to fetch '$Path' from DHIS2: 401 (Unauthorized)" }
                 switch ($Path) {
                     'api/system/info' { return @{ version = $script:Fake.Version } }
                     'api/metadata' {
@@ -283,7 +290,10 @@ InModuleScope 'NeoIPC-Tools' {
             }
             Mock Get-NeoIPCDhis2StatusCode {
                 $script:Fake.Requests.Add(@{ Kind = 'STATUS'; Path = $Path; Hostname = $Hostname })
-                $uid = ($Path -split '/')[-1]
+                if ($Path -cnotmatch '^api/tracker/trackedEntities/([A-Za-z0-9]{11})$') { throw "Unexpected status read $Path" }
+                $uid = $Matches[1]
+                if ($script:Fake.ThrowStatus) { throw 'The response ended prematurely.' }
+                if ($script:Fake.Unauthorized) { return 401 }
                 if ($script:Fake.SingleRead.ContainsKey($uid)) { return $script:Fake.SingleRead[$uid] }
                 if ($script:Fake.Patients.ContainsKey($uid) -and -not $script:Fake.Patients[$uid]['deleted']) { 200 } else { 404 }
             }
@@ -298,6 +308,10 @@ InModuleScope 'NeoIPC-Tools' {
                         'NoReport' { return [pscustomobject]@{ StatusCode = 500; Body = '<html><body>Internal error</body></html>' } }
                         'Foreign' { return New-FakeReport -Errors @(@{ uid = 'TeForeign01'; errorCode = 'E1063'; message = 'TrackedEntity: TeForeign01, does not exist.' }) -Validate }
                         'ErrorNoCodes' { return New-Fake240ErrorReport 'Exception:could not execute statement' }
+                        # What a release that ignored importMode would do: carry the deletion out.
+                        'Commits' { foreach ($uid in $uids) { Remove-FakePatient $uid }; return New-FakeReport -Deleted $uids }
+                        # A report that lists as deleted a UID the request did not carry.
+                        'CommitsForeign' { return New-FakeReport -Deleted @('TeForeign01') }
                     }
                     $errors = foreach ($uid in $uids) {
                         if (-not $script:Fake.Patients.ContainsKey($uid)) { @{ uid = $uid; errorCode = 'E1063'; message = "TrackedEntity: $uid, does not exist." } }
@@ -321,6 +335,48 @@ InModuleScope 'NeoIPC-Tools' {
                     # CrudControllerAdvice answers as a conflict; the job's process has no description.
                     'PartialFail' { Remove-FakeEvent $uid; return New-FakeWebMessage 409 "Non-null post-condition failed after: null`n  => Commit Transaction" }
                     'AccessDenied' { return New-FakeWebMessage 403 'Access is denied' }
+                    # Credentials that stopped working: DHIS2 refuses this request and every later one.
+                    'Unauthorized' { $script:Fake.Unauthorized = $true; return New-FakeWebMessage 401 'Unauthorized' }
+                    # Data added to the patient after the preview read it, which the cascade deletes with the patient: an
+                    # enrolment in another program and org unit, which, as the patient's first there, gives it an owner
+                    # in that program, as DHIS2 does.
+                    'Grows' {
+                        $p = $script:Fake.Patients[$uid]
+                        $p['enrollments'] = @($p['enrollments']) + @([ordered]@{ enrollment = 'EnExtra0001'; program = $script:Fake.OtherProgramId; orgUnit = 'OuDeptB0001'
+                                status = 'ACTIVE'; deleted = $false; events = @([ordered]@{ event = 'EvExtra0001'; programStage = 'StgAdmn0001'; orgUnit = 'OuDeptB0001'; status = 'ACTIVE'; deleted = $false }) })
+                        $p['programOwners'] = @($p['programOwners']) + @([ordered]@{ program = $script:Fake.OtherProgramId; orgUnit = 'OuDeptB0001' })
+                        Remove-FakePatient $uid; return New-FakeReport -Deleted @($uid)
+                    }
+                    # An event added to an enrolment the preview showed.
+                    'GrowsEvent' {
+                        $en = @($script:Fake.Patients[$uid]['enrollments'])[0]
+                        $en['events'] = @($en['events']) + @([ordered]@{ event = 'EvExtra0002'; programStage = 'StgAdmn0001'; orgUnit = 'OuDeptA0001'; status = 'ACTIVE'; deleted = $false })
+                        Remove-FakePatient $uid; return New-FakeReport -Deleted @($uid)
+                    }
+                    # An enrolment in a program of the type the caller cannot read, which only its owner shows.
+                    'GrowsHidden' {
+                        $p = $script:Fake.Patients[$uid]
+                        $p['programOwners'] = @($p['programOwners']) + @([ordered]@{ program = 'PrgHidn0001'; orgUnit = 'OuDeptA0001' })
+                        Remove-FakePatient $uid; return New-FakeReport -Deleted @($uid)
+                    }
+                    # A previewed event moved to another org unit before the commit.
+                    'Moves' {
+                        @(@($script:Fake.Patients[$uid]['enrollments'])[0]['events'])[0]['orgUnit'] = 'OuDeptB0001'
+                        Remove-FakePatient $uid; return New-FakeReport -Deleted @($uid)
+                    }
+                    # The patient's NEOIPC_CORE ownership transferred to another org unit before the commit.
+                    'Transfers' {
+                        @($script:Fake.Patients[$uid]['programOwners'])[0]['orgUnit'] = 'OuDeptB0001'
+                        Remove-FakePatient $uid; return New-FakeReport -Deleted @($uid)
+                    }
+                    # The patient's registration moved to another org unit before the commit.
+                    'Reregisters' {
+                        $script:Fake.Patients[$uid]['orgUnit'] = 'OuDeptB0001'
+                        Remove-FakePatient $uid; return New-FakeReport -Deleted @($uid)
+                    }
+                    # Another user deleted the patient, or one of its events, while a proxy refused the run's own request.
+                    'DeniedButGone' { Remove-FakePatient $uid; return New-FakeWebMessage 403 'Access is denied' }
+                    'DeniedButEventGone' { Remove-FakeEvent $uid; return New-FakeWebMessage 403 'Access is denied' }
                     'Async' { return New-FakeWebMessage 200 'Tracker job added' @{ responseType = 'TrackerJob'; id = 'JobId000001' } }
                     'AsyncDeleted' { Remove-FakePatient $uid; return New-FakeWebMessage 200 'Tracker job added' @{ responseType = 'TrackerJob'; id = 'JobId000001' } }
                     'Gateway' { return [pscustomobject]@{ StatusCode = 504; Body = '<html><body>Gateway Timeout</body></html>' } }
@@ -338,7 +394,7 @@ InModuleScope 'NeoIPC-Tools' {
         # A patient-ID lookup's query, the first one sent.
         function Get-LookupQuery { @(Get-FakeRequest 'GET' -Path 'api/tracker/trackedEntities' | Where-Object { $_.Query.ContainsKey('filter') } | Select-Object -First 1).Query }
 
-        # A run's results, errors and warnings. A run that ends with a terminating error rethrows it, unless -AllowStop
+        # A run's results, errors, and warnings. A run that ends with a terminating error rethrows it, unless -AllowStop
         # asks for it in Stop beside the results emitted before it.
         function Invoke-Removal([hashtable]$Arguments, [switch]$AllowStop) {
             $splat = @{ Auth = $script:Auth; Hostname = $script:Host1; Confirm = $false; ErrorAction = 'SilentlyContinue'; ErrorVariable = 'removalErrors'
@@ -366,7 +422,7 @@ InModuleScope 'NeoIPC-Tools' {
             Test-NeoIPCTrackerFilterValue -Dialect (Get-NeoIPCTrackerDialect -Version $Version) -Value $Value | Should -Be $Expected
         }
         Context 'the fake DHIS2 reads a filter back the way the source does' {
-            # A value with two slashes comes back changed before 2.42 (the cause of the check above); one slash, ':' and
+            # A value with two slashes comes back changed before 2.42 (the cause of the check above); one slash, ':', and
             # ',' come back exactly on every version.
             It 'reads <Value> back on DHIS2 <Version> as <ReadAs>' -ForEach @(
                 @{ Version = '2.40.12'; Value = 'x/2:a,b'; ReadAs = 'x/2:a,b' }
@@ -386,7 +442,7 @@ InModuleScope 'NeoIPC-Tools' {
     }
 
     Describe 'Get-NeoIPCTrackerDialect: the tracked-entity read names' {
-        It 'names the org units, the tracked entities and their separator of DHIS2 <Version>' -ForEach @(
+        It 'names the org units, the tracked entities, and their separator of DHIS2 <Version>' -ForEach @(
             # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
             @{ Version = '2.40.12'; OrgUnits = 'orgUnit'; TrackedEntities = 'trackedEntity'; Separator = ';' }
             @{ Version = '2.41.10'; OrgUnits = 'orgUnits'; TrackedEntities = 'trackedEntities'; Separator = ',' }
@@ -439,8 +495,10 @@ InModuleScope 'NeoIPC-Tools' {
             @{ Version = '2.41.10' }
         ) {
             New-FakeInstance $Version; Set-FakeMock
+            $value = 'DE-BER-01/2024-0000001/b'
+            (ConvertFrom-FakeFilter ('AttPatId001:eq:' + (ConvertTo-NeoIPCTrackerFilterValue -Value $value))).Value | Should -Not -Be $value -Because 'the case needs a value this release reads back as another'
             { Get-NeoIPCTrackedEntityList -Endpoint @{ Auth = $script:Auth; Hostname = $script:Host1 } -Dialect (Get-NeoIPCTrackerDialect -Version $Version) `
-                    -TrackedEntityTypeId 'TetPatnt001' -OrgUnitMode 'SELECTED' -OrgUnitId 'OuDeptA0001' -AttributeId 'AttPatId001' -AttributeValue 'A/1/2' -Fields 'trackedEntity' } |
+                    -TrackedEntityTypeId 'TetPatnt001' -OrgUnitMode 'SELECTED' -OrgUnitId 'OuDeptA0001' -AttributeId 'AttPatId001' -AttributeValue $value -Fields 'trackedEntity' } |
                 Should -Throw "*more than one '/'*"
             @(Get-FakeRequest 'GET').Count | Should -Be 0
         }
@@ -460,7 +518,7 @@ InModuleScope 'NeoIPC-Tools' {
             $s = ConvertTo-NeoIPCPatientSelection @arguments
             @($s.Items | ForEach-Object { $_.Reason }) | Should -Be @('CaseVariantInput', 'CaseVariantInput')
         }
-        It 'refuses a malformed UID, a padded patient ID and a malformed piped OrgUnitId, and nothing else' {
+        It 'refuses only a malformed UID, a padded patient ID, and a malformed piped OrgUnitId' {
             $items = (ConvertTo-NeoIPCPatientSelection -Mode 'TrackedEntityId' -OrgUnitCode 'DEPT_A' -TrackedEntityId 'not-a-uid', 'TePat000001' -MaximumCount 25).Items
             $items[0].Reason | Should -Be 'InvalidInput'
             $items[1].Outcome | Should -BeNullOrEmpty
@@ -566,6 +624,7 @@ InModuleScope 'NeoIPC-Tools' {
             @{ Case = '2.40''s veto'; Kind = 'CommitFailed'; Make = { New-Fake240ErrorReport 'Exception:x' } }
             @{ Case = '2.41''s veto'; Kind = 'ServerError'; Make = { New-FakeWebMessage 500 'null' } }
             @{ Case = 'a 403'; Kind = 'AccessDenied'; Make = { New-FakeWebMessage 403 'denied' } }
+            @{ Case = 'a 401'; Kind = 'AccessDenied'; Make = { New-FakeWebMessage 401 'Unauthorized' } }
             @{ Case = 'a queued job'; Kind = 'AsyncJob'; Make = { New-FakeWebMessage 200 'Tracker job added' @{ responseType = 'TrackerJob' } } }
             @{ Case = 'a gateway timeout'; Kind = 'NoAnswer'; Make = { [pscustomobject]@{ StatusCode = 504; Body = '<html></html>' } } }
             @{ Case = 'a 400 WebMessage'; Kind = 'Rejected'; Make = { New-FakeWebMessage 400 'bad' } }
@@ -587,31 +646,111 @@ InModuleScope 'NeoIPC-Tools' {
         It 'classifies a lost connection as no answer' {
             (Get-Answer $null -Transport 'The SSL connection could not be established.').Kind | Should -Be 'NoAnswer'
         }
+        It 'gives the text DHIS2 or the transport gave after a colon, and leaves the colon out when there is none: <Case>' -ForEach @(
+            @{ Case = 'a 403 with a message'; Make = { New-FakeWebMessage 403 ' Access is denied ' }; Transport = $null; Message = 'DHIS2 refused the request with HTTP 403: Access is denied' }
+            @{ Case = 'a 403 with an empty message'; Make = { New-FakeWebMessage 403 '' }; Transport = $null; Message = 'DHIS2 refused the request with HTTP 403.' }
+            @{ Case = 'a lost connection'; Make = { $null }; Transport = 'The response ended prematurely.'; Message = 'No answer from DHIS2: The response ended prematurely.' }
+        ) {
+            (Get-Answer (& $Make) -Transport $Transport).Message | Should -BeExactly $Message
+        }
     }
 
     Describe 'Get-NeoIPCPatientReadBackState and Get-NeoIPCPatientRemovalOutcome' {
         BeforeAll {
-            function New-Rec([bool]$Deleted, [bool]$ChildDeleted = $Deleted, [switch]$Incomplete) {
-                [pscustomobject]@{ TrackedEntityId = 'TePat000001'; Deleted = $Deleted; Complete = -not $Incomplete
-                    Enrollments = @([pscustomobject]@{ EnrollmentId = 'En000000001'; Deleted = $ChildDeleted; Events = @([pscustomobject]@{ EventId = 'Ev000000001'; Deleted = $ChildDeleted }) }) }
+            # A patient registered in OuDeptA0001 with one enrolment and one event there and its NEOIPC_CORE owner.
+            function New-Rec([bool]$Deleted, [bool]$ChildDeleted = $Deleted, [switch]$Incomplete, [switch]$Extra, [string]$ExtraOrgUnit = 'OuDeptA0001',
+                [switch]$ExtraEvent, [string]$OrgUnit = 'OuDeptA0001', [string]$EnrollmentOrgUnit = 'OuDeptA0001', [string]$EventOrgUnit = 'OuDeptA0001',
+                [object[]]$Owners = @(@{ ProgramId = 'PrgCore0001'; OrgUnitId = 'OuDeptA0001' })) {
+                $trackerEvents = @([pscustomobject]@{ EventId = 'Ev000000001'; OrgUnitId = $EventOrgUnit; Deleted = $ChildDeleted })
+                # A deleted event besides the first, in the same enrolment.
+                if ($ExtraEvent) { $trackerEvents += [pscustomobject]@{ EventId = 'Ev000000008'; OrgUnitId = 'OuDeptA0001'; Deleted = $true } }
+                $enrollments = @([pscustomobject]@{ EnrollmentId = 'En000000001'; OrgUnitId = $EnrollmentOrgUnit; Deleted = $ChildDeleted; Events = $trackerEvents })
+                # A deleted enrolment with a deleted event besides the first.
+                if ($Extra) {
+                    $enrollments += [pscustomobject]@{ EnrollmentId = 'En000000009'; OrgUnitId = $ExtraOrgUnit; Deleted = $true
+                        Events = @([pscustomobject]@{ EventId = 'Ev000000009'; OrgUnitId = $ExtraOrgUnit; Deleted = $true }) }
+                }
+                [pscustomobject]@{ TrackedEntityId = 'TePat000001'; OrgUnitId = $OrgUnit; Deleted = $Deleted; Complete = -not $Incomplete; Enrollments = $enrollments
+                    Owners = @($Owners | ForEach-Object { [pscustomobject]$_ }) }
             }
             $script:Previewed = New-Rec $false
         }
         It 'proves a deletion only with the patient and its data deleted and a 404' {
-            (Get-NeoIPCPatientReadBackState -Record (New-Rec $true) -Previewed $script:Previewed -SingleReadStatus 404).State | Should -Be 'ProvenDeleted'
+            $s = Get-NeoIPCPatientReadBackState -Record (New-Rec $true) -Previewed $script:Previewed -SingleReadStatus 404
+            $s.State | Should -Be 'ProvenDeleted'
+            @($s.Unpreviewed).Count | Should -Be 0
+        }
+        It 'names the deleted data the preview did not show beside a proven deletion: <Case>' -ForEach @(
+            @{ Case = 'a new enrolment with its event'; Rec = { New-Rec $true -Extra }; Unpreviewed = @('enrolment En000000009', 'event Ev000000009') }
+            @{ Case = 'a new event in a previewed enrolment'; Rec = { New-Rec $true -ExtraEvent }; Unpreviewed = @('event Ev000000008') }
+        ) {
+            $s = Get-NeoIPCPatientReadBackState -Record (& $Rec) -Previewed $script:Previewed -SingleReadStatus 404
+            $s.State | Should -Be 'ProvenDeleted'
+            @($s.Unpreviewed) | Should -Be $Unpreviewed
+        }
+        It 'names what the preview showed elsewhere beside a proven deletion: <Case>' -ForEach @(
+            @{ Case = 'an event moved'; Rec = { New-Rec $true -EventOrgUnit 'OuDeptB0001' }; Unpreviewed = 'event Ev000000001 (moved to org unit OuDeptB0001)' }
+            @{ Case = 'an enrolment moved'; Rec = { New-Rec $true -EnrollmentOrgUnit 'OuDeptB0001' }; Unpreviewed = 'enrolment En000000001 (moved to org unit OuDeptB0001)' }
+            @{ Case = 'the registration moved'; Rec = { New-Rec $true -OrgUnit 'OuDeptB0001' }; Unpreviewed = "the patient's registration (moved to org unit OuDeptB0001)" }
+            @{ Case = 'the ownership transferred'; Rec = { New-Rec $true -Owners @(@{ ProgramId = 'PrgCore0001'; OrgUnitId = 'OuDeptB0001' }) }
+                Unpreviewed = 'the ownership in program PrgCore0001 (moved to org unit OuDeptB0001)' }
+            @{ Case = 'an owner in another program'; Rec = { New-Rec $true -Owners @(@{ ProgramId = 'PrgCore0001'; OrgUnitId = 'OuDeptA0001' }, @{ ProgramId = 'PrgHidn0001'; OrgUnitId = 'OuDeptB0001' }) }
+                Unpreviewed = 'data in program PrgHidn0001 (owned by org unit OuDeptB0001)' }
+        ) {
+            $s = Get-NeoIPCPatientReadBackState -Record (& $Rec) -Previewed $script:Previewed -SingleReadStatus 404
+            $s.State | Should -Be 'ProvenDeleted'
+            @($s.Unpreviewed) | Should -Be @($Unpreviewed)
+        }
+        It 'does not count data the preview already showed as deleted, even elsewhere' {
+            $s = Get-NeoIPCPatientReadBackState -Record (New-Rec $true -Extra -ExtraOrgUnit 'OuDeptB0001') -Previewed (New-Rec $false -Extra) -SingleReadStatus 404
+            $s.State | Should -Be 'ProvenDeleted'
+            @($s.Unpreviewed).Count | Should -Be 0
+        }
+        It 'reads a live patient as Live whatever moved' {
+            $s = Get-NeoIPCPatientReadBackState -Record (New-Rec $false -EventOrgUnit 'OuDeptB0001' -OrgUnit 'OuDeptB0001' -Owners @(@{ ProgramId = 'PrgCore0001'; OrgUnitId = 'OuDeptB0001' })) `
+                -Previewed $script:Previewed -SingleReadStatus 200
+            $s.State | Should -Be 'Live'
+        }
+        # The expectation's key differs from the property's name: a variable named ReadsDeleted in this scope would be
+        # one the function under test could read.
+        It 'says whether the list read showed the patient deleted, whatever the state: <Case>' -ForEach @(
+            @{ Case = 'proven deleted'; Rec = { New-Rec $true }; Single = 404; Failure = $null; Expected = $true }
+            @{ Case = 'deleted, the single read answering 503'; Rec = { New-Rec $true }; Single = 503; Failure = $null; Expected = $true }
+            @{ Case = 'deleted, the single read failing'; Rec = { New-Rec $true }; Single = $null; Failure = 'refused'; Expected = $true }
+            @{ Case = 'deleted, the read incomplete'; Rec = { New-Rec $true -Incomplete }; Single = 404; Failure = $null; Expected = $true }
+            @{ Case = 'live, the single read answering 404'; Rec = { New-Rec $false }; Single = 404; Failure = $null; Expected = $false }
+            @{ Case = 'no read'; Rec = { $null }; Single = $null; Failure = 'refused'; Expected = $false }
+        ) {
+            (Get-NeoIPCPatientReadBackState -Record (& $Rec) -Previewed $script:Previewed -SingleReadStatus $Single -Failure $Failure).ReadsDeleted | Should -Be $Expected
         }
         It 'reads <Case> as <State>' -ForEach @(
             @{ Case = 'a deleted patient with a live event'; State = 'Unknown'; Reason = 'CascadeIncomplete'; Rec = { New-Rec $true $false }; Single = 404 }
-            @{ Case = 'a deleted patient whose single read answers 200'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { New-Rec $true }; Single = 200 }
+            @{ Case = 'a deleted patient with a live event, the single read failing'; State = 'Unknown'; Reason = 'CascadeIncomplete'; Rec = { New-Rec $true $false }; Single = $null; Failure = 'refused' }
+            @{ Case = 'a deleted patient whose single read answers 200'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { New-Rec $true }; Single = 200
+                Message = 'The patient reads as deleted, but its single read answered HTTP 200 instead of 404.' }
+            @{ Case = 'a deleted patient whose single read fails'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { New-Rec $true }; Single = $null; Failure = 'refused.'
+                Message = 'The patient reads as deleted, but its single read failed: refused.' }
+            @{ Case = 'a deleted patient with data the preview did not show, the single read answering 503'; State = 'Unknown'; Reason = 'ReadBackFailed'
+                Rec = { New-Rec $true -Extra -OrgUnit 'OuDeptB0001' }; Single = 503
+                Message = ("The patient reads as deleted, but its single read answered HTTP 503 instead of 404. The list read also shows data the preview did not show, or " +
+                    "showed elsewhere: enrolment En000000009, event Ev000000009, the patient's registration (moved to org unit OuDeptB0001).") }
             @{ Case = 'a live patient found by the single read'; State = 'Live'; Reason = $null; Rec = { New-Rec $false }; Single = 200 }
             @{ Case = 'a live patient whose data is deleted'; State = 'Unknown'; Reason = 'PartialDeletion'; Rec = { New-Rec $false $true }; Single = 200 }
+            @{ Case = 'a live patient with deleted data the preview did not show'; State = 'Unknown'; Reason = 'PartialDeletion'; Rec = { New-Rec $false -Extra }; Single = 200 }
+            @{ Case = 'a live patient whose data is deleted, the single read answering 503'; State = 'Unknown'; Reason = 'PartialDeletion'; Rec = { New-Rec $false $true }; Single = 503 }
+            @{ Case = 'a live patient whose data is deleted, the single read failing'; State = 'Unknown'; Reason = 'PartialDeletion'; Rec = { New-Rec $false $true }; Single = $null; Failure = 'refused' }
+            @{ Case = 'a live patient whose single read fails'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { New-Rec $false }; Single = $null; Failure = 'refused'
+                Message = 'The patient reads as not deleted, but its single read failed: refused.' }
             @{ Case = 'a live patient whose single read answers 404'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { New-Rec $false }; Single = 404 }
             @{ Case = 'an incomplete read'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { New-Rec $true -Incomplete }; Single = 404 }
-            @{ Case = 'no read'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { $null }; Single = 404 }
+            @{ Case = 'no read'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { $null }; Single = 404; Message = 'The read-back did not return the patient.' }
+            @{ Case = 'no read, the list read failing'; State = 'Unknown'; Reason = 'ReadBackFailed'; Rec = { $null }; Single = $null; Failure = 'refused'
+                Message = 'Reading the patient back failed: refused.' }
         ) {
-            $s = Get-NeoIPCPatientReadBackState -Record (& $Rec) -Previewed $script:Previewed -SingleReadStatus $Single
+            $s = Get-NeoIPCPatientReadBackState -Record (& $Rec) -Previewed $script:Previewed -SingleReadStatus $Single -Failure $(if ($_.ContainsKey('Failure')) { $_.Failure })
             $s.State | Should -Be $State
             $s.Reason | Should -Be $Reason
+            if ($_.ContainsKey('Message')) { $s.Message | Should -BeExactly $_.Message }
         }
         It 'gives <Outcome> (<Reason>, stop: <Stop>) for <Answer> with the patient <ReadBack>' -ForEach @(
             @{ Answer = 'Reported'; ReadBack = 'ProvenDeleted'; Outcome = 'Deleted'; Reason = $null; Stop = $false }
@@ -629,6 +768,7 @@ InModuleScope 'NeoIPC-Tools' {
             @{ Answer = 'ServerError'; ReadBack = 'Live'; Outcome = 'Failed'; Reason = 'ServerError'; Stop = $false }
             @{ Answer = 'Rejected'; ReadBack = 'Live'; Outcome = 'Failed'; Reason = 'Rejected'; Stop = $false }
             @{ Answer = 'AccessDenied'; ReadBack = 'Live'; Outcome = 'Failed'; Reason = 'AccessDenied'; Stop = $true }
+            @{ Answer = 'AccessDenied'; ReadBack = 'Unknown'; Outcome = 'Failed'; Reason = 'AccessDenied'; Stop = $true }
             @{ Answer = 'Reported'; ReadBack = 'Live'; Outcome = 'Failed'; Reason = 'ReportMismatch'; Stop = $true }
             @{ Answer = 'Unclear'; ReadBack = 'Live'; Outcome = 'Failed'; Reason = 'ReportMismatch'; Stop = $true }
             @{ Answer = 'Foreign'; ReadBack = 'Live'; Outcome = 'Failed'; Reason = 'ReportMismatch'; Stop = $true }
@@ -641,13 +781,51 @@ InModuleScope 'NeoIPC-Tools' {
             $o.Reason | Should -Be $Reason
             $o.Stop | Should -Be $Stop
         }
+        It 'stops at a deletion that took data the preview did not show, whatever DHIS2 answered (<Answer>)' -ForEach @(
+            @{ Answer = 'Reported' }
+            @{ Answer = 'NoAnswer' }
+            @{ Answer = 'AsyncJob' }
+        ) {
+            $o = Get-NeoIPCPatientRemovalOutcome -Answer ([pscustomobject]@{ Kind = $Answer; Message = 'm' }) `
+                -ReadBack ([pscustomobject]@{ State = 'ProvenDeleted'; Reason = $null; Message = 'r'; Unpreviewed = @('enrolment En000000009') })
+            $o.Outcome | Should -Be 'Deleted'
+            $o.Reason | Should -Be 'UnpreviewedData'
+            $o.Stop | Should -BeTrue
+            $o.Warning | Should -BeLike "*The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: enrolment En000000009."
+        }
+        It 'leaves to the read-back a 401 or 403 beside <Case>' -ForEach @(
+            @{ Case = 'a patient the list read shows deleted'; ReadBack = @{ State = 'Unknown'; Reason = 'ReadBackFailed'; ReadsDeleted = $true } }
+            @{ Case = 'a deletion in part'; ReadBack = @{ State = 'Unknown'; Reason = 'PartialDeletion'; ReadsDeleted = $false } }
+            @{ Case = 'an incomplete cascade'; ReadBack = @{ State = 'Unknown'; Reason = 'CascadeIncomplete'; ReadsDeleted = $true } }
+        ) {
+            $o = Get-NeoIPCPatientRemovalOutcome -Answer ([pscustomobject]@{ Kind = 'AccessDenied'; Message = 'm' }) -ReadBack ([pscustomobject]($ReadBack + @{ Message = 'r' }))
+            $o.Outcome | Should -Be 'Unverified'
+            $o.Reason | Should -Be $ReadBack.Reason
+            $o.Stop | Should -BeTrue
+            $o.Message | Should -BeExactly 'm. r.'
+        }
+        It 'joins the answer and the read-back as sentences, the answer <Case>' -ForEach @(
+            @{ Case = 'without a full stop'; AnswerMessage = 'refused'; Message = 'refused. r.' }
+            @{ Case = 'with one'; AnswerMessage = 'refused.'; Message = 'refused. r.' }
+            @{ Case = 'with an exclamation mark'; AnswerMessage = 'refused!'; Message = 'refused! r.' }
+            @{ Case = 'with trailing white space'; AnswerMessage = 'refused  '; Message = 'refused. r.' }
+            @{ Case = 'empty'; AnswerMessage = ''; Message = 'r.' }
+        ) {
+            $o = Get-NeoIPCPatientRemovalOutcome -Answer ([pscustomobject]@{ Kind = 'Reported'; Message = $AnswerMessage }) -ReadBack ([pscustomobject]@{ State = 'Unknown'; Reason = 'ReadBackFailed'; Message = 'r' })
+            $o.Message | Should -BeExactly $Message
+        }
+        It 'joins a lost answer and what it leaves open as sentences' {
+            $o = Get-NeoIPCPatientRemovalOutcome -Answer ([pscustomobject]@{ Kind = 'NoAnswer'; Message = 'No answer from DHIS2: reset' }) -ReadBack ([pscustomobject]@{ State = 'Live'; Reason = $null; Message = 'r' })
+            $o.Message | Should -BeExactly 'No answer from DHIS2: reset. The deletion may still be running.'
+        }
     }
 
     Describe 'Format-NeoIPCPatientRemovalPrompt' {
         It 'states the totals, singular and plural, and the refused patients' {
             $p = Format-NeoIPCPatientRemovalPrompt -PatientCount 2 -EnrollmentCount 1 -EventCount 4 -OrgUnitCode 'DEPT_A' -Target 'https://h' -Dhis2Version '2.40.12' -RefusedCount 1
             $p.Description | Should -BeExactly 'Deleting 2 patients with 1 enrolment and 4 events in DEPT_A on https://h (DHIS2 2.40.12)'
-            $p.Query | Should -BeLike '*1 selected patient is refused and will not be deleted.'
+            $p.Query | Should -BeExactly ('Delete 2 patients with 1 enrolment and 4 events in DEPT_A on https://h (DHIS2 2.40.12)? DHIS2 deletes every live ' +
+                'enrolment and event of each patient, including any you cannot read. 1 selected patient is refused and will not be deleted.')
         }
     }
 
@@ -738,10 +916,26 @@ InModuleScope 'NeoIPC-Tools' {
                 @{ Case = 'answers without a report'; DryRun = 'NoReport'; Message = '*without an import report*' }
                 @{ Case = 'names a UID it was not asked about'; DryRun = 'Foreign'; Message = '*UIDs it was not asked about*' }
                 @{ Case = 'fails without refusing a patient'; DryRun = 'ErrorNoCodes'; Message = '*without refusing any patient*' }
+                @{ Case = 'reports a patient as deleted'; DryRun = 'Commits'
+                    Message = "DHIS2's dry run reports TePat000001 as deleted, so this release may have carried the deletion out instead of only validating it. Check these patients on the instance; the run sent nothing further." }
+                # Before the stop for UIDs the request did not carry, which says that nothing was deleted.
+                @{ Case = 'reports as deleted a UID it was not asked about'; DryRun = 'CommitsForeign'
+                    Message = "DHIS2's dry run reports TeForeign01 as deleted, so this release may have carried the deletion out instead of only validating it. Check these patients on the instance; the run sent nothing further." }
             ) {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
                 $script:Fake.DryRun = $DryRun
                 { Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' } } | Should -Throw $Message
+                @(Get-FakeRequest 'POST' 'COMMIT').Count | Should -Be 0
+            }
+            It 'ends a -WhatIf run too when the dry run reports patients as deleted, and claims no outcome for them' {
+                Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
+                Add-FakePatient -Uid 'TePat000002' -NeoIpcId 'A-2'
+                $script:Fake.DryRun = 'Commits'
+                $r = Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = @('A-1', 'A-2'); WhatIf = $true } -AllowStop
+                $r.Stop.FullyQualifiedErrorId | Should -BeLike 'NeoIPCPatientRemovalDryRunDeleted*'
+                $r.Stop.Exception.Message | Should -BeExactly ("DHIS2's dry run reports TePat000001, TePat000002 as deleted, so this release may have carried the deletion out " +
+                    'instead of only validating it. Check these patients on the instance; the run sent nothing further.')
+                $r.Results.Count | Should -Be 0
                 @(Get-FakeRequest 'POST' 'COMMIT').Count | Should -Be 0
             }
             It 'takes the dry run''s <Code> as <Outcome> and sends no deletion for that patient' -ForEach @(
@@ -768,7 +962,7 @@ InModuleScope 'NeoIPC-Tools' {
                 @($r.Results | ForEach-Object { $_.EnrollmentIds.Count }) | Should -Be @(1, 2, 0)
                 @($r.Results | ForEach-Object { $_.EventIds.Count }) | Should -Be @(1, 2, 0)
             }
-            It 'states the totals in the confirmation text' {
+            It 'states the totals in the -Verbose description of the confirmation' {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1' -Enrollments 2 -Events 1
                 Add-FakePatient -Uid 'TePat000002' -NeoIpcId 'A-2' -Enrollments 1 -Events 2
                 $verbose = Remove-NeoIPCPatient -OrgUnitCode 'DEPT_A' -NeoIpcId 'A-1', 'A-2' -Auth $script:Auth -Hostname $script:Host1 -Confirm:$false -Verbose 4>&1 6>$null |
@@ -981,11 +1175,24 @@ InModuleScope 'NeoIPC-Tools' {
                     Warning = "Patient TePat000001: DHIS2's report names UIDs the request did not carry: TeForeign01. The read-back proves the patient deleted." }
                 @{ Behaviour = 'RefuseForeign'; Outcome = 'Failed'; Reason = 'ReportMismatch'; Warning = $null }
                 @{ Behaviour = 'AccessDenied'; Outcome = 'Failed'; Reason = 'AccessDenied'; Warning = $null }
+                @{ Behaviour = 'Unauthorized'; Outcome = 'Failed'; Reason = 'AccessDenied'; Warning = $null }
+                @{ Behaviour = 'Grows'; Outcome = 'Deleted'; Reason = 'UnpreviewedData'
+                    Warning = "Patient TePat000001: The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: enrolment EnExtra0001, event EvExtra0001, data in program PrgOthr0001 (owned by org unit OuDeptB0001)." }
+                @{ Behaviour = 'GrowsEvent'; Outcome = 'Deleted'; Reason = 'UnpreviewedData'
+                    Warning = "Patient TePat000001: The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: event EvExtra0002." }
+                @{ Behaviour = 'GrowsHidden'; Outcome = 'Deleted'; Reason = 'UnpreviewedData'
+                    Warning = "Patient TePat000001: The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: data in program PrgHidn0001 (owned by org unit OuDeptA0001)." }
+                @{ Behaviour = 'Moves'; Outcome = 'Deleted'; Reason = 'UnpreviewedData'
+                    Warning = "Patient TePat000001: The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: event Evt00000111 (moved to org unit OuDeptB0001)." }
+                @{ Behaviour = 'Transfers'; Outcome = 'Deleted'; Reason = 'UnpreviewedData'
+                    Warning = "Patient TePat000001: The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: the ownership in program PrgCore0001 (moved to org unit OuDeptB0001)." }
+                @{ Behaviour = 'Reregisters'; Outcome = 'Deleted'; Reason = 'UnpreviewedData'
+                    Warning = "Patient TePat000001: The deletion also took data the preview did not show, or showed elsewhere, which the removal's rules never checked: the patient's registration (moved to org unit OuDeptB0001)." }
                 @{ Behaviour = 'Transport'; Outcome = 'Unverified'; Reason = 'ResponseLost'; Warning = $null }
                 @{ Behaviour = 'Gateway'; Outcome = 'Unverified'; Reason = 'ResponseLost'; Warning = $null }
                 @{ Behaviour = 'Async'; Outcome = 'Unverified'; Reason = 'AsyncJob'; Warning = $null }
                 @{ Behaviour = 'AsyncDeleted'; Outcome = 'Deleted'; Reason = 'AsyncJob'
-                    Warning = "Patient TePat000001: DHIS2's answer did not report the deletion (DHIS2 queued the deletion as a job instead of running it.), but the read-back proves it." }
+                    Warning = "Patient TePat000001: DHIS2's answer did not report the deletion (DHIS2 queued the deletion as a job instead of running it), but the read-back proves it." }
                 @{ Behaviour = 'Partial'; Outcome = 'Unverified'; Reason = 'CascadeIncomplete'; Warning = $null }
                 @{ Behaviour = 'PartialFail'; Outcome = 'Unverified'; Reason = 'PartialDeletion'; Warning = $null }
             ) {
@@ -1002,12 +1209,51 @@ InModuleScope 'NeoIPC-Tools' {
                 @($r.Warnings).Count | Should -Be $(if ($Warning) { 1 } else { 0 })
                 if ($Warning) { "$($r.Warnings[0])" | Should -BeExactly $Warning }
             }
+            It 'leaves to the read-back a 403 beside <Case>, keeping what the read-back saw' -ForEach @(
+                @{ Case = 'a patient another user deleted'; Behaviour = 'DeniedButGone'; Reason = 'ReadBackFailed'
+                    Message = 'DHIS2 refused the request with HTTP 403: Access is denied. The patient reads as deleted, but its single read answered HTTP 503 instead of 404.' }
+                @{ Case = 'an event another user deleted'; Behaviour = 'DeniedButEventGone'; Reason = 'PartialDeletion'
+                    Message = 'DHIS2 refused the request with HTTP 403: Access is denied. The patient reads as not deleted, but not all of the data the preview showed does (event Evt00000111).' }
+            ) {
+                Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
+                $script:Fake.Behaviour['TePat000001'] = $Behaviour
+                $script:Fake.SingleRead['TePat000001'] = 503
+                $r = Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' } -AllowStop
+                $r.Results[0].Outcome | Should -Be 'Unverified'
+                $r.Results[0].Reason | Should -Be $Reason
+                $r.Results[0].Message | Should -BeExactly $Message
+            }
+            It 'deletes without a Reason a patient with data deleted before the run, found by <Kind>' -ForEach @(
+                @{ Kind = 'NeoIpcId'; Value = 'A-1' }
+                @{ Kind = 'TrackedEntityId'; Value = 'TePat000001' }
+            ) {
+                Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1' -Enrollments 2
+                $old = @($script:Fake.Patients['TePat000001']['enrollments'])[0]
+                $old['deleted'] = $true
+                foreach ($ev in $old['events']) { $ev['deleted'] = $true }
+                $r = Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; $Kind = $Value }
+                $r.Results[0].Outcome | Should -Be 'Deleted'
+                $r.Results[0].Reason | Should -BeNullOrEmpty
+                @($r.Results[0].EnrollmentIds).Count | Should -Be 1
+                $r.Warnings.Count | Should -Be 0
+            }
             It 'reports a deletion whose answer was lost as deleted once the read-back proves it' {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
                 $script:Fake.Behaviour['TePat000001'] = 'DeleteLost'
                 $r = Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' }
                 $r.Results[0].Outcome | Should -Be 'Deleted'
                 @($r.Warnings).Count | Should -BeGreaterThan 0
+            }
+            It 'reports a deleted patient whose single read fails as Unverified, and stops' {
+                Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
+                Add-FakePatient -Uid 'TePat000002' -NeoIpcId 'A-2'
+                $script:Fake.ThrowStatus = $true
+                $r = Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = @('A-1', 'A-2') } -AllowStop
+                $r.Results[0].Outcome | Should -Be 'Unverified'
+                $r.Results[0].Reason | Should -Be 'ReadBackFailed'
+                $r.Results[0].Message | Should -BeExactly 'DHIS2 reported the patient deleted. The patient reads as deleted, but its single read failed: The response ended prematurely.'
+                $r.Results[1].Outcome | Should -Be 'NotAttempted'
+                $r.Stop.FullyQualifiedErrorId | Should -BeLike 'NeoIPCPatientRemovalStopped*'
             }
             It 'never reports Deleted when the single read still finds the patient' {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
@@ -1025,10 +1271,15 @@ InModuleScope 'NeoIPC-Tools' {
                 $r.Errors[0].FullyQualifiedErrorId | Should -BeLike 'NeoIPCPatientNotFound*'
                 $r.Errors[0].TargetObject.NeoIpcId | Should -BeExactly 'X-9'
             }
-            It 'deletes nothing under -ErrorAction Stop when a selected patient is refused' {
-                Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
-                { Remove-NeoIPCPatient -OrgUnitCode 'DEPT_A' -NeoIpcId 'A-1', 'X-9' -Auth $script:Auth -Hostname $script:Host1 -Confirm:$false -ErrorAction Stop 6>$null } | Should -Throw
+            It 'deletes nothing under -ErrorAction Stop when a selected patient is <Case>' -ForEach @(
+                @{ Case = 'not found'; Ids = @('X-9', 'A-2') }
+                @{ Case = 'refused'; Ids = @('A-1', 'A-2') }
+            ) {
+                Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1' -Program 'PrgOthr0001'
+                Add-FakePatient -Uid 'TePat000002' -NeoIpcId 'A-2'
+                { Remove-NeoIPCPatient -OrgUnitCode 'DEPT_A' -NeoIpcId $Ids -Auth $script:Auth -Hostname $script:Host1 -Confirm:$false -ErrorAction Stop 6>$null } | Should -Throw
                 @(Get-FakeRequest 'POST' 'COMMIT').Count | Should -Be 0
+                $script:Fake.Patients['TePat000002']['deleted'] | Should -BeFalse
             }
             It 'sends every confirmed deletion under -ErrorAction Stop before a failure ends the run' {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1'
@@ -1056,13 +1307,16 @@ InModuleScope 'NeoIPC-Tools' {
             It 'ends the run at a failure after a deletion under -ErrorAction SilentlyContinue, with no try around the call' {
                 # Only a process with no try anywhere above the call shows what the function-wide Stop preference does:
                 # Pester's own try makes every throw end the run, whatever the preference. The child process replaces
-                # the HTTP helpers in the module, and the classification of DHIS2's answer throws after the first
-                # deletion; without the preference the run would drop that throw and go on to the second patient.
+                # only the HTTP helpers in the module, as every other test does. They delete what a commit names, as
+                # DHIS2 does, but answer the first commit with a status code the real helper never returns, which makes
+                # reading that answer throw after the deletion. Without the preference the run would drop that throw,
+                # take the answer for none, find the patient deleted, and go on to the second patient.
                 $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
                 $child = @"
 Import-Module '$($manifest.Replace("'", "''"))' -Force
 `$m = Get-Module NeoIPC-Tools
 & `$m {
+    `$script:Committed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
     function script:Invoke-WebRequest { throw 'A test made an HTTP call.' }
     function script:Invoke-RestMethod { throw 'A test made an HTTP call.' }
     function script:Invoke-NeoIPCDhis2Get {
@@ -1074,7 +1328,7 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
             'api/organisationUnits' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }) } }
             'api/tracker/trackedEntities' {
                 return @{ trackedEntities = @(([string]`$QueryParameters['trackedEntities']) -split ',' | ForEach-Object {
-                            [ordered]@{ trackedEntity = `$_; trackedEntityType = 'TetPatnt001'; orgUnit = 'OuDeptA0001'; deleted = `$false; attributes = @()
+                            [ordered]@{ trackedEntity = `$_; trackedEntityType = 'TetPatnt001'; orgUnit = 'OuDeptA0001'; deleted = `$script:Committed.Contains(`$_); attributes = @()
                                 programOwners = @([ordered]@{ program = 'PrgCore0001'; orgUnit = 'OuDeptA0001' }); enrollments = @() } }) }
             }
         }
@@ -1082,11 +1336,14 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
     function script:Invoke-NeoIPCDhis2Post {
         [CmdletBinding(SupportsShouldProcess)]
         param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path, `$Body, `$QueryParameters)
-        if (`$QueryParameters['importMode'] -eq 'COMMIT') { [Console]::Out.WriteLine('##COMMIT##') }
+        if (`$QueryParameters['importMode'] -eq 'COMMIT') {
+            foreach (`$te in @((ConvertFrom-Json `$Body).trackedEntities)) { [void]`$script:Committed.Add(`$te.trackedEntity) }
+            [Console]::Out.WriteLine('##COMMIT##')
+            return [pscustomobject]@{ StatusCode = 'unreadable'; Body = `$null }
+        }
         [pscustomobject]@{ StatusCode = 200; Body = [pscustomobject]@{ status = 'OK'; validationReport = [pscustomobject]@{ errorReports = @() }; bundleReport = [pscustomobject]@{ typeReportMap = [pscustomobject]@{} } } }
     }
-    function script:Get-NeoIPCDhis2StatusCode { param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path) 200 }
-    function script:Get-NeoIPCTrackerDeleteAnswer { throw 'A failure after a deletion.' }
+    function script:Get-NeoIPCDhis2StatusCode { param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path) if (`$script:Committed.Contains((`$Path -split '/')[-1])) { 404 } else { 200 } }
 }
 Remove-NeoIPCPatient -OrgUnitCode 'DEPT_A' -TrackedEntityId 'TePat000001', 'TePat000002' -Auth @{ AuthType = 'Basic' } -Hostname 'dhis2.example.org' ``
     -Confirm:`$false -ErrorAction SilentlyContinue 6>`$null | Out-Null
@@ -1094,6 +1351,7 @@ Remove-NeoIPCPatient -OrgUnitCode 'DEPT_A' -TrackedEntityId 'TePat000001', 'TePa
                 $encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($child))
                 $output = & (Get-Process -Id $PID).Path -NoProfile -NonInteractive -EncodedCommand $encoded 2>&1
                 @($output | Where-Object { "$_" -ceq '##COMMIT##' }).Count | Should -Be 1 -Because ($output -join "`n")
+                ($output -join "`n") | Should -Match 'unreadable' -Because 'the run ends at the failure itself, not at a stop rule after it'
             }
         }
 

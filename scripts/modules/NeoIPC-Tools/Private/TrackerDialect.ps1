@@ -108,7 +108,7 @@ function Get-NeoIPCTrackedEntityList {
     if ($OrgUnitMode -eq 'CAPTURE' -and $OrgUnitId) { throw 'A CAPTURE tracked-entity read takes no org unit; DHIS2 2.41 and later refuse one.' }
     if ([bool]$AttributeId -ne [bool]$AttributeValue) { throw 'An attribute filter needs both the attribute and the value.' }
     if ($AttributeId -and -not (Test-NeoIPCTrackerFilterValue -Dialect $Dialect -Value $AttributeValue)) {
-        throw "DHIS2 before 2.42 cannot look up the value '$AttributeValue': it holds more than one '/'."
+        throw "DHIS2 before 2.42 may look the value '$AttributeValue' up as another value: it holds more than one '/'."
     }
     $ids = @($TrackedEntityId | Where-Object { $_ })
     foreach ($id in @($ids + @($TrackedEntityTypeId, $OrgUnitId, $AttributeId) | Where-Object { $_ })) {

@@ -166,12 +166,12 @@ data*, not all operator-rich expressions.
 
 The `Read-*Info` cmdlets and the personal-access-token cmdlets accept a
 `-Token` parameter (or read `$env:NEOIPC_DHIS2_TOKEN`); `Read-OrgUnitInfo`,
-`Read-PatientInfo`, `Read-EnrolmentInfo` and `Read-EventInfo` take an `-Auth`
+`Read-PatientInfo`, `Read-EnrolmentInfo`, and `Read-EventInfo` take an `-Auth`
 hashtable from `Resolve-NeoIPCAuth` as well. If no token is available, you are
 prompted for username/password. The other cmdlets that talk to DHIS2 take
 `-Auth`. Without `-Hostname`, a cmdlet talks to the NeoIPC production instance,
 except the four that write metadata or tracker data (`Import-NeoIPCMetadata`,
-`Deploy-NeoIPCMetadata`, `Import-NeoIPCPlayData` and `Remove-NeoIPCPatient`),
+`Deploy-NeoIPCMetadata`, `Import-NeoIPCPlayData`, and `Remove-NeoIPCPatient`),
 whose `-Hostname` is mandatory, so that they always name their target.
 
 ```powershell
@@ -322,8 +322,9 @@ since a NeoIPC patient ID is unique only within its department:
 3. piped patient records carrying `TrackedEntityId` and `OrgUnitId`, and
    optionally `NeoIpcId`, which must then be the patient's.
 
-Enrolment and event records carry `TrackedEntityId` too; the cmdlet refuses
-them, so that a list of events can never select their patients.
+Enrolment and event records carry `TrackedEntityId` too; piped as they come,
+they are refused, so that a list of events piped by mistake does not select
+their patients.
 `-MaximumCount` (default 25) caps a run before any request.
 
 **What is refused.** DHIS2 deletes every live enrolment and event of a patient
@@ -335,7 +336,8 @@ deletion for:
 2. a piped `OrgUnitId` that names no department, or another one than
    `-OrgUnitCode`;
 3. before DHIS2 2.42, a patient ID holding more than one `/`, which those
-   releases cannot look up: select such a patient by its UID;
+   releases may look up as another patient ID: select such a patient by its
+   UID;
 4. a patient ID that matches more than one patient, and a piped `NeoIpcId`
    that is not the patient's;
 5. a patient registered or owned outside the department, enrolled in another
@@ -344,13 +346,16 @@ deletion for:
 6. a patient that DHIS2's own dry run (`importMode=VALIDATE`, which `-WhatIf`
    runs too) refuses.
 
+A dry run whose answer reports any patient as deleted ends the run at once
+(`DryRunDeleted`).
+
 **Outcomes.** One object per selected patient:
 
 | Outcome | Meaning |
 |---------|---------|
 | `WouldDelete` | `-WhatIf`: the patient would be deleted |
 | `Declined` | the confirmation was declined |
-| `Deleted` | the read-back shows the patient, and every enrolment and event the preview showed, deleted, and the patient's own read answers 404; a `Reason` says why the run stopped there |
+| `Deleted` | the read-back shows the patient, and every enrolment and event the preview showed live, deleted, and the patient's own read answers 404; a `Reason` says why the run stopped there |
 | `AlreadyDeleted` | deleted before this run |
 | `NotFound` | no such patient where DHIS2 looks, by program owner: by patient ID, in the department; by UID, within your data-capture org units, and on 2.43 for a superuser anywhere |
 | `Refused` | by rules 1 to 6 (`Reason`, `ErrorCodes`) |
@@ -369,11 +374,18 @@ A run carries on after a failure that concerns one patient. It stops, naming
 the cause in the `Reason` of the patient it stopped at, when DHIS2 denies
 access, queues the deletion as a job, or gives an answer that contradicts the
 request or the read-back; when DHIS2's answer is lost and the read-back does
-not prove the deletion; and when the read-back fails or finds the patient's
-data deleted in part. Running it again is safe: a deleted patient comes back
-`AlreadyDeleted` by UID and `NotFound` by patient ID.
+not prove the deletion; when the read-back fails or finds the patient's data
+deleted in part; and when the deletion took data the preview did not show, or
+showed elsewhere, which DHIS2 deletes with the patient unchecked (`Deleted`,
+with the `Reason` `UnpreviewedData`): an enrolment or event added, or moved to
+another org unit, after the preview read the patient; its registration moved;
+or its program ownership changed. The read-back sees the enrolments and events
+you can read, and the program owners of every program, so an enrolment added in
+a program you cannot read shows through its owner.
+Running it again is safe: a deleted patient comes back `AlreadyDeleted` by UID
+and `NotFound` by patient ID.
 `-WhatIf` writes no errors; otherwise every result but `WouldDelete`,
-`Declined`, `Deleted` and `AlreadyDeleted` writes one, the refusals before the
+`Declined`, `Deleted`, and `AlreadyDeleted` writes one, the refusals before the
 first deletion, so that `-ErrorAction Stop` deletes nothing while any selected
 patient is refused or not found.
 
@@ -387,7 +399,7 @@ patient is refused or not found.
 3. Without `ALL`, a deletion also needs data-write access to the NeoIPC Patient
    type and to one of its programs, and ownership: the owner of the CLOSED
    program `NEOIPC_CORE` must lie within your data-capture org units (`E1003`;
-   on 2.43 `E1001`, `E1323` or `E1324`).
+   on 2.43 `E1001`, `E1323`, or `E1324`).
 
 The preview counts only the enrolments and events you can read, while DHIS2
 deletes every live one.
@@ -400,7 +412,7 @@ refuses every deletion.
 
 **What DHIS2 keeps.** The deletion is logical:
 
-1. The patient, its enrolments (set to `CANCELLED`) and its events stay in the
+1. The patient, its enrolments (set to `CANCELLED`), and its events stay in the
    database, flagged as deleted; the events keep all their data values.
 2. Its attribute values, the patient ID among them, are removed. DHIS2 2.40 and
    2.41 keep each removed value in the attribute-value audit while
@@ -422,17 +434,19 @@ tracker data, a separate decision this cmdlet never takes. It removes every
 soft-deleted patient on the instance, not only these, and needs `ALL` or
 `F_PERFORM_MAINTENANCE`. Run it from the Data Administration app, or as
 `POST /api/maintenance` with `softDeletedRelationshipRemoval`,
-`softDeletedEventRemoval`, `softDeletedEnrollmentRemoval` and
+`softDeletedEventRemoval`, `softDeletedEnrollmentRemoval`, and
 `softDeletedTrackedEntityRemoval` (on 2.40:
 `softDeletedTrackedEntityInstanceRemoval`, which 2.42 and later ignore without
 an error) set to `true` together, since the tracked-entity removal alone can
 fail on records the others remove first.
 
 **Verified releases.** The cmdlet relies on DHIS2 behaviour read in the source
-of 2.40.12, 2.41.10, 2.42.6 and 2.43.2, and confirmed by a removal run against
+of 2.40.12, 2.41.10, 2.42.6, and 2.43.2, and confirmed by a removal run against
 a synthetic instance of each. A later patch of one of these lines counts as
 verified; any other release is refused before a patient is read, unless
-`-AllowUnverifiedVersion` is given.
+`-AllowUnverifiedVersion` is given. On such a release DHIS2's dry run is
+unverified as well: should its answer report any patient as deleted, the run
+ends at once, though what the dry run did cannot be undone.
 
 ## Personal Access Token Lifecycle Management
 
