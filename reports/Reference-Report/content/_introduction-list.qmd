@@ -3,27 +3,28 @@
 #| output: asis
 
 cat(sep = "\n", c(
-  paste0(sR$headerList$numberOfDepartments, ":"),
+  term_label(sR$headerList$numberOfDepartments, sR),
   "",
   paste0(":   ", dR$numberOfDepartments),
   "",
-  paste0(sR$headerList$numberOfPatients, ":"),
+  term_label(sR$headerList$numberOfPatients, sR),
   "",
   paste0(":   ", dR$numberOfPatients),
   "",
-  paste0(sR$headerList$numberOfAdmissions, ":"),
+  term_label(sR$headerList$numberOfAdmissions, sR),
   "",
   paste0(":   ", dR$numberOfAdmissions,
     if (dR$numberOfAdmissions != dR$numberOfPatients)
       paste0("^[", sR$headerList$admissionsExceedRecordsNote, "]")
     else ""),
   "",
-  paste0(sR$headerList$sumOfPatientDays, ":"),
+  term_label(sR$headerList$sumOfPatientDays, sR),
   "",
   paste0(":   ", dR$sumOfPatientDays),
   "",
-  paste0(sR$headerList$averageSurveillancePeriod, ":"),
+  term_label(sR$headerList$averageSurveillancePeriod, sR),
   "",
-  paste0(":   ", dR$averageSurveillancePeriod, " days")
+  paste0(":   ", interpolate_translation(
+    sR$headerList$averageSurveillancePeriodValue, days = dR$averageSurveillancePeriod))
 ))
 ```

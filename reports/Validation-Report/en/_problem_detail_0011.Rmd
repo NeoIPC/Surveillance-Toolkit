@@ -15,7 +15,7 @@ There may be different reasons for this:
 
     It is very unlikely that the infection is still related to the procedure after such a long time.
     Please check the documented findings again carefully and, if necessary, consult with the treating neonatologist and/or surgeon.
-    If you still believe that this is a surgical site infection, please contact us (e.g. via our [support email address](mailto:NeoIPC-Support@charite.de)).
+    If you still believe that this is a surgical site infection, please contact us (e.g. via our [support email address](mailto:`r support_email_address`)).
     If you have verified that it is not a surgical site infection, please delete the event form (see @sec-solution-12).
 
 2. No form has been created for the surgical procedure

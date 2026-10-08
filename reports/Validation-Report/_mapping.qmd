@@ -65,7 +65,8 @@ problem_info  <- tibble::tribble(
   58L, 58L, 34L, 34L,
   59L, 59L, 35L, 35L,
   60L, 60L, 36L, 36L,
-  61L, 61L, 37L, 37L
+  61L, 61L, 37L, 37L,
+  62L, 62L, 30L, 30L
 )
 problem_detail_info <- tibble::tribble(
   ~id, ~sortOrder, ~usedSolutions,
@@ -159,7 +160,8 @@ context_fallbacks <- tibble::tribble(
   ~rule_id, ~field,      ~fallback,
   52L,      "substance", "substance_code",
   53L,      "substance", "substance_code",
-  54L,      "substance", "substance_code"
+  54L,      "substance", "substance_code",
+  62L,      "substance", "substance_code"
 )
 
 solution_info <-tibble::tribble(

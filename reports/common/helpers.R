@@ -498,15 +498,18 @@ get_tracker_capture_base <- function(public_base_url, connection_options) {
 #'
 #' Every rule's findings render with its `description`. Rule 20 has a second
 #' complete sentence for an infectious agent recorded as causing a secondary
-#' sepsis, and rule 55 one for a secondary-BSI item that was never answered,
-#' between which `select_template()` in the report's `_problem_text.qmd`
-#' chooses.
+#' sepsis, and rule 55 one for a secondary-BSI item that was never answered.
+#' Rule 54 has two more, for a substance in two entries: of which an entry has
+#' no days, or whose two entries have the same days; its `description` is the
+#' case of different days, most likely one entry per treatment course.
+#' `select_template()` in the report's `_problem_text.qmd` chooses among them.
 #' @param rule_id A validation rule id
 #' @return The keys of the rule's templates in its entry under `problems` in
 #'   the Validation Report's string resources
 validation_rule_template_keys <- function(rule_id)
   c("description",
     if (rule_id == 20L) "description_secondary_bsi",
+    if (rule_id == 54L) c("description_days_missing", "description_same_days"),
     if (rule_id == 55L) "description_unanswered")
 
 #' Check that the Validation Report's string resources carry sentences for
@@ -559,6 +562,231 @@ check_validation_rule_texts <- function(sR, rule_ids) {
         paste(unruled, collapse = ", ")),
       class = "neoipc_validation_rule_text_without_rule")
   invisible(NULL)
+}
+
+#' The labels of the record kinds that neoipcr's validation and reconciliation
+#' summaries count
+#'
+#' @param sR String resources
+#' @return A named character vector: the labels of `patients`, `enrollments`,
+#'   and `events`, the levels of a summary's `record_kind`
+record_kind_labels <- function(sR) {
+  strings <- sR$`tbl-validation-summary`
+  c(patients = strings$patients, enrollments = strings$admissions, events = strings$forms)
+}
+
+#' The label of an entry in a report's header or overview list
+#'
+#' The entry's name in the translated `term_label` template, which carries
+#' the punctuation the report's language puts after a label (a French
+#' translation writes a no-break space before the colon), as the term of a
+#' Markdown definition list. The name is a translated string and is escaped
+#' as one.
+#' @param term The entry's name, a translated string
+#' @param sR String resources
+#' @return The label as Markdown text
+term_label <- function(term, sR)
+  as.character(interpolate_translation(sR$term_label, term = escape_markdown_translation(term)))
+
+#' Escapes a list marker at the start of a line of the report's Markdown
+#'
+#' A translated template is the report's Markdown and is not escaped, so a
+#' translation that starts with a list marker would open a list where its line
+#' starts a list item or a definition: an ordinal as many languages write it
+#' ("54. kural", "54)"), a number in parentheses ("(54)"), which opens a list
+#' at any number, Pandoc's `#` and `@` markers, or a bullet followed by a
+#' space. The punctuation that makes the marker is escaped, as
+#' [escape_markdown_translation()] escapes it in a translated value.
+#' @param x character vector, one line each
+#' @return the vector with each leading marker escaped
+escape_leading_list_marker <- function(x) {
+  token <- "(?:[[:alnum:]]+|#|@[[:alnum:]_-]*)"
+  x <- sub(paste0("^(", token, ")([.)])"), "\\1\\\\\\2", x, perl = TRUE)
+  x <- sub(paste0("^\\((?=", token, "\\))"), "\\\\(", x, perl = TRUE)
+  sub("^([*+-])(?=\\s|$)", "\\\\\\1", x, perl = TRUE)
+}
+
+#' The state of the Validation Report's validation-exception list
+#'
+#' Switched off when the caller asked for the report without a list it holds
+#' or gives, which an upload time alone shows as well, since the reporting
+#' service passes no file then; none without a list; unusable when neoipcr
+#' refuses the list given, reading it or resolving it onto the dataset; and
+#' applied otherwise. Only neoipcr's refusal of the list
+#' (`neoipcr_invalid_exception_list`) makes it unusable: any other error is a
+#' defect of the render and propagates.
+#' @param apply `applyValidationExceptions`
+#' @param file `validationExceptionFile`, or NULL
+#' @param uploaded_at `validationExceptionFileUploadedAt`, or NULL
+#' @param read_and_resolve A function of the file's path returning the list
+#'   read (`list`) and its records resolved onto the dataset (`keys`)
+#' @return A list: `state`, one of `"applied"`, `"none"`, `"switched_off"`,
+#'   and `"unusable"`; `list` and `keys` when the list was applied; and
+#'   `refusal`, neoipcr's message, when it is unusable
+validation_exception_state <- function(apply, file, uploaded_at, read_and_resolve) {
+  if (isFALSE(apply) && (!is.null(file) || !is.null(uploaded_at)))
+    return(list(state = "switched_off"))
+  if (is.null(file))
+    return(list(state = "none"))
+  tryCatch(
+    c(list(state = "applied"), read_and_resolve(file)),
+    neoipcr_invalid_exception_list = function(cnd)
+      list(state = "unusable", refusal = conditionMessage(cnd)))
+}
+
+#' The upload time of the Validation Report's validation-exception list
+#'
+#' Reads `validationExceptionFileUploadedAt`, which the reporting service
+#' passes as `yyyy-mm-ddThh:mm:ssZ`. The same time with fractional seconds,
+#' or with an offset from UTC in place of the `Z`, is read as well; any other
+#' form is not, an ISO 8601 time without seconds or without a zone included.
+#' @param x The parameter's value, or NULL
+#' @return The time as a POSIXct in UTC, NA when `x` is in none of these
+#'   forms, or NULL when `x` is NULL
+validation_exception_upload_time <- function(x) {
+  if (is.null(x))
+    return(NULL)
+  lubridate::fast_strptime(
+    x, c("%Y-%m-%dT%H:%M:%OS%Ou", "%Y-%m-%dT%H:%M:%OS%OO", "%Y-%m-%dT%H:%M:%OS%Oz"),
+    tz = "UTC", lt = FALSE)
+}
+
+#' Whether the validation-exception list exempted any record from a rule
+#'
+#' @param summary The validation summary of the render's findings, or NULL
+#'   unless the list was applied
+#' @return TRUE or FALSE
+validation_exceptions_exempted <- function(summary)
+  !is.null(summary) && any(summary$n_exempted[!is.na(summary$rule_id)] > 0L)
+
+#' The Validation Report's header entry for the validation-exception list
+#'
+#' The definitions of the "Validation exceptions" entry, as Markdown text:
+#' when the list was uploaded, where that is known and the report has a list
+#' to speak of; the list's state; and, when the list was applied, one line per
+#' rule naming the records it exempted, in rule order, counted at the rule's
+#' level as neoipcr's `validation_summary()` counts them, which is how the
+#' Partner and Reference Reports' table counts them. The templates are the
+#' report's Markdown, as the rules' sentences are; the values put into them
+#' are escaped, and so is a list marker a translation starts a line with.
+#' @param state One of `"applied"`, `"none"`, `"switched_off"`, and
+#'   `"unusable"`
+#' @param uploaded_at The list's upload time, as
+#'   [validation_exception_upload_time()] reads it, or NULL
+#' @param summary The validation summary of the render's findings, or NULL
+#'   unless the list was applied
+#' @param sR String resources
+#' @return A character vector, one element per definition
+validation_exception_overview <- function(state, uploaded_at, summary, sR) {
+  strings <- sR$validation_exceptions
+  per_rule <- if (identical(state, "applied") && !is.null(summary)) {
+    exempted <- summary[!is.na(summary$rule_id) & summary$n_exempted > 0L, ]
+    exempted[order(exempted$rule_id), ]
+  }
+  state_line <- switch(state,
+    applied      = if (NROW(per_rule) > 0L) strings$applied else strings$applied_none_exempted,
+    none         = strings$none,
+    switched_off = strings$switched_off,
+    unusable     = strings$unusable,
+    rlang::abort(sprintf("Unknown validation-exception state '%s'.", state), .internal = TRUE))
+  kinds <- record_kind_labels(sR)
+  escape_leading_list_marker(c(
+    if (!identical(state, "none") && length(uploaded_at) == 1L && !is.na(uploaded_at))
+      as.character(interpolate_translation(
+        strings$uploaded,
+        date = escape_markdown(format(uploaded_at, format = "%x")))),
+    state_line,
+    if (NROW(per_rule) > 0L)
+      vapply(seq_len(nrow(per_rule)), \(i) as.character(interpolate_translation(
+        strings$rule_records,
+        rule  = per_rule$rule_id[i],
+        kind  = escape_markdown_translation(kinds[[as.character(per_rule$record_kind[i])]]),
+        count = escape_markdown(format_integer(
+          per_rule$n_exempted[i], big_mark = sR$digit_group_separator)))),
+        character(1))))
+}
+
+#' Percent-encodes a value for a mailto link's header fields
+#'
+#' Every reserved character is encoded, a `%` included that already reads as
+#' an escape, and each line break as `%0D%0A`, which RFC 6068 requires in a
+#' message body.
+#' @param x A string
+#' @return The encoded string
+mailto_encode <- function(x)
+  utils::URLencode(gsub("\r?\n", "\r\n", x), reserved = TRUE, repeated = TRUE)
+
+#' The Validation Report's hint on requesting a validation exception
+#'
+#' The sentence, with its link to the NeoIPC support team, which opens an
+#' e-mail asking for what the team needs to assess the request and to write
+#' the exception record: the department, the patient, the enrolment, the
+#' form, and the rule.
+#' @param sR String resources
+#' @param support_email_address The support team's address
+#' @return The hint as Markdown text
+exception_request_hint <- function(sR, support_email_address) {
+  mailto <- paste0(
+    support_email_address,
+    "?subject=", mailto_encode(sR$exception_request_hint_email_subject),
+    "&body=", mailto_encode(sR$exception_request_hint_email_body))
+  # The link is markup built here and handed to the sentence as a value; its
+  # label is a translated string set inside that markup.
+  support_link <- paste0(
+    "[", escape_markdown_translation(sR$support_email_address_link_text), "](mailto:", mailto, ")")
+  as.character(interpolate_translation(sR$exception_request_hint, support_link = support_link))
+}
+
+#' The Validation Report's appendix of unused validation exceptions
+#'
+#' The appendix an administrator can add: the exception list's records for
+#' the report's departments that match no record, or match one but exempt
+#' nothing, as neoipcr's `validation_exception_usage()` reports them, in a
+#' table; or a sentence saying why there is nothing to list. A matched record
+#' whose rule the render did not run, which exempted nothing for want of a
+#' run, is not listed. A list whose records do not name their department is
+#' kept whole by neoipcr, so its records could be other departments', and
+#' none is listed. The records name patients, so the appendix is meant for the
+#' list's upkeep, not for partners.
+#' @param state The list's state, as for [validation_exception_overview()]
+#' @param usage The list's usage, or NULL unless the list was applied
+#' @param sR String resources
+#' @return Markdown lines
+unused_validation_exceptions_markdown <- function(state, usage, sR) {
+  strings <- sR$unused_validation_exceptions
+  lines <- c(paste0("## ", strings$heading, " {.unnumbered}"), "")
+  if (!identical(state, "applied"))
+    return(c(lines, if (identical(state, "unusable")) strings$unusable else strings$not_applied))
+  if (!"DEPARTMENT_CODE" %in% names(usage))
+    return(c(lines, strings$no_department_codes))
+  if (nrow(usage) == 0L)
+    return(c(lines, strings$no_records))
+  unused <- usage[!usage$matched | usage$n_exempted %in% 0L, ]
+  if (nrow(unused) == 0L)
+    return(c(lines, strings$none_unused))
+  date_text <- function(d) ifelse(is.na(d), escape_markdown_translation(sR$missing_value),
+                                  vapply(format(d, format = "%x"), escape_markdown, character(1)))
+  text <- function(x) ifelse(is.na(x) | !nzchar(x), escape_markdown_translation(sR$missing_value),
+                             vapply(as.character(x), escape_markdown, character(1)))
+  rows <- paste(
+    "|", vapply(unused$RULE_ID, \(id) as.character(id), character(1)),
+    "|", text(unused$DEPARTMENT_CODE),
+    "|", text(unused$NEOIPC_PATIENT_ID),
+    "|", date_text(unused$ENROLMENT_DATE),
+    "|", text(toupper(unused$EVENT_TYPE)),
+    "|", date_text(unused$EVENT_DATE),
+    "|", escape_markdown_translation(ifelse(unused$matched, strings$exempts_nothing, strings$matches_nothing)),
+    "|")
+  header <- paste(
+    "|", paste(vapply(c(strings$rule, sR$header$department, strings$patient, strings$enrolment_date,
+                        strings$form, strings$form_date, strings$outcome),
+                      escape_markdown_translation, character(1)), collapse = " | "),
+    "|")
+  # A pipe table wider than Pandoc's line limit, as this one always is, takes
+  # its column widths from the dashes of this line. The codes and ids cannot
+  # break, so they get the width; a date gets enough for its locale's format.
+  separator <- paste0("|", paste(strrep("-", c(3L, 8L, 7L, 6L, 3L, 6L, 5L)), collapse = "|"), "|")
+  c(lines, strings$intro, "", header, separator, rows)
 }
 
 get_dataset_options <- function(
@@ -763,15 +991,18 @@ compared_summaries <- function(own, ref, has_reference, own_notes, reference_not
 
 #' Format the validation summaries of one or more datasets as a table
 #'
-#' One row per rule that removed or exempted a record, in rule order, with the
-#' kind of record the rule concerns and its counts, then one row per record
-#' kind with the totals across all rules. `summaries` is a list of
-#' `validationSummary` tibbles as neoipcr's `import_dhis2()` documents them
-#' (`rule_id`, `record_kind`, `n_removed`, `n_exempted`, the totals rows
+#' One row per rule that flagged a record, in rule order, with the kind of
+#' record the rule concerns and its counts, then one row per record kind with
+#' the totals across all rules. `summaries` is a list of `validationSummary`
+#' tibbles as neoipcr's `import_dhis2()` documents them (`rule_id`,
+#' `record_kind`, `n_removed`, `n_exempted`, `n_warned`, the totals rows
 #' carrying `NA` for the rule); when the list is named, each name labels a
 #' column group over its dataset's counts, and a rule one dataset never met
-#' shows no count for it. `NULL` when no summary removed or exempted anything,
-#' so the caller can say so instead of printing a table of zeros.
+#' shows no count for it. A summary without `n_warned` gets no column of
+#' warnings, and a footnote of its own on its removed records, which include
+#' the warnings' records.
+#' `NULL` when no summary removed, exempted, or warned of anything, so the
+#' caller can say so instead of printing a table of zeros.
 #' @param summaries List of validation-summary tibbles, named to label each
 #'   dataset's column group
 #' @param sR String resources
@@ -780,20 +1011,28 @@ compared_summaries <- function(own, ref, has_reference, own_notes, reference_not
 #' @return A gt table, or NULL
 format_validation_summary_table <- function(summaries, sR, font_size = NULL) {
   strings <- sR$`tbl-validation-summary`
-  kind_labels <- c(
-    patients    = strings$patients,
-    enrollments = strings$admissions,
-    events      = strings$forms)
+  kind_labels <- record_kind_labels(sR)
 
+  # NEOIPC-PERMANENT(validation-summary-warnings): a stored reference dataset
+  # or partner-data file written before neoipcr counted the records a warning
+  # flagged apart from the removed ones carries no `n_warned`. Such a file
+  # outlives every deployment, and the rules that are warnings now removed
+  # their records then, so its removed records include them; without this the
+  # table would refuse the file.
+  has_warned <- vapply(summaries, \(summary) "n_warned" %in% names(summary), logical(1))
   counts <- purrr::map2(summaries, seq_along(summaries), function(summary, i) {
-    summary |>
-      dplyr::select("rule_id", "record_kind", "n_removed", "n_exempted") |>
+    counted <- summary |>
+      dplyr::select("rule_id", "record_kind", "n_removed", "n_exempted",
+                    tidyselect::any_of("n_warned")) |>
       dplyr::mutate(
         rule_id     = as.integer(.data$rule_id),
         record_kind = as.character(.data$record_kind)) |>
       dplyr::rename(
         !!paste0("removed_", i)  := "n_removed",
         !!paste0("exempted_", i) := "n_exempted")
+    if (has_warned[[i]])
+      counted <- dplyr::rename(counted, !!paste0("warned_", i) := "n_warned")
+    counted
   })
   joined <- purrr::reduce(counts, dplyr::full_join, by = c("rule_id", "record_kind"))
   count_cols <- setdiff(names(joined), c("rule_id", "record_kind"))
@@ -853,21 +1092,42 @@ format_validation_summary_table <- function(summaries, sR, font_size = NULL) {
         gt::cells_body(rows = which(tbl_data$total)[1]),
         gt::cells_stub(rows = which(tbl_data$total)[1]))) |>
     gt::tab_footnote(
-      footnote = interpolate_translation(strings$removed_footnote, column = strings$removed),
-      locations = gt::cells_column_labels(columns = "removed_1"),
-      placement = "right") |>
-    gt::tab_footnote(
       footnote = interpolate_translation(strings$exempted_footnote, column = strings$exempted),
       locations = gt::cells_column_labels(columns = "exempted_1"),
       placement = "right") |>
     gt::tab_source_note(strings$rule_footnote)
+  # The removed records of a summary without `n_warned` include the warnings'
+  # records, so the note that leaves them out goes on the first summary that
+  # counts them apart, and each older summary gets its own note below.
+  if (any(has_warned)) {
+    first_warned <- which(has_warned)[1]
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = interpolate_translation(strings$removed_footnote, column = strings$removed),
+        locations = gt::cells_column_labels(columns = paste0("removed_", first_warned)),
+        placement = "right") |>
+      gt::tab_footnote(
+        footnote = interpolate_translation(strings$warned_footnote, column = strings$warned),
+        locations = gt::cells_column_labels(columns = paste0("warned_", first_warned)),
+        placement = "right")
+  }
 
   for (i in seq_along(summaries)) {
-    cols <- c(paste0("removed_", i), paste0("exempted_", i))
+    cols <- c(paste0("removed_", i), paste0("exempted_", i),
+              if (has_warned[[i]]) paste0("warned_", i))
     tbl <- tbl |>
       gt::cols_label(
         !!cols[1] := strings$removed,
         !!cols[2] := strings$exempted)
+    if (has_warned[[i]])
+      tbl <- tbl |>
+        gt::cols_label(!!cols[3] := strings$warned)
+    else
+      tbl <- tbl |>
+        gt::tab_footnote(
+          footnote = interpolate_translation(strings$warned_absent_footnote, column = strings$removed),
+          locations = gt::cells_column_labels(columns = tidyselect::all_of(cols[1])),
+          placement = "right")
     if (!is.null(names(summaries)))
       tbl <- tbl |>
         gt::tab_spanner(label = names(summaries)[i], columns = tidyselect::all_of(cols),
@@ -972,10 +1232,7 @@ check_reconciliation_labels <- function(sR) {
 #'   zero, so the caller can say so instead of printing a table of zeros
 reconciliation_summary_rows <- function(summaries, sR) {
   strings <- sR$`tbl-reconciliation-summary`
-  kind_labels <- c(
-    patients    = sR$`tbl-validation-summary`$patients,
-    enrollments = sR$`tbl-validation-summary`$admissions,
-    events      = sR$`tbl-validation-summary`$forms)
+  kind_labels <- record_kind_labels(sR)
   labels <- reconciliation_labels(sR)
 
   counts <- purrr::map2(summaries, seq_along(summaries), function(summary, i) {

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-10-01 19:22+0200\n"
+"POT-Creation-Date: 2026-10-09 00:38+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -197,6 +197,12 @@ msgstr ""
 #: reports/common.yaml:1
 #, no-wrap
 msgid "Average surveillance period per patient"
+msgstr ""
+
+#. type: Hash Value: headerList averageSurveillancePeriodValue
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{days} days"
 msgstr ""
 
 #. type: Hash Value: headerList birthweightFilter
@@ -1378,7 +1384,7 @@ msgstr ""
 #. type: Hash Value: tbl-validation-summary exempted_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "{column}: Records the rule flagged that an exception list exempted from it; a record another rule flagged as well is removed all the same."
+msgid "{column}: Records the rule flagged that an exception list exempted from it; an exception concerns that rule alone, so a record another rule flagged as well also counts in that rule's row."
 msgstr ""
 
 #. type: Hash Value: tbl-validation-summary forms
@@ -1462,7 +1468,7 @@ msgstr ""
 #. type: Hash Value: tbl-validation-summary removed_footnote
 #: reports/common.yaml:1
 #, no-wrap
-msgid "{column}: Records the rule flagged; the validation removed each from the dataset before the analysis together with the whole patient record it belongs to, so the total of patient records is the number of patients removed."
+msgid "{column}: Records the rule flagged, unless it is only a warning; the validation removed each from the dataset before the analysis together with the whole patient record it belongs to, so the total of patient records is the number of patients removed."
 msgstr ""
 
 #. type: Hash Value: tbl-validation-summary rule_footnote
@@ -1480,13 +1486,37 @@ msgstr ""
 #. type: Hash Value: tbl-validation-summary tbl-cap
 #: reports/common.yaml:1
 #, no-wrap
-msgid "Records removed or exempted by the validation rules"
+msgid "Records flagged by the validation rules"
 msgstr ""
 
 #. type: Hash Value: tbl-validation-summary total_label
 #: reports/common.yaml:1
 #, no-wrap
 msgid "All rules – {records}"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary warned
+#: reports/common.yaml:1
+#, no-wrap
+msgid "Warnings"
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary warned_absent_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{column}: Records the rule flagged; the validation removed each from the dataset before the analysis together with the whole patient record it belongs to, so the total of patient records is the number of patients removed. These data were built before the records a warning flags were counted apart, so such records were removed then and count here as well."
+msgstr ""
+
+#. type: Hash Value: tbl-validation-summary warned_footnote
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{column}: Records a rule that is only a warning flagged, since such a record may be correct as entered; the validation kept each in the dataset, unless another rule removed it."
+msgstr ""
+
+#. type: Hash Value: term_label
+#: reports/common.yaml:1
+#, no-wrap
+msgid "{term}:"
 msgstr ""
 
 #. type: Hash Value: total
@@ -2839,8 +2869,8 @@ msgstr ""
 #, markdown-text, no-wrap
 msgid ""
 "Unless stated otherwise below, the NeoIPC validation rules were applied to your department's data before any figure in this report was calculated.\n"
-"A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any figure in this report.\n"
-"@tbl-validation-summary shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules; where the report compares your department with reference data that carry a summary of their own, it is shown alongside.\n"
+"A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it or the rule is only a warning, which flags data that may be correct as entered, and the removed records are not part of any figure in this report.\n"
+"@tbl-validation-summary shows, for each rule that flagged a record, how many records of which kind it removed, exempted, or flagged as a warning, and the totals across all rules; where the report compares your department with reference data that carry a summary of their own, it is shown alongside.\n"
 "The Validation Report for your department explains each rule and lists every record a rule flags.\n"
 msgstr ""
 
@@ -3507,8 +3537,8 @@ msgstr ""
 #, markdown-text, no-wrap
 msgid ""
 "Unless stated otherwise below, the NeoIPC validation rules were applied to the data of every department contributing to the reference data before any value in this report was calculated.\n"
-"A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it, and the removed records are not part of any value in this report.\n"
-"@tbl-validation-summary shows, for each rule that removed or exempted a record, how many records of which kind it concerned, and the totals across all rules.\n"
+"A record a rule flags is removed from the dataset together with the whole patient record it belongs to — the patient's admissions and forms — unless an exception list names it or the rule is only a warning, which flags data that may be correct as entered, and the removed records are not part of any value in this report.\n"
+"@tbl-validation-summary shows, for each rule that flagged a record, how many records of which kind it removed, exempted, or flagged as a warning, and the totals across all rules.\n"
 "The rules are numbered as in the NeoIPC Validation Report, which explains each rule.\n"
 msgstr ""
 
@@ -3690,6 +3720,39 @@ msgstr ""
 msgid "Enrolment with the admission date"
 msgstr ""
 
+#. type: Hash Value: exception_request_hint
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "If a problem listed below describes data that are correct as recorded, you can ask the NeoIPC support team for an exception through our {support_link}, naming the department, the patient's NeoIPC-ID, the form or the enrolment the problem concerns, and the rule number shown with the problem. The team assesses each request individually. An accepted exception is added to the exception list, and the problem then no longer appears in later reports, as long as the patient's NeoIPC-ID and the dates of the enrolment and of the form stay the same."
+msgstr ""
+
+#. type: Hash Value: exception_request_hint_email_body
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid ""
+"Dear NeoIPC Surveillance support team,\n"
+"Please consider an exception for this problem in my validation report.\n"
+"Department:\n"
+"NeoIPC-ID of the patient:\n"
+"Admission date of the enrolment:\n"
+"Form and its date:\n"
+"Rule number:\n"
+"Why the data are correct as recorded:\n"
+"Best regards,\n"
+msgstr ""
+
+#. type: Hash Value: exception_request_hint_email_subject
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Request for a validation exception"
+msgstr ""
+
+#. type: Hash Value: exception_request_hint_title
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Requesting an Exception"
+msgstr ""
+
 #. type: Hash Value: hap_problem_header_prefix
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -3700,6 +3763,12 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Departments"
+msgstr ""
+
+#. type: Hash Value: header validation_exceptions
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Validation exceptions"
 msgstr ""
 
 #. type: Hash Value: header validation_rules
@@ -3732,6 +3801,12 @@ msgstr ""
 msgid "No problem was detected in the data of the departments listed above as of the date this report was created."
 msgstr ""
 
+#. type: Hash Value: no_problems_detected_exempted
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No problem was detected in the data of the departments listed above as of the date this report was created, apart from the records the exception list exempts, which the header counts."
+msgstr ""
+
 #. type: Hash Value: patient_problem_dashboard_link_description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -3755,7 +3830,7 @@ msgstr ""
 #, no-wrap
 msgid ""
 "Dear NeoIPC Surveillance support team,\n"
-"my validation report contains multiple errors for the patient with the id '{patient_id}'.\n"
+"My validation report contains multiple errors for the patient with the id '{patient_id}'.\n"
 "Can you please have a look and get in touch with me?\n"
 "Best regards,\n"
 msgstr ""
@@ -3764,6 +3839,24 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Support request regarding complex errors in a patient record"
+msgstr ""
+
+#. type: Hash Value: patient_problem_multiple_hint_title
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "More Than One Problem in This Patient Record"
+msgstr ""
+
+#. type: Hash Value: problem_rule_label
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Rule {rule}:"
+msgstr ""
+
+#. type: Hash Value: problem_rule_label_warning
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Rule {rule} (warning):"
 msgstr ""
 
 #. type: Hash Value: problems 1 description
@@ -4351,13 +4444,25 @@ msgstr ""
 #. type: Hash Value: problems 54 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
+msgid "The antibiotic substance {substance} is recorded in entry {index} and in entry {index_other}, with different numbers of days ({days} and {days_other}), probably one for each treatment course, which the analyses add up correctly; the protocol, however, asks for one entry holding the days of all its courses."
+msgstr ""
+
+#. type: Hash Value: problems 54 description_days_missing
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
 msgid "The antibiotic substance {substance} is recorded in entry {index} and in entry {index_other}."
+msgstr ""
+
+#. type: Hash Value: problems 54 description_same_days
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The antibiotic substance {substance} is recorded in entry {index} and in entry {index_other}, both with the same number of days ({days}). Two courses of the same length are added up correctly, but a course entered twice is counted twice."
 msgstr ""
 
 #. type: Hash Value: problems 54 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The same antibiotic substance is recorded in two substance entries."
+msgid "The same antibiotic substance is recorded in two substance entries; where its entries together record more days than the total antibiotic days, rule 62 reports them instead."
 msgstr ""
 
 #. type: Hash Value: problems 55 description
@@ -4462,6 +4567,18 @@ msgstr ""
 msgid "A completed surgical site infection form does not meet the definition of the type of infection it records."
 msgstr ""
 
+#. type: Hash Value: problems 62 description
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The antibiotic substance {substance} is recorded in more than one entry, and its entries together record more days ({substance_days}) than the total antibiotic days ({ab_days}). Separate treatment courses cannot add up to more than the antibiotic days, so either a course was entered twice, an entry records too many days, or the total antibiotic days are too few."
+msgstr ""
+
+#. type: Hash Value: problems 62 summary
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The entries of one antibiotic substance together record more days than the total antibiotic days."
+msgstr ""
+
 #. type: Hash Value: problems 7 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
@@ -4496,6 +4613,12 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "The enrolment or the surveillance end form is completed but a pneumonia form is not."
+msgstr ""
+
+#. type: Hash Value: problems_warning_note
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "A problem labelled as a warning points to data that may be correct as recorded, so unlike the other problems it does not make the validation remove the patient record from the analyses. An enrolment that is still open stays out of them until its surveillance has ended, warning or not. Please check each warning all the same."
 msgstr ""
 
 #. type: Hash Value: rules_applied_all
@@ -4568,6 +4691,138 @@ msgstr ""
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
 msgid "Surgical Procedure event with the procedure date"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions enrolment_date
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Enrolment date"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions exempts_nothing
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Exempts nothing"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions form
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Form"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions form_date
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Form date"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions heading
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Unused Validation Exceptions"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions intro
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The records of the validation exception list below concern the departments of this report and either match no record in their data or match one that the rule they name does not flag, so that they exempt nothing. The appendix serves the upkeep of the list and is not meant to be passed on."
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions matches_nothing
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Matches no record"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions no_department_codes
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The validation exception list does not name the department of its records, so they cannot be narrowed to the departments of this report, and none of them is listed."
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions no_records
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The validation exception list holds no record for the departments of this report."
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions none_unused
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Every record of the validation exception list for the departments of this report matches a record in their data. Each one whose rule this report applied exempted that record from the rule."
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions not_applied
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No validation exception list was applied to this report, so none of its records can be listed."
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions outcome
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Outcome"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions patient
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "NeoIPC-ID"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions rule
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Rule"
+msgstr ""
+
+#. type: Hash Value: unused_validation_exceptions unusable
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "The validation exception list could not be read or applied to the departments of this report, so none of its records can be listed."
+msgstr ""
+
+#. type: Hash Value: validation_exceptions applied
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Applied; records exempted:"
+msgstr ""
+
+#. type: Hash Value: validation_exceptions applied_none_exempted
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Applied; no record exempted"
+msgstr ""
+
+#. type: Hash Value: validation_exceptions none
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "No exception list"
+msgstr ""
+
+#. type: Hash Value: validation_exceptions rule_records
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Rule {rule} – {kind} ({count})"
+msgstr ""
+
+#. type: Hash Value: validation_exceptions switched_off
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Not applied; an administrator rendered this report without the exception list"
+msgstr ""
+
+#. type: Hash Value: validation_exceptions unusable
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "Not applied; the list could not be read or applied to these departments"
+msgstr ""
+
+#. type: Hash Value: validation_exceptions uploaded
+#: reports/Validation-Report/content/_sR.yaml:1
+#, no-wrap
+msgid "List uploaded on {date}"
 msgstr ""
 
 #. type: Plain text
@@ -4722,7 +4977,7 @@ msgstr ""
 #, markdown-text, no-wrap
 msgid ""
 "The NeoIPC Surveillance Platform requires a patient's admission date for internal calculations. The date must be present twice, once in the patient enrolment and once in the admission form (see @fig-the-two-admission-dates).\n"
-"Normally, the exception form automatically takes the admission date from the patient registration.\n"
+"Normally, the admission form automatically takes the admission date from the patient registration.\n"
 "There is also an input validation that prevents you from completing an admission form if the admission date does not match the admission date in the patient registration.\n"
 "But you can change the admission date in the patient registration and confirm the change in the warning dialogue that appears (see @fig-warning-enrolment-admission-date).\n"
 "The system can make erroneous calculations if it has two different admission dates for the same patient registration. Therefore, this must be prevented.\n"
@@ -4982,7 +5237,7 @@ msgstr ""
 msgid ""
 "    It is very unlikely that the infection is still related to the procedure after such a long time.\n"
 "    Please check the documented findings again carefully and, if necessary, consult with the treating neonatologist and/or surgeon.\n"
-"    If you still believe that this is a surgical site infection, please contact us (e.g. via our [support email address](mailto:NeoIPC-Support@charite.de)).\n"
+"    If you still believe that this is a surgical site infection, please contact us (e.g. via our [support email address](mailto:`r support_email_address`)).\n"
 "    If you have verified that it is not a surgical site infection, please delete the event form (see @sec-solution-12).\n"
 msgstr ""
 
@@ -5538,26 +5793,51 @@ msgid ""
 "The surveillance end form records, for each systemic antibiotic substance the infant received, the substance and the number of days on which it was given, in up to nine substance entries.\n"
 "An entry holds a substance together with its days.\n"
 "A substance day is an antibiotic day and an antibiotic day is a patient day, so the days of one substance can exceed neither the total antibiotic days nor the patient days.\n"
-"A substance is recorded in one entry only, since its days belong together.\n"
+"The protocol counts a substance's days cumulatively: one entry holds the days of all the treatment courses in which the infant received the substance.\n"
 msgstr ""
 
 #. type: Plain text
 #: reports/Validation-Report/en/_problem_detail_0030.Rmd:13
 #, markdown-text, no-wrap
 msgid ""
-"Three messages report a violation of these rules: a substance recorded without its days or days recorded without a substance; a substance whose days exceed the total antibiotic days or the patient days, which includes a substance recorded on a form whose total antibiotic days are zero; and the same substance recorded in two entries.\n"
+"Four messages report a violation of these rules: a substance recorded without its days or days recorded without a substance; a substance whose days exceed the total antibiotic days or the patient days, which includes a substance recorded on a form whose total antibiotic days are zero; the same substance recorded in two entries; and a substance whose entries together record more days than the total antibiotic days.\n"
 "The form shows the first entry once antibiotic days are entered and each further entry once the previous one holds a substance.\n"
 "It asks for the substance of the first entry and for the days of every entry whose substance is chosen, and it insists on what it asks for only when the form is completed.\n"
 "It does not ask for the substance of entries 2 to 9 when their days are entered, so days without a substance can be recorded on any form, and a substance without its days on a form that is not completed yet or that was written by a tool that does not apply these checks.\n"
-"The other two shapes are not checked when the data is entered.\n"
+"The other three shapes are not checked when the data is entered.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0030.Rmd:15
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:19
+#, markdown-text, no-wrap
+msgid ""
+"A substance recorded in two entries is most often one entry for each treatment course.\n"
+"The analyses add up a substance's entries, so such entries do not distort the results, and the message is a warning, although the protocol asks for one entry.\n"
+"If the same course was entered twice, however, its days are counted twice.\n"
+"The message therefore says what the entries' days suggest: entries with different days are most likely one for each course, and entries with the same days may be one course entered twice.\n"
+"Entries that together record more days than the total antibiotic days cannot all be separate courses, so their message is no warning: a course was entered twice, an entry records too many days, or the total antibiotic days are too few.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:24
 #, markdown-text, no-wrap
 msgid ""
 "Please open the surveillance end form (see @sec-solution-15), reopen it for editing if it is completed (see @sec-solution-9) and complete, correct or clear the entries concerned.\n"
-"When a substance appears twice, keep one entry with the correct days and clear the other.\n"
+"When a substance appears in two entries for separate courses, enter the days of all its courses in the entry with the lower number and remove the other entry.\n"
+"When the same course was entered twice, remove the entry with the higher number.\n"
+"When the total antibiotic days are too few, correct them.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0030.Rmd:30
+#, markdown-text, no-wrap
+msgid ""
+"Remove an entry with care.\n"
+"The form hides an entry while the entry before it holds no substance, and Tracker Capture blanks out the values of an entry it hides.\n"
+"It says so for each of the entry's two fields in a message, in English whatever the language of the interface, which names the field and says it was blanked out and hidden by your last action.\n"
+"Clearing an entry that other entries follow therefore blanks out the entry after it, and with a later change the one after that.\n"
+"To remove an entry that other entries follow, choose in it the substance of the last entry that holds one, without clearing it first, and enter that entry's days; then clear the substance and the days of that last entry.\n"
+"To remove the last entry that holds a substance, clear its substance and its days.\n"
 msgstr ""
 
 #. type: Title ###

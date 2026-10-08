@@ -3,27 +3,27 @@
 #| output: asis
 
 cat(sep = "\n", c(
-  paste0(sR$headerList$created,":"),
+  term_label(sR$headerList$created, sR),
   "",
   paste0(":   ",dR$creationTimestamp),
   "",
-  paste0(sR$headerList$dataUpTo,":"),
+  term_label(sR$headerList$dataUpTo, sR),
   "",
   paste0(":   ",dR$dataUpToTimestamp),
   "",
-  paste0(sR$headerList$effectiveAnalysisPeriod,":"),
+  term_label(sR$headerList$effectiveAnalysisPeriod, sR),
   "",
   paste0(":   ",dR$effectiveAnalysisPeriod, "^[", sR$headerList$effectiveAnalysisPeriodFootnote, "]"),
   "",
-  paste0(if(nrow(reference_data$metadata$countries) > 1)sR$headerList$countries else sR$headerList$country, ":"),
+  term_label(if(nrow(reference_data$metadata$countries) > 1)sR$headerList$countries else sR$headerList$country, sR),
   "",
   paste0(":   ",dR$countriesList),
   "",
-  paste0(sR$headerList$birthweightFilter,":"),
+  term_label(sR$headerList$birthweightFilter, sR),
   "",
   paste0(":   ",dR$birthweightFilter),
   "",
-  paste0(sR$headerList$gestationalAgeFilter,":"),
+  term_label(sR$headerList$gestationalAgeFilter, sR),
   "",
   paste0(":   ",dR$gestationalAgeFilter)
 ))

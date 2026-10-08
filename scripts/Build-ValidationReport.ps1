@@ -23,6 +23,11 @@ or password, any '?' or '#', which begins a query or fragment, or any whitespace
 The report refuses any other value outside this shape, such as one with a bracketed host such as an IPv6
 literal. No refusal repeats the value.
 
+.PARAMETER IncludeUnusedValidationExceptions
+Add an appendix listing the records of the -ValidationExceptionFile list for the report's departments that
+match no record, or match one but exempt nothing, for the list's upkeep. The appendix names patients and is
+not meant to be passed on. Without a list, it says that none was applied.
+
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
 
@@ -80,6 +85,9 @@ param(
     [string]$Token,
 
     [string]$ValidationExceptionFile,
+
+    [Parameter()]
+    [switch]$IncludeUnusedValidationExceptions,
 
     [Parameter()]
     [int[]]$Rules,
@@ -288,6 +296,9 @@ try {
         if ($validationExceptionPath) {
             $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
         }
+        if ($IncludeUnusedValidationExceptions) {
+            $quartoArgs += @('-P', 'includeUnusedValidationExceptions:true')
+        }
         if ($rulesSpecified) {
             $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
         }
@@ -327,6 +338,9 @@ try {
             }
             if ($validationExceptionPath) {
                 $quartoArgs += @('-P', "validationExceptionFile:$validationExceptionPath")
+            }
+            if ($IncludeUnusedValidationExceptions) {
+                $quartoArgs += @('-P', 'includeUnusedValidationExceptions:true')
             }
             if ($rulesSpecified) {
                 $quartoArgs += @('-P', "rules:[$($Rules -join ',')]")
