@@ -64,6 +64,7 @@
         'Read-PatientInfo'
         'Read-EnrolmentInfo'
         'Read-EventInfo'
+        'Remove-NeoIPCPatient'
         # InfectiousAgents
         'Find-NextFreeInfectiousAgentId'
         # Metadata pipeline

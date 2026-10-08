@@ -3,7 +3,7 @@
 PowerShell tools for the NeoIPC Surveillance project: DHIS2 admin operations,
 report-generation helpers, and pipeline-composable data inspection.
 
-Requires **PowerShell 7.5+**.
+Requires **PowerShell 7.6+**.
 
 ## Installation
 
@@ -17,7 +17,7 @@ Import-Module ./scripts/modules/NeoIPC-Tools
 Report-generation scripts (`Build-PartnerReport.ps1`, etc.) import the module
 automatically.
 
-## Architecture & subsystems
+## Architecture & Subsystems
 
 The module spans two broad areas:
 
@@ -36,7 +36,7 @@ export→prune→normalize→reconcile reverse path, Node-free expressions), the
 principles, the capability matrix, and the verification gates — lives in
 [`docs/metadata-pipeline-design.md`](../../../docs/metadata-pipeline-design.md).
 
-### Files at a glance
+### Files at a Glance
 
 `Public/` holds the exported surface; `Private/` the implementation. Each
 `.ps1` is one cohesive subsystem:
@@ -45,12 +45,13 @@ principles, the capability matrix, and the verification gates — lives in
 |------|------|
 | `Public/Auth.ps1` + `Private/DHIS2Http.ps1` | DHIS2 auth (PAT / user-password) + the REST GET/POST/PUT/DELETE layer every live call goes through |
 | `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, DE codes, and personal-access-token lifecycle |
+| `Public/PatientRemoval.ps1` + `Private/PatientRemoval.ps1` | **Remove patients** entered in error (`Remove-NeoIPCPatient`): select them by department and patient ID or by UID, refuse what a deletion would take with it unseen, preview with DHIS2's own dry run, confirm once, delete one patient per request, and prove each deletion by reading it back; the planning half is free of I/O ([Removing Patients](#removing-patients)) |
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/InfectiousAgents.ps1` | Infectious-agent ontology helpers (next free `Id`) |
 | `Public/Metadata.ps1` | The metadata-pipeline public surface — convert, compare, round-trip, closure, lint, update, **assemble** (`New-NeoIPCMetadataPackage`), translation export/import |
 | `Public/MetadataDeploy.ps1` + `Private/MetadataDeploy.ps1` | **Deploy** a package to a DHIS2 instance (`Deploy-NeoIPCMetadata`): compare with the live objects, write only what differs in the order DHIS2 needs, gate the hazardous changes, verify; the planning half is free of I/O ([`docs/metadata-deployment.md`](../../../docs/metadata-deployment.md)) |
 | `Public/MetadataVerify.ps1` + `Private/MetadataLive.ps1` | Read a package's objects back from DHIS2 and report what did not land (`Test-NeoIPCMetadataImport`), check that every rule action is served (`Test-NeoIPCProgramRuleActionServed`); the batched live read and the schema index the deployment shares |
-| `Private/TrackerDialect.ps1` | The tracker read parameters and response key per DHIS2 version, and the list read that throws when the key is missing |
+| `Private/TrackerDialect.ps1` | The tracker read parameters and response key per DHIS2 version, the attribute-filter escaping and whether a version reads an escaped value back exactly, the list read that throws when the key is missing, and the tracked-entity read that throws on any entity it did not ask for |
 | `Public/MetadataReconcile.ps1` | **Reconcile** the canonical directory against a fresh export (`Update-NeoIPCMetadataDirectory`) — classify drift, auto-write CSV-owned config + PO, report-only for authored / generated / domain |
 | `Public/Generation.ps1` | The ontology/matrix-driven object generators (pathogen + substance + field-gating + virus-classification) |
 | `Public/Regeneration.ps1` | Re-materialize the generated families into `metadata/common/` (`Update-NeoIPCGeneratedMetadataDirectory`) — the generators are the source of truth; this writes their current output back so drift shows as a git diff |
@@ -64,7 +65,7 @@ principles, the capability matrix, and the verification gates — lives in
 | `Private/MetadataGeneration.ps1` | The generation **plans** — pathogen/substance/field-gating DE+PRV+rule plans, resistance + common-commensal + **virus** effective-flag/code-set computation, the per-slot capability matrix |
 | `Public/DataDictionary.ps1` + `Private/DataDictionary.ps1` | The **data-dictionary** generator (`Export-NeoIPCDataDictionary`) — flattens the assembled package into a technology-agnostic spreadsheet (patient attributes, per-stage data elements, the event dates, and every code list in full) as CSV + a multi-tab `.xlsx` (via `DocumentFormat.OpenXml`, provisioned under `lib/`) |
 
-### Metadata pipeline — data flow
+### Metadata Pipeline — Data Flow
 
 Everything here is file-only (no DHIS2 API calls). The **canonical source** is the
 `metadata/` directory plus the infectious-agent ontology — not the export, which is
@@ -106,7 +107,7 @@ it can faithfully reconcile — and reporting the rest by owner. Authored org un
 export carries only anonymized instances), the ontology-generated families, and the domain YAML are
 never reverse-written; an unexpected change surfaces as `Unclassified` for investigation.
 
-### Materialized generation, drift detection & the no-hand-authored-enumeration rule
+### Materialized Generation, Drift Detection & the No-Hand-Authored-Enumeration Rule
 
 The ontology- and capability-matrix-driven families — the per-slot pathogen / substance data
 elements, and the resistance / field-gating / **virus** / substance program-rule variables, rules and
@@ -163,9 +164,15 @@ data*, not all operator-rich expressions.
 
 ## Authentication
 
-All functions that call the DHIS2 API accept a `-Token` parameter (or read
-`$env:NEOIPC_DHIS2_TOKEN`). If no token is available, you are prompted for
-username/password.
+The `Read-*Info` cmdlets and the personal-access-token cmdlets accept a
+`-Token` parameter (or read `$env:NEOIPC_DHIS2_TOKEN`); `Read-OrgUnitInfo`,
+`Read-PatientInfo`, `Read-EnrolmentInfo`, and `Read-EventInfo` take an `-Auth`
+hashtable from `Resolve-NeoIPCAuth` as well. If no token is available, you are
+prompted for username/password. The other cmdlets that talk to DHIS2 take
+`-Auth`. Without `-Hostname`, a cmdlet talks to the NeoIPC production instance,
+except the four that write metadata or tracker data (`Import-NeoIPCMetadata`,
+`Deploy-NeoIPCMetadata`, `Import-NeoIPCPlayData`, and `Remove-NeoIPCPatient`),
+whose `-Hostname` is mandatory, so that they always name their target.
 
 ```powershell
 # Token from environment variable (set once, used by all commands)
@@ -181,7 +188,7 @@ $auth = Resolve-NeoIPCAuth
 Tokens are validated against the DHIS2 v1 PAT format (`d2pat_` + 32 alphanum
 \+ 10-digit CRC32). Invalid tokens are rejected immediately.
 
-## OrgUnit inspection
+## OrgUnit Inspection
 
 ```powershell
 # List all departments the current user can see
@@ -198,7 +205,7 @@ Read-OrgUnitInfo -OrgUnitCode NEO_DE_01, NEO_DE_02
 Read-OrgUnitInfo -OrgUnitId abc123, def456
 ```
 
-## User inspection
+## User Inspection
 
 ```powershell
 # All users
@@ -208,7 +215,7 @@ Read-UserInfo
 Read-UserInfo -OrgUnitCode NEO_AT_01
 ```
 
-## Patient, enrolment, event inspection (pipeline-composable)
+## Patient, Enrolment, and Event Inspection (Pipeline-Composable)
 
 Each `Read-*Info` cmdlet emits parent IDs and child ID lists on its
 output objects, and accepts pipeline-bound filter parameters with
@@ -261,7 +268,7 @@ Read-EventInfo -OrgUnitCode NEO_DE_01 -EventType Pneumonia `
   | Read-EnrolmentInfo
 ```
 
-## Working with event dataValues
+## Working With Event dataValues
 
 `Read-EventInfo` returns a `DataValues` PSCustomObject keyed by the DE
 codes you passed in `-DataElementCode` (omitted from output when the
@@ -280,7 +287,168 @@ $events[0].DataValues.NEOIPC_BSI_PATHOGEN_1_NAME.StoredBy
 $events | Select-Object EventId, OccurredAt, CreatedBy -ExpandProperty DataValues
 ```
 
-## PAT lifecycle management
+## Removing Patients
+
+`Remove-NeoIPCPatient` deletes patients entered in error, each with all its
+enrolments and events. Before it deletes anything it shows a preview with
+DHIS2's own dry run, and it asks once; it then deletes one patient per request
+and proves each deletion by reading the patient back.
+
+```powershell
+$auth = Resolve-NeoIPCAuth
+
+# Preview, including DHIS2's own refusals; nothing is deleted.
+Remove-NeoIPCPatient -OrgUnitCode NEO_DE_01 -NeoIpcId 'NEO-0042', 'NEO-0043' `
+  -Auth $auth -Hostname neoipc.example.org -WhatIf
+
+# Delete, after one confirmation.
+Remove-NeoIPCPatient -OrgUnitCode NEO_DE_01 -NeoIpcId 'NEO-0042', 'NEO-0043' `
+  -Auth $auth -Hostname neoipc.example.org
+
+# Write the plan to a file, review it, then delete exactly the reviewed patients.
+Remove-NeoIPCPatient -OrgUnitCode NEO_DE_01 -NeoIpcId (Get-Content ./ids.txt) `
+  -Auth $auth -Hostname neoipc.example.org -WhatIf |
+  Where-Object Outcome -eq 'WouldDelete' |
+  Select-Object TrackedEntityId, OrgUnitId, OrgUnitCode, NeoIpcId | Export-Csv ./plan.csv
+Import-Csv ./plan.csv | Remove-NeoIPCPatient -Auth $auth -Hostname neoipc.example.org
+```
+
+**Selection.** Every selection names the department its patients belong to,
+since a NeoIPC patient ID is unique only within its department:
+
+1. `-OrgUnitCode` with `-NeoIpcId`, matched exactly (DHIS2 itself compares
+   patient IDs ignoring case);
+2. `-OrgUnitCode` with `-TrackedEntityId`;
+3. piped patient records carrying `TrackedEntityId` and `OrgUnitId`, and
+   optionally `NeoIpcId`, which must then be the patient's.
+
+Enrolment and event records carry `TrackedEntityId` too; piped as they come,
+they are refused, so that a list of events piped by mistake does not select
+their patients.
+`-MaximumCount` (default 25) caps a run before any request.
+
+**What is refused.** DHIS2 deletes every live enrolment and event of a patient
+with it, in every program, without checking them. A run therefore sends no
+deletion for:
+
+1. selectors that differ only in case, contradict each other, or are
+   malformed;
+2. a piped `OrgUnitId` that names no department, or another one than
+   `-OrgUnitCode`;
+3. before DHIS2 2.42, a patient ID holding more than one `/`, which those
+   releases may look up as another patient ID: select such a patient by its
+   UID;
+4. a patient ID that matches more than one patient, and a piped `NeoIpcId`
+   that is not the patient's;
+5. a patient registered or owned outside the department, enrolled in another
+   program, or with an enrolment or event in another org unit, and one whose
+   read lacks what these rules check;
+6. a patient that DHIS2's own dry run (`importMode=VALIDATE`, which `-WhatIf`
+   runs too) refuses.
+
+A dry run whose answer reports any patient as deleted ends the run at once
+(`DryRunDeleted`).
+
+**Outcomes.** One object per selected patient:
+
+| Outcome | Meaning |
+|---------|---------|
+| `WouldDelete` | `-WhatIf`: the patient would be deleted |
+| `Declined` | the confirmation was declined |
+| `Deleted` | the read-back shows the patient, and every enrolment and event the preview showed live, deleted, and the patient's own read answers 404; a `Reason` says why the run stopped there |
+| `AlreadyDeleted` | deleted before this run |
+| `NotFound` | no such patient where DHIS2 looks, by program owner: by patient ID, in the department; by UID, within your data-capture org units, and on 2.43 for a superuser anywhere |
+| `Refused` | by rules 1 to 6 (`Reason`, `ErrorCodes`) |
+| `Failed` | DHIS2 answered, and the patient is still there |
+| `Unverified` | neither the deletion nor its failure can be proven |
+| `NotAttempted` | the run stopped before this patient |
+
+DHIS2 looks a patient up by program owner, so where `NEOIPC_CORE` is the
+patient type's only program, a patient the department registered whose
+`NEOIPC_CORE` owner is another org unit comes back `NotFound` by its patient
+ID. By its UID it comes back `Refused` (rule 5) when that owner lies within
+your data-capture org units, or you are a superuser on 2.43, and `NotFound`
+otherwise.
+
+A run carries on after a failure that concerns one patient. It stops, naming
+the cause in the `Reason` of the patient it stopped at, when DHIS2 denies
+access, queues the deletion as a job, or gives an answer that contradicts the
+request or the read-back; when DHIS2's answer is lost and the read-back does
+not prove the deletion; when the read-back fails or finds the patient's data
+deleted in part; and when the deletion took data the preview did not show, or
+showed elsewhere, which DHIS2 deletes with the patient unchecked (`Deleted`,
+with the `Reason` `UnpreviewedData`): an enrolment or event added, or moved to
+another org unit, after the preview read the patient; its registration moved;
+or its program ownership changed. The read-back sees the enrolments and events
+you can read, and the program owners of every program, so an enrolment added in
+a program you cannot read shows through its owner.
+Running it again is safe: a deleted patient comes back `AlreadyDeleted` by UID
+and `NotFound` by patient ID.
+`-WhatIf` writes no errors; otherwise every result but `WouldDelete`,
+`Declined`, `Deleted`, and `AlreadyDeleted` writes one, the refusals before the
+first deletion, so that `-ErrorAction Stop` deletes nothing while any selected
+patient is refused or not found.
+
+**Who may delete.**
+
+1. A patient with a live enrolment needs `F_TEI_CASCADE_DELETE` (the role
+   "Update Delete User" carries it, and `ALL` includes it), or DHIS2 refuses it
+   with `E1100`.
+2. The patient's registration org unit must lie within your data-capture org
+   units, on DHIS2 2.40 to 2.42 even for a superuser (`E1000`).
+3. Without `ALL`, a deletion also needs data-write access to the NeoIPC Patient
+   type and to one of its programs, and ownership: the owner of the CLOSED
+   program `NEOIPC_CORE` must lie within your data-capture org units (`E1003`;
+   on 2.43 `E1001`, `E1323`, or `E1324`).
+
+The preview counts only the enrolments and events you can read, while DHIS2
+deletes every live one.
+
+DHIS2 2.40 and 2.41 refuse to delete a patient whose enrolment or event has a
+scheduled program notification, which a "schedule message" program-rule action
+creates; such a patient ends `Failed`. From 2.42 DHIS2 deletes the notifications
+with the patient. With `http.security.csrf.enabled` on (2.42 and later), DHIS2
+refuses every deletion.
+
+**What DHIS2 keeps.** The deletion is logical:
+
+1. The patient, its enrolments (set to `CANCELLED`), and its events stay in the
+   database, flagged as deleted; the events keep all their data values.
+2. Its attribute values, the patient ID among them, are removed. DHIS2 2.40 and
+   2.41 keep each removed value in the attribute-value audit while
+   `changelog.tracker` is on (the default); 2.42 and later clear the patient's
+   attribute change log, though rows an upgrade did not migrate can remain in
+   the older audit table.
+3. Its notes and program-ownership records stay, and so do the files of
+   file-type attributes; analytics tables keep the data until they are next
+   generated.
+4. The messages the program notifications of `NEOIPC_CORE` sent about the
+   patient name its patient ID and stay as they are. Removing one in the
+   Messaging app removes it for that user only, while
+   `DELETE /api/messageConversations/{id}` deletes it for everyone, which needs
+   `ALL`, or `F_METADATA_IMPORT` and, from 2.41, being one of the
+   conversation's participants, such as a recipient.
+
+**Removing the records for good** is DHIS2's maintenance task for soft-deleted
+tracker data, a separate decision this cmdlet never takes. It removes every
+soft-deleted patient on the instance, not only these, and needs `ALL` or
+`F_PERFORM_MAINTENANCE`. Run it from the Data Administration app, or as
+`POST /api/maintenance` with `softDeletedRelationshipRemoval`,
+`softDeletedEventRemoval`, `softDeletedEnrollmentRemoval`, and
+`softDeletedTrackedEntityRemoval` (on 2.40:
+`softDeletedTrackedEntityInstanceRemoval`, which 2.42 and later ignore without
+an error) set to `true` together, since the tracked-entity removal alone can
+fail on records the others remove first.
+
+**Verified releases.** The cmdlet relies on DHIS2 behaviour read in the source
+of 2.40.12, 2.41.10, 2.42.6, and 2.43.2, and confirmed by a removal run against
+a synthetic instance of each. A later patch of one of these lines counts as
+verified; any other release is refused before a patient is read, unless
+`-AllowUnverifiedVersion` is given. On such a release DHIS2's dry run is
+unverified as well: should its answer report any patient as deleted, the run
+ends at once, though what the dry run did cannot be undone.
+
+## Personal Access Token Lifecycle Management
 
 ```powershell
 # List all personal access tokens
@@ -305,12 +473,12 @@ Clear-DHIS2PersonalAccessTokens
 Clear-PATs -All
 ```
 
-## Report generation helpers
+## Report Generation Helpers
 
 These functions are used by the report scripts (`Build-PartnerReport.ps1`,
 `Build-ReferenceReport.ps1`, etc.) but can also be called directly.
 
-### Scoped auth environment variables
+### Scoped Auth Environment Variables
 
 ```powershell
 # Run a script block with DHIS2 auth env vars set (and securely cleared after)
@@ -323,7 +491,7 @@ Invoke-WithNeoIPCAuth -Auth $auth -ScriptBlock {
 # env vars are restored to their original values here, even on error
 ```
 
-### Quarto & Rscript rendering
+### Quarto & Rscript Rendering
 
 ```powershell
 # Render with error/warning parsing
@@ -335,7 +503,7 @@ $result = Invoke-Rscript -Arguments @('--vanilla', 'Generate-Data.R', '--output'
 $result.Status   # 'Success' or 'Error'
 ```
 
-### Locale handling
+### Locale Handling
 
 ```powershell
 # Split locale code
@@ -347,7 +515,7 @@ Resolve-NeoIPCLocaleQmd -ReportDirPath ./reports/Partner-Report -BaseName 'Partn
 # Returns Partner-Report.de.qmd if it exists, otherwise Partner-Report.qmd
 ```
 
-### Build reports
+### Build Reports
 
 ```powershell
 # Write a build summary to console and optionally to JSON. Common fields (site codes,
@@ -364,7 +532,7 @@ $step = New-NeoIPCBuildStep -SiteCode 'NEO_DE_01' -OutputLocale 'de' -OutputForm
 $step = $step | Complete-NeoIPCBuildStep -Result $renderResult
 ```
 
-### Quarto parameter pairs
+### Quarto Parameter Pairs
 
 ```powershell
 # Convert a hashtable to -P key:value pairs for quarto render
@@ -375,10 +543,10 @@ $pairs = Build-QmdParamPairs -Values @{
 # @('-P', 'unitCodes:NEO_DE_01', '-P', 'reportingPeriodFrom:2025-01-01')
 ```
 
-## Tab completion
+## Tab Completion
 
 `-OrgUnitCode` (on `Read-OrgUnitInfo`, `Read-UserInfo`, `Read-PatientInfo`,
-`Read-EnrolmentInfo`, `Read-EventInfo`) and `-DataElementCode` (on
+`Read-EnrolmentInfo`, `Read-EventInfo`, `Remove-NeoIPCPatient`) and `-DataElementCode` (on
 `Read-EventInfo`) support tab completion from local caches. Populate
 them once with the unified cache-refresh script:
 
@@ -391,7 +559,7 @@ them once with the unified cache-refresh script:
 After that, `-OrgUnitCode NEO_<Tab>` and `-DataElementCode NEOIPC_<Tab>`
 complete from the cached lists.
 
-## Metadata translations (gettext PO)
+## Metadata Translations (gettext PO)
 
 The metadata pipeline keeps DHIS2 object i18n in a translator-facing gettext PO
 component (one `po/metadata.pot` template + one `po/metadata.<lang>.po` per
@@ -482,13 +650,13 @@ PO emit, parse and inject are pure PowerShell (Pester-tested), mirroring how
 the reports' glossary PO is managed in `scripts/update-glossary-po.py`. `-Validate`
 runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 
-## Exported functions
+## Exported Functions
 
 | Category | Functions |
 |----------|-----------|
 | Auth | `Resolve-NeoIPCToken`, `Resolve-NeoIPCAuth`, `Get-NeoIPCAuthPassword`, `Test-DHIS2PersonalAccessToken` |
 | OrgUnits | `Get-NeoIPCDepartments`, `Get-NeoIPCServerKey`, `Read-OrgUnitInfo` |
-| Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventInfo` |
+| Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventInfo`, `Remove-NeoIPCPatient` |
 | DataElements | `Get-NeoIPCDataElementCodes` |
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |
 | User | `Read-UserInfo` |

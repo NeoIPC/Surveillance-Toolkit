@@ -112,7 +112,8 @@ function Invoke-NeoIPCDhis2Get {
 
 function Get-NeoIPCDhis2StatusCode {
     # The HTTP status of a GET, without throwing on 4xx/5xx: 200 when the object exists, 404 when it does not. The
-    # read-back that proves a delete, since DHIS2 can answer a DELETE with 200 and keep the object.
+    # read-back that proves a metadata delete, since DHIS2 can answer a DELETE with 200 and keep the object. For a
+    # tracked entity a 404 alone proves nothing from DHIS2 2.42 on, which answers it for one the caller cannot see too.
     [CmdletBinding()]
     [OutputType([int])]
     param(
