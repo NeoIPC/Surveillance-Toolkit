@@ -14,7 +14,14 @@
 #             actually established by testing.
 
 neoipcr:
-  # The floor is the first neoipcr whose import reconciles the stored values (v0.0.0.9007). The
+  # The floor is the first neoipcr that grades the validation rules and records what an exception
+  # list exempted (v0.0.0.9008). The Validation Report labels a warning's problem from
+  # `validation_rule_severities()`, counts the records the list exempted with
+  # `validation_summary()` from the findings `validate()` records as exempted, and builds its
+  # appendix with `validation_exception_usage()`; an older package has none of these, so the
+  # report's setup fails. Its catalogue also carries rule 62's sentence and the days rule 54
+  # records, which its setup checks against the fields the package's rules record.
+  # Below it sits the first neoipcr whose import reconciles the stored values (v0.0.0.9007). The
   # Patient Data Report passes `reconcile = FALSE`, so that its copy of the stored record shows
   # every value as stored, and an older `dhis2_dataset_options()` rejects the argument, which
   # fails the report at its import. The Validation Report's catalogue carries the sentences of
@@ -24,7 +31,7 @@ neoipcr:
   # print the reconciliation summary the import records from this tag on; under an older one their
   # figures would rest on values as stored while the table said that no reconciliation was
   # recorded. The same tag has rule 57 read a gestational-age text as a recorded gestational age.
-  # Below it sits the first neoipcr the Patient Data Report's import works with (v0.0.0.9006): the
+  # Below that sits the first neoipcr the Patient Data Report's import works with (v0.0.0.9006): the
   # report imports with timestamps and enrolment notes, which failed every import below it (on the
   # events' timestamps, and on notes read without the DHIS2 enrolment ids), and with pseudonymized
   # users, which failed it for records without a creator: events created before the instance's
@@ -47,9 +54,9 @@ neoipcr:
   # reconciliation table of either report says that none was recorded for it, in the branch
   # marked NEOIPC-PERMANENT(dataset-format). The release gate checks only that a declared tag
   # exists, and only `tested`, so nothing here would catch a floor set too low.
-  tested: v0.0.0.9007
-  minimum: v0.0.0.9007
+  tested: v0.0.0.9008
+  minimum: v0.0.0.9008
 
 neoipc-app:
-  tested: v0.2.0-alpha
-  minimum: v0.2.0-alpha
+  tested: v0.3.0-alpha
+  minimum: v0.3.0-alpha

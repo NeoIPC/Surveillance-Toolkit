@@ -13,6 +13,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.3.0-alpha] - 2026-10-09
+
 ### Added
 
 - The Validation Report's header says what became of the validation-exception list: applied, with the
@@ -47,6 +49,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   out the entries after one it clears.
 - The caption of the Partner and Reference Reports' table of the records the validation rules flagged
   names all of its columns.
+- `compatibility.yml` declares neoipcr `v0.0.0.9008`, whose severities, exempted findings, and record
+  of each exception's use the Validation Report reads, and neoipc-app `v0.3.0-alpha`, whose Validation
+  Report form offers administrators the switch and the appendix; both are the releases these reports
+  were validated against.
 
 ### Fixed
 
