@@ -1007,9 +1007,9 @@ problems:
     description: >-
       The antibiotic substance {substance} is recorded in entry {index} and in
       entry {index_other}, with different numbers of days ({days} and
-      {days_other}), probably one for each treatment course. The analyses add
-      up a substance's entries, so the results are not distorted, but the
-      protocol asks for one entry holding the days of all its courses.
+      {days_other}), probably one for each treatment course, which the analyses
+      add up correctly; the protocol, however, asks for one entry holding the
+      days of all its courses.
     # Translators:
     # The sentence for a substance recorded in two entries where an entry has no days, so the
     # entries cannot be compared. `{substance}` is replaced by the substance's name from the NeoIPC
