@@ -803,7 +803,8 @@ jobs:
               # stringr, whose locale-aware casing comes from stringi. ReportStringResources reads the
               # string resources with their YAML handlers and loads the Validation Report's formatter
               # from its .qmd chunks with knitr; the formatter builds its tables with tibble and dplyr,
-              # and the income-class labels are looked up with purrr.
+              # the income-class labels are looked up with purrr, and the validation exception list's
+              # upload time is read with lubridate, as the reporting image installs it.
               #
               # Recommended packages are left out: r-base-core recommends the compiler toolchain and the
               # recommended R packages, and r-cran-glue recommends dplyr, knitr, rmarkdown and testthat,
@@ -812,8 +813,8 @@ jobs:
               run: |
                 sudo apt-get update -qq
                 sudo apt-get install -qq --no-install-recommends r-base-core r-cran-glue r-cran-yaml r-cran-stringr \
-                  r-cran-knitr r-cran-tibble r-cran-dplyr r-cran-purrr
-                Rscript -e 'cat(R.version.string, "\n"); for (p in c("glue", "yaml", "stringr", "knitr", "tibble", "dplyr", "purrr")) cat(p, as.character(packageVersion(p)), "\n")'
+                  r-cran-knitr r-cran-tibble r-cran-dplyr r-cran-purrr r-cran-lubridate
+                Rscript -e 'cat(R.version.string, "\n"); for (p in c("glue", "yaml", "stringr", "knitr", "tibble", "dplyr", "purrr", "lubridate")) cat(p, as.character(packageVersion(p)), "\n")'
 
             - name: Provision and test NeoIPC-Tools
               shell: pwsh
