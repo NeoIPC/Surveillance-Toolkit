@@ -11,7 +11,7 @@ Path-scoped rules files hold what is tied to particular files, each loaded when 
 Untagged bullets are the NeoIPC **universal** guardrails, localized to this repository's stack (examples in its languages; the end-to-end, Playwright, Tracker Capture, and asynchronous-code clauses, which have no referent here, left out); a tagged bullet holds only where it is carried. A universal guardrail changed outside the workspace ends with `<!-- SYNC: propagate to all repos -->` inline at the end of its last line, in `CLAUDE.md` and rules files alike, for the next workspace session to propagate.
 
 - **Never** put personal names or other identifying information in source code, comments, strings, or commit messages, except in copyright statements and file-header attribution lines (`Author:`, `@author`, `Copyright (c)`).
-- **Never** read, write, list, glob, search, or otherwise touch anything under `secrets/`, `data/`, or `.env`, at any depth. If the user gives a path there, use it as given without exploring the directory.
+- **Never** read, write, list, glob, search, or otherwise touch anything under `secrets/`, `data/`, or `.env`, at any depth, nor search recursively from above them (`grep -r`, `find`). Use a path the user gives there as given, exploring nothing.
 - **Never** push directly to `main` or `master` on this repository.
 - **Never** make HTTP calls to the DHIS2 API or read JSON files it returned: they hold sensitive surveillance data, and code-level tasks do not need them.
 - **Never** put absolute local paths into a checked-in file; use relative paths or generic placeholders. A local checkout path means nothing to anyone else.
