@@ -55,6 +55,8 @@ InModuleScope 'NeoIPC-Tools' {
                 TypeCode       = 'NEOIPC_PATIENT'
                 AttributeId    = 'AttPatId001'
                 OrgUnits       = [System.Collections.Generic.List[object]]::new()
+                # The capture units /api/me names, whose hierarchy the department lookup searches.
+                MeUnits        = [System.Collections.Generic.List[string]]::new([string[]]@('OuRoot00001'))
                 Capture        = [System.Collections.Generic.HashSet[string]]::new([string[]]@('OuDeptA0001', 'OuDeptB0001'), $ordinal)
                 # The programs of the patient type the caller can read, which the org-unit match runs over.
                 TypePrograms   = [System.Collections.Generic.List[string]]::new([string[]]@('PrgCore0001', 'PrgOthr0001'))
@@ -72,9 +74,10 @@ InModuleScope 'NeoIPC-Tools' {
                 ThrowStatus    = $false
                 Unauthorized   = $false
             }
-            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; groups = @('NEO_DEPARTMENT') })
-            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptB0001'; code = 'DEPT_B'; groups = @('NEO_DEPARTMENT') })
-            $script:Fake.OrgUnits.Add(@{ id = 'OuHospX0001'; code = 'HOSP_X'; groups = @('HOSPITAL') })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuRoot00001'; code = 'ROOT'; path = '/OuRoot00001'; groups = @() })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; path = '/OuRoot00001/OuHospX0001/OuDeptA0001'; groups = @('NEO_DEPARTMENT') })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptB0001'; code = 'DEPT_B'; path = '/OuRoot00001/OuHospX0001/OuDeptB0001'; groups = @('NEO_DEPARTMENT') })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuHospX0001'; code = 'HOSP_X'; path = '/OuRoot00001/OuHospX0001'; groups = @('HOSPITAL') })
         }
 
         # A patient with -Enrollments enrolments of -Events events each. Children's ids derive from the patient's UID.
@@ -277,12 +280,27 @@ InModuleScope 'NeoIPC-Tools' {
                         }
                         return $r
                     }
+                    'api/me' {
+                        return @{ organisationUnits = @($script:Fake.MeUnits | ForEach-Object { $id = $_; @($script:Fake.OrgUnits | Where-Object { $_.id -ceq $id } | ForEach-Object { @{ id = $_.id; path = $_.path } }) }) }
+                    }
                     'api/organisationUnits' {
-                        $f = [string]$Filter[0]
-                        # Looser than DHIS2 on purpose: a code differing in case comes back, and the cmdlet must not take it.
-                        $rows = if ($f.StartsWith('code:eq:')) { $code = $f.Substring(8); @($script:Fake.OrgUnits | Where-Object { $_.code -eq $code }) }
-                        else { $ids = $f.Substring(7).TrimEnd(']') -split ','; @($script:Fake.OrgUnits | Where-Object { $ids -ccontains $_.id }) }
-                        return @{ organisationUnits = @($rows | ForEach-Object { @{ id = $_.id; code = $_.code; organisationUnitGroups = @($_.groups | ForEach-Object { @{ code = $_ } }) } }) }
+                        $rows = @($script:Fake.OrgUnits)
+                        foreach ($f in @($Filter)) {
+                            $property, $operator, $value = ([string]$f) -split ':', 3
+                            $list = @($value.TrimStart('[').TrimEnd(']') -split ',')
+                            $rows = @($rows | Where-Object {
+                                    $row = $_
+                                    switch ("${property}:$operator") {
+                                        'path:like' { $row.path.Contains($value, [System.StringComparison]::Ordinal) }
+                                        # Looser than DHIS2 on purpose: a code differing in case comes back, and the cmdlet must not take it.
+                                        'code:in' { $list -contains $row.code }
+                                        'code:eq' { $row.code -eq $value }
+                                        'id:in' { $list -ccontains $row.id }
+                                        default { throw "The fake does not read the filter '$f'." }
+                                    }
+                                })
+                        }
+                        return @{ organisationUnits = @($rows | ForEach-Object { @{ id = $_.id; code = $_.code; path = $_.path; organisationUnitGroups = @($_.groups | ForEach-Object { @{ code = $_ } }) } }) }
                     }
                     'api/tracker/trackedEntities' { return Get-FakeTrackedEntityList $QueryParameters }
                 }
@@ -1026,6 +1044,13 @@ InModuleScope 'NeoIPC-Tools' {
                 { Invoke-Removal @{ OrgUnitCode = $Code; NeoIpcId = 'A-1' } } | Should -Throw
                 @(Get-FakeRequest 'GET' -Path 'api/tracker/trackedEntities').Count | Should -Be 0
             }
+            It 'looks for the department of -OrgUnitCode only in your hierarchy' {
+                $script:Fake.MeUnits.Clear()
+                $script:Fake.MeUnits.Add('OuDeptB0001')
+                { Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' } } | Should -Throw "*No org unit in your hierarchy has the code 'DEPT_A'*"
+                @(Get-FakeRequest 'GET' -Path 'api/organisationUnits' | ForEach-Object { $_.Filter[0] }) | Should -Be @('path:like:OuDeptB0001')
+                @(Get-FakeRequest 'GET' -Path 'api/tracker/trackedEntities').Count | Should -Be 0
+            }
             It 'ends the run when NEOIPC_CORE registers another type' {
                 $script:Fake.TypeCode = 'OTHER'
                 { Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' } } | Should -Throw '*NEOIPC_PATIENT*'
@@ -1154,7 +1179,7 @@ InModuleScope 'NeoIPC-Tools' {
             It 'refuses a piped record whose OrgUnitId <Case>, and sends nothing for it' -ForEach @(
                 @{ Case = 'names another department than -OrgUnitCode'; OrgUnitId = 'OuDeptB0001'; OrgUnitCode = 'DEPT_A'; Reason = 'DepartmentMismatch'; Message = "*'OuDeptB0001', not the department DEPT_A*" }
                 @{ Case = 'names an org unit that is no department'; OrgUnitId = 'OuHospX0001'; OrgUnitCode = $null; Reason = 'NotADepartment'; Message = '*HOSP_X is not a department*' }
-                @{ Case = 'names no org unit'; OrgUnitId = 'OuNone00001'; OrgUnitCode = $null; Reason = 'NotADepartment'; Message = "*No org unit has the UID 'OuNone00001'*" }
+                @{ Case = 'names no org unit'; OrgUnitId = 'OuNone00001'; OrgUnitCode = $null; Reason = 'NotADepartment'; Message = "*No org unit in your hierarchy has the UID 'OuNone00001'*" }
             ) {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1' -OrgUnit $OrgUnitId
                 Add-FakePatient -Uid 'TePat000002' -NeoIpcId 'A-2'
@@ -1356,7 +1381,8 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
         switch (`$Path) {
             'api/system/info' { return @{ version = '2.43.2' } }
             'api/metadata' { return @{ programs = @(@{ id = 'PrgCore0001'; code = 'NEOIPC_CORE'; trackedEntityType = @{ id = 'TetPatnt001'; code = 'NEOIPC_PATIENT' } }); trackedEntityAttributes = @(@{ id = 'AttPatId001'; code = 'NEOIPC_PATIENT_ID' }) } }
-            'api/organisationUnits' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }) } }
+            'api/me' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; path = '/OuDeptA0001' }) } }
+            'api/organisationUnits' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; path = '/OuDeptA0001'; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }) } }
             'api/tracker/trackedEntities' {
                 return @{ trackedEntities = @(([string]`$QueryParameters['trackedEntities']) -split ',' | ForEach-Object {
                             [ordered]@{ trackedEntity = `$_; trackedEntityType = 'TetPatnt001'; orgUnit = 'OuDeptA0001'; deleted = `$script:Committed.Contains(`$_); attributes = @()

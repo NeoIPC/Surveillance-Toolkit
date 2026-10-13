@@ -30,6 +30,97 @@ function New-NeoIPCDhis2Uri {
     $uriBuilder.Uri
 }
 
+function Split-NeoIPCList {
+    # Values cut into chunks for one list parameter, each holding at most -MaximumCount values whose text, joined with the
+    # separator and URL-encoded, stays within -MaximumLength characters. Tomcat refuses a request line over 8 KB with
+    # HTTP 414 (a filter of 550 UIDs passed on every verified release, one of 700 did not), and the same line carries the
+    # path, the fields, and the other parameters. Throws on a value that alone exceeds the length.
+    [CmdletBinding()]
+    [OutputType([string[][]])]
+    param(
+        [Parameter(Mandatory)][AllowEmptyCollection()][string[]]$Value,
+        [Parameter(Mandatory)][string]$Separator,
+        [ValidateRange(1, [int]::MaxValue)][int]$MaximumCount = 100,
+        [ValidateRange(1, [int]::MaxValue)][int]$MaximumLength = 4000
+    )
+    $chunks = [System.Collections.Generic.List[string[]]]::new()
+    $current = [System.Collections.Generic.List[string]]::new()
+    $length = 0
+    $separatorLength = [System.Net.WebUtility]::UrlEncode($Separator).Length
+    foreach ($v in $Value) {
+        $valueLength = [System.Net.WebUtility]::UrlEncode($v).Length
+        if ($valueLength -gt $MaximumLength) { throw "A value of $valueLength encoded characters does not fit in one request." }
+        if ($current.Count -gt 0 -and ($current.Count -ge $MaximumCount -or $length + $separatorLength + $valueLength -gt $MaximumLength)) {
+            $chunks.Add($current.ToArray())
+            $current.Clear()
+            $length = 0
+        }
+        $length += $(if ($current.Count -gt 0) { $separatorLength }) + $valueLength
+        $current.Add($v)
+    }
+    if ($current.Count -gt 0) { $chunks.Add($current.ToArray()) }
+    , $chunks.ToArray()
+}
+
+function Get-NeoIPCDhis2ErrorDetail {
+    # What the body of a failed DHIS2 response says: the WebMessage's message and errorCode when it is JSON, else a short
+    # excerpt of its text. Some refusals come as the servlet container's HTML error page instead (DHIS2 2.43's event read
+    # without a program, for one); .NET has no HTML parser, so the excerpt drops the markup by pattern, and it is only
+    # ever shown, never read further.
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param([AllowNull()][AllowEmptyString()][string]$Content)
+    $message = ''
+    $errorCode = $null
+    if (-not [string]::IsNullOrWhiteSpace($Content)) {
+        $parsed = try { $Content | ConvertFrom-Json -AsHashtable -ErrorAction Stop } catch { $null }
+        if ($parsed -is [System.Collections.IDictionary]) {
+            $message = [string]$parsed['message']
+            if ($parsed['errorCode']) { $errorCode = [string]$parsed['errorCode'] }
+        }
+        else {
+            $text = $Content -replace '(?is)<(script|style)\b.*?</\1\s*>', ' ' -replace '(?s)<[^>]*>', ' '
+            $text = ([System.Net.WebUtility]::HtmlDecode($text) -replace '\s+', ' ').Trim()
+            $message = if ($text.Length -gt 300) { $text.Substring(0, 300) + '...' } else { $text }
+        }
+    }
+    [pscustomobject]@{ Message = $message; ErrorCode = $errorCode }
+}
+
+function New-NeoIPCDhis2HttpError {
+    # The error a refused DHIS2 request ends with: an HttpRequestException whose StatusCode is the failing status and whose
+    # Data['Dhis2ErrorCode'] holds DHIS2's errorCode when the body names one, in the category a caller acts on
+    # (AuthenticationError for 401, PermissionDenied for 403, ObjectNotFound for 404). DHIS2 2.41 and later check a token's
+    # checksum over the bytes of a buffer longer than the token, which no token 2.40 issued passes, and answer 400
+    # "Checksum validation failed"; the message then says what to do about the token, without showing it.
+    [CmdletBinding()]
+    [OutputType([System.Management.Automation.ErrorRecord])]
+    param(
+        [Parameter(Mandatory)][string]$Method,
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][int]$StatusCode,
+        [AllowNull()][AllowEmptyString()][string]$Message,
+        [AllowNull()][AllowEmptyString()][string]$ErrorCode,
+        [hashtable]$Auth
+    )
+    $text = "$Method '$Path' failed with HTTP $StatusCode$(if ($ErrorCode) { " ($ErrorCode)" })$(if ($Message) { ": $Message" } else { '.' })"
+    if ($StatusCode -eq 400 -and $Message -match 'Checksum validation failed' -and $Auth -and $Auth.AuthType -eq 'Token') {
+        $text += if (([string]$Auth.Token).StartsWith('d2pat_', [System.StringComparison]::Ordinal)) {
+            ' The token is a version-1 token (d2pat_), which only DHIS2 2.40 and earlier issued and which 2.41 and later refuse: create a new token on this instance.'
+        }
+        else { ' The token''s checksum does not match its text: check that the whole token was copied.' }
+    }
+    $exception = [System.Net.Http.HttpRequestException]::new($text, $null, [System.Net.HttpStatusCode]$StatusCode)
+    $exception.Data['Dhis2ErrorCode'] = $ErrorCode
+    $category = switch ($StatusCode) {
+        401 { [System.Management.Automation.ErrorCategory]::AuthenticationError }
+        403 { [System.Management.Automation.ErrorCategory]::PermissionDenied }
+        404 { [System.Management.Automation.ErrorCategory]::ObjectNotFound }
+        default { [System.Management.Automation.ErrorCategory]::InvalidOperation }
+    }
+    [System.Management.Automation.ErrorRecord]::new($exception, "NeoIPCDhis2$($Method.Substring(0, 1).ToUpperInvariant())$($Method.Substring(1).ToLowerInvariant())Failed", $category, $Path)
+}
+
 function Set-NeoIPCDhis2Auth {
     # Apply an auth hashtable to an Invoke-RestMethod splat: a PAT goes in the Authorization header, a
     # username/password becomes Basic credential auth. Shared by every verb so a credential change lands once.
@@ -50,6 +141,15 @@ function Set-NeoIPCDhis2Auth {
 }
 
 function Invoke-NeoIPCDhis2Get {
+    <#
+    .SYNOPSIS
+        GET a DHIS2 API path and return the parsed JSON body, or end with an error carrying the HTTP status.
+    .DESCRIPTION
+        A status outside 2xx ends the call with New-NeoIPCDhis2HttpError's error, whose message holds DHIS2's own message
+        (or an excerpt of a non-JSON error page). A 2xx body that is not JSON ends it too, since a reader would otherwise
+        find none of the keys it looks for and take the answer as empty. A request that never reaches DHIS2 (name
+        resolution, TLS, a refused connection) ends with that failure's message.
+    #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     param(
         [Parameter(Mandatory)]
@@ -106,9 +206,10 @@ function Invoke-NeoIPCDhis2Get {
     $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path -QueryPart $queryParts
 
     $invokeParams = @{
-        Method      = 'Get'
-        Uri         = $uri
-        ErrorAction = 'Stop'
+        Method             = 'Get'
+        Uri                = $uri
+        SkipHttpErrorCheck = $true
+        ErrorAction        = 'Stop'
     }
     # -AllowUnencrypted so Basic auth works over the local http dev/test stack, matching the POST helper
     # (harmless over https — it only permits, never forces, unencrypted Basic auth).
@@ -119,12 +220,22 @@ function Invoke-NeoIPCDhis2Get {
             "Fetch DHIS2 data via GET $uri?",
             'Fetching DHIS2 data')) {
         Write-Debug "GET $uri"
+        try { $response = Invoke-WebRequest @invokeParams }
+        catch { throw "Failed to fetch '$Path' from DHIS2 ($uri): $($_.Exception.Message)" }
+        $content = $response.Content
+        if ($content -is [byte[]]) { $content = [System.Text.Encoding]::UTF8.GetString($content) }
+        $status = [int]$response.StatusCode
+        if ($status -lt 200 -or $status -ge 300) {
+            $detail = Get-NeoIPCDhis2ErrorDetail -Content $content
+            $PSCmdlet.ThrowTerminatingError((New-NeoIPCDhis2HttpError -Method 'GET' -Path $Path -StatusCode $status -Message $detail.Message -ErrorCode $detail.ErrorCode -Auth $Auth))
+        }
+        if ([string]::IsNullOrWhiteSpace($content)) { return }
         try {
-            if ($AsHashtable) { return ((Invoke-WebRequest @invokeParams).Content | ConvertFrom-Json -AsHashtable -DateKind String) }
-            Invoke-RestMethod @invokeParams
+            if ($AsHashtable) { return ($content | ConvertFrom-Json -AsHashtable -DateKind String -ErrorAction Stop) }
+            $content | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            throw "Failed to fetch '$Path' from DHIS2 ($uri): $($_.Exception.Message)"
+            throw "DHIS2 answered GET '$Path' with a body that is not JSON: $((Get-NeoIPCDhis2ErrorDetail -Content $content).Message)"
         }
     }
 }
@@ -186,7 +297,7 @@ function Invoke-NeoIPCDhis2Delete {
         Method             = 'Delete'
         Uri                = $uri
         SkipHttpErrorCheck = $true
-        StatusCodeVariable = 'statusCode'
+        ErrorAction        = 'Stop'
     }
     Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted:$AllowUnencrypted
 
@@ -197,25 +308,23 @@ function Invoke-NeoIPCDhis2Delete {
             "Delete DHIS2 data via DELETE $uri?",
             'Removing DHIS2 data')) {
         Write-Debug "DELETE $uri"
-        $($result = . { Invoke-RestMethod @invokeParams }) 4>&1 | Write-Debug
+        try { $($response = . { Invoke-WebRequest @invokeParams }) 4>&1 | Write-Debug }
+        catch { throw "Failed to send DELETE '$Path' to DHIS2 ($uri): $($_.Exception.Message)" }
+        $content = $response.Content
+        if ($content -is [byte[]]) { $content = [System.Text.Encoding]::UTF8.GetString($content) }
+        $result = $null
+        if (-not [string]::IsNullOrWhiteSpace($content)) {
+            $result = try { $content | ConvertFrom-Json -ErrorAction Stop } catch { $content }
+        }
 
-        $bodyStatus = if ($result -and $result.PSObject.Properties['httpStatusCode']) { [int]$result.httpStatusCode } else { $null }
-        $failedStatus = if ([int]$statusCode -lt 200 -or [int]$statusCode -ge 300) { [int]$statusCode }
+        $statusCode = [int]$response.StatusCode
+        $bodyStatus = if ($result -and $result -isnot [string] -and $result.PSObject.Properties['httpStatusCode']) { [int]$result.httpStatusCode } else { $null }
+        $failedStatus = if ($statusCode -lt 200 -or $statusCode -ge 300) { $statusCode }
         elseif ($null -ne $bodyStatus -and ($bodyStatus -lt 200 -or $bodyStatus -ge 300)) { $bodyStatus }
         else { $null }
         if ($null -ne $failedStatus) {
-            $errorCode = if ($result -and $result.PSObject.Properties['errorCode']) { [string]$result.errorCode } else { $null }
-            $message = if ($result -and $result.PSObject.Properties['message']) { [string]$result.message } else { '' }
-            $text = "DELETE '$Path' failed with HTTP $failedStatus$(if ($errorCode) { " ($errorCode)" }): $message"
-            $exception = [System.Net.Http.HttpRequestException]::new($text, $null, [System.Net.HttpStatusCode]$failedStatus)
-            $exception.Data['Dhis2ErrorCode'] = $errorCode
-            $category = switch ($failedStatus) {
-                401 { [System.Management.Automation.ErrorCategory]::AuthenticationError }
-                403 { [System.Management.Automation.ErrorCategory]::PermissionDenied }
-                404 { [System.Management.Automation.ErrorCategory]::ObjectNotFound }
-                default { [System.Management.Automation.ErrorCategory]::InvalidOperation }
-            }
-            $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new($exception, 'NeoIPCDhis2DeleteFailed', $category, $Path))
+            $detail = Get-NeoIPCDhis2ErrorDetail -Content $content
+            $PSCmdlet.ThrowTerminatingError((New-NeoIPCDhis2HttpError -Method 'DELETE' -Path $Path -StatusCode $failedStatus -Message $detail.Message -ErrorCode $detail.ErrorCode -Auth $Auth))
         }
         $result
     }
