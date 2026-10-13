@@ -24,7 +24,7 @@ function Remove-NeoIPCPatient {
              resolves by code the program NEOIPC_CORE, the tracked-entity type NEOIPC_PATIENT, the attribute
              NEOIPC_PATIENT_ID, and the department, which must be a member of the org-unit group NEO_DEPARTMENT; a piped
              OrgUnitId must name such a department, the same one as -OrgUnitCode if both are given; and a patient ID
-             holding more than one '/' is refused before DHIS2 2.42, which may look it up as another patient ID:
+             holding more than one '/' is refused before DHIS2 2.42.1, which may look it up as another patient ID:
              select such a patient by its UID;
           3. reads each patient with its enrolments and events, and refuses one whose patient ID matches more than one
              patient (DHIS2 compares patient IDs ignoring case, the run exactly), that is registered or owned outside
@@ -322,7 +322,7 @@ function Remove-NeoIPCPatient {
             else { $item.Department = $departments[$id] }
         }
         foreach ($item in $items) {
-            # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Test-NeoIPCTrackerFilterValue in Private/TrackerDialect.ps1.
+            # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue in Private/TrackerDialect.ps1.
             if (-not $item.Outcome -and $item.Kind -eq 'NeoIpcId' -and -not (Test-NeoIPCTrackerFilterValue -Dialect $dialect -Value $item.Value)) {
                 Set-Refusal $item 'InvalidInput' "DHIS2 $versionText may look a patient ID that holds more than one '/' up as another one; select this patient by its UID."
             }

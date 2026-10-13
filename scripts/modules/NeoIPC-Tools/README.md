@@ -335,7 +335,7 @@ deletion for:
    malformed;
 2. a piped `OrgUnitId` that names no department, or another one than
    `-OrgUnitCode`;
-3. before DHIS2 2.42, a patient ID holding more than one `/`, which those
+3. before DHIS2 2.42.1, a patient ID holding more than one `/`, which those
    releases may look up as another patient ID: select such a patient by its
    UID;
 4. a patient ID that matches more than one patient, and a piped `NeoIpcId`
