@@ -19,6 +19,11 @@
 .PARAMETER SignatureImagePath
     Path to the signature image reproduced on the certificate.
 
+.PARAMETER Dhis2Path
+    The API base path the certificate's R code reads the participation data from, and the last part of the
+    key that keeps each instance's tab-completion cache apart. The department list is read from the
+    instance's /api root whatever this says, as every read of the NeoIPC-Tools module is.
+
 .EXAMPLE
     ./scripts/Build-PartnerCertificate.ps1 'A. Signatory' ./signature.png -Department AT_TEST_TEST
 #>
@@ -186,10 +191,14 @@ try {
         if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
         if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
         if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
-        if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
         $allSiteCodes = Get-NeoIPCDepartments @deptArgs
 
         $siteCodes = $allSiteCodes | Where-Object -FilterScript { foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } } | Sort-Object
+
+        if (-not $siteCodes -or $siteCodes.Count -eq 0) {
+            Write-Warning "No department matched -DepartmentCode '$($DepartmentCode -join "', '")'. Nothing to do."
+            return
+        }
 
         $totalSteps = $siteCodes.Count
         $completedSteps = 0

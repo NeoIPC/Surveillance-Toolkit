@@ -164,6 +164,10 @@ param(
     [Nullable[int]]
     $Dhis2Port = $null,
 
+    # The API base path the report's R code reads the data from, and the last
+    # part of the key that keeps each instance's tab-completion cache apart.
+    # The site list is read from the instance's /api root whatever this says,
+    # as every read of the NeoIPC-Tools module is.
     [Parameter(ParameterSetName='Online')]
     [string]
     $Dhis2Path = $null,
@@ -403,7 +407,6 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
         if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
         if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
         if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
-        if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
         $siteCodes = Get-NeoIPCDepartments @deptArgs
 
         if (-not $siteCodes -or $siteCodes.Count -eq 0) {

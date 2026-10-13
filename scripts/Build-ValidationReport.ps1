@@ -23,6 +23,11 @@ or password, any '?' or '#', which begins a query or fragment, or any whitespace
 The report refuses any other value outside this shape, such as one with a bracketed host such as an IPv6
 literal. No refusal repeats the value.
 
+.PARAMETER Dhis2Path
+The API base path the report's R code reads the data from, and the last part of the key that keeps each
+instance's tab-completion cache apart. The site list is read from the instance's /api root whatever this
+says, as every read of the NeoIPC-Tools module is.
+
 .PARAMETER IncludeUnusedValidationExceptions
 Add an appendix listing the records of the -ValidationExceptionFile list for the report's departments that
 match no record, or match one but exempt nothing, for the list's upkeep. The appendix names patients and is
@@ -206,7 +211,6 @@ if (-not $isCombined) {
     if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
     if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
     if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
-    if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
     $siteCodes = Get-NeoIPCDepartments @deptArgs
 
     if (-not $siteCodes -or $siteCodes.Count -eq 0) {
