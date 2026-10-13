@@ -572,10 +572,9 @@ function Read-EventInfo {
         -ProgramStageId together select the stages of both.
 
         -CreatedBy, -UpdatedBy, and -StoredBy are compared exactly, by the cmdlet rather than by DHIS2, and an event
-        without the value never matches. They take their values from the pipeline too, so objects piped from
-        Read-EnrolmentInfo, which carry their enrolment's CreatedBy, UpdatedBy, and StoredBy, filter the events by them;
-        to read every event of piped enrolments, pipe only their EnrollmentId (Select-Object EnrollmentId).
-        -DataElementCode keeps the events with a value for any of the data elements and adds their values to the output.
+        without the value never matches. Unlike the other filters they take no values from the pipeline, so the events of
+        piped enrolments are read whoever created, updated, or stored the enrolments. -DataElementCode keeps the events
+        with a value for any of the data elements and adds their values to the output.
 
         The cmdlet writes an error naming each code or UID that names no org unit in your hierarchy, each stage that is no
         stage of NEOIPC_CORE, each data-element code your account can read no data element of, each event, enrolment, or
@@ -610,11 +609,11 @@ function Read-EventInfo {
         Data-element codes, compared exactly: keeps the events with a value for any of them, and adds DataValues to the
         output. Completes from the local cache that Update-NeoIPCCache.ps1 writes.
     .PARAMETER CreatedBy
-        Usernames of the accounts that created the events, compared exactly. Takes CreatedBy from the pipeline.
+        Usernames of the accounts that created the events, compared exactly.
     .PARAMETER UpdatedBy
-        Usernames of the accounts that last updated the events, compared exactly. Takes UpdatedBy from the pipeline.
+        Usernames of the accounts that last updated the events, compared exactly.
     .PARAMETER StoredBy
-        The events' storedBy values, compared exactly. Takes StoredBy from the pipeline.
+        The events' storedBy values, compared exactly.
     .PARAMETER OccurredAfter
         Reads only events that occurred on or after the start of this day, in the server's time.
     .PARAMETER OccurredBefore
@@ -701,13 +700,10 @@ function Read-EventInfo {
             })]
         [string[]]$DataElementCode,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        # Not bound from the pipeline: Read-EnrolmentInfo's and Read-EventInfo's objects carry their own CreatedBy,
+        # UpdatedBy, and StoredBy, which would silently narrow a read of the events of piped records to those users.
         [string[]]$CreatedBy,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]$UpdatedBy,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]$StoredBy,
 
         [datetime]$OccurredAfter,

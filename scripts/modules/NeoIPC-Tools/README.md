@@ -43,8 +43,9 @@ principles, the capability matrix, and the verification gates — lives in
 
 | File | Role |
 |------|------|
-| `Public/Auth.ps1` + `Private/DHIS2Http.ps1` | DHIS2 auth (PAT / user-password) + the REST GET/POST/PUT/DELETE layer every live call goes through |
-| `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, DE codes, and personal-access-token lifecycle |
+| `Public/Auth.ps1` + `Private/Auth.ps1`, `Private/DHIS2Http.ps1`, `Private/Dhis2Version.ps1` | DHIS2 auth (a personal access token of either version, or a username and password), the instance's DHIS2 version, and the REST GET/POST/PUT/DELETE layer every live call goes through, whose errors carry DHIS2's own message |
+| `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, DE codes, and personal-access-token lifecycle; `Private/OrgUnits.ps1`, `Private/TrackerRead.ps1`, and `Private/UserInfo.ps1` hold what each needs beside the requests |
+| `Private/OrgUnitHierarchy.ps1` | The org units of the caller's hierarchy (its data-capture org units and those below them), read per capture unit, and org units looked up by code or UID within it |
 | `Public/PatientRemoval.ps1` + `Private/PatientRemoval.ps1` | **Remove patients** entered in error (`Remove-NeoIPCPatient`): select them by department and patient ID or by UID, refuse what a deletion would take with it unseen, preview with DHIS2's own dry run, confirm once, delete one patient per request, and prove each deletion by reading it back; the planning half is free of I/O ([Removing Patients](#removing-patients)) |
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/InfectiousAgents.ps1` | Infectious-agent ontology helpers (next free `Id`) |
@@ -164,125 +165,262 @@ data*, not all operator-rich expressions.
 
 ## Authentication
 
-The `Read-*Info` cmdlets and the personal-access-token cmdlets accept a
-`-Token` parameter (or read `$env:NEOIPC_DHIS2_TOKEN`); `Read-OrgUnitInfo`,
-`Read-PatientInfo`, `Read-EnrolmentInfo`, and `Read-EventInfo` take an `-Auth`
-hashtable from `Resolve-NeoIPCAuth` as well. If no token is available, you are
-prompted for username/password. The other cmdlets that talk to DHIS2 take
-`-Auth`. Without `-Hostname`, a cmdlet takes its host from the
-`NEOIPC_DHIS2_HOST` environment variable, and with neither it stops: the module
-has no built-in host, so nothing reaches an instance by omission. The four that
-write metadata or tracker data (`Import-NeoIPCMetadata`,
-`Deploy-NeoIPCMetadata`, `Import-NeoIPCPlayData`, and `Remove-NeoIPCPatient`)
+Every cmdlet that talks to DHIS2 takes `-Auth`, the hashtable
+`Resolve-NeoIPCAuth` returns. Resolve the credentials once and pass them on. A
+cmdlet given no `-Auth` resolves them itself, from its `-Token` and, where it
+has one, its `-UserName`:
+
+1. `-Token`: a personal access token, or the path of a file whose first line
+   is one;
+2. without `-Token`, the environment variable `NEOIPC_DHIS2_TOKEN`, read the
+   same way;
+3. with neither, a prompt for a username and password.
+
+A value that is neither a token nor the path of an existing file, an empty
+file, and a file whose first line holds no token each end the call with an
+error that names where the value came from, never the value itself.
+
+DHIS2 issues personal access tokens in two versions, and the module accepts
+both:
+
+| Version | Shape | Issued by |
+|---------|-------|-----------|
+| 1 | `d2pat_`, 32 letters or digits, and a 10-digit checksum (48 characters) | DHIS2 2.40 and earlier |
+| 2 | `d2p_`, 44 letters or digits, and a 6-character checksum (54 characters) | DHIS2 2.41 and later |
+
+The module checks a token's shape; DHIS2 checks its checksum. DHIS2 2.41 and
+later refuse every version-1 token that 2.40 issued, with HTTP 400 "Checksum
+validation failed", and the module's error then says so: after an upgrade to
+2.41 or later, create a new token on the upgraded instance (in your profile,
+under Personal access tokens).
+
+Without `-Hostname`, a cmdlet takes its host from the `NEOIPC_DHIS2_HOST`
+environment variable, and with neither it stops: the module has no built-in
+host, so nothing reaches an instance by omission. The cmdlets that write or
+delete (`Import-NeoIPCMetadata`, `Deploy-NeoIPCMetadata`,
+`Import-NeoIPCPlayData`, `Remove-NeoIPCPatient`,
+`Remove-DHIS2PersonalAccessToken`, and `Clear-DHIS2PersonalAccessTokens`)
 require `-Hostname` itself, so that each call names its target. The report
 builders (`scripts/Build-*.ps1`) are the exception: like the reports' R
 scripts, they fall back to the NeoIPC production instance when neither names a
-host.
+host. Their `-Dhis2Path` reaches only the reports' R code and the key of the
+tab-completion cache; the department list is read from the instance's `/api`
+root, as every read of the module is.
 
 ```powershell
-# Host and token from environment variables (set once, used by all commands)
+# Host and token file from environment variables, set once for all commands
 $env:NEOIPC_DHIS2_HOST = 'dhis2.example.org'
-$env:NEOIPC_DHIS2_TOKEN = 'd2pat_...'
-
-# Token from a file
-$auth = Resolve-NeoIPCAuth -Token ./secrets/my-token.txt
-
-# Interactive username/password prompt
+$env:NEOIPC_DHIS2_TOKEN = './my-token.txt'
 $auth = Resolve-NeoIPCAuth
+
+# The token file given directly
+$auth = Resolve-NeoIPCAuth -Token ./my-token.txt
+
+# A username and password: asks for the password
+$auth = Resolve-NeoIPCAuth -UserName admin
 ```
 
-Tokens are validated against the DHIS2 v1 PAT format (`d2pat_` + 32 alphanum
-\+ 10-digit CRC32). Invalid tokens are rejected immediately.
+## DHIS2 Versions
+
+The cmdlets that talk to DHIS2 read the instance's version
+(`/api/system/info`) and speak each release's request dialect. They are
+verified against DHIS2 2.40.12, 2.41.10, 2.42.6, and 2.43.2, the newest patch
+of each line. What you see differs between releases in these ways:
+
+1. **Links.** `DashboardUrl` (`Read-EnrolmentInfo`) opens Tracker Capture's
+   dashboard on 2.41 and earlier, and the Capture app's enrolment page
+   (`/apps/capture#/enrollment?…`) on 2.42 and later, which have no Tracker
+   Capture. `EditUrl` (`Read-UserInfo`) opens the Users app at
+   `dhis-web-user/index.html` on 2.41 and earlier, and at `apps/user` from
+   2.42.
+2. **Two-factor state.** Where `Read-UserInfo`'s `TwoFactorEnabled` comes from:
+
+   | DHIS2 release | Source | What it says |
+   |---------------|--------|--------------|
+   | 2.41 and earlier | the user's `twoFactorEnabled` field | enabled from the moment the user asks for the QR code that sets up an authenticator app, before the user confirms the enrolment |
+   | 2.42.0 to 2.42.5 and 2.43.0, their hotfix releases included | none | empty, with a warning naming 2.42.6 and 2.43.1 |
+   | 2.42.6 and later, 2.43.1 and later | `api/users/twoFactor` | true for a confirmed authenticator app or email, false otherwise; empty for a disabled account or an invitation, which DHIS2 does not list there. Needs the authority ALL, and lists at most 10,000 accounts; a warning says when either leaves the column empty |
+
+3. **Who sees which users.** On 2.41 and earlier, an account without the
+   authority ALL does not see the accounts that hold any of its own user
+   roles, itself included, unless the system setting that lets users grant
+   their own roles (`keyCanGrantOwnUserAuthorityGroups`) is on; from 2.42 it
+   sees them.
+4. **Attribute values.** DHIS2 2.43.2 and later leave out the values of the
+   patient attributes your account may not read through their sharing.
+   `Read-PatientInfo` then warns, naming the attributes whose columns may be
+   empty although a value exists.
+5. **Patient IDs with slashes.** Before 2.42.1, DHIS2's filter parser may read
+   a patient ID that holds more than one `/` as another one, so
+   `Read-PatientInfo -NeoIpcId` refuses such an ID there; select the patient
+   by its UID instead.
+6. **Org units of an account with several data-capture org units.** DHIS2
+   2.42 and later match nothing with `withinUserHierarchy=true` for such an
+   account, so the module reads the org units below each capture unit itself.
+7. **Widened reads.** DHIS2 2.42 and later ignore a request parameter they do
+   not know and widen the read instead of refusing it. Every tracker read
+   checks the records DHIS2 returns against its request, and a record it did
+   not ask for ends the read with an error.
+
+On 2.40, the tracker reads apply the filters DHIS2 ignores when it reads
+enrolments by UID themselves, and fill `EventIds` with a second read, since
+DHIS2 2.40 returns no events with enrolments it reads by query.
+
+## Access and Scope
+
+What the cmdlets show an account is what DHIS2 lets that account read. An
+account with the authority ALL sees everything they read; any other account
+sees less, and where a missing privilege empties a column or shortens a list,
+the cmdlet says so with a warning or an error rather than return less in
+silence:
+
+- **Org units.** Every lookup (`-OrgUnitCode`, `-OrgUnitId`,
+  `Read-OrgUnitInfo`, `Get-NeoIPCDepartments`) stays within your hierarchy:
+  your account's data-capture org units and the org units below them. A code
+  or UID outside it is an error naming it, even where DHIS2 would let your
+  account read the org unit's metadata.
+- **Patients, enrolments, and events.** DHIS2 lets only an account with
+  data-capture org units and data read access to NEOIPC_CORE read its
+  records; without either, the read ends with an error that says which. On
+  DHIS2 2.43.2 and later, a patient attribute's values also need read access
+  to the attribute.
+- **Users.** `Read-UserInfo` needs the authority F_USER_VIEW, which ALL
+  includes; the two-factor state needs ALL itself (see
+  [DHIS2 Versions](#dhis2-versions)).
+- **Tokens.** The token cmdlets work on your own tokens. With `-AllUsers` they
+  reach every user's with ALL, and otherwise only those shared with your
+  account, with a warning.
 
 ## OrgUnit Inspection
 
+`Get-NeoIPCDepartments` lists the codes of the departments (org-unit group
+NEO_DEPARTMENT) in your hierarchy. `Read-OrgUnitInfo` returns one record per
+department: its hospital, country, and World Bank class, told by org-unit
+group code (HOSPITAL, COUNTRY, WORLD_BANK_CLASSES) however many levels lie
+between them, its trials, and whether it is a test unit. Codes and UIDs compare
+exactly, case included, and come in ordinal order.
+
 ```powershell
-# List all departments the current user can see
-Get-NeoIPCDepartments -Auth $auth
+# The codes of the departments in your hierarchy, test units left out
+Get-NeoIPCDepartments -Auth $auth -ExcludeTestUnits
 
-# Rich org unit objects with hierarchy, trials, World Bank class
-Read-OrgUnitInfo -Token $env:NEOIPC_DHIS2_TOKEN
+# Every department in your hierarchy, with its hospital, country, trials, and World Bank class
+Read-OrgUnitInfo -Auth $auth
 
-# Filter by country
-Read-OrgUnitInfo -CountryCode DE
+# The departments of one country
+Read-OrgUnitInfo -Auth $auth -CountryCode DE
 
-# Filter by OU codes (friendly form) or UIDs
-Read-OrgUnitInfo -OrgUnitCode NEO_DE_01, NEO_DE_02
-Read-OrgUnitInfo -OrgUnitId abc123, def456
+# Departments by code
+Read-OrgUnitInfo -Auth $auth -OrgUnitCode NEO_DE_01, NEO_DE_02
 ```
 
 ## User Inspection
 
-```powershell
-# All users
-Read-UserInfo
+`Read-UserInfo` lists the user accounts DHIS2 lets you list, all of them or
+those whose data-capture org units include one of the given org units, which
+must lie in your hierarchy. Each comes with its org units, roles, and groups as
+sorted lists, its state, its two-factor state (see
+[DHIS2 Versions](#dhis2-versions)), and a link to its page in the Users app.
 
-# Users assigned to specific sites
-Read-UserInfo -OrgUnitCode NEO_AT_01
+```powershell
+# Every user account DHIS2 lets you list
+Read-UserInfo -Auth $auth
+
+# The users of the Austrian departments in your hierarchy
+Read-OrgUnitInfo -Auth $auth -CountryCode AT | Read-UserInfo -Auth $auth
+
+# The accounts DHIS2 reports without two-factor authentication, with links to their pages
+Read-UserInfo -Auth $auth | Where-Object TwoFactorEnabled -eq $false |
+    Select-Object Username, LastLogin, EditUrl
 ```
 
 ## Patient, Enrolment, and Event Inspection (Pipeline-Composable)
 
-Each `Read-*Info` cmdlet emits parent IDs and child ID lists on its
-output objects, and accepts pipeline-bound filter parameters with
-matching property names. Cross-cmdlet composition works by exact
-property-name match — no `[Alias]` indirection, no `Select-Object`
-renames.
+`Read-PatientInfo`, `Read-EnrolmentInfo`, and `Read-EventInfo` read the
+patients, enrolments, and events of the program NEOIPC_CORE within your
+hierarchy (see [Access and Scope](#access-and-scope)). Without a filter, a
+cmdlet reads everything there; the filters of different parameters combine, so
+that a record must pass each of them. `-OrgUnitCode` and `-OrgUnitId` form one
+set of org units, and `-EventType` and `-ProgramStageId` one set of stages. A
+record lies in an org unit when it was registered or entered there, or when
+its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects
+it.
+
+Each code or UID that names no org unit in your hierarchy, each value that is
+no DHIS2 UID, each stage or data element that does not exist, and each tracked
+entity DHIS2 says does not exist is an error naming it. When none of the values
+given to a filter names anything, the cmdlet returns nothing rather than read
+without that filter; an empty pipeline returns nothing, and a filter given
+without a value is an error.
+
+Each cmdlet emits parent IDs and child ID lists on its output objects, and
+takes pipeline-bound filter parameters with matching property names, so the
+reads compose by exact property-name match, with no `[Alias]` indirection and
+no `Select-Object` renames. `Read-EventInfo`'s `-CreatedBy`, `-UpdatedBy`, and
+`-StoredBy`, which compare exactly, take no pipeline input, so that the events
+of piped enrolments are read whoever created or changed the enrolments.
+
+`-NeoIpcId` compares patient IDs ignoring case, as DHIS2 does: `de-01` also
+finds `DE-01`. DHIS2's event read takes one org unit, one tracked entity, and
+one program stage, so with several values of one of them `Read-EventInfo` sends
+one request per value and compares the others itself. Dates are `[datetime]`
+in the server's time, and `EnrollmentIds`, `EventIds`, and `Notes` are string
+arrays.
 
 ```powershell
-# All enrolments at Austrian sites
-Read-EnrolmentInfo -OrgUnitCode NEO_AT_01, NEO_AT_02
+# The enrolments of two departments
+Read-EnrolmentInfo -Auth $auth -OrgUnitCode NEO_AT_01, NEO_AT_02
 
 # Pipe from org units (OrgUnitCode binds to -OrgUnitCode)
-Read-OrgUnitInfo -CountryCode AT | Read-EnrolmentInfo
+Read-OrgUnitInfo -Auth $auth -CountryCode AT | Read-EnrolmentInfo -Auth $auth
 
-# Filter by date range
-Read-EnrolmentInfo -AdmissionDateFrom 2025-01-01 -AdmissionDateTo 2025-06-30
+# Admissions in the first half of 2025
+Read-EnrolmentInfo -Auth $auth -AdmissionDateFrom 2025-01-01 -AdmissionDateTo 2025-06-30
 
-# Search by patient ID (lives on Read-PatientInfo — its endpoint is the
-# only one with attribute filters). Compose to get enrolments:
-Read-PatientInfo -NeoIpcId 'NEO_AT_01-0042' | Read-EnrolmentInfo
+# A patient by its NeoIPC patient ID, and its enrolments
+Read-PatientInfo -Auth $auth -NeoIpcId 'NEO_AT_01-0042' | Read-EnrolmentInfo -Auth $auth
 
-# Reverse direction: enrolments → patients (TrackedEntityId binds)
-Read-EnrolmentInfo -OrgUnitCode NEO_DE_01 | Read-PatientInfo
+# From enrolments to their patients (TrackedEntityId binds)
+Read-EnrolmentInfo -Auth $auth -OrgUnitCode NEO_DE_01 | Read-PatientInfo -Auth $auth
 
-# Search events directly (new — replaces Read-EventSummary)
-Read-EventInfo -OrgUnitCode NEO_DE_01 -EventType 'Primary Sepsis/BSI' `
+# Primary sepsis events of the last 90 days
+Read-EventInfo -Auth $auth -OrgUnitCode NEO_DE_01 -EventType 'Primary Sepsis/BSI' `
   -OccurredAfter (Get-Date).AddDays(-90)
 
-# "Who created events with custom organism names recently?" — the
-# spike-investigation use case. -DataElementCode OR-composes
-# client-side; supply each DE code the partners might have populated.
+# Who entered infectious-agent names as free text recently? -DataElementCode
+# keeps the events with a value for any of the codes.
 $codes = @(
     'NEOIPC_BSI_PATHOGEN_1_NAME','NEOIPC_BSI_PATHOGEN_2_NAME','NEOIPC_BSI_PATHOGEN_3_NAME',
     'NEOIPC_HAP_PATHOGEN_1_NAME','NEOIPC_HAP_PATHOGEN_2_NAME','NEOIPC_HAP_PATHOGEN_3_NAME'
     # …add more codes as needed (use Tab completion: -DataElementCode NEOIPC_<Tab>)
 )
-Read-EventInfo -DataElementCode $codes -UpdatedAfter (Get-Date).AddDays(-30) `
+Read-EventInfo -Auth $auth -DataElementCode $codes -UpdatedAfter (Get-Date).AddDays(-30) `
   | Group-Object OrgUnitId, CreatedBy `
   | Sort-Object Count -Descending `
   | Select-Object `
-      @{ Name = 'OrgUnitCode'; Expression = { (Read-OrgUnitInfo -OrgUnitId ($_.Name -split ', ')[0]).OrgUnitCode } }, `
+      @{ Name = 'OrgUnitCode'; Expression = { (Read-OrgUnitInfo -Auth $auth -OrgUnitId ($_.Name -split ', ')[0]).OrgUnitCode } }, `
       @{ Name = 'CreatedBy';   Expression = { ($_.Name -split ', ')[1] } }, `
       Count
 
-# Events at a partner (no DE filter — DataValues omitted from output)
-Read-OrgUnitInfo -CountryCode DE | Read-EventInfo -EventType Pneumonia
+# The pneumonia events of a country's departments (no -DataElementCode, so no DataValues)
+Read-OrgUnitInfo -Auth $auth -CountryCode DE | Read-EventInfo -Auth $auth -EventType Pneumonia
 
-# Reverse pipe: events → parent enrolments (gets DashboardUrl, etc.)
-Read-EventInfo -OrgUnitCode NEO_DE_01 -EventType Pneumonia `
-  | Read-EnrolmentInfo
+# From events to their enrolments, with the link that opens each (DashboardUrl)
+Read-EventInfo -Auth $auth -OrgUnitCode NEO_DE_01 -EventType Pneumonia `
+  | Read-EnrolmentInfo -Auth $auth
 ```
 
 ## Working With Event dataValues
 
-`Read-EventInfo` returns a `DataValues` PSCustomObject keyed by the DE
-codes you passed in `-DataElementCode` (omitted from output when the
-parameter is absent — UIDs aren't decoded to codes without a separate
-metadata call).
+With `-DataElementCode`, `Read-EventInfo` adds `DataValues`, a
+PSCustomObject with a property per code you passed, in the order you passed
+them: `$null` where the event has no value for it, else the value with its
+`StoredBy`, `CreatedAt`, `UpdatedAt`, `CreatedByUsername`, and
+`UpdatedByUsername`. Without the parameter, `DataValues` is left out, since
+DHIS2 names data values by UID and decoding them takes another metadata read.
 
 ```powershell
-$events = Read-EventInfo -DataElementCode 'NEOIPC_BSI_PATHOGEN_1_NAME' `
+$events = Read-EventInfo -Auth $auth -DataElementCode 'NEOIPC_BSI_PATHOGEN_1_NAME' `
   -OccurredAfter (Get-Date).AddDays(-30)
 
 # Direct access by code
@@ -456,27 +594,39 @@ ends at once, though what the dry run did cannot be undone.
 
 ## Personal Access Token Lifecycle Management
 
+`Read-DHIS2PersonalAccessToken` lists your own tokens: DHIS2 lists every
+user's tokens to an account with the authority ALL, so the cmdlet compares
+their creator with your account itself. `-AllUsers` lists every token DHIS2
+lets your account read: every user's with ALL, otherwise only those shared
+with your account, with a warning. `-Id` reads exactly the tokens it names. The
+output is `Id`, `Expire` (UTC), `Created`, `CreatedBy`, and `AllowedMethods`;
+DHIS2 never returns a token's key.
+
+`Remove-DHIS2PersonalAccessToken` asks before each token it deletes; `-Force`
+skips the question, and `-WhatIf` deletes nothing. It reports `Deleted`,
+`WouldDelete`, `Declined`, or `Failed` for each token, and HTTP 401 ends the
+run. That happens once the run has deleted the token it authenticates with: at
+once on DHIS2 2.41 and later, and on 2.40, whose token cache keeps a deleted
+token working, up to an hour later. `Clear-DHIS2PersonalAccessTokens` deletes
+your expired tokens through it, `-All` all of your tokens, the one you
+authenticate with included, and `-AllUsers` extends either to every token your
+account may read. Both require `-Hostname`.
+
 ```powershell
-# List all personal access tokens
-Read-DHIS2PersonalAccessToken
-# Aliases: Read-PAT
+# Your own tokens
+Read-DHIS2PersonalAccessToken -Auth $auth -Hostname dhis2.example.org
+# Alias: Read-PAT
 
-# List specific tokens by ID
-Read-DHIS2PersonalAccessToken -Id 'abc123'
+# Two tokens by UID, whoever created them
+Read-DHIS2PersonalAccessToken -Id 'aBcDeFgHiJ1', 'kLmNoPqRsT2' -Auth $auth -Hostname dhis2.example.org
 
-# Remove a token
-Remove-DHIS2PersonalAccessToken -Id 'abc123'
-# Aliases: Remove-PAT
+# Delete one token, after asking
+Remove-DHIS2PersonalAccessToken -Id 'aBcDeFgHiJ1' -Auth $auth -Hostname dhis2.example.org
+# Alias: Remove-PAT
 
-# Pipeline: remove all tokens
-Read-PAT | Select-Object -ExpandProperty id | Remove-PAT
-
-# Clear expired tokens
-Clear-DHIS2PersonalAccessTokens
-# Aliases: Clear-PATs
-
-# Clear ALL tokens (including unexpired)
-Clear-PATs -All
+# Which of your expired tokens a clean-up would delete; nothing is deleted
+Clear-DHIS2PersonalAccessTokens -Auth $auth -Hostname dhis2.example.org -WhatIf
+# Alias: Clear-PATs
 ```
 
 ## Report Generation Helpers
@@ -660,7 +810,7 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 
 | Category | Functions |
 |----------|-----------|
-| Auth | `Resolve-NeoIPCToken`, `Resolve-NeoIPCAuth`, `Get-NeoIPCAuthPassword`, `Test-DHIS2PersonalAccessToken` |
+| Auth | `Resolve-NeoIPCAuth`, `Get-NeoIPCAuthPassword`, `Test-DHIS2PersonalAccessToken` |
 | OrgUnits | `Get-NeoIPCDepartments`, `Get-NeoIPCServerKey`, `Read-OrgUnitInfo` |
 | Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventInfo`, `Remove-NeoIPCPatient` |
 | DataElements | `Get-NeoIPCDataElementCodes` |

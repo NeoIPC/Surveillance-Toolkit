@@ -193,7 +193,7 @@ try {
         if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
         $allSiteCodes = Get-NeoIPCDepartments @deptArgs
 
-        $siteCodes = $allSiteCodes | Where-Object -FilterScript { foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } } | Sort-Object
+        $siteCodes = $allSiteCodes | Where-Object -FilterScript { foreach ($d in $DepartmentCode) { if ($_ -match $d) { return $true } } }
 
         if (-not $siteCodes -or $siteCodes.Count -eq 0) {
             Write-Warning "No department matched -DepartmentCode '$($DepartmentCode -join "', '")'. Nothing to do."

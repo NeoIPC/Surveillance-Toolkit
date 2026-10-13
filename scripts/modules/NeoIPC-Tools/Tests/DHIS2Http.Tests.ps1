@@ -32,6 +32,29 @@ InModuleScope 'NeoIPC-Tools' {
             function Get-TestError([scriptblock]$Call) {
                 try { & $Call; return $null } catch { return $_ }
             }
+            # Runs -Command inside the module in a runspace of its own, as a console runs a line, against a DHIS2 that
+            # answers every request with HTTP 401. A try anywhere above a call makes every terminating error unwind to it,
+            # Pester's own included, so only a runspace with nothing around the command shows whether the statement after
+            # a failed call still runs. Returns the output and every error record, written or thrown.
+            function Invoke-WithoutTry([Parameter(Mandatory)][string]$Command) {
+                $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+                $ps = [powershell]::Create()
+                try {
+                    $null = $ps.AddScript(@"
+Import-Module '$($manifest.Replace("'", "''"))' -Force
+function global:Invoke-WebRequest { [pscustomobject]@{ StatusCode = 401; Content = '{"httpStatusCode":401,"status":"ERROR","message":"Unauthorized"}' } }
+function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
+& (Get-Module NeoIPC-Tools) { $Command }
+"@)
+                    $thrown = $null
+                    $output = try { @($ps.Invoke()) } catch { $thrown = $_; @() }
+                    [pscustomobject]@{
+                        Output = $output
+                        Errors = @(@($ps.Streams.Error) + @(if ($thrown) { $thrown.Exception.InnerException.ErrorRecord }))
+                    }
+                }
+                finally { $ps.Dispose() }
+            }
         }
         AfterAll {
             # [NullString]::Value removes the variable; $null would bind as '' and leave it present but empty.
@@ -191,6 +214,12 @@ InModuleScope 'NeoIPC-Tools' {
                 { Invoke-NeoIPCDhis2Get -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/me' -Confirm:$false -WhatIf:$false } |
                     Should -Throw "Failed to fetch 'api/me' from DHIS2*No such host is known.*"
             }
+            It 'stops the function that called it when no try surrounds the call' {
+                $run = Invoke-WithoutTry -Command "`$null = Get-NeoIPCCaptureRoot -Endpoint @{ Auth = @{ AuthType = 'Token'; Token = 'not-a-real-token' }; Hostname = 'given.example.org' }; 'went on'"
+                $run.Output | Should -Not -Contain 'went on'
+                $run.Errors | Should -HaveCount 1
+                $run.Errors[0].Exception.Message | Should -BeLike "GET 'api/me' failed with HTTP 401*"
+            }
         }
 
         Describe 'Invoke-NeoIPCDhis2Delete' {
@@ -211,6 +240,31 @@ InModuleScope 'NeoIPC-Tools' {
                 $failure = Get-TestError { Invoke-NeoIPCDhis2Delete -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/apiToken/TokAAAAAA01' -Confirm:$false }
                 $failure.Exception.StatusCode | Should -Be ([System.Net.HttpStatusCode]::InternalServerError)
                 $failure.Exception.Message | Should -BeExactly "DELETE 'api/apiToken/TokAAAAAA01' failed with HTTP 500: Internal Server Error"
+            }
+            It 'stops its caller when no try surrounds the call' {
+                $run = Invoke-WithoutTry -Command "`$null = Invoke-NeoIPCDhis2Delete -Auth @{ AuthType = 'Token'; Token = 'not-a-real-token' } -Hostname 'given.example.org' -Path 'api/apiToken/TokAAAAAA01' -Confirm:`$false; 'went on'"
+                $run.Output | Should -Not -Contain 'went on'
+                $run.Errors | Should -HaveCount 1
+                $run.Errors[0].Exception.Message | Should -BeLike "DELETE 'api/apiToken/TokAAAAAA01' failed with HTTP 401*"
+            }
+        }
+
+        Describe 'The public reads' {
+            # Under SilentlyContinue, PowerShell drops an error thrown where no try encloses it and runs on past it, so a
+            # cmdlet without a try of its own would go on reading with nothing, warning on the way.
+            It '<Command> ends with an error of its own when DHIS2 refuses the credentials, under SilentlyContinue too' -ForEach @(
+                @{ Command = 'Read-OrgUnitInfo' }
+                @{ Command = 'Read-UserInfo' }
+                @{ Command = 'Read-PatientInfo' }
+                @{ Command = 'Read-EnrolmentInfo' }
+                @{ Command = 'Read-EventInfo' }
+                @{ Command = 'Read-DHIS2PersonalAccessToken' }
+            ) {
+                $run = Invoke-WithoutTry -Command "$Command -Auth @{ AuthType = 'Token'; Token = 'not-a-real-token' } -Hostname 'given.example.org' -ErrorAction SilentlyContinue 3>&1"
+                $run.Output | Should -BeNullOrEmpty -Because 'the cmdlet stops at the refusal, before any warning or record'
+                $run.Errors | Should -HaveCount 1
+                $run.Errors[0].FullyQualifiedErrorId | Should -BeLike "*,$Command"
+                $run.Errors[0].Exception.Message | Should -BeLike '*HTTP 401*'
             }
         }
 

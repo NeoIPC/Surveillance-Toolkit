@@ -914,12 +914,9 @@ InModuleScope 'NeoIPC-Tools' {
                 @($events.EventId) | Should -Be @('EvPat000001')
                 @((Get-FakeRead 'events') | ForEach-Object { $_.Query['trackedEntity'] }) | Should -Be @('TePat000001')
             }
-            It 'filters the events of piped enrolments by the enrolments'' audit users, unless only EnrollmentId is piped' {
+            It 'reads the events of piped enrolments whoever created, updated, or stored the enrolments' {
                 Add-FakeCorpus
-                $all = Read-EnrolmentInfo -EnrollmentId 'EnPat000001' -Auth $script:Auth -Hostname $script:Host1 | Read-EventInfo -Auth $script:Auth -Hostname $script:Host1
-                @($all).Count | Should -Be 0 -Because 'the enrolment''s creator, updater, and storedBy bind to the event filters'
-                $events = Read-EnrolmentInfo -EnrollmentId 'EnPat000001' -Auth $script:Auth -Hostname $script:Host1 | Select-Object EnrollmentId |
-                    Read-EventInfo -Auth $script:Auth -Hostname $script:Host1
+                $events = Read-EnrolmentInfo -EnrollmentId 'EnPat000001' -Auth $script:Auth -Hostname $script:Host1 | Read-EventInfo -Auth $script:Auth -Hostname $script:Host1
                 @($events.EventId) | Should -Be @('EvPat000001')
             }
             It 'reads the enrolments of the patients a patient-ID lookup returns' {

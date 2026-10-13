@@ -105,6 +105,8 @@ function New-NeoIPCDhis2HttpError {
     )
     $text = "$Method '$Path' failed with HTTP $StatusCode$(if ($ErrorCode) { " ($ErrorCode)" })$(if ($Message) { ": $Message" } else { '.' })"
     if ($StatusCode -eq 400 -and $Message -match 'Checksum validation failed' -and $Auth -and $Auth.AuthType -eq 'Token') {
+        # NEOIPC-COMPAT(dhis2-version-1-token): the d2pat_ hint; see Test-DHIS2PersonalAccessToken in Public/Auth.ps1, without
+        # whose version-1 branch no such token reaches DHIS2.
         $text += if (([string]$Auth.Token).StartsWith('d2pat_', [System.StringComparison]::Ordinal)) {
             ' The token is a version-1 token (d2pat_), which only DHIS2 2.40 and earlier issued and which 2.41 and later refuse: create a new token on this instance.'
         }
@@ -145,10 +147,12 @@ function Invoke-NeoIPCDhis2Get {
     .SYNOPSIS
         GET a DHIS2 API path and return the parsed JSON body, or end with an error carrying the HTTP status.
     .DESCRIPTION
-        A status outside 2xx ends the call with New-NeoIPCDhis2HttpError's error, whose message holds DHIS2's own message
-        (or an excerpt of a non-JSON error page). A 2xx body that is not JSON ends it too, since a reader would otherwise
-        find none of the keys it looks for and take the answer as empty. A request that never reaches DHIS2 (name
-        resolution, TLS, a refused connection) ends with that failure's message.
+        A status outside 2xx throws New-NeoIPCDhis2HttpError's error, whose message holds DHIS2's own message (or an
+        excerpt of a non-JSON error page). A 2xx body that is not JSON throws too, since a reader would otherwise find
+        none of the keys it looks for and take the answer as empty. A request that never reaches DHIS2 (name
+        resolution, TLS, a refused connection) throws that failure's message. Each failure is thrown rather than raised
+        with ThrowTerminatingError: that error ends only the statement that called this function, so a caller with no
+        try around it would go on with an empty answer.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
     param(
@@ -227,7 +231,7 @@ function Invoke-NeoIPCDhis2Get {
         $status = [int]$response.StatusCode
         if ($status -lt 200 -or $status -ge 300) {
             $detail = Get-NeoIPCDhis2ErrorDetail -Content $content
-            $PSCmdlet.ThrowTerminatingError((New-NeoIPCDhis2HttpError -Method 'GET' -Path $Path -StatusCode $status -Message $detail.Message -ErrorCode $detail.ErrorCode -Auth $Auth))
+            throw (New-NeoIPCDhis2HttpError -Method 'GET' -Path $Path -StatusCode $status -Message $detail.Message -ErrorCode $detail.ErrorCode -Auth $Auth)
         }
         if ([string]::IsNullOrWhiteSpace($content)) { return }
         try {
@@ -269,9 +273,10 @@ function Invoke-NeoIPCDhis2Delete {
         A failure is a transport status outside 2xx, or a 2xx whose WebMessage body reports one (DHIS2 can answer a
         DELETE with HTTP 200 and an error body). It is thrown as an HttpRequestException whose StatusCode is the
         failing status and whose Data['Dhis2ErrorCode'] holds DHIS2's errorCode when the body names one, so a
-        caller can decide per object (catch and continue) or per status (stop at the first 401). A 200 proves only
-        that DHIS2 accepted the request: DHIS2 2.41.10 and later answer a program stage section's DELETE with 200
-        and keep the section, so a caller that must know the object is gone reads it back.
+        caller can decide per object (catch and continue) or per status (stop at the first 401). It is thrown, as
+        Invoke-NeoIPCDhis2Get's are and for the same reason, so a caller without a try stops. A 200 proves only that
+        DHIS2 accepted the request: DHIS2 2.41.10 and later answer a program stage section's DELETE with 200 and keep
+        the section, so a caller that must know the object is gone reads it back.
     .PARAMETER AllowUnencrypted
         Permit Basic auth over http (the local stack).
     #>
@@ -324,7 +329,7 @@ function Invoke-NeoIPCDhis2Delete {
         else { $null }
         if ($null -ne $failedStatus) {
             $detail = Get-NeoIPCDhis2ErrorDetail -Content $content
-            $PSCmdlet.ThrowTerminatingError((New-NeoIPCDhis2HttpError -Method 'DELETE' -Path $Path -StatusCode $failedStatus -Message $detail.Message -ErrorCode $detail.ErrorCode -Auth $Auth))
+            throw (New-NeoIPCDhis2HttpError -Method 'DELETE' -Path $Path -StatusCode $failedStatus -Message $detail.Message -ErrorCode $detail.ErrorCode -Auth $Auth)
         }
         $result
     }

@@ -107,8 +107,8 @@ function Read-DHIS2PersonalAccessToken {
         }
     }
 
-    # A failed request ends the cmdlet as a whole: a terminating error from a helper ends only the statement it stands in,
-    # and the rest would go on without the answer.
+    # A failure ends the cmdlet with an error of its own: an error a helper throws would otherwise end the caller's whole
+    # script, or, under -ErrorAction SilentlyContinue, be dropped and leave the read running on nothing.
     try {
         $wanted = [System.Collections.Generic.List[string]]::new()
         $seen = [System.Collections.Generic.HashSet[string]]::new($ordinal)

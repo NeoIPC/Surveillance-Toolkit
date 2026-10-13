@@ -239,86 +239,91 @@ function Read-OrgUnitInfo {
     }
 
     end {
-        if (($MyInvocation.ExpectingInput -or $selectorGiven) -and $codes.Count -eq 0 -and $ids.Count -eq 0) { return }
-        if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token }
-        $endpoint = @{ Auth = $Auth }
-        if ($Scheme) { $endpoint.Scheme = $Scheme }
-        if ($Hostname) { $endpoint.Hostname = $Hostname }
-        if ($null -ne $Port) { $endpoint.Port = $Port }
+        # A failure ends the cmdlet with an error of its own: an error a helper throws would otherwise end the caller's
+        # whole script, or, under -ErrorAction SilentlyContinue, be dropped and leave the read running on nothing.
+        try {
+            if (($MyInvocation.ExpectingInput -or $selectorGiven) -and $codes.Count -eq 0 -and $ids.Count -eq 0) { return }
+            if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token }
+            $endpoint = @{ Auth = $Auth }
+            if ($Scheme) { $endpoint.Scheme = $Scheme }
+            if ($Hostname) { $endpoint.Hostname = $Hostname }
+            if ($null -ne $Port) { $endpoint.Port = $Port }
 
-        $fields = @(
-            'id', 'code', 'name', 'level', 'openingDate', 'closedDate',
-            'organisationUnitGroups[code,groupSets[code]]',
-            'ancestors[id,code,organisationUnitGroups[code,groupSets[code]]]'
-        )
-        $ordinal = [System.StringComparer]::Ordinal
-        $departments = [System.Collections.Generic.List[object]]::new()
-        if ($codes.Count -gt 0 -or $ids.Count -gt 0) {
-            $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code $codes.ToArray() -Id $ids.ToArray() -Fields $fields
-            foreach ($missing in $found.MissingCode) {
-                Write-Error -Message "No org unit with the code '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitCodeNotFound' -TargetObject $missing
-            }
-            foreach ($missing in $found.MissingId) {
-                Write-Error -Message "No org unit with the UID '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitIdNotFound' -TargetObject $missing
-            }
-            foreach ($lookup in @(@{ Values = $codes; Found = $found.ByCode }, @{ Values = $ids; Found = $found.ById })) {
-                $reported = [System.Collections.Generic.HashSet[string]]::new($ordinal)
-                foreach ($value in $lookup.Values) {
-                    if (-not $lookup.Found.ContainsKey($value) -or -not $reported.Add($value)) { continue }
-                    if (@(Get-NeoIPCOrgUnitGroupCode -Unit $lookup.Found[$value]) -cnotcontains 'NEO_DEPARTMENT') {
-                        Write-Error -Message "The org unit '$value' is not a department: it is not a member of the org-unit group NEO_DEPARTMENT." -Category InvalidArgument -ErrorId 'NeoIPCOrgUnitNotDepartment' -TargetObject $value
+            $fields = @(
+                'id', 'code', 'name', 'level', 'openingDate', 'closedDate',
+                'organisationUnitGroups[code,groupSets[code]]',
+                'ancestors[id,code,organisationUnitGroups[code,groupSets[code]]]'
+            )
+            $ordinal = [System.StringComparer]::Ordinal
+            $departments = [System.Collections.Generic.List[object]]::new()
+            if ($codes.Count -gt 0 -or $ids.Count -gt 0) {
+                $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code $codes.ToArray() -Id $ids.ToArray() -Fields $fields
+                foreach ($missing in $found.MissingCode) {
+                    Write-Error -Message "No org unit with the code '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitCodeNotFound' -TargetObject $missing
+                }
+                foreach ($missing in $found.MissingId) {
+                    Write-Error -Message "No org unit with the UID '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitIdNotFound' -TargetObject $missing
+                }
+                foreach ($lookup in @(@{ Values = $codes; Found = $found.ByCode }, @{ Values = $ids; Found = $found.ById })) {
+                    $reported = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+                    foreach ($value in $lookup.Values) {
+                        if (-not $lookup.Found.ContainsKey($value) -or -not $reported.Add($value)) { continue }
+                        if (@(Get-NeoIPCOrgUnitGroupCode -Unit $lookup.Found[$value]) -cnotcontains 'NEO_DEPARTMENT') {
+                            Write-Error -Message "The org unit '$value' is not a department: it is not a member of the org-unit group NEO_DEPARTMENT." -Category InvalidArgument -ErrorId 'NeoIPCOrgUnitNotDepartment' -TargetObject $value
+                        }
                     }
                 }
+                foreach ($unit in $found.Units) {
+                    if (@(Get-NeoIPCOrgUnitGroupCode -Unit $unit) -ccontains 'NEO_DEPARTMENT') { $departments.Add($unit) }
+                }
+                if ($departments.Count -eq 0) { return }
             }
-            foreach ($unit in $found.Units) {
-                if (@(Get-NeoIPCOrgUnitGroupCode -Unit $unit) -ccontains 'NEO_DEPARTMENT') { $departments.Add($unit) }
-            }
-            if ($departments.Count -eq 0) { return }
-        }
-        else {
-            foreach ($unit in (Get-NeoIPCHierarchyOrgUnit -Endpoint $endpoint -Filter 'organisationUnitGroups.code:eq:NEO_DEPARTMENT' -Fields $fields)) {
-                $departments.Add($unit)
-            }
-        }
-
-        $records = [System.Collections.Generic.List[object]]::new()
-        $ambiguousCountries = [System.Collections.Generic.HashSet[string]]::new($ordinal)
-        foreach ($unit in $departments) {
-            $hospital = Find-NeoIPCOrgUnitAncestor -Unit $unit -GroupCode 'HOSPITAL'
-            $country = Find-NeoIPCOrgUnitAncestor -Unit $unit -GroupCode 'COUNTRY'
-            $unitCountryCode = if ($country) { $country['code'] } else { $null }
-            if ($PSBoundParameters.ContainsKey('CountryCode') -and [string]$unitCountryCode -cne $CountryCode) { continue }
-            $worldBankClass = $null
-            if ($country) {
-                $classes = [string[]]@(Get-NeoIPCOrgUnitGroupCode -Unit $country -GroupSetCode 'WORLD_BANK_CLASSES')
-                if ($classes.Count -gt 0) { $worldBankClass = $classes[0] }
-                if ($classes.Count -gt 1 -and $ambiguousCountries.Add([string]$country['id'])) {
-                    Write-Warning "The country '$unitCountryCode' is a member of $($classes.Count) groups of the group set WORLD_BANK_CLASSES ($($classes -join ', ')); WorldBankClass is '$worldBankClass'."
+            else {
+                foreach ($unit in (Get-NeoIPCHierarchyOrgUnit -Endpoint $endpoint -Filter 'organisationUnitGroups.code:eq:NEO_DEPARTMENT' -Fields $fields)) {
+                    $departments.Add($unit)
                 }
             }
-            $records.Add([pscustomobject]@{
-                    OrgUnitId      = $unit['id']
-                    OrgUnitCode    = $unit['code']
-                    OrgUnitName    = $unit['name']
-                    Level          = $unit['level']
-                    HospitalCode   = if ($hospital) { $hospital['code'] } else { $null }
-                    CountryCode    = $unitCountryCode
-                    OpeningDate    = ConvertFrom-NeoIPCDhis2DateText -Text $unit['openingDate']
-                    ClosedDate     = ConvertFrom-NeoIPCDhis2DateText -Text $unit['closedDate']
-                    IsTestUnit     = @(Get-NeoIPCOrgUnitGroupCode -Unit $unit) -ccontains 'TEST_UNITS'
-                    TrialCodes     = [string[]]@(Get-NeoIPCOrgUnitGroupCode -Unit $unit -GroupSetCode 'NEOIPC_TRIALS')
-                    WorldBankClass = $worldBankClass
-                })
-        }
-        if ($PSBoundParameters.ContainsKey('CountryCode') -and $records.Count -eq 0) {
-            Write-Warning "No department in your hierarchy has a country with the code '$CountryCode'."
-        }
 
-        $records.Sort([System.Comparison[object]] {
-                param($x, $y)
-                $byCode = [string]::CompareOrdinal([string]$x.OrgUnitCode, [string]$y.OrgUnitCode)
-                if ($byCode -ne 0) { $byCode } else { [string]::CompareOrdinal([string]$x.OrgUnitId, [string]$y.OrgUnitId) }
-            })
-        $records
+            $records = [System.Collections.Generic.List[object]]::new()
+            $ambiguousCountries = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+            foreach ($unit in $departments) {
+                $hospital = Find-NeoIPCOrgUnitAncestor -Unit $unit -GroupCode 'HOSPITAL'
+                $country = Find-NeoIPCOrgUnitAncestor -Unit $unit -GroupCode 'COUNTRY'
+                $unitCountryCode = if ($country) { $country['code'] } else { $null }
+                if ($PSBoundParameters.ContainsKey('CountryCode') -and [string]$unitCountryCode -cne $CountryCode) { continue }
+                $worldBankClass = $null
+                if ($country) {
+                    $classes = [string[]]@(Get-NeoIPCOrgUnitGroupCode -Unit $country -GroupSetCode 'WORLD_BANK_CLASSES')
+                    if ($classes.Count -gt 0) { $worldBankClass = $classes[0] }
+                    if ($classes.Count -gt 1 -and $ambiguousCountries.Add([string]$country['id'])) {
+                        Write-Warning "The country '$unitCountryCode' is a member of $($classes.Count) groups of the group set WORLD_BANK_CLASSES ($($classes -join ', ')); WorldBankClass is '$worldBankClass'."
+                    }
+                }
+                $records.Add([pscustomobject]@{
+                        OrgUnitId      = $unit['id']
+                        OrgUnitCode    = $unit['code']
+                        OrgUnitName    = $unit['name']
+                        Level          = $unit['level']
+                        HospitalCode   = if ($hospital) { $hospital['code'] } else { $null }
+                        CountryCode    = $unitCountryCode
+                        OpeningDate    = ConvertFrom-NeoIPCDhis2DateText -Text $unit['openingDate']
+                        ClosedDate     = ConvertFrom-NeoIPCDhis2DateText -Text $unit['closedDate']
+                        IsTestUnit     = @(Get-NeoIPCOrgUnitGroupCode -Unit $unit) -ccontains 'TEST_UNITS'
+                        TrialCodes     = [string[]]@(Get-NeoIPCOrgUnitGroupCode -Unit $unit -GroupSetCode 'NEOIPC_TRIALS')
+                        WorldBankClass = $worldBankClass
+                    })
+            }
+            if ($PSBoundParameters.ContainsKey('CountryCode') -and $records.Count -eq 0) {
+                Write-Warning "No department in your hierarchy has a country with the code '$CountryCode'."
+            }
+
+            $records.Sort([System.Comparison[object]] {
+                    param($x, $y)
+                    $byCode = [string]::CompareOrdinal([string]$x.OrgUnitCode, [string]$y.OrgUnitCode)
+                    if ($byCode -ne 0) { $byCode } else { [string]::CompareOrdinal([string]$x.OrgUnitId, [string]$y.OrgUnitId) }
+                })
+            $records
+        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 }

@@ -126,124 +126,129 @@ function Read-UserInfo {
     }
 
     end {
-        if (($MyInvocation.ExpectingInput -or $selectorGiven) -and $codes.Count -eq 0) { return }
-        if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName }
-        $endpoint = @{ Auth = $Auth }
-        if ($Scheme) { $endpoint.Scheme = $Scheme }
-        if ($Hostname) { $endpoint.Hostname = $Hostname }
-        if ($null -ne $Port) { $endpoint.Port = $Port }
-        $ordinal = [System.StringComparer]::Ordinal
+        # A failure ends the cmdlet with an error of its own: an error a helper throws would otherwise end the caller's
+        # whole script, or, under -ErrorAction SilentlyContinue, be dropped and leave the read running on nothing.
+        try {
+            if (($MyInvocation.ExpectingInput -or $selectorGiven) -and $codes.Count -eq 0) { return }
+            if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName }
+            $endpoint = @{ Auth = $Auth }
+            if ($Scheme) { $endpoint.Scheme = $Scheme }
+            if ($Hostname) { $endpoint.Hostname = $Hostname }
+            if ($null -ne $Port) { $endpoint.Port = $Port }
+            $ordinal = [System.StringComparer]::Ordinal
 
-        # One read per chunk of codes; DHIS2 splits an `in` list on ',' with no escape, so a code holding one is read by
-        # itself.
-        $reads = [System.Collections.Generic.List[hashtable]]::new()
-        if ($codes.Count -gt 0) {
-            $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code $codes.ToArray() -Fields 'code'
-            foreach ($missing in $found.MissingCode) {
-                Write-Error -Message "No org unit with the code '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitCodeNotFound' -TargetObject $missing
-            }
-            $wanted = [string[]]@($found.ByCode.Keys)
-            if ($wanted.Count -eq 0) { return }
-            [Array]::Sort($wanted, $ordinal)
-            foreach ($chunk in (Split-NeoIPCList -Value @($wanted | Where-Object { -not $_.Contains(',') }) -Separator ',')) {
-                $reads.Add(@{ Filter = "organisationUnits.code:in:[$($chunk -join ',')]" })
-            }
-            foreach ($c in @($wanted | Where-Object { $_.Contains(',') })) { $reads.Add(@{ Filter = "organisationUnits.code:eq:$c" }) }
-        }
-        else {
-            $reads.Add(@{})
-        }
-
-        $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint
-        $version = ConvertTo-NeoIPCDhis2Version -Text $versionText
-        $twoFactorSource = Get-NeoIPCUserTwoFactorSource -Version $version
-        $fields = @(
-            'id', 'username', 'firstName', 'surname', 'email', 'phoneNumber', 'employer', 'created', 'createdBy[username]',
-            'lastUpdated', 'lastUpdatedBy[username]', 'passwordLastUpdated', 'lastLogin', 'invitation', 'disabled',
-            'selfRegistered', 'userRoles[name]', 'userGroups[name]', 'organisationUnits[code]',
-            'dataViewOrganisationUnits[code]', 'teiSearchOrganisationUnits[code]'
-        )
-        # NEOIPC-COMPAT(dhis2-user-twofactorenabled): see Get-NeoIPCUserTwoFactorSource in Private/UserInfo.ps1.
-        if ($twoFactorSource -eq 'UserField') { $fields += 'twoFactorEnabled' }
-
-        $users = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
-        foreach ($read in $reads) {
-            try {
-                $answer = Invoke-NeoIPCDhis2Get @endpoint @read -Path 'api/users' -Fields $fields -AsHashtable -Confirm:$false -WhatIf:$false
-            }
-            catch {
-                $failure = $_
-                if ($failure.Exception -is [System.Net.Http.HttpRequestException] -and [int]$failure.Exception.StatusCode -eq 403) {
-                    $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new(
-                            [System.Net.Http.HttpRequestException]::new("Your account may not list DHIS2 users: api/users needs the authority F_USER_VIEW, which ALL includes. $($failure.Exception.Message)", $failure.Exception, [System.Net.HttpStatusCode]::Forbidden),
-                            'NeoIPCUserListForbidden', [System.Management.Automation.ErrorCategory]::PermissionDenied, 'api/users'))
+            # One read per chunk of codes; DHIS2 splits an `in` list on ',' with no escape, so a code holding one is read
+            # by itself.
+            $reads = [System.Collections.Generic.List[hashtable]]::new()
+            if ($codes.Count -gt 0) {
+                $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code $codes.ToArray() -Fields 'code'
+                foreach ($missing in $found.MissingCode) {
+                    Write-Error -Message "No org unit with the code '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitCodeNotFound' -TargetObject $missing
                 }
-                $PSCmdlet.ThrowTerminatingError($failure)
+                $wanted = [string[]]@($found.ByCode.Keys)
+                if ($wanted.Count -eq 0) { return }
+                [Array]::Sort($wanted, $ordinal)
+                foreach ($chunk in (Split-NeoIPCList -Value @($wanted | Where-Object { -not $_.Contains(',') }) -Separator ',')) {
+                    $reads.Add(@{ Filter = "organisationUnits.code:in:[$($chunk -join ',')]" })
+                }
+                foreach ($c in @($wanted | Where-Object { $_.Contains(',') })) { $reads.Add(@{ Filter = "organisationUnits.code:eq:$c" }) }
             }
-            if ($answer -isnot [System.Collections.IDictionary] -or $answer['users'] -isnot [System.Collections.IList]) {
-                throw 'The user read did not return a users list.'
+            else {
+                $reads.Add(@{})
             }
-            foreach ($user in $answer['users']) {
-                if ($user -isnot [System.Collections.IDictionary] -or [string]::IsNullOrEmpty([string]$user['id'])) { continue }
-                if (-not $users.ContainsKey([string]$user['id'])) { $users[[string]$user['id']] = $user }
-            }
-        }
-        if ($users.Count -eq 0) { return }
 
-        $twoFactor = $null
-        if ($twoFactorSource -eq 'AuditEndpoint') { $twoFactor = Read-NeoIPCUserTwoFactorState -Endpoint $endpoint }
-        # NEOIPC-COMPAT(dhis2-user-twofactor-audit-floor): see Get-NeoIPCUserTwoFactorSource in Private/UserInfo.ps1.
-        elseif ($twoFactorSource -eq 'None') {
-            Write-Warning "TwoFactorEnabled is empty for every user: DHIS2 $versionText shows no other user's two-factor state. The first patches that do (api/users/twoFactor) are 2.42.6 and 2.43.1."
-        }
-
-        $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
-        $baseUrl = "${effectiveScheme}://$(Resolve-NeoIPCDhis2Hostname -Hostname $Hostname)"
-        if ($null -ne $Port) { $baseUrl += ":$Port" }
-
-        $records = [System.Collections.Generic.List[object]]::new()
-        foreach ($user in $users.Values) {
-            $id = [string]$user['id']
-            $twoFactorEnabled = $null
+            $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint
+            $version = ConvertTo-NeoIPCDhis2Version -Text $versionText
+            $twoFactorSource = Get-NeoIPCUserTwoFactorSource -Version $version
+            $fields = @(
+                'id', 'username', 'firstName', 'surname', 'email', 'phoneNumber', 'employer', 'created', 'createdBy[username]',
+                'lastUpdated', 'lastUpdatedBy[username]', 'passwordLastUpdated', 'lastLogin', 'invitation', 'disabled',
+                'selfRegistered', 'userRoles[name]', 'userGroups[name]', 'organisationUnits[code]',
+                'dataViewOrganisationUnits[code]', 'teiSearchOrganisationUnits[code]'
+            )
             # NEOIPC-COMPAT(dhis2-user-twofactorenabled): see Get-NeoIPCUserTwoFactorSource in Private/UserInfo.ps1.
-            if ($twoFactorSource -eq 'UserField') { $twoFactorEnabled = $user['twoFactorEnabled'] }
-            elseif ($null -ne $twoFactor -and $twoFactor.ContainsKey($id)) {
-                $twoFactorEnabled = @('TOTP_ENABLED', 'EMAIL_ENABLED') -ccontains $twoFactor[$id]
-            }
-            $createdBy = $user['createdBy']
-            $lastUpdatedBy = $user['lastUpdatedBy']
-            $records.Add([pscustomobject]@{
-                    UserId                     = $user['id']
-                    Username                   = $user['username']
-                    FirstName                  = $user['firstName']
-                    Surname                    = $user['surname']
-                    Email                      = $user['email']
-                    PhoneNumber                = $user['phoneNumber']
-                    Employer                   = $user['employer']
-                    OrganisationUnits          = ConvertTo-NeoIPCSortedText -InputObject $user['organisationUnits'] -Property 'code'
-                    DataViewOrganisationUnits  = ConvertTo-NeoIPCSortedText -InputObject $user['dataViewOrganisationUnits'] -Property 'code'
-                    TeiSearchOrganisationUnits = ConvertTo-NeoIPCSortedText -InputObject $user['teiSearchOrganisationUnits'] -Property 'code'
-                    UserRoles                  = ConvertTo-NeoIPCSortedText -InputObject $user['userRoles'] -Property 'name'
-                    UserGroups                 = ConvertTo-NeoIPCSortedText -InputObject $user['userGroups'] -Property 'name'
-                    Created                    = ConvertFrom-NeoIPCDhis2DateText -Text $user['created']
-                    CreatedBy                  = if ($createdBy -is [System.Collections.IDictionary]) { $createdBy['username'] } else { $null }
-                    LastUpdated                = ConvertFrom-NeoIPCDhis2DateText -Text $user['lastUpdated']
-                    LastUpdatedBy              = if ($lastUpdatedBy -is [System.Collections.IDictionary]) { $lastUpdatedBy['username'] } else { $null }
-                    PasswordLastUpdated        = ConvertFrom-NeoIPCDhis2DateText -Text $user['passwordLastUpdated']
-                    LastLogin                  = ConvertFrom-NeoIPCDhis2DateText -Text $user['lastLogin']
-                    Invitation                 = $user['invitation']
-                    Disabled                   = $user['disabled']
-                    TwoFactorEnabled           = $twoFactorEnabled
-                    SelfRegistered             = $user['selfRegistered']
-                    EditUrl                    = Get-NeoIPCUserEditUrl -BaseUrl $baseUrl -Version $version -UserId $id
-                })
-        }
+            if ($twoFactorSource -eq 'UserField') { $fields += 'twoFactorEnabled' }
 
-        $records.Sort([System.Comparison[object]] {
-                param($x, $y)
-                $byName = [string]::CompareOrdinal([string]$x.Username, [string]$y.Username)
-                if ($byName -ne 0) { $byName } else { [string]::CompareOrdinal([string]$x.UserId, [string]$y.UserId) }
-            })
-        $records
+            $users = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
+            foreach ($read in $reads) {
+                try {
+                    $answer = Invoke-NeoIPCDhis2Get @endpoint @read -Path 'api/users' -Fields $fields -AsHashtable -Confirm:$false -WhatIf:$false
+                }
+                catch {
+                    $failure = $_
+                    if ($failure.Exception -is [System.Net.Http.HttpRequestException] -and [int]$failure.Exception.StatusCode -eq 403) {
+                        $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new(
+                                [System.Net.Http.HttpRequestException]::new("Your account may not list DHIS2 users: api/users needs the authority F_USER_VIEW, which ALL includes. $($failure.Exception.Message)", $failure.Exception, [System.Net.HttpStatusCode]::Forbidden),
+                                'NeoIPCUserListForbidden', [System.Management.Automation.ErrorCategory]::PermissionDenied, 'api/users'))
+                    }
+                    $PSCmdlet.ThrowTerminatingError($failure)
+                }
+                if ($answer -isnot [System.Collections.IDictionary] -or $answer['users'] -isnot [System.Collections.IList]) {
+                    throw 'The user read did not return a users list.'
+                }
+                foreach ($user in $answer['users']) {
+                    if ($user -isnot [System.Collections.IDictionary] -or [string]::IsNullOrEmpty([string]$user['id'])) { continue }
+                    if (-not $users.ContainsKey([string]$user['id'])) { $users[[string]$user['id']] = $user }
+                }
+            }
+            if ($users.Count -eq 0) { return }
+
+            $twoFactor = $null
+            if ($twoFactorSource -eq 'AuditEndpoint') { $twoFactor = Read-NeoIPCUserTwoFactorState -Endpoint $endpoint }
+            # NEOIPC-COMPAT(dhis2-user-twofactor-audit-floor): see Get-NeoIPCUserTwoFactorSource in Private/UserInfo.ps1.
+            elseif ($twoFactorSource -eq 'None') {
+                Write-Warning "TwoFactorEnabled is empty for every user: DHIS2 $versionText shows no other user's two-factor state. The first patches that do (api/users/twoFactor) are 2.42.6 and 2.43.1."
+            }
+
+            $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
+            $baseUrl = "${effectiveScheme}://$(Resolve-NeoIPCDhis2Hostname -Hostname $Hostname)"
+            if ($null -ne $Port) { $baseUrl += ":$Port" }
+
+            $records = [System.Collections.Generic.List[object]]::new()
+            foreach ($user in $users.Values) {
+                $id = [string]$user['id']
+                $twoFactorEnabled = $null
+                # NEOIPC-COMPAT(dhis2-user-twofactorenabled): see Get-NeoIPCUserTwoFactorSource in Private/UserInfo.ps1.
+                if ($twoFactorSource -eq 'UserField') { $twoFactorEnabled = $user['twoFactorEnabled'] }
+                elseif ($null -ne $twoFactor -and $twoFactor.ContainsKey($id)) {
+                    $twoFactorEnabled = @('TOTP_ENABLED', 'EMAIL_ENABLED') -ccontains $twoFactor[$id]
+                }
+                $createdBy = $user['createdBy']
+                $lastUpdatedBy = $user['lastUpdatedBy']
+                $records.Add([pscustomobject]@{
+                        UserId                     = $user['id']
+                        Username                   = $user['username']
+                        FirstName                  = $user['firstName']
+                        Surname                    = $user['surname']
+                        Email                      = $user['email']
+                        PhoneNumber                = $user['phoneNumber']
+                        Employer                   = $user['employer']
+                        OrganisationUnits          = ConvertTo-NeoIPCSortedText -InputObject $user['organisationUnits'] -Property 'code'
+                        DataViewOrganisationUnits  = ConvertTo-NeoIPCSortedText -InputObject $user['dataViewOrganisationUnits'] -Property 'code'
+                        TeiSearchOrganisationUnits = ConvertTo-NeoIPCSortedText -InputObject $user['teiSearchOrganisationUnits'] -Property 'code'
+                        UserRoles                  = ConvertTo-NeoIPCSortedText -InputObject $user['userRoles'] -Property 'name'
+                        UserGroups                 = ConvertTo-NeoIPCSortedText -InputObject $user['userGroups'] -Property 'name'
+                        Created                    = ConvertFrom-NeoIPCDhis2DateText -Text $user['created']
+                        CreatedBy                  = if ($createdBy -is [System.Collections.IDictionary]) { $createdBy['username'] } else { $null }
+                        LastUpdated                = ConvertFrom-NeoIPCDhis2DateText -Text $user['lastUpdated']
+                        LastUpdatedBy              = if ($lastUpdatedBy -is [System.Collections.IDictionary]) { $lastUpdatedBy['username'] } else { $null }
+                        PasswordLastUpdated        = ConvertFrom-NeoIPCDhis2DateText -Text $user['passwordLastUpdated']
+                        LastLogin                  = ConvertFrom-NeoIPCDhis2DateText -Text $user['lastLogin']
+                        Invitation                 = $user['invitation']
+                        Disabled                   = $user['disabled']
+                        TwoFactorEnabled           = $twoFactorEnabled
+                        SelfRegistered             = $user['selfRegistered']
+                        EditUrl                    = Get-NeoIPCUserEditUrl -BaseUrl $baseUrl -Version $version -UserId $id
+                    })
+            }
+
+            $records.Sort([System.Comparison[object]] {
+                    param($x, $y)
+                    $byName = [string]::CompareOrdinal([string]$x.Username, [string]$y.Username)
+                    if ($byName -ne 0) { $byName } else { [string]::CompareOrdinal([string]$x.UserId, [string]$y.UserId) }
+                })
+            $records
+        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
     }
 }
