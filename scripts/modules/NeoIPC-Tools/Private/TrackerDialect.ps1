@@ -6,11 +6,17 @@ function Get-NeoIPCTrackerDialect {
     # 2.41 renamed the org-unit mode and paging parameters, the list reads' org-unit and UID parameters (with ',' in
     # place of ';' between their values), and the list key; 2.40 answers the new names with a silently widened or
     # paged read, 2.41 reads both name sets, and 2.42 ignores the old names, so a read in the wrong dialect widens
-    # rather than fails. On every version the event read takes one org unit, tracked entity, and program stage, and
-    # its enrolment list is separated by ','.
+    # rather than fails. On every version the event read takes one org unit, tracked entity, and program stage, the
+    # enrolment read one tracked entity, and the event read's enrolment list is separated by ','; the dates keep their
+    # names. A single-value parameter given a joined list answers 400.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][version]$Version)
+    $enrollmentNames = @{ TrackedEntity = 'trackedEntity'; EnrolledAfter = 'enrolledAfter'; EnrolledBefore = 'enrolledBefore'; UpdatedAfter = 'updatedAfter' }
+    $eventNames = @{
+        OrgUnit = 'orgUnit'; TrackedEntity = 'trackedEntity'; ProgramStage = 'programStage'; Enrollments = 'enrollments'
+        OccurredAfter = 'occurredAfter'; OccurredBefore = 'occurredBefore'; UpdatedAfter = 'updatedAfter'; UpdatedBefore = 'updatedBefore'
+    }
     if ($Version -lt [version]'2.41') {
         # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): remove once no supported instance runs 2.40 (/api/system/info
         # version 2.41 or later everywhere).
@@ -20,10 +26,12 @@ function Get-NeoIPCTrackerDialect {
             ListKey               = @{ events = 'instances'; enrollments = 'instances'; trackedEntities = 'instances' }
             TrackedEntityQuery    = [pscustomobject]@{ OrgUnits = 'orgUnit'; TrackedEntities = 'trackedEntity'; Separator = ';' }
             # An enrolment read by UID takes no other filter on 2.40: DHIS2 reads each listed enrolment and ignores
-            # the program, org unit, and the rest (TrackerEnrollmentsExportController).
-            EnrollmentQuery       = [pscustomobject]@{ OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; UidReadIgnoresFilters = $true }
+            # the program, org unit, and the rest (TrackerEnrollmentsExportController). An enrolment read by query
+            # carries no events, however the fields ask (AbstractEnrollmentService.getEnrollments maps each with
+            # EnrollmentParams.FALSE); one read by UID does.
+            EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; UidReadIgnoresFilters = $true; QueryReadOmitsEvents = $true } + $enrollmentNames)
             # 'event' drops a value that is no UID instead of refusing it; 'enrollments' is a set Spring binds, so ','.
-            EventQuery            = [pscustomobject]@{ Events = 'event'; EventSeparator = ';'; Enrollments = 'enrollments' }
+            EventQuery            = [pscustomobject](@{ Events = 'event'; EventSeparator = ';' } + $eventNames)
             # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue.
             RestoresFilterSlashes = $false
         }
@@ -34,8 +42,8 @@ function Get-NeoIPCTrackerDialect {
         Paging                = @{}
         ListKey               = @{ events = 'events'; enrollments = 'enrollments'; trackedEntities = 'trackedEntities' }
         TrackedEntityQuery    = [pscustomobject]@{ OrgUnits = 'orgUnits'; TrackedEntities = 'trackedEntities'; Separator = ',' }
-        EnrollmentQuery       = [pscustomobject]@{ OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; UidReadIgnoresFilters = $false }
-        EventQuery            = [pscustomobject]@{ Events = 'events'; EventSeparator = ','; Enrollments = 'enrollments' }
+        EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; UidReadIgnoresFilters = $false; QueryReadOmitsEvents = $false } + $enrollmentNames)
+        EventQuery            = [pscustomobject](@{ Events = 'events'; EventSeparator = ',' } + $eventNames)
         # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue.
         RestoresFilterSlashes = $Version -ge [version]'2.42.1'
     }
