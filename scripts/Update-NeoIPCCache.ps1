@@ -56,6 +56,8 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
+# The host the report builds default to, so the cache this fills is the one their completion reads.
+$Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname
 
 # Default: refresh all caches
 if (-not $Sites -and -not $DataElements) {
@@ -70,7 +72,7 @@ if ($Dhis2Scheme)   { $connArgs.Scheme   = $Dhis2Scheme }
 if ($Dhis2Hostname) { $connArgs.Hostname = $Dhis2Hostname }
 if ($Dhis2Port)     { $connArgs.Port     = $Dhis2Port }
 # -Dhis2Path is used only for cache-key partitioning (Get-NeoIPCServerKey
-# above); the readers hardcode 'api/<endpoint>' paths.
+# below); the readers hardcode 'api/<endpoint>' paths.
 
 $serverKey = Get-NeoIPCServerKey -Scheme $Dhis2Scheme -Hostname $Dhis2Hostname -Port $Dhis2Port -Path $Dhis2Path
 $cacheDir = Join-Path $PSScriptRoot '..' 'data' $serverKey

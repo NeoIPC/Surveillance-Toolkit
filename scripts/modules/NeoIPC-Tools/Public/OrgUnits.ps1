@@ -5,9 +5,11 @@
 Build a filesystem-safe key from DHIS2 connection parameters.
 
 .DESCRIPTION
-Returns a string like "https_neoipc.charite.de_api" derived from scheme,
+Returns a string like "https_dhis2.example.org_api" derived from scheme,
 hostname, port, and path. Used to partition per-server cache files.
-Falls back to neoipcr defaults for any null parameter.
+A null scheme or path falls back to neoipcr's default (https, /api); a null
+hostname to the NEOIPC_DHIS2_HOST environment variable, and with neither
+the call stops, since the module has no built-in host.
 #>
 function Get-NeoIPCServerKey {
     [CmdletBinding()]
@@ -19,7 +21,7 @@ function Get-NeoIPCServerKey {
     )
 
     $s = if ($Scheme) { $Scheme } else { 'https' }
-    $h = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
+    $h = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $p = if ($Path) { $Path } else { '/api' }
     $key = "${s}_${h}"
     if ($Port) { $key += "_${Port}" }

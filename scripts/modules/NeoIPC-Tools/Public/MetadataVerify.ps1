@@ -79,7 +79,8 @@ function Test-NeoIPCMetadataImport {
     .PARAMETER Scheme
         DHIS2 scheme (http/https). Default https.
     .PARAMETER Hostname
-        DHIS2 hostname. Default neoipc.charite.de.
+        DHIS2 hostname. Without it the NEOIPC_DHIS2_HOST environment variable names the host; with neither the
+        check stops, since the module has no built-in host.
     .PARAMETER Port
         DHIS2 port. Default none (scheme default).
     .PARAMETER Expected
@@ -107,7 +108,7 @@ function Test-NeoIPCMetadataImport {
         [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
         [System.Collections.IDictionary]$Expected,
         [switch]$CheckTranslations,
@@ -390,7 +391,8 @@ function Test-NeoIPCProgramRuleActionServed {
     .PARAMETER Scheme
         DHIS2 scheme (http/https). Default https.
     .PARAMETER Hostname
-        DHIS2 hostname. Default neoipc.charite.de.
+        DHIS2 hostname. Without it the NEOIPC_DHIS2_HOST environment variable names the host; with neither the
+        check stops, since the module has no built-in host.
     .PARAMETER Port
         DHIS2 port. Default none (scheme default).
     .OUTPUTS
@@ -406,7 +408,7 @@ function Test-NeoIPCProgramRuleActionServed {
         [Parameter(Mandatory, ParameterSetName = 'Package')]$Package,
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null
     )
     if ($PSCmdlet.ParameterSetName -eq 'Path') {

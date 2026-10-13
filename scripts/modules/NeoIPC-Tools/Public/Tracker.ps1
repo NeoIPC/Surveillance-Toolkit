@@ -275,7 +275,7 @@ function Read-EnrolmentInfo {
         $script:Auth_local = $Auth
 
         $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
-        $effectiveHost   = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
+        $effectiveHost   = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
         $script:baseUrl  = "${effectiveScheme}://${effectiveHost}"
         if ($Port) { $script:baseUrl += ":$Port" }
 

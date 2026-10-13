@@ -90,6 +90,32 @@ function Test-NeoIPCRenderWarningHead {
 
 <#
 .SYNOPSIS
+The DHIS2 host a report build reads from.
+
+.DESCRIPTION
+The given host, else the NEOIPC_DHIS2_HOST environment variable, else the
+NeoIPC production host: the order in which the reports' R scripts resolve
+theirs (get_connection_options in reports/common/helpers.R). A build resolves
+its host once and passes it to every part, its R and Quarto children
+included, so the department list and the report data come from the same
+instance. The report tooling is the only place with a default host; the
+module's DHIS2 functions have none.
+
+.PARAMETER Hostname
+The host given to the build, or nothing.
+#>
+function Resolve-NeoIPCReportHostname {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([string]$Hostname)
+    if (-not [string]::IsNullOrWhiteSpace($Hostname)) { return $Hostname.Trim() }
+    $fromEnvironment = $env:NEOIPC_DHIS2_HOST
+    if (-not [string]::IsNullOrWhiteSpace($fromEnvironment)) { return $fromEnvironment.Trim() }
+    'neoipc.charite.de'
+}
+
+<#
+.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION

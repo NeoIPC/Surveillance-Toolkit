@@ -162,6 +162,8 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
+# One host for every part of the build, the department list and the report data alike.
+$Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname
 
 $isDataFileMode = $PSCmdlet.ParameterSetName -eq 'DataFile'
 

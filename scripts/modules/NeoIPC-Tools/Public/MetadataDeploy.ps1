@@ -380,9 +380,8 @@ function Deploy-NeoIPCMetadata {
     # Every read passes -WhatIf:$false: the GET helper asks ShouldProcess, and a -WhatIf given to this cmdlet reaches
     # it (-Confirm:$false does not stop that), which would leave a dry run nothing to plan with. A read that fails ends
     # the run like any other failure, with the summary.
-    try { $info = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false }
+    try { $summary.Dhis2Version = Get-NeoIPCDhis2VersionText -Endpoint $endpoint }
     catch { Exit-Deployment "Reading the DHIS2 version failed: $($_.Exception.Message)" }
-    $summary.Dhis2Version = [string]$info['version']
     $version = ConvertTo-NeoIPCDhis2Version -Text $summary.Dhis2Version
     Write-Host ("Deploying metadata to {0} (DHIS2 {1}){2}{3}" -f $target, $summary.Dhis2Version,
         $(if ($DryRun) { ', dry run' } else { '' }), $(if ($SyntheticInstance) { ', synthetic instance' } else { '' }))

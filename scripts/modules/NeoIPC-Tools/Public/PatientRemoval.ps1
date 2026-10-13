@@ -250,9 +250,8 @@ function Remove-NeoIPCPatient {
         # ---- 2. version, metadata, and departments -----------------------------------------------------------------------
         # Every read passes -WhatIf:$false: the GET helper asks ShouldProcess, and a -WhatIf given to this cmdlet reaches it,
         # which would leave the preview nothing to read.
-        try { $info = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false }
+        try { $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint }
         catch { Stop-PatientRemoval 'PreflightFailed' "Reading the DHIS2 version failed: $($_.Exception.Message) Nothing was deleted." }
-        $versionText = [string]$info['version']
         if (-not (Test-NeoIPCVerifiedDhis2Version -Text $versionText -Release $script:NeoIPCPatientRemovalVerifiedReleases)) {
             $detail = 'DHIS2 {0} is no release this removal was verified on ({1}, or a later patch of one of their lines).' -f $versionText,
             (($script:NeoIPCPatientRemovalVerifiedReleases | ForEach-Object { "$_" }) -join ', ')

@@ -169,13 +169,19 @@ The `Read-*Info` cmdlets and the personal-access-token cmdlets accept a
 `Read-PatientInfo`, `Read-EnrolmentInfo`, and `Read-EventInfo` take an `-Auth`
 hashtable from `Resolve-NeoIPCAuth` as well. If no token is available, you are
 prompted for username/password. The other cmdlets that talk to DHIS2 take
-`-Auth`. Without `-Hostname`, a cmdlet talks to the NeoIPC production instance,
-except the four that write metadata or tracker data (`Import-NeoIPCMetadata`,
-`Deploy-NeoIPCMetadata`, `Import-NeoIPCPlayData`, and `Remove-NeoIPCPatient`),
-whose `-Hostname` is mandatory, so that they always name their target.
+`-Auth`. Without `-Hostname`, a cmdlet takes its host from the
+`NEOIPC_DHIS2_HOST` environment variable, and with neither it stops: the module
+has no built-in host, so nothing reaches an instance by omission. The four that
+write metadata or tracker data (`Import-NeoIPCMetadata`,
+`Deploy-NeoIPCMetadata`, `Import-NeoIPCPlayData`, and `Remove-NeoIPCPatient`)
+require `-Hostname` itself, so that each call names its target. The report
+builders (`scripts/Build-*.ps1`) are the exception: like the reports' R
+scripts, they fall back to the NeoIPC production instance when neither names a
+host.
 
 ```powershell
-# Token from environment variable (set once, used by all commands)
+# Host and token from environment variables (set once, used by all commands)
+$env:NEOIPC_DHIS2_HOST = 'dhis2.example.org'
 $env:NEOIPC_DHIS2_TOKEN = 'd2pat_...'
 
 # Token from a file
@@ -660,7 +666,7 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | DataElements | `Get-NeoIPCDataElementCodes` |
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |
 | User | `Read-UserInfo` |
-| Quarto | `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `New-NeoIPCBuildStep`, `Complete-NeoIPCBuildStep`, `Get-NeoIPCParameterSnapshot`, `Get-NeoIPCRenderLogLevel`, `Test-NeoIPCRenderWarningHead`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
+| Quarto | `Resolve-NeoIPCReportHostname`, `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `New-NeoIPCBuildStep`, `Complete-NeoIPCBuildStep`, `Get-NeoIPCParameterSnapshot`, `Get-NeoIPCRenderLogLevel`, `Test-NeoIPCRenderWarningHead`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
 | InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
 | Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation`, `Update-NeoIPCMetadataDirectory` |
 | Metadata deployment | `Deploy-NeoIPCMetadata`, `Import-NeoIPCMetadata`, `Test-NeoIPCMetadataImport`, `Test-NeoIPCProgramRuleActionServed` |

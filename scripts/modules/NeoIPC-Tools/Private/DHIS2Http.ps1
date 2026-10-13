@@ -2,6 +2,18 @@
 # Private DHIS2 HTTP layer — not exported from the module.
 # All public functions that call the DHIS2 API should go through these functions.
 
+function Resolve-NeoIPCDhis2Hostname {
+    # The DHIS2 host a call goes to: the given one, else the NEOIPC_DHIS2_HOST environment variable. The module has no
+    # built-in host, so nothing reaches an instance by omission; a call with neither stops here.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([string]$Hostname)
+    if (-not [string]::IsNullOrWhiteSpace($Hostname)) { return $Hostname.Trim() }
+    $fromEnvironment = $env:NEOIPC_DHIS2_HOST
+    if (-not [string]::IsNullOrWhiteSpace($fromEnvironment)) { return $fromEnvironment.Trim() }
+    throw 'No DHIS2 host given: pass -Hostname or set the NEOIPC_DHIS2_HOST environment variable.'
+}
+
 function New-NeoIPCDhis2Uri {
     # Build the request URI from scheme/host/port/path plus pre-built, already-encoded query parts. Shared by
     # the GET / DELETE / POST verbs so the UriBuilder construction (port=-1/null handled cleanly) lives once.
@@ -47,11 +59,13 @@ function Invoke-NeoIPCDhis2Get {
         [string]$Path,
 
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
 
         [string[]]$Fields,
         [string[]]$Filter,
+        # One value per key. A list goes in pre-joined with the separator its parameter takes, which differs between
+        # parameters and DHIS2 versions (Get-NeoIPCTrackerDialect), so an array is refused rather than joined.
         [hashtable]$QueryParameters,
 
         # Parse the body into ordered dictionaries and keep every date as the server's own text. Invoke-RestMethod
@@ -63,6 +77,7 @@ function Invoke-NeoIPCDhis2Get {
         [Nullable[int]]$PageSize = $null
     )
 
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $queryParts = [System.Collections.Generic.List[string]]::new()
     if ($null -ne $PageSize) { $queryParts.Add("pageSize=$PageSize") }
     else { $queryParts.Add('paging=false') }
@@ -80,7 +95,11 @@ function Invoke-NeoIPCDhis2Get {
 
     if ($QueryParameters) {
         foreach ($key in $QueryParameters.Keys) {
-            $queryParts.Add("${key}=$([System.Net.WebUtility]::UrlEncode($QueryParameters[$key]))")
+            $value = $QueryParameters[$key]
+            if ($value -is [System.Collections.IEnumerable] -and $value -isnot [string]) {
+                throw "The query parameter '$key' holds a list; join it with the separator the parameter takes."
+            }
+            $queryParts.Add("${key}=$([System.Net.WebUtility]::UrlEncode([string]$value))")
         }
     }
 
@@ -120,9 +139,10 @@ function Get-NeoIPCDhis2StatusCode {
         [Parameter(Mandatory)][hashtable]$Auth,
         [Parameter(Mandatory)][string]$Path,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null
     )
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path -QueryPart 'fields=id'
     $invokeParams = @{ Method = 'Get'; Uri = $uri; SkipHttpErrorCheck = $true }
     Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted
@@ -153,12 +173,13 @@ function Invoke-NeoIPCDhis2Delete {
         [string]$Path,
 
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
 
         [switch]$AllowUnencrypted
     )
 
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path
 
     $invokeParams = @{
@@ -224,12 +245,13 @@ function Invoke-NeoIPCDhis2Put {
         [string]$Path,
 
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
 
         [Parameter(Mandatory)][string]$Body,
         [string]$ContentType = 'application/json'
     )
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $uri = New-NeoIPCDhis2Uri -Scheme $Scheme -Hostname $Hostname -Port $Port -Path $Path
     $invokeParams = @{
         Method             = 'Put'
@@ -281,7 +303,7 @@ function Invoke-NeoIPCDhis2Post {
         [string]$Path,
 
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
 
         [string]$Body,
@@ -289,6 +311,7 @@ function Invoke-NeoIPCDhis2Post {
         [hashtable]$QueryParameters
     )
 
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $queryParts = [System.Collections.Generic.List[string]]::new()
     if ($QueryParameters) {
         foreach ($key in $QueryParameters.Keys) {

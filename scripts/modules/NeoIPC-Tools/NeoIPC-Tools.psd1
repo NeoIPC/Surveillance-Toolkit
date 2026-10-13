@@ -43,6 +43,7 @@
         # QuartoHelpers
         'Get-NeoIPCRenderLogLevel'
         'Test-NeoIPCRenderWarningHead'
+        'Resolve-NeoIPCReportHostname'
         'Invoke-WithNeoIPCAuth'
         'Invoke-QuartoRender'
         'Invoke-Rscript'

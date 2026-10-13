@@ -47,7 +47,7 @@ param(
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoIPCServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
-            -Hostname $fakeBoundParameters['Dhis2Hostname'] `
+            -Hostname (Resolve-NeoIPCReportHostname -Hostname $fakeBoundParameters['Dhis2Hostname']) `
             -Port $fakeBoundParameters['Dhis2Port'] `
             -Path $fakeBoundParameters['Dhis2Path']
         $cacheFile = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
@@ -119,6 +119,8 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
+# One host for every part of the build, the department list and the report data alike.
+$Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname
 
 # -Dhis2PublicBaseUrl is checked before anything else runs: authentication can
 # prompt for credentials, -OutputDir is created, the build report records the

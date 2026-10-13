@@ -77,7 +77,7 @@ function Read-UserInfo {
         $obj = Invoke-NeoIPCDhis2Get @getParams
 
         $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
-        $effectiveHost = if ($Hostname) { $Hostname } else { 'neoipc.charite.de' }
+        $effectiveHost = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
         $baseUrl = "${effectiveScheme}://${effectiveHost}"
         if ($Port) { $baseUrl += ":$Port" }
 

@@ -32,7 +32,7 @@ function New-NeoIPCPlayDataPackage {
         [string]$Path,
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
         [string[]]$OrgUnitCode,
         [string]$OutputPath,
@@ -155,8 +155,7 @@ function Import-NeoIPCPlayData {
         reportMode     = 'FULL'
     }
 
-    # -WhatIf:$false: a read under -WhatIf would return nothing, which leaves no version to choose the dialect by.
-    $versionText = [string]((Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false)['version'])
+    $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint
     $dialect = Get-NeoIPCTrackerDialect -Version (ConvertTo-NeoIPCDhis2Version -Text $versionText)
 
     # Skip the rule engine on the two 2.43.0.x patches whose SupplementaryDataProvider 409s our
@@ -339,7 +338,7 @@ function Export-NeoIPCPlayDataCsv {
         [Parameter(Mandatory)][string]$OutputDirectory,
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null
     )
     $payloads = if ($PSCmdlet.ParameterSetName -eq 'Path') {
