@@ -44,7 +44,7 @@ principles, the capability matrix, and the verification gates — lives in
 | File | Role |
 |------|------|
 | `Public/Auth.ps1` + `Private/Auth.ps1`, `Private/DHIS2Http.ps1`, `Private/Dhis2Version.ps1` | DHIS2 auth (a personal access token of either version, or a username and password), the instance's DHIS2 version, and the REST GET/POST/PUT/DELETE layer every live call goes through, whose errors carry DHIS2's own message |
-| `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, DE codes, and personal-access-token lifecycle; `Private/OrgUnits.ps1`, `Private/TrackerRead.ps1`, and `Private/UserInfo.ps1` hold what each needs beside the requests |
+| `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, data-element codes, and personal-access-token lifecycle; `Private/OrgUnits.ps1`, `Private/TrackerRead.ps1`, and `Private/UserInfo.ps1` hold what each needs beside the requests |
 | `Private/OrgUnitHierarchy.ps1` | The org units of the caller's hierarchy (its data-capture org units and those below them), read per capture unit, and org units looked up by code or UID within it |
 | `Public/PatientRemoval.ps1` + `Private/PatientRemoval.ps1` | **Remove patients** entered in error (`Remove-NeoIPCPatient`): select them by department and patient ID or by UID, refuse what a deletion would take with it unseen, preview with DHIS2's own dry run, confirm once, delete one patient per request, and prove each deletion by reading it back; the planning half is free of I/O ([Removing Patients](#removing-patients)) |
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
@@ -201,7 +201,8 @@ delete (`Import-NeoIPCMetadata`, `Deploy-NeoIPCMetadata`,
 `Import-NeoIPCPlayData`, `Remove-NeoIPCPatient`,
 `Remove-DHIS2PersonalAccessToken`, and `Clear-DHIS2PersonalAccessTokens`)
 require `-Hostname` itself, so that each call names its target. The report
-builders (`scripts/Build-*.ps1`) are the exception: like the reports' R
+builders (`scripts/Build-*.ps1`) and `scripts/Update-NeoIPCCache.ps1`, which
+fills their tab-completion cache, are the exception: like the reports' R
 scripts, they fall back to the NeoIPC production instance when neither names a
 host. Their `-Dhis2Path` reaches only the reports' R code and the key of the
 tab-completion cache; the department list is read from the instance's `/api`
@@ -244,8 +245,8 @@ of each line. What you see differs between releases in these ways:
 3. **Who sees which users.** On 2.41 and earlier, an account without the
    authority ALL does not see the accounts that hold any of its own user
    roles, itself included, unless the system setting that lets users grant
-   their own roles (`keyCanGrantOwnUserAuthorityGroups`) is on; from 2.42 it
-   sees them.
+   their own roles (`keyCanGrantOwnUserAuthorityGroups`) is on, and
+   `Read-UserInfo` warns that its list may lack them; from 2.42 it sees them.
 4. **Attribute values.** DHIS2 2.43.2 and later leave out the values of the
    patient attributes your account may not read through their sharing.
    `Read-PatientInfo` then warns, naming the attributes whose columns may be
@@ -255,16 +256,27 @@ of each line. What you see differs between releases in these ways:
    `Read-PatientInfo -NeoIpcId` refuses such an ID there; select the patient
    by its UID instead.
 6. **Org units of an account with several data-capture org units.** DHIS2
-   2.42 and later match nothing with `withinUserHierarchy=true` for such an
-   account, so the module reads the org units below each capture unit itself.
-7. **Widened reads.** DHIS2 2.42 and later ignore a request parameter they do
-   not know and widen the read instead of refusing it. Every tracker read
-   checks the records DHIS2 returns against its request, and a record it did
-   not ask for ends the read with an error.
+   2.42 and later match with `withinUserHierarchy=true` only the org units
+   whose path holds every one of such an account's capture units: none unless
+   they lie on one line of descent, and then only the deepest one's subtree.
+   The module reads the org units below each capture unit itself.
+7. **Widened reads.** DHIS2 ignores a request parameter it does not know, on
+   every release, and widens the read instead of refusing it; from 2.42 the
+   2.40 names are among those it does not know. Every tracker read checks the
+   records DHIS2 returns against its request, and a record it did not ask for
+   ends the read with an error.
+8. **Org-unit codes holding a comma.** DHIS2 2.42 and later cut an org-unit
+   filter's value at its first `,`, so the module looks such a code up by its
+   longest part without one and compares the whole code itself.
 
 On 2.40, the tracker reads apply the filters DHIS2 ignores when it reads
-enrolments by UID themselves, and fill `EventIds` with a second read, since
-DHIS2 2.40 returns no events with enrolments it reads by query.
+enrolments by UID themselves, and read such enrolments one at a time when DHIS2
+refuses the whole read because your account may not read one of them, with an
+error naming each one it refuses. They fill `EventIds` with a second read,
+since DHIS2 2.40 returns no events with enrolments it reads by query, and
+`Read-EnrolmentInfo` checks that your account has data-capture org units
+before a read without org units, which DHIS2 2.40 answers with nothing rather
+than a refusal.
 
 ## Access and Scope
 
@@ -281,11 +293,16 @@ silence:
   account read the org unit's metadata.
 - **Patients, enrolments, and events.** DHIS2 lets only an account with
   data-capture org units and data read access to NEOIPC_CORE read its
-  records; without either, the read ends with an error that says which. On
-  DHIS2 2.43.2 and later, a patient attribute's values also need read access
-  to the attribute.
+  records; without either, the read ends with an error that says which. It
+  reads them as far as the account's search org units reach (its data-capture
+  org units where it has none), and for an account without ALL only the
+  records whose patient's NEOIPC_CORE record is owned within its data-capture
+  org units. An account with ALL can therefore read records in org units that
+  the org-unit lookups above do not find. On DHIS2 2.43.2 and later, a patient
+  attribute's values also need read access to the attribute.
 - **Users.** `Read-UserInfo` needs the authority F_USER_VIEW, which ALL
-  includes; the two-factor state needs ALL itself (see
+  includes. On 2.41 and earlier the two-factor state comes with the user list;
+  from 2.42.6 and 2.43.1 it needs ALL itself (see
   [DHIS2 Versions](#dhis2-versions)).
 - **Tokens.** The token cmdlets work on your own tokens. With `-AllUsers` they
   reach every user's with ALL, and otherwise only those shared with your
@@ -337,28 +354,33 @@ Read-UserInfo -Auth $auth | Where-Object TwoFactorEnabled -eq $false |
 ## Patient, Enrolment, and Event Inspection (Pipeline-Composable)
 
 `Read-PatientInfo`, `Read-EnrolmentInfo`, and `Read-EventInfo` read the
-patients, enrolments, and events of the program NEOIPC_CORE within your
-hierarchy (see [Access and Scope](#access-and-scope)). Without a filter, a
-cmdlet reads everything there; the filters of different parameters combine, so
-that a record must pass each of them. `-OrgUnitCode` and `-OrgUnitId` form one
-set of org units, and `-EventType` and `-ProgramStageId` one set of stages. A
-record lies in an org unit when it was registered or entered there, or when
-its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects
-it.
+patients, enrolments, and events of the program NEOIPC_CORE that DHIS2 lets
+you read (see [Access and Scope](#access-and-scope)). Without a filter, a
+cmdlet reads all of them; the filters of different parameters combine, so that
+a record must pass each of them. `-OrgUnitCode` and `-OrgUnitId` form one set
+of org units, and `-EventType` and `-ProgramStageId` one set of stages. A
+record lies in an org unit when its patient's NEOIPC_CORE record is owned
+there, which is how DHIS2 selects it: where the patient was registered, unless
+the record has been transferred. A record's `OrgUnitId` is where it was
+registered or entered.
 
 Each code or UID that names no org unit in your hierarchy, each value that is
 no DHIS2 UID, each stage or data element that does not exist, and each tracked
-entity DHIS2 says does not exist is an error naming it. When none of the values
-given to a filter names anything, the cmdlet returns nothing rather than read
-without that filter; an empty pipeline returns nothing, and a filter given
-without a value is an error.
+entity that is no NEOIPC_CORE patient you can read is an error naming it. When
+none of the values given to a filter names anything, the cmdlet returns
+nothing rather than read without that filter; an empty pipeline returns
+nothing, whatever the arguments, and a filter given without a value is an
+error.
 
 Each cmdlet emits parent IDs and child ID lists on its output objects, and
 takes pipeline-bound filter parameters with matching property names, so the
 reads compose by exact property-name match, with no `[Alias]` indirection and
-no `Select-Object` renames. `Read-EventInfo`'s `-CreatedBy`, `-UpdatedBy`, and
-`-StoredBy`, which compare exactly, take no pipeline input, so that the events
-of piped enrolments are read whoever created or changed the enrolments.
+no `Select-Object` renames. Two kinds of filter take no pipeline input:
+`-OrgUnitId`, since a record's `OrgUnitId` need not be the org unit that owns
+it, so a transferred patient piped on would drop out; and `Read-EventInfo`'s
+`-CreatedBy`, `-UpdatedBy`, and `-StoredBy`, which compare exactly, so that
+the events of piped enrolments are read whoever created or changed the
+enrolments. `Read-OrgUnitInfo`'s records select through `-OrgUnitCode`.
 
 `-NeoIpcId` compares patient IDs ignoring case, as DHIS2 does: `de-01` also
 finds `DE-01`. DHIS2's event read takes one org unit, one tracked entity, and
@@ -703,17 +725,22 @@ $pairs = Build-QmdParamPairs -Values @{
 
 `-OrgUnitCode` (on `Read-OrgUnitInfo`, `Read-UserInfo`, `Read-PatientInfo`,
 `Read-EnrolmentInfo`, `Read-EventInfo`, `Remove-NeoIPCPatient`) and `-DataElementCode` (on
-`Read-EventInfo`) support tab completion from local caches. Populate
-them once with the unified cache-refresh script:
+`Read-EventInfo`) complete from local caches, one per DHIS2 instance. Populate
+them with the unified cache-refresh script, which takes its host as the report
+builders do: `-Dhis2Hostname`, else `NEOIPC_DHIS2_HOST`, else the production
+instance.
 
 ```powershell
-./scripts/Update-NeoIPCCache.ps1                # refresh everything
-./scripts/Update-NeoIPCCache.ps1 -Sites         # only site-codes cache
-./scripts/Update-NeoIPCCache.ps1 -DataElements  # only DE-codes cache
+./scripts/Update-NeoIPCCache.ps1 -Dhis2Hostname dhis2.example.org  # refresh everything
+./scripts/Update-NeoIPCCache.ps1 -Dhis2Hostname dhis2.example.org -Sites         # only the site codes
+./scripts/Update-NeoIPCCache.ps1 -Dhis2Hostname dhis2.example.org -DataElements  # only the data-element codes
 ```
 
 After that, `-OrgUnitCode NEO_<Tab>` and `-DataElementCode NEOIPC_<Tab>`
-complete from the cached lists.
+complete from the cache of the cmdlet's own host: its `-Hostname`, typed before
+the code, or `NEOIPC_DHIS2_HOST`. With neither they offer nothing, since the
+module has no built-in host; the cache the script fills for the production
+instance when no host is given serves only the report builders' completion.
 
 ## Metadata Translations (gettext PO)
 

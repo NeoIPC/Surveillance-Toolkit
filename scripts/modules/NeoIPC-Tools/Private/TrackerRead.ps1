@@ -80,19 +80,42 @@ function Write-NeoIPCTrackerReadError {
     $Cmdlet.WriteError((New-NeoIPCTrackerReadError -ErrorId $ErrorId -Message $Message -Category $Category -TargetObject $TargetObject))
 }
 
+function Add-NeoIPCTrackerReadInput {
+    # Adds filter values to a tracker read's lists ($Given, one list per parameter name), leaving out the parameters named
+    # in -Skip. A cmdlet adds the values given as arguments once, in begin, and in process those that each pipeline object
+    # binds, skipping the arguments, which stay bound for every object. Before binding the next object PowerShell resets
+    # a parameter that the previous one bound, so the parameter variables hold the current object's values, while
+    # PSBoundParameters can keep a key the current object did not bind.
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][hashtable]$Given,
+        [Parameter(Mandatory)][hashtable]$Value,
+        [AllowEmptyCollection()][string[]]$Skip = @()
+    )
+    foreach ($name in $Value.Keys) {
+        if ($Skip -ccontains $name) { continue }
+        foreach ($v in $Value[$name]) { $Given[$name].Add([string]$v) }
+    }
+}
+
 function Test-NeoIPCTrackerReadInput {
-    # Whether a tracker read has anything to read. False, after an error naming the parameter, when a filter given as an
-    # argument holds no value, since reading without it would widen the read to every record; false without an error when
-    # the cmdlet takes pipeline input and none of its filters received a value, since an empty upstream must not widen
-    # the read either.
+    # Whether a tracker read has anything to read:
+    #   1. false, without an error, when the cmdlet takes pipeline input and received no object, whatever its arguments,
+    #      since an empty upstream reads nothing;
+    #   2. false, after an error naming the parameter, when a filter given as an argument holds no value, since reading
+    #      without it would widen the read to every record;
+    #   3. false, without an error, when the cmdlet received pipeline objects but none of them gave its filters a value,
+    #      since that must not widen the read either.
     [CmdletBinding()]
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)][System.Management.Automation.PSCmdlet]$Cmdlet,
         [Parameter(Mandatory)][hashtable]$Given,
         [AllowEmptyCollection()][string[]]$Explicit = @(),
-        [switch]$ExpectingInput
+        [switch]$ExpectingInput,
+        [switch]$Received
     )
+    if ($ExpectingInput -and -not $Received) { return $false }
     foreach ($name in $Explicit) {
         if ((Get-NeoIPCDistinctValue -Value $Given[$name]).Count -eq 0) {
             Write-NeoIPCTrackerReadError -Cmdlet $Cmdlet -ErrorId 'EmptyFilter' -Category InvalidArgument -TargetObject $name `
@@ -183,10 +206,13 @@ function Get-NeoIPCCoreTrackerList {
     #      NEOIPC_CORE: "User needs to be assigned data capture org units" (409 on 2.40's event read, 400 on 2.41, 403 on
     #      2.42 and later); on 2.40's tracked-entity and enrolment reads "Current user must be associated with at least
     #      one organisation unit when selection mode is ACCESSIBLE", and on its tracked-entity read also "User need to be
-    #      associated with at least one organisation unit." (both 409);
+    #      associated with at least one organisation unit." (both 409). 2.40's enrolment read by query refuses only an
+    #      account with neither data-capture nor data-view org units: one with data-view org units only gets an empty
+    #      list, which Read-EnrolmentInfo checks for itself;
     #   2. no data read access to the program: "User has no access to program: <uid>" (403), on 2.40's tracked-entity and
     #      enrolment reads "Current user is not authorized to read data from selected program:  <uid>" (409).
-    # Every other failure passes through unchanged.
+    # Every other failure passes through unchanged, among them the 409 of 2.40's enrolment read by UID for a listed
+    # enrolment the account may not read, which Read-EnrolmentInfo handles per enrolment.
     [CmdletBinding()]
     [OutputType([object[]])]
     param(
@@ -198,10 +224,8 @@ function Get-NeoIPCCoreTrackerList {
     )
     try { Get-NeoIPCTrackerList -Endpoint $Endpoint -Dialect $Dialect -Resource $Resource -Query $Query -Fields $Fields }
     catch {
-        $exception = $_.Exception
-        $status = if ($exception -is [System.Net.Http.HttpRequestException] -and $null -ne $exception.StatusCode) { [int]$exception.StatusCode } else { 0 }
-        if ($status -in 400, 403, 409) {
-            $answer = $exception.Message
+        if ((Get-NeoIPCHttpStatus -ErrorRecord $_) -in 400, 403, 409) {
+            $answer = $_.Exception.Message
             if ($answer -match 'data capture org units|associated with at least one organisation unit') {
                 throw (New-NeoIPCTrackerReadError -ErrorId 'NoCaptureOrgUnits' -Category PermissionDenied -TargetObject $Resource `
                         -Message "Your account has no data-capture org units, which DHIS2 requires for reading NEOIPC_CORE's tracker records. $answer")
@@ -215,10 +239,23 @@ function Get-NeoIPCCoreTrackerList {
     }
 }
 
+function Get-NeoIPCHttpStatus {
+    # The HTTP status of a failed DHIS2 request, from the error the GET helper throws; 0 for any other error.
+    [CmdletBinding()]
+    [OutputType([int])]
+    param([Parameter(Mandatory)][System.Management.Automation.ErrorRecord]$ErrorRecord)
+    $exception = $ErrorRecord.Exception
+    if ($exception -is [System.Net.Http.HttpRequestException] -and $null -ne $exception.StatusCode) { return [int]$exception.StatusCode }
+    0
+}
+
 function Test-NeoIPCTrackedEntityMissing {
-    # Whether a read failed because the one tracked entity it named does not exist, or is deleted: the enrolment and event
-    # reads answer that with 400 "Tracked entity is specified but does not exist: <uid>" ("Tracked entity instance ..." on
-    # 2.40) rather than with an empty list.
+    # Whether a read failed because the one tracked entity it named does not exist: 400 "Tracked entity is specified but
+    # does not exist: <uid>" ("Tracked entity instance ..." on 2.40), which the enrolment and event reads answer on 2.40
+    # to 2.42 and the event read on 2.43 and later, 2.42 and later also for a deleted one. Other cases give an empty list
+    # instead: 2.43's enrolment read checks no tracked entity, and 2.40 and 2.41 take a deleted one as existing. The
+    # cmdlets therefore read the given tracked entities first (Select-NeoIPCTrackerReadPatient), and this test covers one
+    # deleted between that read and the next.
     [CmdletBinding()]
     [OutputType([bool])]
     param([Parameter(Mandatory)][System.Management.Automation.ErrorRecord]$ErrorRecord, [Parameter(Mandatory)][string]$TrackedEntityId)
@@ -228,20 +265,21 @@ function Test-NeoIPCTrackedEntityMissing {
 }
 
 function New-NeoIPCUnexpectedItemError {
-    # The error a tracker read ends with when DHIS2 returned a record the request did not ask for: DHIS2 2.42 and later
-    # ignore a parameter they do not know, and widen the read instead of refusing it.
+    # The error a tracker read ends with when DHIS2 returned a record the request did not ask for: DHIS2 ignores a request
+    # parameter it does not know, on every release, and widens the read instead of refusing it; from 2.42 the 2.40 names
+    # are among those it does not know.
     [CmdletBinding()]
     [OutputType([System.Management.Automation.ErrorRecord])]
     param([Parameter(Mandatory)][string]$Resource, [Parameter(Mandatory)][string]$Item, [Parameter(Mandatory)][string]$Reason)
     New-NeoIPCTrackerReadError -ErrorId 'UnexpectedItem' -Category InvalidResult -TargetObject $Item `
-        -Message ("The {0} read returned {1}, {2}. DHIS2 2.42 and later ignore a parameter they do not know and widen the read instead of refusing it, so this read returns nothing." -f $Resource, $Item, $Reason)
+        -Message ("The {0} read returned {1}, {2}. DHIS2 ignores a request parameter it does not know and widens the read instead of refusing it, so this read returns nothing." -f $Resource, $Item, $Reason)
 }
 
 function Get-NeoIPCCoreOwner {
     # The org unit that owns NEOIPC_CORE's record of each given tracked entity, keyed by its UID. DHIS2 matches the org
-    # units of an enrolment or event read against this owner, on every supported version, rather than against the org
-    # unit the record was entered in. Read ACCESSIBLE, which for the CLOSED program NEOIPC_CORE is the caller's capture
-    # scope, in chunks; a tracked entity the read does not return has no entry, and one it was not asked for ends the read.
+    # units of a tracker read with program against this owner, on every supported version, rather than against the org
+    # unit a record was registered or entered in. Read ACCESSIBLE, in chunks, so a tracked entity that does not exist, is
+    # deleted, or lies outside what the account may read has no entry; one the read was not asked for ends it.
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.Dictionary[string, string]])]
     param(
@@ -269,10 +307,38 @@ function Get-NeoIPCCoreOwner {
     , $owners
 }
 
+function Select-NeoIPCTrackerReadPatient {
+    # The given tracked entities that are NEOIPC_CORE patients the account can read, after an error per one that is not,
+    # and the owners of the found ones' NEOIPC_CORE records (Get-NeoIPCCoreOwner). DHIS2 answers an enrolment or event read
+    # of a tracked entity that does not exist, is deleted, or lies outside what the account may read with a refusal on
+    # some versions and with an empty list on others (Test-NeoIPCTrackedEntityMissing), so the reads ask for the tracked
+    # entities first.
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param(
+        [Parameter(Mandatory)][System.Management.Automation.PSCmdlet]$Cmdlet,
+        [Parameter(Mandatory)][hashtable]$Endpoint,
+        [Parameter(Mandatory)]$Dialect,
+        [Parameter(Mandatory)][string]$ProgramId,
+        [Parameter(Mandatory)][string[]]$TrackedEntityId
+    )
+    $owners = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -TrackedEntityId $TrackedEntityId
+    $found = [System.Collections.Generic.List[string]]::new()
+    foreach ($te in $TrackedEntityId) {
+        if ($owners.ContainsKey($te)) { $found.Add($te); continue }
+        Write-NeoIPCTrackerReadError -Cmdlet $Cmdlet -ErrorId 'TrackedEntityNotFound' -TargetObject $te `
+            -Message "No NEOIPC_CORE patient your account can read has the UID '$te': it does not exist, is deleted, or lies outside what your account may read."
+    }
+    [pscustomobject]@{ TrackedEntities = $found.ToArray(); Owners = $owners }
+}
+
 function Split-NeoIPCTrackerItemByOrgUnit {
-    # NEOIPC_CORE enrolments or events, as a read returns them, split by whether they lie in the given org units: entered in
-    # one of them, or belonging to a patient whose NEOIPC_CORE record one of them owns. DHIS2 selects them by the owner,
-    # which they do not carry, so the owners are read only for those entered elsewhere. Both lists keep the input order.
+    # NEOIPC_CORE enrolments or events, as a read returns them, split by whether they lie in the given org units: whether
+    # one of them owns their patient's NEOIPC_CORE record, which is how DHIS2 selects them on every supported version,
+    # whatever org unit a record was entered in. The items do not carry that owner, so it is read for those whose
+    # patient -Owner does not list. -AcceptEntered also counts an item entered in one of the org units as inside, without
+    # reading its owner: enough for checking that a read DHIS2 filtered by org unit returned nothing outside them, since a
+    # read DHIS2 widened returns records entered elsewhere as well. Both lists keep the input order.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -280,19 +346,24 @@ function Split-NeoIPCTrackerItemByOrgUnit {
         [Parameter(Mandatory)]$Dialect,
         [Parameter(Mandatory)][string]$ProgramId,
         [AllowEmptyCollection()][object[]]$Item = @(),
-        [Parameter(Mandatory)][string[]]$OrgUnitId
+        [Parameter(Mandatory)][string[]]$OrgUnitId,
+        [System.Collections.Generic.Dictionary[string, string]]$Owner,
+        [switch]$AcceptEntered
     )
-    $set = [System.Collections.Generic.HashSet[string]]::new($OrgUnitId, [System.StringComparer]::Ordinal)
-    $elsewhere = @($Item | Where-Object { -not $set.Contains([string]$_['orgUnit']) })
-    $owners = $null
-    if ($elsewhere.Count -gt 0) {
-        $owners = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -TrackedEntityId @($elsewhere | ForEach-Object { [string]$_['trackedEntity'] })
+    $ordinal = [System.StringComparer]::Ordinal
+    $set = [System.Collections.Generic.HashSet[string]]::new($OrgUnitId, $ordinal)
+    $owners = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
+    if ($null -ne $Owner) { foreach ($k in $Owner.Keys) { $owners[$k] = $Owner[$k] } }
+    $unknown = @($Item | Where-Object { -not ($AcceptEntered -and $set.Contains([string]$_['orgUnit'])) -and -not $owners.ContainsKey([string]$_['trackedEntity']) })
+    if ($unknown.Count -gt 0) {
+        $read = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -TrackedEntityId @($unknown | ForEach-Object { [string]$_['trackedEntity'] })
+        foreach ($k in $read.Keys) { $owners[$k] = $read[$k] }
     }
     $inside = [System.Collections.Generic.List[object]]::new()
     $outside = [System.Collections.Generic.List[object]]::new()
     foreach ($i in $Item) {
         $te = [string]$i['trackedEntity']
-        if ($set.Contains([string]$i['orgUnit']) -or ($null -ne $owners -and $owners.ContainsKey($te) -and $set.Contains($owners[$te]))) { $inside.Add($i) }
+        if (($AcceptEntered -and $set.Contains([string]$i['orgUnit'])) -or ($owners.ContainsKey($te) -and $set.Contains($owners[$te]))) { $inside.Add($i) }
         else { $outside.Add($i) }
     }
     [pscustomobject]@{ Inside = $inside.ToArray(); Outside = $outside.ToArray() }

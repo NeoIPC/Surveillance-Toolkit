@@ -4,9 +4,11 @@
 function Get-NeoIPCTrackerDialect {
     # The parameters a tracker list read takes on a DHIS2 version, and the key its response lists the items under.
     # 2.41 renamed the org-unit mode and paging parameters, the list reads' org-unit and UID parameters (with ',' in
-    # place of ';' between their values), and the list key; 2.40 answers the new names with a silently widened or
-    # paged read, 2.41 reads both name sets, and 2.42 ignores the old names, so a read in the wrong dialect widens
-    # rather than fails. On every version the event read takes one org unit, tracked entity, and program stage, the
+    # place of ';' between their values), and the list key; 2.41 reads both name sets, and 2.42 binds only the new ones.
+    # DHIS2 ignores a parameter name it does not know, on every version, so a read in the wrong dialect does not fail
+    # cleanly: 2.40 refuses a tracked-entity or enrolment read whose org units come only in the new names (409, no org
+    # unit) and widens or pages an event read, and 2.42 widens a read in the old names, or pages it where only the
+    # paging switch was old. On every version the event read takes one org unit, tracked entity, and program stage, the
     # enrolment read one tracked entity, and the event read's enrolment list is separated by ','; the dates keep their
     # names. A single-value parameter given a joined list answers 400.
     [CmdletBinding()]
@@ -26,10 +28,12 @@ function Get-NeoIPCTrackerDialect {
             ListKey               = @{ events = 'instances'; enrollments = 'instances'; trackedEntities = 'instances' }
             TrackedEntityQuery    = [pscustomobject]@{ OrgUnits = 'orgUnit'; TrackedEntities = 'trackedEntity'; Separator = ';' }
             # An enrolment read by UID takes no other filter on 2.40: DHIS2 reads each listed enrolment and ignores
-            # the program, org unit, and the rest (TrackerEnrollmentsExportController). An enrolment read by query
-            # carries no events, however the fields ask (AbstractEnrollmentService.getEnrollments maps each with
-            # EnrollmentParams.FALSE); one read by UID does.
-            EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; UidReadIgnoresFilters = $true; QueryReadOmitsEvents = $true } + $enrollmentNames)
+            # the program, org unit, and the rest (TrackerEnrollmentsExportController), and refuses the whole read
+            # with 409 when the account may not read one of them. An enrolment read by query carries no events,
+            # however the fields ask (AbstractEnrollmentService.getEnrollments maps each with EnrollmentParams.FALSE);
+            # one read by UID does. A read by query without org units answers an account that has data-view but no
+            # data-capture org units with an empty list rather than a refusal (DefaultProgramInstanceService).
+            EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; UidReadIgnoresFilters = $true; QueryReadOmitsEvents = $true; EmptyWithoutCaptureUnits = $true } + $enrollmentNames)
             # 'event' drops a value that is no UID instead of refusing it; 'enrollments' is a set Spring binds, so ','.
             EventQuery            = [pscustomobject](@{ Events = 'event'; EventSeparator = ';' } + $eventNames)
             # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue.
@@ -42,7 +46,7 @@ function Get-NeoIPCTrackerDialect {
         Paging                = @{}
         ListKey               = @{ events = 'events'; enrollments = 'enrollments'; trackedEntities = 'trackedEntities' }
         TrackedEntityQuery    = [pscustomobject]@{ OrgUnits = 'orgUnits'; TrackedEntities = 'trackedEntities'; Separator = ',' }
-        EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; UidReadIgnoresFilters = $false; QueryReadOmitsEvents = $false } + $enrollmentNames)
+        EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; UidReadIgnoresFilters = $false; QueryReadOmitsEvents = $false; EmptyWithoutCaptureUnits = $false } + $enrollmentNames)
         EventQuery            = [pscustomobject](@{ Events = 'events'; EventSeparator = ',' } + $eventNames)
         # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue.
         RestoresFilterSlashes = $Version -ge [version]'2.42.1'
@@ -105,7 +109,7 @@ function Get-NeoIPCTrackedEntityList {
     # at a time), which DHIS2 looks for within the caller's data-capture org units, and on 2.43 for a superuser in every
     # org unit. CAPTURE always counts as a search inside the capture scope, where the type's maximum search result does
     # not apply. Every returned entity is checked against the request, and one the request did not ask for makes the
-    # read throw, since 2.42 and later ignore a parameter name they do not know rather than refuse it.
+    # read throw, since DHIS2 ignores a parameter name it does not know rather than refuse it.
     [CmdletBinding()]
     [OutputType([object[]])]
     param(
