@@ -17,10 +17,13 @@
          tracked entity, and program stage, the enrolment read one tracked entity, and a joined value answers 400;
       2. 2.43 and later refuse an enrolment or event read without program, the event read with Tomcat's HTML page;
       3. 2.40's enrolment read by UID ignores every other filter, returns deleted enrolments too, and refuses the whole
-         read when the account may not read one of them, and its read by query carries no events;
+         read when the account may not read one of them (an account with ALL it never refuses), and its read by query
+         carries no events;
       4. the lists come under the version's key;
       5. a read's org units select by the owner of NEOIPC_CORE's record (a tracked-entity read without program by the
-         registration org unit), and ACCESSIBLE by an owner within the caller's capture units;
+         owner in some program of the patient, else the registration org unit); CAPTURE and an event read's ACCESSIBLE
+         by an owner within the caller's capture units; a tracked-entity or enrolment read's ACCESSIBLE on 2.40 and 2.41
+         also within its search units where it has any;
       6. the attribute filter's eq and in operators compare ignoring case, and their values unescape as each version
          does, before 2.42.1 putting escaped slashes back in hash order;
       7. 2.43.2 and later leave out the values of attributes the account cannot read through their sharing;
@@ -28,10 +31,10 @@
          each version's status and words;
       9. an unknown tracked entity given to an enrolment or event read answers 400, from 2.42 a deleted one too, except
          on 2.43's enrolment read, which checks none.
-    The fake projects each tracker item and each metadata object onto the top-level fields the request asks for, so a
-    read that forgets a field it checks fails. It can be told to ignore parameters, as DHIS2 2.42 and later ignore names they do not know, to show what a
-    widened read does. Its code comparisons for org units ignore case on purpose, so the cmdlets' own exact comparison is
-    what a test checks.
+    The fake projects each tracker item and each metadata object onto the fields the request asks for, nested lists
+    included, so a read that forgets a field it checks fails. It can be told to ignore parameters, as DHIS2 ignores a
+    name it does not know, to show what a widened read does. Its code comparisons for org units ignore case on purpose,
+    so the cmdlets' own exact comparison is what a test checks.
 
     Self-contained: no live instance is needed and no API call is made.
 
@@ -89,15 +92,22 @@ InModuleScope 'NeoIPC-Tools' {
                     )
                     # The caller's data-capture org units: DEPT_Z lies outside its hierarchy.
                     MeUnits         = [System.Collections.Generic.List[string]]::new([string[]]@('OuHospX0001'))
+                    # The caller's search org units, none by default, and its authorities.
+                    SearchUnits     = [System.Collections.Generic.List[string]]::new()
+                    Authorities     = [System.Collections.Generic.List[string]]::new()
                     TrackedEntities = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
                     Enrollments     = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
                     Events          = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
-                    # Parameters this DHIS2 ignores, as 2.42 and later ignore a name they do not know.
+                    # Parameters this DHIS2 ignores, as DHIS2 ignores a name it does not know.
                     Ignore          = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+                    # Tracked entities deleted, with their enrolments and events, as soon as a tracked-entity read has
+                    # returned them: deleted between that read and the next.
+                    DeleteOnRead    = [System.Collections.Generic.HashSet[string]]::new($ordinal)
                     Refusal         = $null
-                    # Enrolments 2.40's read by UID refuses (409) as the account may not read them, and enrolments it leaves
-                    # out of that read.
+                    # Enrolments 2.40's read by UID refuses (409) as the account may not read them (ProgramRefused: as it
+                    # may not read the data of the enrolment's own program), and enrolments it leaves out of that read.
                     Refused         = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+                    ProgramRefused  = [System.Collections.Generic.HashSet[string]]::new($ordinal)
                     Dropped         = [System.Collections.Generic.HashSet[string]]::new($ordinal)
                     Requests        = [System.Collections.Generic.List[object]]::new()
                 }
@@ -217,10 +227,13 @@ InModuleScope 'NeoIPC-Tools' {
                 @(@($te['programOwners']) | Where-Object { $_['program'] -ceq $script:Fake.ProgramId } | ForEach-Object { $_['orgUnit'] })[0]
             }
 
-            function Test-FakeAccessible([string]$OrgUnit) {
+            # Whether an org unit lies within the caller's data-capture org units, or with -Search within its search org
+            # units, or its data-capture org units where it has none.
+            function Test-FakeAccessible([string]$OrgUnit, [switch]$Search) {
                 $unit = @($script:Fake.OrgUnits | Where-Object { $_.id -ceq $OrgUnit })[0]
                 if ($null -eq $unit) { return $false }
-                @($script:Fake.MeUnits | Where-Object { $unit.path.Split('/') -ccontains $_ }).Count -gt 0
+                $roots = if ($Search -and $script:Fake.SearchUnits.Count -gt 0) { $script:Fake.SearchUnits } else { $script:Fake.MeUnits }
+                @($roots | Where-Object { $unit.path.Split('/') -ccontains $_ }).Count -gt 0
             }
 
             # The org units a read selects, and their mode: 2.41 and later default to SELECTED with org units and to
@@ -237,15 +250,24 @@ InModuleScope 'NeoIPC-Tools' {
                     if ($version -lt [version]'2.41') { Stop-Fake 409 'At least one organisation unit must be specified' }
                     Stop-Fake 400 "At least one org unit is required for orgUnitMode: $Mode."
                 }
-                if ($Mode -eq 'ACCESSIBLE' -and $OrgUnits.Count -gt 0 -and $version -ge [version]'2.41') { Stop-Fake 400 "orgUnitMode $Mode cannot be used with orgUnits." }
+                if ($Mode -in 'ACCESSIBLE', 'CAPTURE' -and $OrgUnits.Count -gt 0 -and $version -ge [version]'2.41') { Stop-Fake 400 "orgUnitMode $Mode cannot be used with orgUnits." }
                 [pscustomobject]@{ Mode = $Mode; OrgUnits = $OrgUnits }
             }
 
-            # A read with program selects by the owner of the program's record, one without by the registration org unit.
-            function Test-FakeInScope($Scope, [string]$TrackedEntity, [switch]$ByRegistration) {
-                $orgUnit = if ($ByRegistration) { $script:Fake.TrackedEntities[$TrackedEntity]['orgUnit'] } else { Get-FakeOwner $TrackedEntity }
+            # A read with program selects by the owner of the program's record, one without by the owner in some program
+            # of the patient, else by the registration org unit. CAPTURE, and an event read's ACCESSIBLE for a CLOSED
+            # program, take the owners within the caller's data-capture org units; the tracked-entity and enrolment
+            # reads' ACCESSIBLE on 2.40 and 2.41 those within its search org units as well.
+            function Test-FakeInScope($Scope, [string]$TrackedEntity, [string]$Resource, [switch]$AnyProgram) {
+                $orgUnit = Get-FakeOwner $TrackedEntity
+                if ($AnyProgram -and -not $orgUnit) {
+                    $te = $script:Fake.TrackedEntities[$TrackedEntity]
+                    $orgUnit = @(@(@($te['programOwners']) | ForEach-Object { $_['orgUnit'] }) + @($te['orgUnit']))[0]
+                }
                 if ($Scope.Mode -eq 'SELECTED') { return $Scope.OrgUnits -ccontains $orgUnit }
-                Test-FakeAccessible $orgUnit
+                if (-not (Test-FakeAccessible $orgUnit)) { return $false }
+                if ($Scope.Mode -eq 'ACCESSIBLE' -and $Resource -ne 'events' -and (Get-FakeVersion) -lt [version]'2.42') { return Test-FakeAccessible $orgUnit -Search }
+                $true
             }
 
             # An attribute filter as DHIS2 reads it. Before 2.42.1 (RequestParamUtils / RequestParamsValidator.filterList)
@@ -281,35 +303,41 @@ InModuleScope 'NeoIPC-Tools' {
                 @{ Attribute = $attribute; Values = $values }
             }
 
-            # An item cut to the top-level fields the request asks for, as DHIS2's field filter cuts it.
-            function Select-FakeField($Item, [string[]]$Fields) {
-                $copy = [ordered]@{}
-                foreach ($f in $Fields) {
-                    $name = ($f -split '\[', 2)[0]
-                    if ($Item.Contains($name)) { $copy[$name] = $Item[$name] }
+            # A field list such as 'a,b[c,d[e]]' as a tree: each name maps to the tree of its nested list, or to $null.
+            function ConvertFrom-FakeFieldList([string]$Text) {
+                $root = [ordered]@{}
+                $outer = [System.Collections.Generic.Stack[object]]::new()
+                $level = $root
+                $name = [System.Text.StringBuilder]::new()
+                foreach ($ch in $Text.ToCharArray()) {
+                    if ($ch -eq [char]'[') { $child = [ordered]@{}; $level[$name.ToString()] = $child; [void]$name.Clear(); $outer.Push($level); $level = $child }
+                    elseif ($ch -eq [char]']') { if ($name.Length -gt 0) { $level[$name.ToString()] = $null; [void]$name.Clear() }; $level = $outer.Pop() }
+                    elseif ($ch -eq [char]',') { if ($name.Length -gt 0) { $level[$name.ToString()] = $null; [void]$name.Clear() } }
+                    else { [void]$name.Append($ch) }
                 }
-                $copy
+                if ($name.Length -gt 0) { $level[$name.ToString()] = $null }
+                $root
             }
 
-            # A metadata object cut to the top-level fields of its type's '<type>:fields' list, as api/metadata cuts it; a
-            # nested list such as programStages[id,code,name] keeps its objects whole.
-            function Select-FakeMetadataField($Item, [string]$Fields) {
-                $names = [System.Collections.Generic.List[string]]::new()
-                $depth = 0
-                $current = [System.Text.StringBuilder]::new()
-                foreach ($ch in $Fields.ToCharArray()) {
-                    if ($ch -eq [char]'[') { $depth++ } elseif ($ch -eq [char]']') { $depth-- }
-                    if ($ch -eq [char]',' -and $depth -eq 0) { $names.Add($current.ToString()); [void]$current.Clear(); continue }
-                    [void]$current.Append($ch)
+            # A value cut to a field tree, as DHIS2's field filter cuts it: a dictionary to the tree's names, each element of
+            # a list alike, and a name without a nested list keeps its value whole.
+            function Select-FakeTree($Value, $Tree) {
+                $isList = $Value -is [System.Collections.IEnumerable] -and $Value -isnot [string] -and $Value -isnot [System.Collections.IDictionary]
+                if ($null -ne $Tree -and $Value -is [System.Collections.IDictionary]) {
+                    $copy = [ordered]@{}
+                    foreach ($k in $Tree.Keys) { if ($Value.Contains($k)) { $copy[$k] = Select-FakeTree $Value[$k] $Tree[$k] } }
+                    return $copy
                 }
-                if ($current.Length -gt 0) { $names.Add($current.ToString()) }
-                $copy = [ordered]@{}
-                foreach ($n in $names) {
-                    $name = ($n -split '\[', 2)[0]
-                    if ($Item.Contains($name)) { $copy[$name] = $Item[$name] }
-                }
-                $copy
+                if ($null -ne $Tree -and $isList) { return , @(foreach ($v in $Value) { Select-FakeTree $v $Tree }) }
+                if ($isList) { return , $Value }
+                $Value
             }
+
+            # An item cut to the fields the request asks for.
+            function Select-FakeField($Item, [string[]]$Fields) { Select-FakeTree $Item (ConvertFrom-FakeFieldList ($Fields -join ',')) }
+
+            # A metadata object cut to its type's '<type>:fields' list, as api/metadata cuts it.
+            function Select-FakeMetadataField($Item, [string]$Fields) { Select-FakeTree $Item (ConvertFrom-FakeFieldList $Fields) }
 
             function Get-FakeRefusal([string]$Resource) {
                 $version = Get-FakeVersion
@@ -360,7 +388,8 @@ InModuleScope 'NeoIPC-Tools' {
                     }
                     Stop-Fake 400 'Program is mandatory'
                 }
-                Get-FakeRefusal $Resource
+                # 2.40's enrolment read by UID refuses per enrolment instead (below).
+                if (-not ($Resource -eq 'enrollments' -and $version -lt [version]'2.41' -and $q.ContainsKey('enrollment'))) { Get-FakeRefusal $Resource }
                 $mode = if ($version -lt [version]'2.42' -and $q.ContainsKey('ouMode')) { [string]$q['ouMode'] }
                 if ($version -ge [version]'2.41' -and $q.ContainsKey('orgUnitMode')) {
                     if ($mode) { Stop-Fake 400 "Only one parameter of 'ouMode' and 'orgUnitMode' must be specified." }
@@ -378,7 +407,7 @@ InModuleScope 'NeoIPC-Tools' {
                             if ($te['deleted']) { continue }
                             if ($program -and @($script:Fake.Enrollments.Values | Where-Object { $_['trackedEntity'] -ceq $uid -and $_['program'] -ceq $program -and -not $_['deleted'] }).Count -eq 0) { continue }
                             if ($ids -and $ids -cnotcontains $uid) { continue }
-                            if (-not (Test-FakeInScope $scope $uid -ByRegistration:(-not $program))) { continue }
+                            if (-not (Test-FakeInScope $scope $uid 'trackedEntities' -AnyProgram:(-not $program))) { continue }
                             if ($filter) {
                                 $values = @(@($te['attributes']) | Where-Object { $_['attribute'] -ceq $filter.Attribute } | ForEach-Object { [string]$_['value'] })
                                 if (@($values | Where-Object { $v = $_; @($filter.Values | Where-Object { [string]::Equals($_, $v, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0 }).Count -eq 0) { continue }
@@ -389,13 +418,29 @@ InModuleScope 'NeoIPC-Tools' {
                             $view['enrollments'] = @($script:Fake.Enrollments.Values | Where-Object { $_['trackedEntity'] -ceq $uid -and -not $_['deleted'] } | ForEach-Object { [ordered]@{ enrollment = $_['enrollment']; program = $_['program'] } })
                             $rows.Add($view)
                         }
+                        foreach ($view in $rows) {
+                            $uid = $view['trackedEntity']
+                            if (-not $script:Fake.DeleteOnRead.Contains($uid)) { continue }
+                            $script:Fake.TrackedEntities[$uid]['deleted'] = $true
+                            foreach ($record in @($script:Fake.Enrollments.Values) + @($script:Fake.Events.Values)) { if ($record['trackedEntity'] -ceq $uid) { $record['deleted'] = $true } }
+                        }
                     }
                     'enrollments' {
                         $uids = Get-FakeList $q 'enrollment' ';' 'enrollments' ','
                         if ($uids -and $version -lt [version]'2.41') {
                             # 2.40 reads each listed enrolment by UID, deleted ones too, and applies no other filter; it
-                            # refuses the whole read when the account may not read one of them.
-                            foreach ($uid in $uids) { if ($script:Fake.Refused.Contains($uid)) { Stop-Fake 409 '[OWNERSHIP_ACCESS_DENIED]' } }
+                            # refuses the whole read when the account may not read one of them, naming what it lacks, and
+                            # checks nothing for an account with ALL (DefaultTrackerAccessManager.canRead).
+                            foreach ($uid in $uids) {
+                                if (-not $script:Fake.Enrollments.ContainsKey($uid) -or $script:Fake.Authorities -ccontains 'ALL') { continue }
+                                $lacks = @(
+                                    if ($script:Fake.Refusal -eq 'NoProgram' -or $script:Fake.ProgramRefused.Contains($uid)) {
+                                        "User has no data read access to program: $($script:Fake.Enrollments[$uid]['program'])"
+                                    }
+                                    if ($script:Fake.Refusal -eq 'NoCapture' -or $script:Fake.Refused.Contains($uid)) { 'OWNERSHIP_ACCESS_DENIED' }
+                                )
+                                if ($lacks.Count -gt 0) { Stop-Fake 409 ('[' + ($lacks -join ', ') + ']') }
+                            }
                             foreach ($uid in $uids) {
                                 if (-not $script:Fake.Enrollments.ContainsKey($uid) -or $script:Fake.Dropped.Contains($uid)) { continue }
                                 $rows.Add((Get-FakeEnrollmentView $script:Fake.Enrollments[$uid] -WithEvents))
@@ -409,7 +454,7 @@ InModuleScope 'NeoIPC-Tools' {
                             if ($en['deleted'] -or ($program -and $en['program'] -cne $program)) { continue }
                             if ($uids -and $uids -cnotcontains $en['enrollment']) { continue }
                             if ($te -and $en['trackedEntity'] -cne $te) { continue }
-                            if (-not (Test-FakeInScope $scope $en['trackedEntity'])) { continue }
+                            if (-not (Test-FakeInScope $scope $en['trackedEntity'] 'enrollments')) { continue }
                             if (-not (Test-FakeDate $en['enrolledAt'] $q 'enrolledAfter' 'enrolledBefore')) { continue }
                             if (-not (Test-FakeDate $en['updatedAt'] $q 'updatedAfter' $null)) { continue }
                             $rows.Add((Get-FakeEnrollmentView $en -WithEvents:($version -ge [version]'2.41')))
@@ -440,7 +485,7 @@ InModuleScope 'NeoIPC-Tools' {
                             if ($te -and $ev['trackedEntity'] -cne $te) { continue }
                             if ($uids -and $uids -cnotcontains $ev['event']) { continue }
                             if ($enrollments -and $enrollments -cnotcontains $ev['enrollment']) { continue }
-                            if (-not (Test-FakeInScope $scope $ev['trackedEntity'])) { continue }
+                            if (-not (Test-FakeInScope $scope $ev['trackedEntity'] 'events')) { continue }
                             if (-not (Test-FakeDate $ev['occurredAt'] $q 'occurredAfter' 'occurredBefore')) { continue }
                             if (-not (Test-FakeDate $ev['updatedAt'] $q 'updatedAfter' 'updatedBefore')) { continue }
                             $rows.Add($ev)
@@ -474,7 +519,11 @@ InModuleScope 'NeoIPC-Tools' {
                     $response = switch -Regex ($Path) {
                         '^api/system/info$' { [ordered]@{ version = $script:Fake.Version }; break }
                         '^api/me$' {
-                            [ordered]@{ organisationUnits = @($script:Fake.MeUnits | ForEach-Object { $id = $_; $u = @($script:Fake.OrgUnits | Where-Object { $_.id -ceq $id })[0]; [ordered]@{ id = $u.id; path = $u.path } }) }
+                            $me = [ordered]@{
+                                organisationUnits = @($script:Fake.MeUnits | ForEach-Object { $id = $_; $u = @($script:Fake.OrgUnits | Where-Object { $_.id -ceq $id })[0]; [ordered]@{ id = $u.id; path = $u.path } })
+                                authorities       = @($script:Fake.Authorities)
+                            }
+                            Select-FakeField $me @($Fields)
                             break
                         }
                         '^api/organisationUnits$' {
@@ -724,6 +773,16 @@ InModuleScope 'NeoIPC-Tools' {
                 $r.Errors[0].FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadEmptyFilter*'
                 $script:Fake.Requests.Count | Should -Be 0
             }
+            It '<Command> reads nothing when the piped objects give its filters no value, whatever its arguments' -ForEach @(
+                @{ Command = 'Read-PatientInfo' }, @{ Command = 'Read-EnrolmentInfo' }, @{ Command = 'Read-EventInfo' }
+            ) {
+                Add-FakeCorpus
+                $r = Invoke-Read $Command @{ OrgUnitCode = 'DEPT_A' } -Pipe @([pscustomobject]@{ TrackedEntityId = '' })
+                $r.Output.Count | Should -Be 0
+                $r.Stop | Should -BeNullOrEmpty
+                $r.Errors.Count | Should -Be 0
+                $script:Fake.Requests.Count | Should -Be 0
+            }
         }
 
         Context 'patient IDs' {
@@ -802,6 +861,66 @@ InModuleScope 'NeoIPC-Tools' {
                 $p.CreatedAt | Should -Be ([datetime]'2025-01-01T08:00:00')
                 $p.EnrollmentIds | Should -Be @('EnPat000001')
                 , $p.EnrollmentIds | Should -BeOfType [string[]]
+            }
+        }
+
+        Context 'given tracked entities' {
+            It 'Read-PatientInfo writes an error for each that is no NEOIPC_CORE patient it can read, on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }, @{ Version = '2.42.6' }, @{ Version = '2.43.2' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                Add-FakePatient -Uid 'TeGone00001' -NeoIpcId 'G-1' -Deleted
+                $r = Invoke-Read 'Read-PatientInfo' @{ TrackedEntityId = 'TePat000001', 'TeNoSuch001', 'TeGone00001', 'TePat000004' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.TrackedEntityId) | Should -Be @('TePat000001')
+                @($r.Errors | ForEach-Object { $_.TargetObject }) | Should -Be @('TeNoSuch001', 'TeGone00001', 'TePat000004')
+                foreach ($e in $r.Errors) { $e.FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadTrackedEntityNotFound*' }
+            }
+            It 'Read-PatientInfo writes no error for one that only the org units leave out' {
+                Add-FakeCorpus
+                $r = Invoke-Read 'Read-PatientInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000003'; OrgUnitCode = 'DEPT_A' }
+                @($r.Output.TrackedEntityId) | Should -Be @('TePat000001')
+                $r.Errors.Count | Should -Be 0
+            }
+            It 'Read-EventInfo reads the events of a patient owned within the data-capture org units but outside the search org units, on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }, @{ Version = '2.42.6' }, @{ Version = '2.43.2' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                $script:Fake.SearchUnits.Add('OuDeptB0001')
+                $r = Invoke-Read 'Read-EventInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000003' }
+                $r.Errors.Count | Should -Be 0
+                @($r.Output.EventId) | Should -Be @('EvPat000001', 'EvPat000003')
+            }
+            It 'Read-EnrolmentInfo names a patient outside the search org units as one it cannot read, as DHIS2 <Version> reads none of its enrolments' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                $script:Fake.SearchUnits.Add('OuDeptB0001')
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000003' }
+                @($r.Output.EnrollmentId) | Should -Be @('EnPat000003')
+                $r.Errors.Count | Should -Be 1
+                $r.Errors[0].TargetObject | Should -BeExactly 'TePat000001'
+            }
+            It 'Read-EventInfo writes an error for one deleted after it was read, which DHIS2 <Version> refuses, and reads the others' -ForEach @(
+                @{ Version = '2.42.6' }, @{ Version = '2.43.2' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                [void]$script:Fake.DeleteOnRead.Add('TePat000001')
+                $r = Invoke-Read 'Read-EventInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000002' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.EventId) | Should -Be @('EvPat000002')
+                $r.Errors.Count | Should -Be 1
+                $r.Errors[0].FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadTrackedEntityNotFound*'
+                $r.Errors[0].TargetObject | Should -BeExactly 'TePat000001'
+            }
+            It 'Read-EnrolmentInfo writes an error for one deleted after it was read, which DHIS2 2.42 refuses, and reads the others' {
+                New-FakeInstance '2.42.6'; Add-FakeCorpus
+                [void]$script:Fake.DeleteOnRead.Add('TePat000001')
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000002' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.EnrollmentId) | Should -Be @('EnPat000002')
+                $r.Errors.Count | Should -Be 1
+                $r.Errors[0].TargetObject | Should -BeExactly 'TePat000001'
             }
         }
 
@@ -1110,6 +1229,49 @@ InModuleScope 'NeoIPC-Tools' {
                 $r.Stop.FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadNoCaptureOrgUnits*'
                 (Get-FakeRead 'enrollments').Count | Should -Be 0
             }
+            # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+            It 'on DHIS2 2.40, ends with that error also before a read by UID, which DHIS2 refuses enrolment by enrolment' {
+                New-FakeInstance '2.40.12'; Add-FakeCorpus
+                $script:Fake.MeUnits.Clear(); $script:Fake.Refusal = 'NoCapture'
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000001', 'EnPat000002' }
+                $r.Output.Count | Should -Be 0
+                $r.Errors.Count | Should -Be 0
+                $r.Stop.FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadNoCaptureOrgUnits*'
+                (Get-FakeRead 'enrollments').Count | Should -Be 0
+            }
+            # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+            It 'on DHIS2 2.40, reads by UID for an account with ALL and no data-capture org units, as DHIS2 does' {
+                New-FakeInstance '2.40.12'; Add-FakeCorpus
+                $script:Fake.MeUnits.Clear(); $script:Fake.Authorities.Add('ALL')
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000001', 'EnPat000002' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.EnrollmentId) | Should -Be @('EnPat000001', 'EnPat000002')
+            }
+            # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+            It 'on DHIS2 2.40, ends with an error when DHIS2 refuses a read by UID for NEOIPC_CORE''s data, and refuses per enrolment for another program''s' {
+                New-FakeInstance '2.40.12'; Add-FakeCorpus
+                $script:Fake.Refusal = 'NoProgram'
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000001', 'EnPat000002' }
+                $r.Errors.Count | Should -Be 0
+                $r.Stop.FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadNoProgramAccess*'
+
+                New-FakeInstance '2.40.12'; Add-FakeCorpus
+                Add-FakeEnrollment -Uid 'EnOther0001' -TrackedEntity 'TePat000001' -Program 'PrgOthr0001'
+                [void]$script:Fake.ProgramRefused.Add('EnOther0001')
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000001', 'EnOther0001' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.EnrollmentId) | Should -Be @('EnPat000001')
+                $r.Errors.Count | Should -Be 1
+                $r.Errors[0].FullyQualifiedErrorId | Should -BeLike 'NeoIPCTrackerReadEnrollmentRefused*'
+                $r.Errors[0].TargetObject | Should -BeExactly 'EnOther0001'
+            }
+            # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+            It 'on DHIS2 2.40, keeps an enrolment read by UID by who owns its patient, whatever org unit it was entered in' {
+                New-FakeInstance '2.40.12'; Add-FakeCorpus
+                Add-FakePatient -Uid 'TePat000007' -NeoIpcId 'A-7' -OrgUnit 'OuDeptA0001' -Owner 'OuDeptB0001'
+                (Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000007'; OrgUnitCode = 'DEPT_A' }).Output.Count | Should -Be 0
+                @((Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000007'; OrgUnitCode = 'DEPT_B' }).Output.EnrollmentId) | Should -Be @('EnPat000007')
+            }
             It 'on DHIS2 <Version>, takes EventIds from the one read' -ForEach @(@{ Version = '2.41.10' }, @{ Version = '2.43.2' }) {
                 New-FakeInstance $Version; Add-FakeCorpus
                 $r = Invoke-Read 'Read-EnrolmentInfo' @{ OrgUnitCode = 'DEPT_A' }
@@ -1213,7 +1375,7 @@ InModuleScope 'NeoIPC-Tools' {
             It 'ends with an error when DHIS2 returns a tracked entity that is no patient of NEOIPC_CORE' {
                 New-FakeInstance '2.42.6'; Add-FakeCorpus
                 # A tracked entity registered in DEPT_A and enrolled in another program only, which a read without program
-                # selects by its registration org unit.
+                # selects by the org unit owning it in that program.
                 $script:Fake.TrackedEntities['TeOther0001'] = [ordered]@{
                     trackedEntity = 'TeOther0001'; orgUnit = 'OuDeptA0001'; createdAt = '2025-01-01T08:00:00.000'; updatedAt = '2025-01-02T09:00:00.000'
                     attributes = @(); programOwners = @([ordered]@{ orgUnit = 'OuDeptA0001'; program = 'PrgOthr0001'; trackedEntity = 'TeOther0001' }); deleted = $false
@@ -1318,6 +1480,8 @@ InModuleScope 'NeoIPC-Tools' {
             ) {
                 New-FakeInstance $Version
                 $ids = [string[]]@(1..150 | ForEach-Object { 'Uid{0:D8}' -f $_ })
+                # Patients that exist, since Read-PatientInfo reads the UIDs its read did not return again to name them.
+                if ($Command -eq 'Read-PatientInfo') { foreach ($id in $ids) { Add-FakePatient -Uid $id } }
                 $r = Invoke-Read $Command @{ $Parameter = $ids }
                 $r.Stop | Should -BeNullOrEmpty
                 $reads = Get-FakeRead $Resource

@@ -88,8 +88,8 @@ function Resolve-NeoIPCOrgUnit {
     #
     # Codes go into `code:in:[...]` lists, which DHIS2 splits on ',' with no escape. DHIS2 2.42 and later also receive the
     # request's filters joined with ',' and split them again, ending an unbracketed value at its first ',' and a bracketed
-    # one at its first ']' (GetObjectListParams.splitFilters), so that neither `in` nor `eq` carries a code holding ',' or
-    # ']'. Such a code is looked up by `code:like:` with its longest run free of ',', '%', and '\'
+    # one at its first ']' (GetObjectListParams.splitFilters), so that no filter value carries a code holding ',' there,
+    # and no `in` list one holding ']'. Such a code is looked up by `code:like:` with its longest run free of ',', '%', and '\'
     # (Get-NeoIPCOrgUnitCodeRun), which on every release matches, case-sensitively, the codes that contain the run; a code
     # without such a run is looked up among all the units of the hierarchy. Either way, it is compared exactly here.
     [CmdletBinding()]

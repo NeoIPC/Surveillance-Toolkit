@@ -165,13 +165,13 @@ function Read-UserInfo {
             # (/api/system/info version 2.42 or later everywhere). On 2.41 and earlier, api/users leaves out, for an account
             # without the authority ALL, every account that holds one of its user roles, its own included, unless the system
             # setting keyCanGrantOwnUserAuthorityGroups is on (DefaultUserService.handleUserQueryParams); only the user
-            # lookup endpoint opts out. From 2.42.0, a list read with filters alone no longer applies that rule.
+            # lookup endpoint opts out. From 2.42.0, a list read with filters alone no longer applies that rule. The warning
+            # follows the list reads, so that an account that may not list users gets their refusal alone.
+            $ownRolesHidden = $false
             if ($version -lt [version]'2.42.0') {
                 $me = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/me' -Fields 'authorities' -AsHashtable -Confirm:$false -WhatIf:$false
                 $authorities = if ($me -is [System.Collections.IDictionary]) { @($me['authorities']) } else { @() }
-                if ($authorities -cnotcontains 'ALL') {
-                    Write-Warning "DHIS2 $versionText leaves out of the user list the accounts that hold any of your account's user roles, your own account included, unless the system setting that lets users grant their own user roles (keyCanGrantOwnUserAuthorityGroups) is on."
-                }
+                $ownRolesHidden = $authorities -cnotcontains 'ALL'
             }
             $twoFactorSource = Get-NeoIPCUserTwoFactorSource -Version $version
             $fields = @(
@@ -204,6 +204,9 @@ function Read-UserInfo {
                     if ($user -isnot [System.Collections.IDictionary] -or [string]::IsNullOrEmpty([string]$user['id'])) { continue }
                     if (-not $users.ContainsKey([string]$user['id'])) { $users[[string]$user['id']] = $user }
                 }
+            }
+            if ($ownRolesHidden) {
+                Write-Warning "DHIS2 $versionText leaves out of the user list the accounts that hold any of your account's user roles, your own account included, unless the system setting that lets users grant their own user roles (keyCanGrantOwnUserAuthorityGroups) is on."
             }
             if ($users.Count -eq 0) { return }
 

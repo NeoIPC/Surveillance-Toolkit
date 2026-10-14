@@ -327,6 +327,41 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 Should -Invoke Invoke-WebRequest -Times 0 -Exactly
                 Should -Invoke Invoke-RestMethod -Times 0 -Exactly
             }
+            It '<Command> asks for confirmation naming the host trimmed, and at a host of white space stops before it asks' -ForEach @(
+                @{ Command = 'Import-NeoIPCMetadata'; Payload = '{}'; Target = 'https://dhis2.example.org/api/metadata' }
+                @{ Command = 'Import-NeoIPCPlayData'; Payload = '{"trackedEntities":[]}'; Target = 'https://dhis2.example.org/api/tracker' }
+            ) {
+                # In a runspace of its own no one can answer the confirmation, so asking for it fails with an error that
+                # quotes the question; the DHIS2 there answers the version read and nothing else.
+                $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+                foreach ($case in @(@{ Hostname = ' dhis2.example.org '; Asked = $true }, @{ Hostname = ' '; Asked = $false })) {
+                    $ps = [powershell]::Create()
+                    try {
+                        $null = $ps.AddScript(@"
+Import-Module '$($manifest.Replace("'", "''"))' -Force
+function global:Invoke-WebRequest {
+    [CmdletBinding()]
+    param(`$Method, `$Uri, `$Headers, `$Authentication, `$Credential, `$Body, `$ContentType, [switch]`$SkipHttpErrorCheck, [switch]`$AllowUnencryptedAuthentication)
+    if ("`$Uri" -like '*/api/system/info*') { return [pscustomobject]@{ StatusCode = 200; Content = '{"version":"2.43.2"}' } }
+    throw 'A test made an HTTP call.'
+}
+function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
+$Command -Json '$($Payload.Replace("'", "''"))' -Auth @{ AuthType = 'Token'; Token = 'not-a-real-token' } -Hostname '$($case.Hostname)'
+"@)
+                        $null = try { $ps.Invoke() } catch { $null }
+                        $messages = @($ps.Streams.Error | ForEach-Object { $_.Exception.Message })
+                        if ($case.Asked) {
+                            @($messages | Where-Object { $_ -like "*$Target*" }).Count | Should -Be 1 -Because 'the confirmation names the host without its white space'
+                        }
+                        else {
+                            @($messages | Where-Object { $_ -like '*-Hostname holds only white space*' }).Count | Should -Be 1
+                            @($messages | Where-Object { $_ -like '*https://*' }).Count | Should -Be 0 -Because 'the cmdlet stops before it asks'
+                        }
+                        @($messages | Where-Object { $_ -like '*A test made an HTTP call*' }).Count | Should -Be 0
+                    }
+                    finally { $ps.Dispose() }
+                }
+            }
         }
 
         Describe 'The help of the functions whose host falls back to NEOIPC_DHIS2_HOST' {
@@ -373,6 +408,41 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 $helpers = Get-Content -Raw -LiteralPath (Join-Path $script:NeoIPCRepoRoot 'reports/common/helpers.R')
                 $helpers -match 'NEOIPC_PRODUCTION_DHIS2_HOST <- "([^"]+)"' | Should -BeTrue
                 Resolve-NeoIPCReportHostname | Should -BeExactly $Matches[1]
+            }
+            It '<Script> stops at a host of white space whatever the caller''s error preference' -ForEach @(
+                @{ Script = 'Build-PartnerCertificate.ps1'; Arguments = @{ Signatory = 'A Signatory'; SignatureImagePath = 'signature.png'; DepartmentCode = 'DEPT_A1' } }
+                @{ Script = 'Build-PatientDataReport.ps1'; Arguments = @{ PatientId = 'NEO-0001'; DepartmentCode = 'DEPT_A1' } }
+                @{ Script = 'Build-PartnerReport.ps1'; Arguments = @{} }
+                @{ Script = 'Build-ReferenceReport.ps1'; Arguments = @{} }
+                @{ Script = 'Build-ValidationReport.ps1'; Arguments = @{} }
+                @{ Script = 'Update-NeoIPCCache.ps1'; Arguments = @{} }
+            ) {
+                # Under a caller's SilentlyContinue, a throw outside any try does not stop a script, so a build that did
+                # not resolve its host inside one would go on and read from another instance. Each script runs in a
+                # runspace of its own with that preference and nothing around it, where an alias, which outranks the
+                # module's function, stops it at Resolve-NeoIPCAuth, its next step that reaches DHIS2; the valid host shows
+                # that the step is reached. Should a build go on all the same, the host it falls back to does not resolve.
+                [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'fallback.invalid', 'Process')
+                $path = Join-Path $script:NeoIPCRepoRoot 'scripts' $Script
+                foreach ($case in @(@{ Hostname = ' '; Reached = $false }, @{ Hostname = 'dhis2.example.org'; Reached = $true })) {
+                    $ps = [powershell]::Create()
+                    try {
+                        $null = $ps.AddScript(@'
+param([string]$Path, [hashtable]$Arguments, [string]$Hostname)
+$global:ErrorActionPreference = 'SilentlyContinue'
+function global:Invoke-WebRequest { throw 'A test made an HTTP call.' }
+function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
+$global:NeoIPCReachedAuth = $false
+function global:Stop-AtAuth { $global:NeoIPCReachedAuth = $true; exit }
+Set-Alias -Name Resolve-NeoIPCAuth -Value Stop-AtAuth -Scope Global
+& $Path @Arguments -Dhis2Hostname $Hostname 6>$null
+$global:NeoIPCReachedAuth
+'@).AddArgument($path).AddArgument($Arguments).AddArgument($case.Hostname)
+                        $answer = @($ps.Invoke())
+                        $answer[-1] | Should -Be $case.Reached -Because "-Dhis2Hostname '$($case.Hostname)' is given"
+                    }
+                    finally { $ps.Dispose() }
+                }
             }
         }
     }

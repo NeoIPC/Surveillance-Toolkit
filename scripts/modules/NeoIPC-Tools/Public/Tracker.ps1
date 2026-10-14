@@ -9,14 +9,15 @@ function Read-PatientInfo {
         Read NeoIPC patients: the tracked entities of the program NEOIPC_CORE, with their demographic attributes and their
         NEOIPC_CORE enrolments.
     .DESCRIPTION
-        Reads the NEOIPC_CORE patients that DHIS2 lets your account read: for an account without the authority ALL, the
-        patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, which some DHIS2
-        releases limit further to the account's search org units. DHIS2 does not limit an account with ALL to its
-        data-capture org units, so a read without an org-unit filter can return patients of org units that -OrgUnitCode
-        and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every patient it
-        can. Each filter narrows the read, and the filters of different parameters combine, so that a patient must pass
-        each of them. A patient lies in an org unit when its NEOIPC_CORE record is owned there, which is how DHIS2 selects
-        patients by org unit: where the patient was registered, unless the record has been transferred.
+        Reads the NEOIPC_CORE patients that DHIS2 lets your account read: those whose NEOIPC_CORE record is owned within
+        its data-capture org units or below them, which DHIS2 2.40 and 2.41 limit further to its search org units where it
+        has any. For an account with the authority ALL, DHIS2 2.42 also reads the patients owned within its search org
+        units, and 2.43 and later read every patient, so a read without an org-unit filter can return patients of org
+        units that -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not
+        find. Without a filter it reads every patient it can. Each filter narrows the read, and the filters of different
+        parameters combine, so that a patient must pass each of them. A patient lies in an org unit when its NEOIPC_CORE
+        record is owned there, which is how DHIS2 selects patients by org unit: the owner is the org unit the patient's
+        first NEOIPC_CORE enrolment was entered in, until the record is transferred.
 
         -NeoIpcId looks patients up by their NeoIPC patient ID, which DHIS2 compares ignoring case: 'de-01' also finds
         'DE-01', and patients whose IDs differ only in case are all returned. A patient ID holding ';' is looked up in a
@@ -24,9 +25,10 @@ function Read-PatientInfo {
         on those versions such an ID is refused with an error, and the patient can be selected by its UID instead; an ID
         holding one '/' is looked up in a request of its own there.
 
-        The cmdlet writes an error naming each code or UID that names no org unit in your hierarchy, and each
-        tracked-entity value that is no DHIS2 UID. When none of the values given to a parameter names anything, it returns
-        nothing rather than read without that filter; an empty pipeline, too, returns nothing.
+        The cmdlet writes an error naming each code or UID that names no org unit in your hierarchy, each tracked-entity
+        value that is no DHIS2 UID, and each tracked entity that is no NEOIPC_CORE patient your account can read. When none
+        of the values given to a parameter names anything, it returns nothing rather than read without that filter; an
+        empty pipeline, too, returns nothing.
 
         The attribute columns hold the values of the attributes with the codes NEOIPC_PATIENT_ID, NEOIPC_TEA_SEX,
         NEOIPC_TEA_DELIVERY_MODE, NEOIPC_TEA_BIRTH_WEIGHT, NEOIPC_TEA_GEST_AGE, and NeoIPC_TEA_TOTAL_GESTATION_DAYS.
@@ -67,7 +69,7 @@ function Read-PatientInfo {
         The DHIS2 port. Default: the scheme's.
     .OUTPUTS
         One [pscustomobject] per patient: TrackedEntityId; OrgUnitId, the org unit the patient was registered in, which
-        owns its NEOIPC_CORE record unless the record has been transferred;
+        need not own its NEOIPC_CORE record;
         NeoIpcId, Sex, DeliveryMode, BirthWeight, GestationalAge, and TotalGestationDays, the attribute values as DHIS2
         stores them; CreatedAt and UpdatedAt, [datetime] in the server's time; and EnrollmentIds, the UIDs of the
         patient's NEOIPC_CORE enrolments.
@@ -76,9 +78,11 @@ function Read-PatientInfo {
 
         Reads the patient with the NeoIPC patient ID DEMO-0001, and then its enrolments.
     .EXAMPLE
-        Read-OrgUnitInfo -CountryCode DE | Read-PatientInfo | Group-Object OrgUnitId -NoElement
+        Read-OrgUnitInfo -CountryCode DE |
+            ForEach-Object { [pscustomobject]@{ OrgUnitCode = $_.OrgUnitCode; Patients = @(Read-PatientInfo -OrgUnitCode $_.OrgUnitCode).Count } }
 
-        Counts the patients of each German department in your hierarchy, the host coming from NEOIPC_DHIS2_HOST.
+        Counts the patients of each German department in your hierarchy, those whose NEOIPC_CORE record it owns, the host
+        coming from NEOIPC_DHIS2_HOST.
     .EXAMPLE
         Read-EnrolmentInfo -OrgUnitCode NEO_DE_01 -AdmissionDateFrom 2025-01-01 | Read-PatientInfo
 
@@ -94,8 +98,8 @@ function Read-PatientInfo {
         [string[]]$NeoIpcId,
 
         # Not bound from the pipeline: the tracker reads' own records carry the org unit a record was registered or
-        # entered in, while DHIS2 selects by the owner of the patient's NEOIPC_CORE record, so a transferred patient piped
-        # on would drop out of the read.
+        # entered in, while DHIS2 selects by the owner of the patient's NEOIPC_CORE record, so a patient piped on whose
+        # record another org unit owns would drop out of the read.
         [string[]]$OrgUnitId,
 
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -250,6 +254,12 @@ function Read-PatientInfo {
                     if ($seen.Add($uid)) { $patients.Add($te) }
                 }
             }
+            # A given tracked entity the read did not return is an error unless only the org units left it out, which the
+            # owner read (in the read's own scope) tells apart.
+            $missing = [string[]]@($trackedEntities | Where-Object { -not $seen.Contains($_) })
+            if ($missing.Count -gt 0) {
+                $null = Select-NeoIPCTrackerReadPatient -Cmdlet $PSCmdlet -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'ACCESSIBLE' -TrackedEntityId $missing
+            }
 
             $rows = [System.Collections.Generic.List[object]]::new()
             foreach ($te in $patients) {
@@ -282,14 +292,16 @@ function Read-EnrolmentInfo {
     .SYNOPSIS
         Read the NEOIPC_CORE enrolments of NeoIPC patients, each with its events and a link that opens it in the browser.
     .DESCRIPTION
-        Reads the NEOIPC_CORE enrolments that DHIS2 lets your account read: for an account without the authority ALL,
-        those of patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, which some
-        DHIS2 releases limit further to the account's search org units. DHIS2 does not limit an account with ALL to its
-        data-capture org units, so a read without an org-unit filter can return enrolments in org units that
-        -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every enrolment
-        it can. Each filter narrows the read, and the filters of different parameters combine. An enrolment lies in an
-        org unit when its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects enrolments by org unit,
-        whatever org unit the enrolment was entered in.
+        Reads the NEOIPC_CORE enrolments that DHIS2 lets your account read: those of patients whose NEOIPC_CORE record is
+        owned within its data-capture org units or below them, which DHIS2 2.40 and 2.41 limit further to its search org
+        units where it has any. For an account with the authority ALL, DHIS2 2.40 and 2.41 read those of patients owned
+        within its search org units instead (within its data-capture org units where it has none), 2.42 those of patients
+        owned within either, and 2.43 and later every enrolment, so a read without an org-unit filter can return
+        enrolments in org units that -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture
+        hierarchy only, do not find. Without a filter it reads every enrolment it can. Each filter narrows the read, and
+        the filters of different parameters combine. An enrolment lies in an org unit when its patient's NEOIPC_CORE
+        record is owned there, which is how DHIS2 selects enrolments by org unit, whatever org unit the enrolment was
+        entered in.
 
         The enrolment read takes one tracked entity, so -TrackedEntityId reads each patient's enrolments in a request of
         its own, unless -EnrollmentId bounds the read; the cmdlet then compares the patients itself. It reads the given
@@ -307,8 +319,9 @@ function Read-EnrolmentInfo {
         the tracked entities, the dates, and the org units itself. DHIS2 2.40 refuses such a read whole when your account
         may not read one of the listed enrolments, so the cmdlet then reads them one by one and writes an error naming
         each enrolment DHIS2 refuses. Since an enrolment read by query carries no events on 2.40, it reads the enrolments
-        again by UID to fill EventIds; and since 2.40 answers a read without org units by an account without
-        data-capture org units with nothing rather than a refusal, the cmdlet checks for them first.
+        again by UID to fill EventIds. And since 2.40 answers a read without org units by an account without the
+        authority ALL that has data-view but no data-capture org units with nothing rather than a refusal, and a read by
+        UID with a refusal per enrolment, the cmdlet first checks that an account without ALL has data-capture org units.
 
         DHIS2 lets only an account with data-capture org units and data read access to NEOIPC_CORE read its records;
         without either, the read ends with an error that says which. The cmdlet speaks the request dialect of the
@@ -441,18 +454,21 @@ function Read-EnrolmentInfo {
             $teIds = Get-NeoIPCDistinctValue -Value $given['TrackedEntityId']
             $trackedEntities = Select-NeoIPCTrackerReadUid -Cmdlet $PSCmdlet -Value $teIds -Noun 'tracked entity'
             if ($teIds.Count -gt 0 -and $trackedEntities.Count -eq 0) { return }
-            if ($names.EmptyWithoutCaptureUnits -and -not $orgUnits.Given -and $enrollments.Count -eq 0) {
-                # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Get-NeoIPCTrackerDialect. 2.40 answers this read by an
-                # account without data-capture org units with nothing rather than a refusal.
-                $me = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/me' -Fields 'organisationUnits[id]' -AsHashtable -Confirm:$false -WhatIf:$false
-                if (@(@($me['organisationUnits']) | Where-Object { $_ -is [System.Collections.IDictionary] -and $_['id'] }).Count -eq 0) {
+            if ($names.EmptyWithoutCaptureUnits -and -not $orgUnits.Given) {
+                # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Get-NeoIPCTrackerDialect. 2.40 answers a read by query by
+                # an account without ALL that has data-view but no data-capture org units with nothing rather than a
+                # refusal, and a read by UID with a refusal per enrolment; it reads for an account with ALL either way.
+                # Org units given were found within the data-capture hierarchy, so the account has some.
+                $me = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/me' -Fields 'organisationUnits[id]', 'authorities' -AsHashtable -Confirm:$false -WhatIf:$false
+                $captureUnits = @(@($me['organisationUnits']) | Where-Object { $_ -is [System.Collections.IDictionary] -and $_['id'] })
+                if ($captureUnits.Count -eq 0 -and @($me['authorities']) -cnotcontains 'ALL') {
                     throw (New-NeoIPCTrackerReadError -ErrorId 'NoCaptureOrgUnits' -Category PermissionDenied -TargetObject 'enrollments' `
                             -Message "Your account has no data-capture org units, which DHIS2 requires for reading NEOIPC_CORE's tracker records.")
                 }
             }
             $owners = $null
             if ($trackedEntities.Count -gt 0) {
-                $patients = Select-NeoIPCTrackerReadPatient -Cmdlet $PSCmdlet -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -TrackedEntityId $trackedEntities
+                $patients = Select-NeoIPCTrackerReadPatient -Cmdlet $PSCmdlet -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'ACCESSIBLE' -TrackedEntityId $trackedEntities
                 $trackedEntities = $patients.TrackedEntities
                 $owners = $patients.Owners
                 if ($trackedEntities.Count -eq 0) { return }
@@ -496,7 +512,7 @@ function Read-EnrolmentInfo {
                     }
                 }
                 $kept = $found.ToArray()
-                if ($orgUnits.Given) { $kept = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -Item $kept -OrgUnitId $orgUnits.Ids -Owner $owners).Inside }
+                if ($orgUnits.Given) { $kept = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'ACCESSIBLE' -Item $kept -OrgUnitId $orgUnits.Ids -Owner $owners).Inside }
             }
             else {
                 $dates = @{}
@@ -539,7 +555,7 @@ function Read-EnrolmentInfo {
                         if ($why) { throw (New-NeoIPCUnexpectedItemError -Resource 'enrollments' -Item "the enrolment '$uid'" -Reason $why) }
                     }
                     if ($request.OrgUnits.Count -gt 0) {
-                        $outside = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -Item $items -OrgUnitId $request.OrgUnits -Owner $owners -AcceptEntered).Outside
+                        $outside = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'ACCESSIBLE' -Item $items -OrgUnitId $request.OrgUnits -Owner $owners -AcceptEntered).Outside
                         if ($outside.Count -gt 0) {
                             throw (New-NeoIPCUnexpectedItemError -Resource 'enrollments' -Item "the enrolment '$($outside[0]['enrollment'])'" -Reason 'which lies in none of the org units it asked for')
                         }
@@ -608,14 +624,15 @@ function Read-EventInfo {
     .SYNOPSIS
         Read the NEOIPC_CORE events of NeoIPC patients, optionally with the values of chosen data elements.
     .DESCRIPTION
-        Reads the NEOIPC_CORE events that DHIS2 lets your account read: for an account without the authority ALL, those
-        of patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, which some DHIS2
-        releases limit further to the account's search org units. DHIS2 does not limit an account with ALL to its
-        data-capture org units, so a read without an org-unit filter can return events in org units that -OrgUnitCode
-        and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every event it can.
-        Each filter narrows the read, and the filters of different parameters combine. An event lies in an org unit when
-        its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects events by org unit, whatever org unit
-        the event was entered in.
+        Reads the NEOIPC_CORE events that DHIS2 lets your account read: those of patients whose NEOIPC_CORE record is
+        owned within its data-capture org units or below them. DHIS2 2.40 to 2.42 limit an account with the authority ALL
+        in the same way, and 2.43 and later read every event for it, so a read without an org-unit filter can return
+        events in org units that -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture hierarchy
+        only, do not find. On 2.40 to 2.42, an account with ALL whose search org units reach beyond its data-capture org
+        units can thus read enrolments there, and on 2.42 patients, whose events it cannot read. Without a filter it reads every
+        event it can. Each filter narrows the read, and the filters of different parameters combine. An event lies in an
+        org unit when its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects events by org unit,
+        whatever org unit the event was entered in.
 
         The event read takes one org unit, one tracked entity, and one program stage. With several values of one of them,
         and no -EventId or -EnrollmentId bounding the read, the cmdlet sends one request per value of the first of
@@ -909,7 +926,7 @@ function Read-EventInfo {
             [string[]]$trackedEntities = $resolvedLists['TrackedEntityId']
             $owners = $null
             if ($trackedEntities.Count -gt 0) {
-                $patients = Select-NeoIPCTrackerReadPatient -Cmdlet $PSCmdlet -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -TrackedEntityId $trackedEntities
+                $patients = Select-NeoIPCTrackerReadPatient -Cmdlet $PSCmdlet -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'CAPTURE' -TrackedEntityId $trackedEntities
                 $trackedEntities = $patients.TrackedEntities
                 $owners = $patients.Owners
                 if ($trackedEntities.Count -eq 0) { return }
@@ -980,7 +997,7 @@ function Read-EventInfo {
                     if ($why) { throw (New-NeoIPCUnexpectedItemError -Resource 'events' -Item "the event '$uid'" -Reason $why) }
                 }
                 if ($request.OrgUnit) {
-                    $outside = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -Item $items -OrgUnitId $request.OrgUnit -Owner $owners -AcceptEntered).Outside
+                    $outside = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'CAPTURE' -Item $items -OrgUnitId $request.OrgUnit -Owner $owners -AcceptEntered).Outside
                     if ($outside.Count -gt 0) {
                         throw (New-NeoIPCUnexpectedItemError -Resource 'events' -Item "the event '$($outside[0]['event'])'" -Reason 'which lies in none of the org units it asked for')
                     }
@@ -1023,7 +1040,7 @@ function Read-EventInfo {
                 $kept = @($kept | Where-Object { $value = [string]$_['storedBy']; $value -ne '' -and $storedBySet.Contains($value) })
             }
             if ($orgUnits.Ids.Count -gt 1 -and $fanOut -ne 'OrgUnit' -and $kept.Count -gt 0) {
-                $kept = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -Item $kept -OrgUnitId $orgUnits.Ids -Owner $owners).Inside
+                $kept = (Split-NeoIPCTrackerItemByOrgUnit -Endpoint $endpoint -Dialect $dialect -ProgramId $programId -OrgUnitMode 'CAPTURE' -Item $kept -OrgUnitId $orgUnits.Ids -Owner $owners).Inside
             }
 
             foreach ($e in $kept) {

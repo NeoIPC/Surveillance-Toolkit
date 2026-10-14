@@ -31,8 +31,9 @@ function Get-NeoIPCTrackerDialect {
             # the program, org unit, and the rest (TrackerEnrollmentsExportController), and refuses the whole read
             # with 409 when the account may not read one of them. An enrolment read by query carries no events,
             # however the fields ask (AbstractEnrollmentService.getEnrollments maps each with EnrollmentParams.FALSE);
-            # one read by UID does. A read by query without org units answers an account that has data-view but no
-            # data-capture org units with an empty list rather than a refusal (DefaultProgramInstanceService).
+            # one read by UID does. A read by query without org units answers an account without the authority ALL
+            # that has data-view but no data-capture org units with an empty list rather than a refusal
+            # (DefaultProgramInstanceService), and a read by UID refuses it each enrolment.
             EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; UidReadIgnoresFilters = $true; QueryReadOmitsEvents = $true; EmptyWithoutCaptureUnits = $true } + $enrollmentNames)
             # 'event' drops a value that is no UID instead of refusing it; 'enrollments' is a set Spring binds, so ','.
             EventQuery            = [pscustomobject](@{ Events = 'event'; EventSeparator = ';' } + $eventNames)

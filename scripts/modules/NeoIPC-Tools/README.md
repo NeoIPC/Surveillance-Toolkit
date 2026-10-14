@@ -281,17 +281,15 @@ enrolments by UID themselves, and read such enrolments one at a time when DHIS2
 refuses the whole read because your account may not read one of them, with an
 error naming each one it refuses. They fill `EventIds` with a second read,
 since DHIS2 2.40 returns no events with enrolments it reads by query, and
-`Read-EnrolmentInfo` checks that your account has data-capture org units
-before a read without org units, which DHIS2 2.40 answers with nothing rather
-than a refusal.
+`Read-EnrolmentInfo` checks that an account without ALL has data-capture org
+units before a read without org units, which DHIS2 2.40 answers such an account
+with nothing, or by UID with a refusal per enrolment, rather than one refusal.
 
 ## Access and Scope
 
-What the cmdlets show an account is what DHIS2 lets that account read. An
-account with the authority ALL sees everything they read; any other account
-sees less, and where a missing privilege empties a column or shortens a list,
-the cmdlet says so with a warning or an error rather than return less in
-silence:
+What the cmdlets show an account is what DHIS2 lets that account read. Where a
+missing privilege empties a column or shortens a list, the cmdlet says so with
+a warning or an error rather than return less in silence:
 
 - **Org units.** Every lookup (`-OrgUnitCode`, `-OrgUnitId`,
   `Read-OrgUnitInfo`, `Get-NeoIPCDepartments`) stays within your hierarchy:
@@ -300,13 +298,12 @@ silence:
   account read the org unit's metadata.
 - **Patients, enrolments, and events.** DHIS2 lets only an account with
   data-capture org units and data read access to NEOIPC_CORE read its
-  records; without either, the read ends with an error that says which. For an
-  account without ALL, these are the records whose patient's NEOIPC_CORE
-  record is owned within its data-capture org units, which some DHIS2 releases
-  limit further to its search org units. DHIS2 does not limit an account with
-  ALL to its data-capture org units, so it can read records in org units that
-  the org-unit lookups above do not find. On DHIS2 2.43.2 and later, a patient
-  attribute's values also need read access to the attribute.
+  records; without either, the read ends with an error that says which. Which
+  records a read without an org-unit filter reaches depends on the account and
+  the release (see the table below); where it reaches beyond your data-capture
+  org units, it can return records of org units that the org-unit lookups
+  above do not find. On DHIS2 2.43.2 and later, a patient attribute's values
+  also need read access to the attribute.
 - **Users.** `Read-UserInfo` needs the authority F_USER_VIEW, which ALL
   includes. On 2.41 and earlier the two-factor state comes with the user list;
   from 2.42.6 and 2.43.1 it needs ALL itself (see
@@ -314,6 +311,21 @@ silence:
 - **Tokens.** The token cmdlets work on your own tokens. With `-AllUsers` they
   reach every user's with ALL, and otherwise only those shared with your
   account, with a warning.
+
+The records a tracker read without an org-unit filter reaches, NEOIPC_CORE
+being a closed program, where *owned within* means that the patient's
+NEOIPC_CORE record is owned within those org units or below them:
+
+| Read | Account without ALL | Account with ALL |
+|------|---------------------|------------------|
+| Patients | owned within its data-capture org units, on 2.40 and 2.41 also within its search org units where it has any | as an account without ALL on 2.40 and 2.41; owned within its data-capture or search org units on 2.42; every patient from 2.43 |
+| Enrolments | as patients | owned within its search org units, or within its data-capture org units where it has none, on 2.40 and 2.41; owned within either on 2.42; every enrolment from 2.43 |
+| Events | owned within its data-capture org units | as an account without ALL up to 2.42; every event from 2.43 |
+
+So on 2.40 to 2.42, an account with ALL whose search org units reach beyond
+its data-capture org units can read enrolments there, and on 2.42 patients,
+whose events it cannot read; `Read-EventInfo -TrackedEntityId` names such a
+patient as one it cannot read.
 
 ## OrgUnit Inspection
 
@@ -367,9 +379,9 @@ cmdlet reads all of them; the filters of different parameters combine, so that
 a record must pass each of them. `-OrgUnitCode` and `-OrgUnitId` form one set
 of org units, and `-EventType` and `-ProgramStageId` one set of stages. A
 record lies in an org unit when its patient's NEOIPC_CORE record is owned
-there, which is how DHIS2 selects it: where the patient was registered, unless
-the record has been transferred. A record's `OrgUnitId` is where it was
-registered or entered.
+there, which is how DHIS2 selects it: the owner is the org unit the patient's
+first NEOIPC_CORE enrolment was entered in, until the record is transferred. A
+record's `OrgUnitId` is where it was registered or entered.
 
 Each code or UID that names no org unit in your hierarchy, each value that is
 no DHIS2 UID, each stage or data element that does not exist, and each tracked
@@ -384,7 +396,8 @@ takes pipeline-bound filter parameters with matching property names, so the
 reads compose by exact property-name match, with no `[Alias]` indirection and
 no `Select-Object` renames. Two kinds of filter take no pipeline input:
 `-OrgUnitId`, since a record's `OrgUnitId` need not be the org unit that owns
-it, so a transferred patient piped on would drop out; and `Read-EventInfo`'s
+it, so a patient piped on whose record another org unit owns would drop out;
+and `Read-EventInfo`'s
 `-CreatedBy`, `-UpdatedBy`, and `-StoredBy`, which compare exactly, so that
 the events of piped enrolments are read whoever created or changed the
 enrolments. `Read-OrgUnitInfo`'s records select through `-OrgUnitCode`.

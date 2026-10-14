@@ -102,8 +102,9 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
-# One host for every part of the build, the department list and the report data alike.
-$Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname
+# One host for every part of the build, the department list and the report data alike. Resolved inside a try, so
+# that a blank host stops the build even where the caller's SilentlyContinue would let the resolver's error pass.
+try { $Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname } catch { $PSCmdlet.ThrowTerminatingError($_) }
 $auth = Resolve-NeoIPCAuth -Token $Token
 
 $currentDir = Get-Location

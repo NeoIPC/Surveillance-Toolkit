@@ -105,7 +105,8 @@ function Test-NeoIPCTrackerReadInput {
     #   2. false, after an error naming the parameter, when a filter given as an argument holds no value, since reading
     #      without it would widen the read to every record;
     #   3. false, without an error, when the cmdlet received pipeline objects but none of them gave its filters a value,
-    #      since that must not widen the read either.
+    #      since that must not widen the read either. The arguments ($Explicit) do not count here: they stay bound for
+    #      every object, so with them alone the read would select what the arguments select, whatever was piped.
     [CmdletBinding()]
     [OutputType([bool])]
     param(
@@ -124,7 +125,10 @@ function Test-NeoIPCTrackerReadInput {
         }
     }
     if (-not $ExpectingInput) { return $true }
-    foreach ($name in $Given.Keys) { if ((Get-NeoIPCDistinctValue -Value $Given[$name]).Count -gt 0) { return $true } }
+    foreach ($name in $Given.Keys) {
+        if ($Explicit -ccontains $name) { continue }
+        if ((Get-NeoIPCDistinctValue -Value $Given[$name]).Count -gt 0) { return $true }
+    }
     $false
 }
 
@@ -207,10 +211,12 @@ function Get-NeoIPCCoreTrackerList {
     #      2.42 and later); on 2.40's tracked-entity and enrolment reads "Current user must be associated with at least
     #      one organisation unit when selection mode is ACCESSIBLE", and on its tracked-entity read also "User need to be
     #      associated with at least one organisation unit." (both 409). 2.40's enrolment read by query refuses only an
-    #      account with neither data-capture nor data-view org units: one with data-view org units only gets an empty
-    #      list, which Read-EnrolmentInfo checks for itself;
+    #      account with neither data-capture nor data-view org units: one without the authority ALL that has data-view
+    #      org units only gets an empty list, and the read by UID refuses it each enrolment (409,
+    #      "[OWNERSHIP_ACCESS_DENIED]"), so Read-EnrolmentInfo checks for data-capture org units itself;
     #   2. no data read access to the program: "User has no access to program: <uid>" (403), on 2.40's tracked-entity and
-    #      enrolment reads "Current user is not authorized to read data from selected program:  <uid>" (409).
+    #      enrolment reads "Current user is not authorized to read data from selected program:  <uid>", and on its
+    #      enrolment read by UID "User has no data read access to program: <uid>" (both 409).
     # Every other failure passes through unchanged, among them the 409 of 2.40's enrolment read by UID for a listed
     # enrolment the account may not read, which Read-EnrolmentInfo handles per enrolment.
     [CmdletBinding()]
@@ -230,7 +236,9 @@ function Get-NeoIPCCoreTrackerList {
                 throw (New-NeoIPCTrackerReadError -ErrorId 'NoCaptureOrgUnits' -Category PermissionDenied -TargetObject $Resource `
                         -Message "Your account has no data-capture org units, which DHIS2 requires for reading NEOIPC_CORE's tracker records. $answer")
             }
-            if ($answer -match 'no access to program:|read data from selected program:') {
+            # The read by UID names the program of the enrolment it refuses, which need not be NEOIPC_CORE.
+            $programId = [string]$Query['program']
+            if ($answer -match 'no access to program:|read data from selected program:' -or ($programId -and $answer.Contains("no data read access to program: $programId"))) {
                 throw (New-NeoIPCTrackerReadError -ErrorId 'NoProgramAccess' -Category PermissionDenied -TargetObject $Resource `
                         -Message "Your account may not read NEOIPC_CORE's tracker records: it lacks data read access to the program. $answer")
             }
@@ -278,14 +286,19 @@ function New-NeoIPCUnexpectedItemError {
 function Get-NeoIPCCoreOwner {
     # The org unit that owns NEOIPC_CORE's record of each given tracked entity, keyed by its UID. DHIS2 matches the org
     # units of a tracker read with program against this owner, on every supported version, rather than against the org
-    # unit a record was registered or entered in. Read ACCESSIBLE, in chunks, so a tracked entity that does not exist, is
-    # deleted, or lies outside what the account may read has no entry; one the read was not asked for ends it.
+    # unit a record was registered or entered in. Read in chunks, so a tracked entity that does not exist, is deleted,
+    # or lies outside the read's scope has no entry; one the read was not asked for ends it. The scope is the one of
+    # the read the owners serve, which differ on 2.40 to 2.42: ACCESSIBLE for an enrolment read, whose ACCESSIBLE scope
+    # is the account's search org units (or its data-capture org units without them), and CAPTURE for an event read,
+    # which DHIS2 selects within the data-capture org units for a CLOSED program such as NEOIPC_CORE (and on 2.43 for a
+    # superuser everywhere, as CAPTURE then reads).
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.Dictionary[string, string]])]
     param(
         [Parameter(Mandatory)][hashtable]$Endpoint,
         [Parameter(Mandatory)]$Dialect,
         [Parameter(Mandatory)][string]$ProgramId,
+        [Parameter(Mandatory)][ValidateSet('ACCESSIBLE', 'CAPTURE')][string]$OrgUnitMode,
         [AllowEmptyCollection()][string[]]$TrackedEntityId = @()
     )
     $ordinal = [System.StringComparer]::Ordinal
@@ -295,7 +308,7 @@ function Get-NeoIPCCoreOwner {
     $names = $Dialect.TrackedEntityQuery
     foreach ($chunk in (Split-NeoIPCList -Value $ids -Separator $names.Separator)) {
         $asked = [System.Collections.Generic.HashSet[string]]::new([string[]]$chunk, $ordinal)
-        $query = @{ program = $ProgramId; $Dialect.OrgUnitMode = 'ACCESSIBLE'; $names.TrackedEntities = $chunk -join $names.Separator }
+        $query = @{ program = $ProgramId; $Dialect.OrgUnitMode = $OrgUnitMode; $names.TrackedEntities = $chunk -join $names.Separator }
         foreach ($te in (Get-NeoIPCCoreTrackerList -Endpoint $Endpoint -Dialect $Dialect -Resource 'trackedEntities' -Query $query -Fields 'trackedEntity', 'programOwners[orgUnit,program]')) {
             $uid = [string]$te['trackedEntity']
             if (-not $asked.Contains($uid)) { throw (New-NeoIPCUnexpectedItemError -Resource 'trackedEntities' -Item "the tracked entity '$uid'" -Reason 'which it did not ask for') }
@@ -309,10 +322,10 @@ function Get-NeoIPCCoreOwner {
 
 function Select-NeoIPCTrackerReadPatient {
     # The given tracked entities that are NEOIPC_CORE patients the account can read, after an error per one that is not,
-    # and the owners of the found ones' NEOIPC_CORE records (Get-NeoIPCCoreOwner). DHIS2 answers an enrolment or event read
-    # of a tracked entity that does not exist, is deleted, or lies outside what the account may read with a refusal on
-    # some versions and with an empty list on others (Test-NeoIPCTrackedEntityMissing), so the reads ask for the tracked
-    # entities first.
+    # and the owners of the found ones' NEOIPC_CORE records (Get-NeoIPCCoreOwner, in the scope -OrgUnitMode names). DHIS2
+    # answers an enrolment or event read of a tracked entity that does not exist, is deleted, or lies outside what the
+    # account may read with a refusal on some versions and with an empty list on others (Test-NeoIPCTrackedEntityMissing),
+    # so the reads ask for the tracked entities first.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -320,9 +333,10 @@ function Select-NeoIPCTrackerReadPatient {
         [Parameter(Mandatory)][hashtable]$Endpoint,
         [Parameter(Mandatory)]$Dialect,
         [Parameter(Mandatory)][string]$ProgramId,
+        [Parameter(Mandatory)][ValidateSet('ACCESSIBLE', 'CAPTURE')][string]$OrgUnitMode,
         [Parameter(Mandatory)][string[]]$TrackedEntityId
     )
-    $owners = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -TrackedEntityId $TrackedEntityId
+    $owners = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -OrgUnitMode $OrgUnitMode -TrackedEntityId $TrackedEntityId
     $found = [System.Collections.Generic.List[string]]::new()
     foreach ($te in $TrackedEntityId) {
         if ($owners.ContainsKey($te)) { $found.Add($te); continue }
@@ -335,16 +349,18 @@ function Select-NeoIPCTrackerReadPatient {
 function Split-NeoIPCTrackerItemByOrgUnit {
     # NEOIPC_CORE enrolments or events, as a read returns them, split by whether they lie in the given org units: whether
     # one of them owns their patient's NEOIPC_CORE record, which is how DHIS2 selects them on every supported version,
-    # whatever org unit a record was entered in. The items do not carry that owner, so it is read for those whose
-    # patient -Owner does not list. -AcceptEntered also counts an item entered in one of the org units as inside, without
-    # reading its owner: enough for checking that a read DHIS2 filtered by org unit returned nothing outside them, since a
-    # read DHIS2 widened returns records entered elsewhere as well. Both lists keep the input order.
+    # whatever org unit a record was entered in. The items do not carry that owner, so it is read, in the scope
+    # -OrgUnitMode names (Get-NeoIPCCoreOwner), for those whose patient -Owner does not list. -AcceptEntered also counts
+    # an item entered in one of the org units as inside, without reading its owner: enough for checking that a read DHIS2
+    # filtered by org unit returned nothing outside them, since a read DHIS2 widened returns records entered elsewhere as
+    # well. Both lists keep the input order.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)][hashtable]$Endpoint,
         [Parameter(Mandatory)]$Dialect,
         [Parameter(Mandatory)][string]$ProgramId,
+        [Parameter(Mandatory)][ValidateSet('ACCESSIBLE', 'CAPTURE')][string]$OrgUnitMode,
         [AllowEmptyCollection()][object[]]$Item = @(),
         [Parameter(Mandatory)][string[]]$OrgUnitId,
         [System.Collections.Generic.Dictionary[string, string]]$Owner,
@@ -356,7 +372,7 @@ function Split-NeoIPCTrackerItemByOrgUnit {
     if ($null -ne $Owner) { foreach ($k in $Owner.Keys) { $owners[$k] = $Owner[$k] } }
     $unknown = @($Item | Where-Object { -not ($AcceptEntered -and $set.Contains([string]$_['orgUnit'])) -and -not $owners.ContainsKey([string]$_['trackedEntity']) })
     if ($unknown.Count -gt 0) {
-        $read = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -TrackedEntityId @($unknown | ForEach-Object { [string]$_['trackedEntity'] })
+        $read = Get-NeoIPCCoreOwner -Endpoint $Endpoint -Dialect $Dialect -ProgramId $ProgramId -OrgUnitMode $OrgUnitMode -TrackedEntityId @($unknown | ForEach-Object { [string]$_['trackedEntity'] })
         foreach ($k in $read.Keys) { $owners[$k] = $read[$k] }
     }
     $inside = [System.Collections.Generic.List[object]]::new()

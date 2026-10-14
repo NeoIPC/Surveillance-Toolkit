@@ -47,7 +47,7 @@ whatever this says, as every read of the NeoIPC-Tools module is.
 .EXAMPLE
 .\Update-NeoIPCCache.ps1                      # default: refresh everything
 .\Update-NeoIPCCache.ps1 -Sites               # only site codes
-.\Update-NeoIPCCache.ps1 -DataElements        # only DE codes
+.\Update-NeoIPCCache.ps1 -DataElements        # only data-element codes
 .\Update-NeoIPCCache.ps1 -Dhis2Hostname neoipc-demo.charite.de
 #>
 [CmdletBinding()]
@@ -75,8 +75,9 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
-# The host the report builds default to, so the cache this fills is the one their completion reads.
-$Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname
+# The host the report builds default to, so the cache this fills is the one their completion reads. Resolved inside a
+# try, so that a blank host stops the script even where the caller's SilentlyContinue would let the resolver's error pass.
+try { $Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname } catch { $PSCmdlet.ThrowTerminatingError($_) }
 
 # Default: refresh all caches
 if (-not $Sites -and -not $DataElements) {

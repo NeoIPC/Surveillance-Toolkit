@@ -328,6 +328,18 @@ InModuleScope 'NeoIPC-Tools' {
                 @(Get-Message $warnings | Where-Object { $_ -like '*user roles*' }).Count | Should -Be 0
                 @(Get-FakeRequest 'api/me').Count | Should -Be $AuthorityReads
             }
+            It 'does not warn on DHIS2 <Version> about a list the account may not read, and stops with that refusal alone' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+            ) {
+                $script:Fake.Version = $Version
+                $script:Fake.Authorities = @('M_dhis-web-user')
+                $script:Fake.UsersStatus = 403
+                $failure = $null
+                try { $null = Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -WarningVariable warnings -WarningAction SilentlyContinue } catch { $failure = $_ }
+                "$failure" | Should -BeLike '*F_USER_VIEW*'
+                @($warnings).Count | Should -Be 0
+            }
         }
 
         Describe 'EditUrl' {
