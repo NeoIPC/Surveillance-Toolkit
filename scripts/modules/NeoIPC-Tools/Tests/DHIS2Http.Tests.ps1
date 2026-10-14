@@ -6,11 +6,14 @@
     reader.
 
 .DESCRIPTION
-    Covers Resolve-NeoIPCDhis2Hostname, Split-NeoIPCList, Get-NeoIPCDhis2ErrorDetail, New-NeoIPCDhis2HttpError and
-    Invoke-NeoIPCDhis2Get (Private/DHIS2Http.ps1), Get-NeoIPCDhis2VersionText (Private/Dhis2Version.ps1), and
-    Resolve-NeoIPCReportHostname (Public/ReportHelpers.ps1). Self-contained: every HTTP call is mocked, so no instance is
-    needed and no request leaves the process. NEOIPC_DHIS2_HOST is removed before each test, set where a test needs it,
-    and restored afterwards, removed again if it was absent. The tokens are made-up strings of the two token shapes.
+    Covers Resolve-NeoIPCDhis2Hostname, Split-NeoIPCList, Get-NeoIPCDhis2ErrorDetail, New-NeoIPCDhis2HttpError,
+    Invoke-NeoIPCDhis2Get, and Invoke-NeoIPCDhis2Delete (Private/DHIS2Http.ps1), Get-NeoIPCDhis2VersionText
+    (Private/Dhis2Version.ps1), and Resolve-NeoIPCReportHostname (Public/ReportHelpers.ps1); and, across the module, how
+    the writers take a host of white space and how the help of the functions without a built-in host describes it.
+    Self-contained: every HTTP call is mocked, and Invoke-WebRequest and Invoke-RestMethod throw unless a test makes them
+    answer, so no instance is needed and no request leaves the process. NEOIPC_DHIS2_HOST is removed before each test,
+    set where a test needs it, and restored afterwards, removed again if it was absent. The tokens are made-up strings of
+    the two token shapes.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/DHIS2Http.Tests.ps1
@@ -63,6 +66,8 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
         }
         BeforeEach {
             [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', [NullString]::Value, 'Process')
+            Mock Invoke-WebRequest { throw 'A test made an HTTP call.' }
+            Mock Invoke-RestMethod { throw 'A test made an HTTP call.' }
         }
 
         Describe 'Resolve-NeoIPCDhis2Hostname' {
@@ -76,6 +81,10 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
             }
             It 'stops when neither names a host, instead of choosing one' {
                 { Resolve-NeoIPCDhis2Hostname -Hostname '' } | Should -Throw '*NEOIPC_DHIS2_HOST*'
+            }
+            It 'stops at a host of white space, instead of taking NEOIPC_DHIS2_HOST' {
+                [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'from-variable.example.org', 'Process')
+                { Resolve-NeoIPCDhis2Hostname -Hostname " `t" } | Should -Throw '-Hostname holds only white space, which names no DHIS2 host.'
             }
         }
 
@@ -159,6 +168,17 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                     -QueryParameters @{ events = 'EvtAAAAAA01,EvtBBBBBB02' } -Confirm:$false -WhatIf:$false
                 $answer.Uri | Should -BeLike '*events=EvtAAAAAA01%2CEvtBBBBBB02*'
             }
+            # DHIS2 answers a list read with its first 50 items unless the read asks for all of them, so every list read of
+            # the module depends on paging=false.
+            It 'asks for every item with paging=false, and for one page without it under -PageSize' {
+                Mock Invoke-WebRequest { New-TestResponse 200 (@{ Uri = [string]$Uri } | ConvertTo-Json -Depth 100) }
+                $unpaged = Invoke-NeoIPCDhis2Get -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/organisationUnits' -Confirm:$false -WhatIf:$false
+                @(([uri]$unpaged.Uri).Query.TrimStart('?').Split('&')) | Should -Contain 'paging=false'
+                $paged = Invoke-NeoIPCDhis2Get -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/organisationUnits' -PageSize 5 -Confirm:$false -WhatIf:$false
+                $parts = @(([uri]$paged.Uri).Query.TrimStart('?').Split('&'))
+                $parts | Should -Contain 'pageSize=5'
+                $parts | Should -Not -Contain 'paging=false'
+            }
             It 'returns dates as [datetime], and as DHIS2''s text with -AsHashtable' {
                 Mock Invoke-WebRequest { New-TestResponse 200 '{"created":"2026-01-02T03:04:05.678"}' }
                 $plain = Invoke-NeoIPCDhis2Get -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/me' -Confirm:$false -WhatIf:$false
@@ -191,6 +211,20 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 $failure.Exception.Message | Should -BeLike "GET 'api/tracker/events' failed with HTTP 400: *Program is mandatory*"
                 $failure.Exception.Message | Should -Not -BeLike '*<*'
             }
+            It 'ends a <Method> answered with a status .NET does not name, such as a proxy''s 522, with its own error carrying the status' -ForEach @(
+                @{ Method = 'GET' }
+                @{ Method = 'DELETE' }
+            ) {
+                Mock Invoke-WebRequest { New-TestResponse 522 '<!DOCTYPE html><html><head><title>Connection timed out</title></head><body><h1>Error 522</h1><p>Connection timed out</p></body></html>' }
+                $failure = Get-TestError {
+                    if ($Method -eq 'GET') { Invoke-NeoIPCDhis2Get -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/me' -Confirm:$false -WhatIf:$false }
+                    else { Invoke-NeoIPCDhis2Delete -Auth $script:TestAuth -Hostname 'given.example.org' -Path 'api/apiToken/TokAAAAAA01' -Confirm:$false }
+                }
+                $failure.Exception | Should -BeOfType ([System.Net.Http.HttpRequestException])
+                [int]$failure.Exception.StatusCode | Should -Be 522
+                $failure.Exception.Message | Should -BeLike "$Method '*' failed with HTTP 522: *Connection timed out*"
+            }
+            # NEOIPC-COMPAT(dhis2-version-1-token): see Public/Auth.ps1.
             It 'says a version-1 token must be issued again when DHIS2 refuses its checksum, without showing the token' {
                 Mock Invoke-WebRequest { New-TestResponse 400 '{"httpStatus":"Bad Request","httpStatusCode":400,"status":"ERROR","message":"Checksum validation failed"}' }
                 $failure = Get-TestError { Invoke-NeoIPCDhis2Get -Auth $script:V1Auth -Hostname 'given.example.org' -Path 'api/me' -Confirm:$false -WhatIf:$false }
@@ -265,6 +299,48 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 $run.Errors | Should -HaveCount 1
                 $run.Errors[0].FullyQualifiedErrorId | Should -BeLike "*,$Command"
                 $run.Errors[0].Exception.Message | Should -BeLike '*HTTP 401*'
+            }
+        }
+
+        Describe 'The writers'' host' {
+            # A writer's -Hostname is mandatory, and a value of white space passes that check; were it taken as no host, the
+            # request would go to the instance NEOIPC_DHIS2_HOST names while the confirmation named none.
+            It '<Command> stops at a -Hostname of white space before any request, although NEOIPC_DHIS2_HOST names a host' -ForEach @(
+                @{ Command = 'Remove-DHIS2PersonalAccessToken' }
+                @{ Command = 'Clear-DHIS2PersonalAccessTokens' }
+                @{ Command = 'Import-NeoIPCMetadata' }
+                @{ Command = 'Deploy-NeoIPCMetadata' }
+                @{ Command = 'Import-NeoIPCPlayData' }
+                @{ Command = 'Remove-NeoIPCPatient' }
+            ) {
+                [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'from-variable.example.org', 'Process')
+                $arguments = @{ Auth = $script:TestAuth; Hostname = ' ' }
+                switch ($Command) {
+                    'Remove-DHIS2PersonalAccessToken' { $arguments.Id = 'TokAAAAAA01'; $arguments.Force = $true }
+                    'Clear-DHIS2PersonalAccessTokens' { $arguments.Force = $true }
+                    'Import-NeoIPCMetadata' { $arguments.Json = '{}'; $arguments.Confirm = $false }
+                    'Deploy-NeoIPCMetadata' { $arguments.Json = '{}'; $arguments.Confirm = $false }
+                    'Import-NeoIPCPlayData' { $arguments.Json = '{"trackedEntities":[]}'; $arguments.Confirm = $false }
+                    'Remove-NeoIPCPatient' { $arguments.OrgUnitCode = 'DEPT_A1'; $arguments.NeoIpcId = 'NEO-0001'; $arguments.Confirm = $false }
+                }
+                { & $Command @arguments 6>$null } | Should -Throw '-Hostname holds only white space, which names no DHIS2 host.'
+                Should -Invoke Invoke-WebRequest -Times 0 -Exactly
+                Should -Invoke Invoke-RestMethod -Times 0 -Exactly
+            }
+        }
+
+        Describe 'The help of the functions whose host falls back to NEOIPC_DHIS2_HOST' {
+            It 'describes the connection parameters of <Name>, and says where the host comes from' -ForEach @(
+                @{ Name = 'Get-NeoIPCServerKey'; Parameters = @('Scheme', 'Hostname', 'Port', 'Path') }
+                @{ Name = 'New-NeoIPCPlayDataPackage'; Parameters = @('Scheme', 'Hostname', 'Port') }
+                @{ Name = 'Export-NeoIPCPlayDataCsv'; Parameters = @('Scheme', 'Hostname', 'Port') }
+                @{ Name = 'Get-NeoIPCDataElementCodes'; Parameters = @('Scheme', 'Hostname', 'Port') }
+            ) {
+                $help = Get-Help $Name -Full
+                $descriptions = @{}
+                foreach ($p in @($help.parameters.parameter)) { $descriptions[[string]$p.name] = (($p.description | Out-String) -replace '\s+', ' ').Trim() }
+                foreach ($p in $Parameters) { $descriptions[$p] | Should -Not -BeNullOrEmpty -Because "-$p needs a description" }
+                $descriptions['Hostname'] | Should -BeLike '*NEOIPC_DHIS2_HOST*with neither*stops*'
             }
         }
 

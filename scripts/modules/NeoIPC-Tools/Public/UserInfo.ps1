@@ -18,8 +18,9 @@ the cmdlet stops with an error that names the authority.
 
 Which accounts DHIS2 lists changed with 2.42. On 2.41 and earlier, an account without the authority ALL
 does not see the accounts that hold any of its own user roles, itself included, unless the system setting
-that lets users grant their own user roles (keyCanGrantOwnUserAuthorityGroups) is on. From 2.42, it sees
-them as well.
+that lets users grant their own user roles (keyCanGrantOwnUserAuthorityGroups) is on; the cmdlet reads
+your account's authorities there and warns once when ALL is not among them, whatever the setting. From
+2.42, such an account sees them as well.
 
 Where TwoFactorEnabled comes from depends on the release:
   1. 2.41 and earlier: the user's twoFactorEnabled field. It counts an account as enabled from the moment
@@ -137,21 +138,22 @@ function Read-UserInfo {
             if ($null -ne $Port) { $endpoint.Port = $Port }
             $ordinal = [System.StringComparer]::Ordinal
 
-            # One read per chunk of codes; DHIS2 splits an `in` list on ',' with no escape, so a code holding one is read
-            # by itself.
+            # One read per chunk of the org units' UIDs. Resolve-NeoIPCOrgUnit looks the codes up, and a UID holds no ','
+            # that DHIS2 would split an `in` list or, from 2.42 on, the filter parameter on, as it would a code.
             $reads = [System.Collections.Generic.List[hashtable]]::new()
             if ($codes.Count -gt 0) {
                 $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code $codes.ToArray() -Fields 'code'
                 foreach ($missing in $found.MissingCode) {
                     Write-Error -Message "No org unit with the code '$missing' lies in your hierarchy." -Category ObjectNotFound -ErrorId 'NeoIPCOrgUnitCodeNotFound' -TargetObject $missing
                 }
-                $wanted = [string[]]@($found.ByCode.Keys)
-                if ($wanted.Count -eq 0) { return }
+                $unitIds = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+                foreach ($unit in $found.ByCode.Values) { [void]$unitIds.Add([string]$unit['id']) }
+                if ($unitIds.Count -eq 0) { return }
+                $wanted = [string[]]@($unitIds)
                 [Array]::Sort($wanted, $ordinal)
-                foreach ($chunk in (Split-NeoIPCList -Value @($wanted | Where-Object { -not $_.Contains(',') }) -Separator ',')) {
-                    $reads.Add(@{ Filter = "organisationUnits.code:in:[$($chunk -join ',')]" })
+                foreach ($chunk in (Split-NeoIPCList -Value $wanted -Separator ',')) {
+                    $reads.Add(@{ Filter = "organisationUnits.id:in:[$($chunk -join ',')]" })
                 }
-                foreach ($c in @($wanted | Where-Object { $_.Contains(',') })) { $reads.Add(@{ Filter = "organisationUnits.code:eq:$c" }) }
             }
             else {
                 $reads.Add(@{})
@@ -159,6 +161,18 @@ function Read-UserInfo {
 
             $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint
             $version = ConvertTo-NeoIPCDhis2Version -Text $versionText
+            # NEOIPC-COMPAT(dhis2-user-list-own-roles): remove once no supported instance runs 2.41 or earlier
+            # (/api/system/info version 2.42 or later everywhere). On 2.41 and earlier, api/users leaves out, for an account
+            # without the authority ALL, every account that holds one of its user roles, its own included, unless the system
+            # setting keyCanGrantOwnUserAuthorityGroups is on (DefaultUserService.handleUserQueryParams); only the user
+            # lookup endpoint opts out. From 2.42.0, a list read with filters alone no longer applies that rule.
+            if ($version -lt [version]'2.42.0') {
+                $me = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/me' -Fields 'authorities' -AsHashtable -Confirm:$false -WhatIf:$false
+                $authorities = if ($me -is [System.Collections.IDictionary]) { @($me['authorities']) } else { @() }
+                if ($authorities -cnotcontains 'ALL') {
+                    Write-Warning "DHIS2 $versionText leaves out of the user list the accounts that hold any of your account's user roles, your own account included, unless the system setting that lets users grant their own user roles (keyCanGrantOwnUserAuthorityGroups) is on."
+                }
+            }
             $twoFactorSource = Get-NeoIPCUserTwoFactorSource -Version $version
             $fields = @(
                 'id', 'username', 'firstName', 'surname', 'email', 'phoneNumber', 'employer', 'created', 'createdBy[username]',

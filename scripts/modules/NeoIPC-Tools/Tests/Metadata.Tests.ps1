@@ -5564,6 +5564,28 @@ Hierarchies:
             $r.ErrorMessage | Should -Be 'Could not commit transaction. / PersistenceException: not-null property references a null or transient value'
         }
 
+        # DHIS2 2.41 and later refuse a token whose checksum fails before the import runs, and the POST is the only request.
+        It 'adds to ErrorMessage what to do about the token when DHIS2 refuses its checksum, for <Case>' -ForEach @(
+            # NEOIPC-COMPAT(dhis2-version-1-token): see Public/Auth.ps1.
+            @{ Case = 'a version-1 token'; Kind = 'Version1'; Expected = 'Checksum validation failed. The token is a version-1 token (d2pat_), which only DHIS2 2.40 and earlier issued and which 2.41 and later refuse: create a new token on this instance.' }
+            @{ Case = 'a version-2 token'; Kind = 'Version2'; Expected = 'Checksum validation failed. The token''s checksum does not match its text: check that the whole token was copied.' }
+            @{ Case = 'Basic authentication, which sends no token'; Kind = 'Basic'; Expected = 'Checksum validation failed' }
+        ) {
+            Mock Invoke-NeoIPCDhis2Post {
+                [pscustomobject]@{ StatusCode = 400; Body = ('{"httpStatus":"Bad Request","httpStatusCode":400,"status":"ERROR","message":"Checksum validation failed"}' | ConvertFrom-Json) }
+            }
+            $auth = switch ($Kind) {
+                'Version1' { @{ AuthType = 'Token'; Token = 'd2pat_' + ('a' * 32) + ('0' * 10) } }
+                'Version2' { @{ AuthType = 'Token'; Token = 'd2p_' + ('b' * 44) + '000000' } }
+                'Basic' { @{ AuthType = 'Basic'; Username = 'admin'; Password = [System.Net.NetworkCredential]::new('', 'made-up').SecurePassword } }
+            }
+            $r = Import-NeoIPCMetadata -Json '{}' -Auth $auth -Hostname 'dhis2.example.org' -Confirm:$false
+            $r.HttpStatusCode | Should -Be 400
+            $r.Status | Should -Be 'ERROR'
+            $r.ErrorMessage | Should -BeExactly $Expected
+            if ($auth.Token) { $r.ErrorMessage | Should -Not -BeLike "*$($auth.Token)*" }
+        }
+
         It 'leaves ErrorMessage null on a happy-path (WebMessage-wrapped) import' {
             Mock Invoke-NeoIPCDhis2Post { [pscustomobject]@{ StatusCode = 200; Body = $script:wrappedReport } }
             $r = Import-NeoIPCMetadata -Json '{}' -Auth $script:testAuth -Hostname 'dhis2.example.org' -DryRun

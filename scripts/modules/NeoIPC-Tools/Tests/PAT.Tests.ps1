@@ -5,7 +5,7 @@
     Pester tests for the personal access token cmdlets.
 
 .DESCRIPTION
-    Covers Read-DHIS2PersonalAccessToken, Remove-DHIS2PersonalAccessToken and Clear-DHIS2PersonalAccessTokens
+    Covers Read-DHIS2PersonalAccessToken, Remove-DHIS2PersonalAccessToken, and Clear-DHIS2PersonalAccessTokens
     (Public/PAT.ps1). The requests go to a small in-memory DHIS2 behind Invoke-WebRequest, so that the real GET and DELETE
     helpers build each request and read each answer. It models what the source of DHIS2 2.40.12, 2.41.10, 2.42.6 and
     2.43.2 says of api/apiToken, which no release changed in what is modelled: a token is a sharing object, private by
@@ -17,8 +17,9 @@
     at once from DHIS2 2.41 on. Fields are not applied: a test checks the fields a request names instead.
 
     The confirmation tests run the cmdlets in a runspace whose host answers each prompt from a script, so that they are
-    asked exactly as a person would be. That runspace imports the module afresh and reaches the same fake DHIS2 through
-    a global Invoke-WebRequest, which module code finds before the cmdlet.
+    asked exactly as a person would be, and records every request for input, such as Read-Host's for a username, which
+    it refuses. That runspace imports the module afresh and reaches the same fake DHIS2 through a global
+    Invoke-WebRequest, which module code finds before the cmdlet.
 
     Self-contained: no instance is needed and no request leaves the process.
 
@@ -162,12 +163,15 @@ using System.Security;
 namespace NeoIPCTests
 {
     // Answers each choice prompt with the next answer of the queue, by position, since the labels come in the UI
-    // language: ShouldProcess and ShouldContinue offer Yes, Yes to All, No, No to All, and Suspend, in that order.
+    // language: ShouldProcess and ShouldContinue offer Yes, Yes to All, No, No to All, and Suspend, in that order. Every
+    // request for input is recorded in Inputs and refused: Read-Host -Prompt asks through Prompt, with the prompt as the
+    // field's name.
     public sealed class ScriptedHostUserInterface : PSHostUserInterface
     {
         private static readonly string[] Positions = { "Yes", "YesToAll", "No", "NoToAll" };
         public Queue<string> Answers { get; } = new Queue<string>();
         public List<string> Prompts { get; } = new List<string>();
+        public List<string> Inputs { get; } = new List<string>();
         public List<string> Warnings { get; } = new List<string>();
         public override PSHostRawUserInterface RawUI => null;
         public override int PromptForChoice(string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
@@ -178,11 +182,15 @@ namespace NeoIPCTests
             if (position < 0 || position >= choices.Count) throw new InvalidOperationException("No such answer to: " + message);
             return position;
         }
-        public override Dictionary<string, PSObject> Prompt(string caption, string message, Collection<FieldDescription> descriptions) => throw new InvalidOperationException("Asked for input: " + message);
-        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName) => throw new InvalidOperationException("Asked for a credential.");
-        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName, PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options) => throw new InvalidOperationException("Asked for a credential.");
-        public override string ReadLine() => throw new InvalidOperationException("Asked for a line.");
-        public override SecureString ReadLineAsSecureString() => throw new InvalidOperationException("Asked for a secure line.");
+        public override Dictionary<string, PSObject> Prompt(string caption, string message, Collection<FieldDescription> descriptions)
+        {
+            foreach (FieldDescription description in descriptions) Inputs.Add(description.Name);
+            throw new InvalidOperationException("Asked for input: " + message);
+        }
+        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName) { Inputs.Add("a credential"); throw new InvalidOperationException("Asked for a credential."); }
+        public override PSCredential PromptForCredential(string caption, string message, string userName, string targetName, PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options) { Inputs.Add("a credential"); throw new InvalidOperationException("Asked for a credential."); }
+        public override string ReadLine() { Inputs.Add("a line"); throw new InvalidOperationException("Asked for a line."); }
+        public override SecureString ReadLineAsSecureString() { Inputs.Add("a secure line"); throw new InvalidOperationException("Asked for a secure line."); }
         public override void Write(string value) { }
         public override void Write(ConsoleColor foregroundColor, ConsoleColor backgroundColor, string value) { }
         public override void WriteLine(string value) { }
@@ -237,12 +245,13 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
             finally { $setup.Dispose() }
 
             # Runs -Command in the scripted runspace against the current fake DHIS2, answering the prompts with -Answers.
-            # Returns the output, the errors, the terminating error, and the prompts and warnings the host was shown.
-            # -NoTry runs it as a console runs a line, with no try above it: a try anywhere above a call makes every
-            # terminating error unwind to it, while without one an error that ends a statement lets the next one run.
+            # Returns the output, the errors, the terminating error, and the prompts, requests for input, and warnings the
+            # host was shown. -NoTry runs it as a console runs a line, with no try above it: a try anywhere above a call
+            # makes every terminating error unwind to it, while without one an error that ends a statement lets the next
+            # one run.
             function Invoke-Scripted([string[]]$Answers = @(), [hashtable]$Variables = @{}, [Parameter(Mandatory)][string]$Command, [switch]$NoTry) {
                 $ui = $script:ScriptedHost.ScriptedUI
-                $ui.Answers.Clear(); $ui.Prompts.Clear(); $ui.Warnings.Clear()
+                $ui.Answers.Clear(); $ui.Prompts.Clear(); $ui.Inputs.Clear(); $ui.Warnings.Clear()
                 foreach ($a in $Answers) { $ui.Answers.Enqueue($a) }
                 $script:Runspace.SessionStateProxy.SetVariable('Fake', $script:Fake)
                 $script:Runspace.SessionStateProxy.SetVariable('Stop', $null)
@@ -258,6 +267,7 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                         Errors   = @($ps.Streams.Error)
                         Stop     = $(if ($uncaught) { $uncaught } else { $script:Runspace.SessionStateProxy.GetVariable('Stop') })
                         Prompts  = @($ui.Prompts)
+                        Inputs   = @($ui.Inputs)
                         Warnings = @($ui.Warnings)
                     }
                 }
@@ -352,9 +362,13 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 @(Read-DHIS2PersonalAccessToken -Id 'x' -Auth (Get-FakeAuth 'TokAlice001') -Hostname $script:Host1 -ErrorAction SilentlyContinue).Count | Should -Be 0
                 $script:Fake.Requests.Count | Should -Be 0
             }
-            It 'never shows nor sends a token given as an id' {
+            It 'never shows nor sends a token given as an id, <Case>' -ForEach @(
+                @{ Case = 'as it is'; Prefix = '' }
+                @{ Case = 'after a space'; Prefix = ' ' }
+                @{ Case = 'after the ApiToken scheme of an Authorization header'; Prefix = 'ApiToken ' }
+            ) {
                 $plaintext = (Get-FakeAuth 'TokAlice002').Token
-                $null = Read-DHIS2PersonalAccessToken -Id $plaintext -Auth (Get-FakeAuth 'TokAlice001') -Hostname $script:Host1 -ErrorVariable failures -ErrorAction SilentlyContinue
+                $null = Read-DHIS2PersonalAccessToken -Id ($Prefix + $plaintext) -Auth (Get-FakeAuth 'TokAlice001') -Hostname $script:Host1 -ErrorVariable failures -ErrorAction SilentlyContinue
                 $records = @($failures | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
                 $records.Count | Should -Be 1
                 $records[0].ToString() | Should -Not -BeLike "*$plaintext*"
@@ -449,12 +463,38 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 @($removed | ForEach-Object { "$($_.Id)=$($_.Outcome)" }) | Should -Be @('../users/UsrBobby001=Failed', 'TokAlice001=Deleted')
                 @($failures | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })[0].CategoryInfo.Category | Should -Be 'ObjectNotFound'
             }
-            It 'never shows nor sends a token given as an id' {
+            It 'never shows nor sends a token given as an id, <Case>' -ForEach @(
+                @{ Case = 'as it is'; Prefix = '' }
+                @{ Case = 'after a space'; Prefix = ' ' }
+                @{ Case = 'after the ApiToken scheme of an Authorization header'; Prefix = 'ApiToken ' }
+            ) {
                 $plaintext = (Get-FakeAuth 'TokAlice001').Token
-                $removed = @(Remove-DHIS2PersonalAccessToken -Id $plaintext -Auth $script:AliceUsesOwnToken -Hostname $script:Host1 -Force -ErrorAction SilentlyContinue -ErrorVariable failures)
+                $removed = @(Remove-DHIS2PersonalAccessToken -Id ($Prefix + $plaintext) -Auth $script:AliceUsesOwnToken -Hostname $script:Host1 -Force -ErrorAction SilentlyContinue -ErrorVariable failures)
                 $script:Fake.Requests.Count | Should -Be 0
                 ($removed | Out-String) | Should -Not -BeLike "*$plaintext*"
                 (@($failures | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }) | ForEach-Object { "$_ $($_.TargetObject)" }) -join ' ' | Should -Not -BeLike "*$plaintext*"
+            }
+            It 'says that DHIS2 refused the credentials, with DHIS2''s message, at an HTTP 401 before any deletion, for <Case>' -ForEach @(
+                @{ Case = 'Basic authentication DHIS2 does not accept'; Kind = 'Basic'; Dhis2Message = 'Unauthorized' }
+                @{ Case = 'an expired token'; Kind = 'ExpiredToken'; Dhis2Message = 'Failed to authenticate API token, token has expired.' }
+            ) {
+                $auth = if ($Kind -eq 'Basic') { Get-BasicAuth 'nobody' }
+                else {
+                    $null = Add-FakeToken 'TokAlice009' 'UsrAlice001' -Expire ([System.DateTimeOffset]::UtcNow.AddDays(-1).ToUnixTimeMilliseconds())
+                    Get-FakeAuth 'TokAlice009'
+                }
+                $stop = $null
+                $removed = [System.Collections.Generic.List[object]]::new()
+                try {
+                    Remove-DHIS2PersonalAccessToken -Id 'TokAlice001', 'TokAlice002' -Auth $auth -Hostname $script:Host1 -Force -ErrorAction SilentlyContinue |
+                        ForEach-Object { $removed.Add($_) }
+                }
+                catch { $stop = $_ }
+                Get-DeletedId | Should -Be @('TokAlice001') -Because 'the second token is never sent'
+                @($removed | ForEach-Object { "$($_.Id)=$($_.Outcome)" }) | Should -Be @('TokAlice001=Failed')
+                $stop.Exception.Message | Should -BeExactly "DHIS2 refused the credentials (HTTP 401) at the personal access token 'TokAlice001', so no later token was sent. DHIS2's message: $Dhis2Message"
+                $stop.CategoryInfo.Category | Should -Be 'AuthenticationError'
+                @($script:Fake.Tokens.Id) | Should -Contain 'TokAlice001'
             }
             It 'has a mandatory -Hostname without a default' {
                 $parameter = (Get-Command Remove-DHIS2PersonalAccessToken).Parameters['Hostname']
@@ -492,6 +532,26 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                         -Command "Remove-DHIS2PersonalAccessToken -Id 'TokAlice001' -Auth `$Auth -Hostname '$($script:Host1)' -Force -Confirm"
                     $run.Prompts.Count | Should -Be 1
                     @(Get-FakeRequest 'DELETE').Count | Should -Be 0
+                }
+                It 'names in its confirmation the host the request goes to, given with spaces around it' {
+                    $run = Invoke-Scripted -Answers 'Yes' -Variables @{ Auth = $script:AliceUsesOwnToken } `
+                        -Command "Remove-DHIS2PersonalAccessToken -Id 'TokAlice001' -Auth `$Auth -Hostname ' $($script:Host1) ' -Confirm"
+                    $run.Stop | Should -BeNullOrEmpty
+                    $run.Prompts.Count | Should -Be 1
+                    $run.Prompts[0] | Should -BeExactly "Delete the personal access token 'TokAlice001' on https://$($script:Host1)?"
+                    Get-DeletedId | Should -Be @('TokAlice001')
+                }
+                # Where no try encloses it, PowerShell drops under SilentlyContinue an error a function throws and runs on:
+                # the token reader would then hand back nothing, and the run ask for a password and delete with it.
+                It 'stops before asking for credentials or deleting anything when -Token names no file, under -ErrorAction SilentlyContinue too' {
+                    $missing = (Join-Path $TestDrive 'no-such-token.txt').Replace("'", "''")
+                    $run = Invoke-Scripted -NoTry -Command "Remove-DHIS2PersonalAccessToken -Id 'TokAlice001' -Hostname '$($script:Host1)' -Token '$missing' -Force -ErrorAction SilentlyContinue"
+                    $run.Stop | Should -BeNullOrEmpty
+                    $run.Inputs | Should -BeNullOrEmpty
+                    @(Get-FakeRequest 'DELETE').Count | Should -Be 0
+                    $run.Output | Should -BeNullOrEmpty
+                    @($run.Errors).Count | Should -Be 1
+                    $run.Errors[0].Exception.Message | Should -BeExactly '-Token holds neither a DHIS2 personal access token nor the path of an existing file.'
                 }
             }
         }

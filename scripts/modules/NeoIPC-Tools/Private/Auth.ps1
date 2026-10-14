@@ -54,13 +54,13 @@ function Read-NeoIPCToken {
 }
 
 function Format-NeoIPCMessageValue {
-    # What a message or a result shows for a value the caller gave as an id: the value itself, unless it begins like a
-    # personal access token (d2p_ or d2pat_, which no UID does), since a token given by mistake must not reach the
-    # console or a log.
+    # What a message or a result shows for a value the caller gave as an id: the value itself, unless it holds a personal
+    # access token's prefix (d2p_ or d2pat_) anywhere, in any case, since a token given by mistake, even behind a space or
+    # "ApiToken ", must not reach the console or a log. No UID holds a '_', so no UID is withheld.
     [CmdletBinding()]
     [OutputType([string])]
     param([AllowNull()][AllowEmptyString()][string]$Value)
-    if ($Value.StartsWith('d2p_', [System.StringComparison]::Ordinal) -or $Value.StartsWith('d2pat_', [System.StringComparison]::Ordinal)) {
+    if ([regex]::IsMatch($Value, 'd2p(?:at)?_', [System.Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant')) {
         return '(a personal access token, not shown)'
     }
     $Value

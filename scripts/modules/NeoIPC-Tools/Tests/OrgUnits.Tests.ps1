@@ -14,16 +14,19 @@
     hospital or its country. A test unit hangs, flattened, below an org unit outside every country, and one department
     is in three groups of the group set NEOIPC_TRIALS. Two department codes differ only in case.
 
-    The fake answers api/me with the capture units a test sets, and api/organisationUnits by applying the metadata
-    filters it is sent and serializing only the fields it is asked for, each nested record cut down to the fields in the
-    brackets after its name, and the ancestors root first, as DHIS2's field filter and OrganisationUnit.getAncestors do.
-    Its code comparison ignores case, where DHIS2's does not, so the cmdlets' own exact comparison is what a test
-    checks. It applies withinUserHierarchy=true the way DHIS2 does: 2.41 and earlier as the union of the capture units'
-    subtrees, 2.42 and later as one condition per capture unit joined with AND, which matches nothing for an account
-    with two or more capture units. Its answers pass through JSON the way the GET helper's do, so a read with
-    -AsHashtable gets ordered dictionaries with the dates as text, and one without it objects with DateTime values; and
-    like the GET helper, it reads nothing under an inherited -WhatIf. A minimal api/system/info and api/users serve the
-    pipeline into Read-UserInfo.
+    The fake answers api/me with the capture units a test sets and the authority ALL, and api/organisationUnits by
+    applying the metadata filters it is sent and serializing only the fields it is asked for, each nested record cut
+    down to the fields in the brackets after its name, and the ancestors root first, as DHIS2's field filter and
+    OrganisationUnit.getAncestors do. Its code comparison ignores case, where DHIS2's does not, so the cmdlets' own exact
+    comparison is what a test checks. It reads the filter parameters as the release a test sets does: 2.41 and earlier
+    each as sent, 2.42 and later joined with ',' and split again, which ends an unbracketed value at its first ','. It
+    applies withinUserHierarchy=true the way DHIS2 does: 2.41 and earlier as the union of the capture units' subtrees,
+    2.42 and later as one condition per capture unit joined with AND, which matches only the org units whose path holds
+    every capture unit: nothing unless the capture units lie on one line of descent, and then only the deepest one's
+    subtree. Its answers pass through JSON the way the GET helper's do, so a read with -AsHashtable gets ordered
+    dictionaries with the dates as text, and one without it objects with DateTime values; and like the GET helper, it
+    reads nothing under an inherited -WhatIf. A minimal api/system/info and api/users, which keeps the users of the
+    departments whose UIDs a filter names, serve the pipeline into Read-UserInfo.
 
     The report builders' department step is checked by parsing the scripts: every key a script puts into the hashtable
     it splats into Get-NeoIPCDepartments must be a parameter Get-NeoIPCDepartments declares. Running every builder
@@ -49,8 +52,8 @@ InModuleScope 'NeoIPC-Tools' {
 
             # The group set of each group that belongs to one.
             $script:GroupSets = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
-            foreach ($pair in @(('WB_HIGH', 'WORLD_BANK_CLASSES'), ('WB_LOW', 'WORLD_BANK_CLASSES'), ('TRIAL_X', 'NEOIPC_TRIALS'),
-                    ('TRIAL_Y', 'NEOIPC_TRIALS'), ('trial_a', 'NEOIPC_TRIALS'))) {
+            foreach ($pair in @(('WB_HIGH', 'WORLD_BANK_CLASSES'), ('WB_LOW', 'WORLD_BANK_CLASSES'), ('WB_a', 'WORLD_BANK_CLASSES'),
+                    ('WB_B', 'WORLD_BANK_CLASSES'), ('TRIAL_X', 'NEOIPC_TRIALS'), ('TRIAL_Y', 'NEOIPC_TRIALS'), ('trial_a', 'NEOIPC_TRIALS'))) {
                 $script:GroupSets[$pair[0]] = $pair[1]
             }
 
@@ -129,6 +132,16 @@ InModuleScope 'NeoIPC-Tools' {
                 $out
             }
 
+            # The filters DHIS2 reads from a request's filter parameters. 2.41 and earlier read each as sent
+            # (AbstractFullReadOnlyController, getParameterValues("filter")); 2.42 and later receive them joined with ',' and
+            # split them again with this pattern (GetObjectListParams.splitFilters).
+            function Split-FakeFilter([string[]]$Filter, [string]$Version) {
+                $sent = @($Filter | Where-Object { $_ })
+                $joined = $sent -join ','
+                if ((ConvertTo-NeoIPCDhis2Version -Text $Version) -lt [version]'2.42.0' -or -not $joined.Contains(',')) { return $sent }
+                @([regex]::Matches($joined, '(?<property>[a-zA-Z0-9.]+):(?<op>[!$a-zA-Z]{2,10})(?::(?<value>\[[^]]*]|[^,\n\r]+))?') | ForEach-Object { $_.Value })
+            }
+
             # Whether a unit passes a metadata filter. Looser than DHIS2, which compares codes exactly: a code differing in
             # case passes, and the cmdlet must not take it.
             function Test-FakeFilter($Record, [string]$Filter) {
@@ -138,6 +151,7 @@ InModuleScope 'NeoIPC-Tools' {
                     'path:like' { return $Record.path.Contains($value, [System.StringComparison]::Ordinal) }
                     'code:in' { return @($list | Where-Object { [string]::Equals($_, $Record.code, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0 }
                     'code:eq' { return [string]::Equals($value, $Record.code, [System.StringComparison]::OrdinalIgnoreCase) }
+                    'code:like' { return ([string]$Record.code).IndexOf($value, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 }
                     'id:in' { return $list -ccontains $Record.id }
                     'organisationUnitGroups.code:eq' { return @($Record.organisationUnitGroups | ForEach-Object { $_.code }) -ccontains $value }
                     default { throw "The fake does not read the filter '$Filter'." }
@@ -152,15 +166,16 @@ InModuleScope 'NeoIPC-Tools' {
                 $json | ConvertFrom-Json
             }
 
-            # The users of the minimal api/users: one per department, named after it.
+            # The users of the minimal api/users: one per department, named after it, kept when a filter names its
+            # department's UID.
             function Get-FakeUserAnswer([string[]]$Filter) {
                 $users = @($script:Units.Values | Where-Object { $_.groups -ccontains 'NEO_DEPARTMENT' } | ForEach-Object {
-                        [ordered]@{ id = ('Usr' + $_.id.Substring(3)); username = "user_$($_.code)"; organisationUnits = @([ordered]@{ code = $_.code }) }
+                        [ordered]@{ id = ('Usr' + $_.id.Substring(3)); username = "user_$($_.code)"; organisationUnits = @([ordered]@{ id = $_.id; code = $_.code }) }
                     })
-                foreach ($f in @($Filter | Where-Object { $_ })) {
-                    if ($f -notmatch '^organisationUnits\.code:in:\[(.*)\]$') { throw "The fake does not read the user filter '$f'." }
+                foreach ($f in @(Split-FakeFilter $Filter $script:Version)) {
+                    if ($f -cnotmatch '^organisationUnits\.id:in:\[(.*)\]$') { throw "The fake does not read the user filter '$f'." }
                     $list = $Matches[1] -split ','
-                    $users = @($users | Where-Object { $list -ccontains $_.organisationUnits[0].code })
+                    $users = @($users | Where-Object { $list -ccontains $_.organisationUnits[0].id })
                 }
                 [ordered]@{ users = $users }
             }
@@ -183,11 +198,15 @@ InModuleScope 'NeoIPC-Tools' {
                 $answer = switch ($Path) {
                     'api/system/info' { [ordered]@{ version = $script:Version } }
                     'api/me' {
-                        [ordered]@{ organisationUnits = @($script:Capture | ForEach-Object { $r = Get-FakeUnitRecord $_; [ordered]@{ id = $r.id; path = $r.path } }) }
+                        $me = [ordered]@{
+                            organisationUnits = @($script:Capture | ForEach-Object { $r = Get-FakeUnitRecord $_; [ordered]@{ id = $r.id; path = $r.path } })
+                            authorities       = @('ALL')
+                        }
+                        Select-FakeField $me ([string[]]@($Fields | ForEach-Object { Split-FakeFieldList $_ }))
                     }
                     'api/organisationUnits' {
                         $rows = @($script:Units.Keys | ForEach-Object { Get-FakeUnitRecord $_ })
-                        foreach ($f in @($Filter)) { $rows = @($rows | Where-Object { Test-FakeFilter $_ $f }) }
+                        foreach ($f in @(Split-FakeFilter $Filter $script:Version)) { $rows = @($rows | Where-Object { Test-FakeFilter $_ $f }) }
                         if ($QueryParameters -and $QueryParameters['withinUserHierarchy'] -eq 'true') {
                             $capture = @($script:Capture)
                             $rows = if ((ConvertTo-NeoIPCDhis2Version -Text $script:Version) -ge [version]'2.42.0') {
@@ -358,7 +377,45 @@ InModuleScope 'NeoIPC-Tools' {
                     Should -BeExactly @('DEPT_A1', 'DEPT_A2', 'DEPT_A4', 'Dept_a1')
                 $records = @(Read-OrgUnitInfo -Auth $script:Auth -Hostname $script:Host1 -CountryCode 'country_a' -WarningVariable warnings -WarningAction SilentlyContinue)
                 $records.Count | Should -Be 0
-                Get-Message $warnings | Should -BeLike "*'country_a'*"
+                Get-Message $warnings | Should -BeExactly "No department in your hierarchy has a country with the code 'country_a'."
+            }
+
+            It 'warns that none of the selected departments has the country of -CountryCode, which other departments of the hierarchy have' {
+                $records = @(Read-OrgUnitInfo -Auth $script:Auth -Hostname $script:Host1 -OrgUnitCode 'DEPT_B1' -CountryCode 'COUNTRY_A' -WarningVariable warnings -WarningAction SilentlyContinue)
+                $records.Count | Should -Be 0
+                @($warnings).Count | Should -Be 1
+                Get-Message $warnings | Should -BeExactly "None of the selected departments has a country with the code 'COUNTRY_A'."
+            }
+
+            It 'gives a country in several groups of WORLD_BANK_CLASSES the code first in ordinal order as WorldBankClass, with one warning for the country' {
+                # In culture order, which ignores case first, 'WB_a' comes before 'WB_B'; in ordinal order, 'WB_B' does.
+                Set-FakeUnit ($script:BaseUnits + @(
+                        @{ id = 'OuCtryC0001'; code = 'COUNTRY_C'; parent = 'OuRoot00001'; groups = @('COUNTRY', 'WB_a', 'WB_B') }
+                        @{ id = 'OuHospC0001'; code = 'HOSP_C'; parent = 'OuCtryC0001'; groups = @('HOSPITAL') }
+                        @{ id = 'OuDeptC0001'; code = 'DEPT_C1'; parent = 'OuHospC0001'; groups = @('NEO_DEPARTMENT') }
+                        @{ id = 'OuDeptC0002'; code = 'DEPT_C2'; parent = 'OuHospC0001'; groups = @('NEO_DEPARTMENT') }
+                    ))
+                $script:Capture = @('OuCtryC0001')
+                $records = @(Read-OrgUnitInfo -Auth $script:Auth -Hostname $script:Host1 -WarningVariable warnings -WarningAction SilentlyContinue)
+                @($records | ForEach-Object { "$($_.OrgUnitCode): $($_.CountryCode) $($_.WorldBankClass)" }) | Should -BeExactly @('DEPT_C1: COUNTRY_C WB_B', 'DEPT_C2: COUNTRY_C WB_B')
+                @($warnings).Count | Should -Be 1
+                Get-Message $warnings | Should -BeExactly "The country 'COUNTRY_C' is a member of 2 groups of the group set WORLD_BANK_CLASSES (WB_B, WB_a); WorldBankClass is 'WB_B'."
+            }
+
+            # DHIS2 2.42 and later would read `code:eq:DEPT,X` as `code:eq:DEPT`, and split a code inside an `in` list.
+            It 'finds on DHIS2 <Version> a department whose code holds a comma, and Read-UserInfo after it reads its users' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+                @{ Version = '2.42.0' }
+                @{ Version = '2.43.2' }
+            ) {
+                $script:Version = $Version
+                Set-FakeUnit ($script:BaseUnits + @{ id = 'OuDeptX0001'; code = 'DEPT,X'; parent = 'OuHospB0001'; groups = @('NEO_DEPARTMENT') })
+                $records = @(Read-OrgUnitInfo -Auth $script:Auth -Hostname $script:Host1 -OrgUnitCode 'DEPT,X')
+                @($records | ForEach-Object { "$($_.OrgUnitCode): $($_.HospitalCode) $($_.CountryCode)" }) | Should -BeExactly @('DEPT,X: HOSP_B COUNTRY_B')
+                $users = @($records | Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -WarningAction SilentlyContinue)
+                @($users | ForEach-Object { $_.Username }) | Should -BeExactly @('user_DEPT,X')
+                @($script:Requests | Where-Object { $_.Path -eq 'api/users' } | ForEach-Object { $_.Filter }) | Should -Be @('organisationUnits.id:in:[OuDeptX0001]')
             }
 
             It 'reads the departments under an inherited -WhatIf' {
@@ -451,6 +508,13 @@ InModuleScope 'NeoIPC-Tools' {
                     Should -Invoke Invoke-QuartoRender -Times 0 -Exactly
                     @(Get-Message $hostLines) | Should -Contain 'Build status: cancelled'
                 }
+            }
+
+            It 'Update-NeoIPCCache.ps1 describes every parameter, and that its host falls back to the production instance' {
+                $help = Get-Help (Join-Path $script:RepoRoot 'scripts' 'Update-NeoIPCCache.ps1') -Full
+                @($help.parameters.parameter | Where-Object { -not ($_.description | Out-String).Trim() } | ForEach-Object { $_.name }) | Should -BeNullOrEmpty
+                $hostText = (@($help.parameters.parameter | Where-Object { $_.name -eq 'Dhis2Hostname' })[0].description | Out-String) -replace '\s+', ' '
+                $hostText | Should -BeLike '*NEOIPC_DHIS2_HOST*production instance*'
             }
 
             It '<Name> says in its help where -Dhis2Path takes effect' -ForEach @(

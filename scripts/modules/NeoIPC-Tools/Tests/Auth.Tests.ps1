@@ -5,7 +5,7 @@
     Pester tests for the DHIS2 personal-access-token format, the token reader, and the credential resolver.
 
 .DESCRIPTION
-    Covers Test-DHIS2PersonalAccessToken, Resolve-NeoIPCAuth and Get-NeoIPCAuthPassword (Public/Auth.ps1), and
+    Covers Test-DHIS2PersonalAccessToken, Resolve-NeoIPCAuth, and Get-NeoIPCAuthPassword (Public/Auth.ps1); and
     Read-NeoIPCToken and Format-NeoIPCMessageValue (Private/Auth.ps1). A version-1 token is `d2pat_`, 32 letters or
     digits, and a 10-digit checksum (48 characters); a version-2 token is `d2p_`, 44 letters or digits, and a 6-character
     Base62 checksum (54 characters). The tokens here are made-up strings of those shapes, built part by part so that their
@@ -192,6 +192,13 @@ InModuleScope 'NeoIPC-Tools' {
             ) {
                 Format-NeoIPCMessageValue -Value $Value | Should -Not -BeLike '*aaa*'
                 Format-NeoIPCMessageValue -Value $Value | Should -Not -BeLike '*abc*'
+            }
+            It 'withholds a token''s prefix anywhere in a value, <Case>' -ForEach @(
+                @{ Case = 'after a space'; Value = ' d2p_' + ('a' * 44) + '000000' }
+                @{ Case = 'after the ApiToken scheme of an Authorization header'; Value = 'ApiToken d2p_' + ('a' * 44) + '000000' }
+                @{ Case = 'in upper case'; Value = 'D2PAT_' + ('a' * 32) + ('0' * 10) }
+            ) {
+                Format-NeoIPCMessageValue -Value $Value | Should -BeExactly '(a personal access token, not shown)'
             }
             It 'shows any other value as it is, a UID beginning with d2p included' {
                 Format-NeoIPCMessageValue -Value 'd2pAbcdefgh' | Should -BeExactly 'd2pAbcdefgh'

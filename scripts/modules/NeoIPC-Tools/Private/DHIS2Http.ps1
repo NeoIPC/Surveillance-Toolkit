@@ -3,12 +3,17 @@
 # All public functions that call the DHIS2 API should go through these functions.
 
 function Resolve-NeoIPCDhis2Hostname {
-    # The DHIS2 host a call goes to: the given one, else the NEOIPC_DHIS2_HOST environment variable. The module has no
-    # built-in host, so nothing reaches an instance by omission; a call with neither stops here.
+    # The DHIS2 host a call goes to: the given one, trimmed, else the NEOIPC_DHIS2_HOST environment variable. The module
+    # has no built-in host, so nothing reaches an instance by omission; a call with neither stops here. A host given as
+    # white space only stops it too, rather than counting as none: a writer's confirmation would name that blank host
+    # while the request went to the variable's.
     [CmdletBinding()]
     [OutputType([string])]
     param([string]$Hostname)
-    if (-not [string]::IsNullOrWhiteSpace($Hostname)) { return $Hostname.Trim() }
+    if (-not [string]::IsNullOrEmpty($Hostname)) {
+        if ([string]::IsNullOrWhiteSpace($Hostname)) { throw '-Hostname holds only white space, which names no DHIS2 host.' }
+        return $Hostname.Trim()
+    }
     $fromEnvironment = $env:NEOIPC_DHIS2_HOST
     if (-not [string]::IsNullOrWhiteSpace($fromEnvironment)) { return $fromEnvironment.Trim() }
     throw 'No DHIS2 host given: pass -Hostname or set the NEOIPC_DHIS2_HOST environment variable.'
@@ -87,12 +92,35 @@ function Get-NeoIPCDhis2ErrorDetail {
     [pscustomobject]@{ Message = $message; ErrorCode = $errorCode }
 }
 
+function Get-NeoIPCDhis2TokenHint {
+    # What to do about the token when DHIS2 refuses its checksum, or nothing: the sentence the error of a refused GET or
+    # DELETE (New-NeoIPCDhis2HttpError) and the summary of a refused metadata import (Import-NeoIPCMetadata) append to
+    # DHIS2's message. DHIS2 2.41 and later check the CRC32 over the whole 35-byte (version 1) or 48-byte (version 2)
+    # buffer the UTF-8 encoder allocates for the token's 32 or 44 random characters, trailing zero bytes included, which
+    # no token 2.40 issued passes, and answer 400 "Checksum validation failed" before any controller runs. The hint never
+    # shows the token.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [int]$StatusCode,
+        [AllowNull()][AllowEmptyString()][string]$Message,
+        [hashtable]$Auth
+    )
+    if ($StatusCode -ne 400 -or $Message -notmatch 'Checksum validation failed' -or -not $Auth -or $Auth.AuthType -ne 'Token') { return }
+    # NEOIPC-COMPAT(dhis2-version-1-token): the d2pat_ hint; see Test-DHIS2PersonalAccessToken in Public/Auth.ps1, without
+    # whose version-1 branch no such token reaches DHIS2.
+    if (([string]$Auth.Token).StartsWith('d2pat_', [System.StringComparison]::Ordinal)) {
+        return 'The token is a version-1 token (d2pat_), which only DHIS2 2.40 and earlier issued and which 2.41 and later refuse: create a new token on this instance.'
+    }
+    'The token''s checksum does not match its text: check that the whole token was copied.'
+}
+
 function New-NeoIPCDhis2HttpError {
-    # The error a refused DHIS2 request ends with: an HttpRequestException whose StatusCode is the failing status and whose
-    # Data['Dhis2ErrorCode'] holds DHIS2's errorCode when the body names one, in the category a caller acts on
-    # (AuthenticationError for 401, PermissionDenied for 403, ObjectNotFound for 404). DHIS2 2.41 and later check a token's
-    # checksum over the bytes of a buffer longer than the token, which no token 2.40 issued passes, and answer 400
-    # "Checksum validation failed"; the message then says what to do about the token, without showing it.
+    # The error a refused DHIS2 request ends with: an HttpRequestException whose StatusCode is the failing status, whose
+    # Data['Dhis2ErrorCode'] holds DHIS2's errorCode when the body names one, and whose Data['Dhis2Message'] holds DHIS2's
+    # message, in the category a caller acts on (AuthenticationError for 401, PermissionDenied for 403, ObjectNotFound for
+    # 404). A refused token checksum adds what to do about the token (Get-NeoIPCDhis2TokenHint). The status comes from
+    # [System.Enum]::ToObject, since a cast refuses a status .NET does not name, such as a proxy's 522.
     [CmdletBinding()]
     [OutputType([System.Management.Automation.ErrorRecord])]
     param(
@@ -104,16 +132,11 @@ function New-NeoIPCDhis2HttpError {
         [hashtable]$Auth
     )
     $text = "$Method '$Path' failed with HTTP $StatusCode$(if ($ErrorCode) { " ($ErrorCode)" })$(if ($Message) { ": $Message" } else { '.' })"
-    if ($StatusCode -eq 400 -and $Message -match 'Checksum validation failed' -and $Auth -and $Auth.AuthType -eq 'Token') {
-        # NEOIPC-COMPAT(dhis2-version-1-token): the d2pat_ hint; see Test-DHIS2PersonalAccessToken in Public/Auth.ps1, without
-        # whose version-1 branch no such token reaches DHIS2.
-        $text += if (([string]$Auth.Token).StartsWith('d2pat_', [System.StringComparison]::Ordinal)) {
-            ' The token is a version-1 token (d2pat_), which only DHIS2 2.40 and earlier issued and which 2.41 and later refuse: create a new token on this instance.'
-        }
-        else { ' The token''s checksum does not match its text: check that the whole token was copied.' }
-    }
-    $exception = [System.Net.Http.HttpRequestException]::new($text, $null, [System.Net.HttpStatusCode]$StatusCode)
+    $hint = Get-NeoIPCDhis2TokenHint -StatusCode $StatusCode -Message $Message -Auth $Auth
+    if ($hint) { $text = "$($text.TrimEnd('.')). $hint" }
+    $exception = [System.Net.Http.HttpRequestException]::new($text, $null, [System.Enum]::ToObject([System.Net.HttpStatusCode], $StatusCode))
     $exception.Data['Dhis2ErrorCode'] = $ErrorCode
+    $exception.Data['Dhis2Message'] = $Message
     $category = switch ($StatusCode) {
         401 { [System.Management.Automation.ErrorCategory]::AuthenticationError }
         403 { [System.Management.Automation.ErrorCategory]::PermissionDenied }

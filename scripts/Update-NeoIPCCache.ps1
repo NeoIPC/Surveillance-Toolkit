@@ -25,6 +25,25 @@ Refresh the data-element-codes cache.
 Optional token string or path to a file containing the token. If omitted,
 uses environment variable or prompts for credentials.
 
+.PARAMETER Dhis2Scheme
+http or https. Default https.
+
+.PARAMETER Dhis2Hostname
+The DHIS2 host whose caches to refresh. Without it, the NEOIPC_DHIS2_HOST
+environment variable; with neither, the NeoIPC production instance, which
+the report builds default to as well, so that the caches this fills are the
+ones their tab completion reads. Unlike the module's own functions, this
+script reaches the production instance when no host is given.
+
+.PARAMETER Dhis2Port
+The DHIS2 port. Default: the scheme's.
+
+.PARAMETER Dhis2Path
+The API base path the report builds' R code reads from, used here only as
+the last part of the key that keeps each instance's caches apart. The
+department and data-element codes are read from the instance's /api root
+whatever this says, as every read of the NeoIPC-Tools module is.
+
 .EXAMPLE
 .\Update-NeoIPCCache.ps1                      # default: refresh everything
 .\Update-NeoIPCCache.ps1 -Sites               # only site codes

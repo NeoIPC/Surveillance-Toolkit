@@ -181,6 +181,8 @@ function Remove-NeoIPCPatient {
         # under SilentlyContinue or Ignore, PowerShell drops a throw that no try encloses and runs on past it.
         $callerErrorAction = $ErrorActionPreference
         $ErrorActionPreference = 'Stop'
+        # Resolved here, so that the confirmation names the host the requests go to, and a blank host stops the run first.
+        $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
         # With -NeoIpcId or -TrackedEntityId the selection is in the arguments, and piped objects would bind to nothing:
         # the run would delete the arguments' patients and drop the pipeline's with an error per object.
         if ($PSCmdlet.ParameterSetName -ne 'InputObject' -and $MyInvocation.ExpectingInput) {

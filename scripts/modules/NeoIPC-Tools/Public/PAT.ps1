@@ -19,7 +19,7 @@ function Read-DHIS2PersonalAccessToken {
 
         -Id reads exactly the tokens it names, whoever created them. An id that DHIS2 does not return, because no such
         token exists or your account cannot read it, is an error that names it, and so is an id that is no DHIS2 UID,
-        which is never sent; a value that begins like a token itself (d2p_ or d2pat_) is not shown.
+        which is never sent; a value that holds a token's prefix (d2p_ or d2pat_, in any case) is not shown.
 
         DHIS2 never returns a token's key, so a token cannot be told from its key.
     .PARAMETER Id
@@ -40,7 +40,7 @@ function Read-DHIS2PersonalAccessToken {
     .PARAMETER Scheme
         http or https. Default https.
     .PARAMETER Hostname
-        The DHIS2 host. Default: the environment variable NEOIPC_DHIS2_HOST.
+        The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the cmdlet stops.
     .PARAMETER Port
         DHIS2 port. Default none (the scheme's).
     .OUTPUTS
@@ -182,10 +182,11 @@ function Remove-DHIS2PersonalAccessToken {
 
         A failure that concerns one token, such as HTTP 403 for a token the account may not delete or 404 for one that
         does not exist, is that token's error, and the run goes on. HTTP 401 ends the run with a terminating error, and
-        no later token is sent: DHIS2 no longer accepts the credentials, which is what happens once the run has deleted
-        the token it authenticates with (DHIS2 2.41 and later at once; 2.40 once its token cache lets the token go, at
-        most an hour later). An id that is no DHIS2 UID is an error and is never sent; a value that begins like a token
-        itself (d2p_ or d2pat_) is not shown.
+        no later token is sent: DHIS2 no longer accepts the credentials. When the run authenticates with a token and has
+        deleted a token before, the error says that this happens once the run has deleted the token it authenticates
+        with (DHIS2 2.41 and later refuse it at once; 2.40 once its token cache lets it go, at most an hour later);
+        otherwise it says that DHIS2 refused the credentials, and gives DHIS2's message. An id that is no DHIS2 UID is an
+        error and is never sent; a value that holds a token's prefix (d2p_ or d2pat_, in any case) is not shown.
     .PARAMETER Id
         The UIDs of the tokens to delete. Takes pipeline input, such as Read-DHIS2PersonalAccessToken's output.
     .PARAMETER Auth
@@ -242,10 +243,18 @@ function Remove-DHIS2PersonalAccessToken {
 
     begin {
         if ($Force -and -not $PSBoundParameters.ContainsKey('Confirm')) { $ConfirmPreference = 'None' }
-        if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName }
+        # A failure ends the cmdlet with an error of its own: under -ErrorAction SilentlyContinue, PowerShell drops an error
+        # the token reader throws where no try encloses it, and the run would ask for a username and password instead and
+        # delete with those. The host is resolved here, so that the confirmation names the host the requests go to.
+        try {
+            $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
+            if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName }
+        }
+        catch { $PSCmdlet.ThrowTerminatingError($_) }
         $endpoint = @{ Auth = $Auth; Scheme = $Scheme; Hostname = $Hostname }
         if ($null -ne $Port) { $endpoint.Port = $Port }
         $target = '{0}://{1}{2}' -f $Scheme, $Hostname, $(if ($null -ne $Port) { ":$Port" })
+        $deletedCount = 0
         $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         function New-Outcome([string]$TokenId, [string]$Outcome, $HttpStatusCode = $null, [string]$Message = $null) {
             [pscustomobject]@{ Id = $TokenId; Outcome = $Outcome; HttpStatusCode = $HttpStatusCode; Message = $Message }
@@ -272,18 +281,28 @@ function Remove-DHIS2PersonalAccessToken {
                 $null = Invoke-NeoIPCDhis2Delete @endpoint -Path "api/apiToken/$currentId" -AllowUnencrypted -Confirm:$false -WhatIf:$false
             }
             catch {
-                $status = if ($_.Exception -is [System.Net.Http.HttpRequestException] -and $null -ne $_.Exception.StatusCode) { [int]$_.Exception.StatusCode }
-                New-Outcome $currentId 'Failed' $status $_.Exception.Message
+                $failure = $_
+                $status = if ($failure.Exception -is [System.Net.Http.HttpRequestException] -and $null -ne $failure.Exception.StatusCode) { [int]$failure.Exception.StatusCode }
+                New-Outcome $currentId 'Failed' $status $failure.Exception.Message
                 if ($status -eq 401) {
-                    $exception = [System.Net.Http.HttpRequestException]::new(
-                        "DHIS2 no longer accepts the credentials (HTTP 401) at the personal access token '$currentId', so no later token was sent. This happens once the run has deleted the token it authenticates with; delete the rest with other credentials.",
-                        $_.Exception, [System.Net.HttpStatusCode]::Unauthorized)
+                    # Deleting its own token explains a 401 only for a run that authenticates with a token and has deleted
+                    # one. Before any deletion, a 401 means DHIS2 never accepted the credentials (a wrong password, an
+                    # expired or revoked token, a disabled account), which DHIS2's message tells apart.
+                    $message = if ($Auth.AuthType -eq 'Token' -and $deletedCount -gt 0) {
+                        "DHIS2 no longer accepts the credentials (HTTP 401) at the personal access token '$currentId', so no later token was sent. This happens once the run has deleted the token it authenticates with; delete the rest with other credentials."
+                    }
+                    else {
+                        $dhis2Message = [string]$failure.Exception.Data['Dhis2Message']
+                        "DHIS2 refused the credentials (HTTP 401) at the personal access token '$currentId', so no later token was sent.$(if ($dhis2Message) { " DHIS2's message: $dhis2Message" })"
+                    }
+                    $exception = [System.Net.Http.HttpRequestException]::new($message, $failure.Exception, [System.Net.HttpStatusCode]::Unauthorized)
                     $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new($exception, 'NeoIPCDhis2CredentialsRejected',
                             [System.Management.Automation.ErrorCategory]::AuthenticationError, $currentId))
                 }
-                $PSCmdlet.WriteError($_)
+                $PSCmdlet.WriteError($failure)
                 continue
             }
+            $deletedCount++
             New-Outcome $currentId 'Deleted'
         }
     }
@@ -301,7 +320,8 @@ function Clear-DHIS2PersonalAccessTokens {
 
         The deletion is Remove-DHIS2PersonalAccessToken's, with the same credentials, which are resolved once: it asks
         once for each token unless -Force or -Confirm:$false is given, -WhatIf deletes nothing, and HTTP 401 ends the
-        run, which happens once it has deleted the token it authenticates with.
+        run, which happens once it has deleted the token it authenticates with, or at once when DHIS2 refuses the
+        credentials; the error says which.
     .PARAMETER All
         Delete every token read, expired or not.
     .PARAMETER AllUsers
@@ -356,6 +376,7 @@ function Clear-DHIS2PersonalAccessTokens {
 
     # The read's or the deletion's terminating error ends the cmdlet, not only the statement it stands in.
     try {
+        $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
         if (-not $Auth) { $Auth = Resolve-NeoIPCAuth -Token $Token -UserName $UserName }
         $connection = @{ Auth = $Auth; Scheme = $Scheme; Hostname = $Hostname }
         if ($null -ne $Port) { $connection.Port = $Port }

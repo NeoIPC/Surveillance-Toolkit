@@ -181,6 +181,8 @@ function Deploy-NeoIPCMetadata {
     # Every refusal below, and every failure inside a helper, ends the deployment whatever the caller's error
     # preference: under SilentlyContinue or Ignore, PowerShell drops a throw that no try encloses and runs on past it.
     $ErrorActionPreference = 'Stop'
+    # Resolved here, so that the confirmation and the summary's Target name the host the requests go to.
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $ordinal = [System.StringComparer]::Ordinal
     $endpoint = @{ Auth = $Auth; Scheme = $Scheme; Hostname = $Hostname }
     if ($null -ne $Port) { $endpoint['Port'] = $Port }

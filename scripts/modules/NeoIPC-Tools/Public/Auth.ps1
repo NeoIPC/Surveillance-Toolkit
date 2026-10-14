@@ -4,7 +4,7 @@
 #   1. Version 1: `d2pat_`, 32 alphanumeric characters, and their CRC32 in decimal, zero-padded to 10 digits; 48
 #      characters. Only DHIS2 2.40 and earlier issue it. 2.40 builds the 32 characters from Base64 with '-' and '_'
 #      replaced by 'x', so the first may be a digit. DHIS2 2.41 and later still read this version, but refuse every
-#      token 2.40 issued with 400 "Checksum validation failed" (see New-NeoIPCDhis2HttpError).
+#      token 2.40 issued with 400 "Checksum validation failed" (see Get-NeoIPCDhis2TokenHint).
 #   2. Version 2: `d2p_`, 44 alphanumeric characters, and their CRC32 in Base62 (0-9A-Za-z), zero-padded to 6
 #      characters; 54 characters. DHIS2 2.41 and later issue only this version.
 # The checksum is left to DHIS2, which checks it from 2.41 on; 2.40 checks none.

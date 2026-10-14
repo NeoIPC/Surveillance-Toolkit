@@ -10,6 +10,18 @@ hostname, port, and path. Used to partition per-server cache files.
 A null scheme or path falls back to neoipcr's default (https, /api); a null
 hostname to the NEOIPC_DHIS2_HOST environment variable, and with neither
 the call stops, since the module has no built-in host.
+
+.PARAMETER Scheme
+http or https. Default https.
+
+.PARAMETER Hostname
+The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
+
+.PARAMETER Port
+The DHIS2 port, which the key names when it is given. Default: none, the scheme's.
+
+.PARAMETER Path
+The DHIS2 API base path, the last part of the key. Default /api.
 #>
 function Get-NeoIPCServerKey {
     [CmdletBinding()]
@@ -160,8 +172,8 @@ UIDs of the departments to read. Pipeline-bound by property name, so the output 
 OrgUnitId (such as Read-EventInfo or Read-EnrolmentInfo) selects its departments.
 
 .PARAMETER CountryCode
-Keep only the departments whose CountryCode is this code, compared exactly. A warning says when none is
-left.
+Keep only the departments whose CountryCode is this code, compared exactly: of those -OrgUnitCode and
+-OrgUnitId select, or of every department in your hierarchy. A warning says when none is left.
 
 .PARAMETER Scheme
 http or https. Default https.
@@ -314,7 +326,8 @@ function Read-OrgUnitInfo {
                     })
             }
             if ($PSBoundParameters.ContainsKey('CountryCode') -and $records.Count -eq 0) {
-                Write-Warning "No department in your hierarchy has a country with the code '$CountryCode'."
+                if ($codes.Count -gt 0 -or $ids.Count -gt 0) { Write-Warning "None of the selected departments has a country with the code '$CountryCode'." }
+                else { Write-Warning "No department in your hierarchy has a country with the code '$CountryCode'." }
             }
 
             $records.Sort([System.Comparison[object]] {

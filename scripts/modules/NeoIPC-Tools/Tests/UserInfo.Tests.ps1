@@ -9,15 +9,18 @@
 
     Self-contained: the DHIS2 reads go to a fake instance that models what the source of 2.40.12, 2.41.10, 2.42.0,
     2.42.6, 2.43.1, and 2.43.2 says of reading users. api/system/info names the release. api/users applies the
-    org-unit code filters it is sent, comparing codes exactly as DHIS2 does (InOperator.equals in memory, SQL IN in the
-    database), and serializes only the fields it is asked for; before 2.42 that includes twoFactorEnabled, which counts
-    a pending enrolment in time-based one-time passwords (TOTP) as enabled, and from 2.42.0 never. api/users/twoFactor exists from 2.42.6 in the 2.42
-    line and from 2.43.1 in the 2.43 line, answers 403 to an account without the authority ALL when a test says so,
-    lists only active accounts (neither disabled nor an invitation) with their twoFactorType, and caps its answer at
-    the number of accounts a test sets, its pager counting them all. api/me and api/organisationUnits serve the lookup
-    of the org-unit codes in the caller's hierarchy; there, the fake's code comparison ignores case, where DHIS2's does
-    not, so the lookup's own exact comparison is what a test checks. Like the GET helper, the fake reads nothing under
-    an inherited -WhatIf, and a refusal ends the read with the helper's error.
+    org-unit UID filters it is sent, keeping a user any of whose data-capture org units it names, as DHIS2 does, and
+    serializes only the fields it is asked for; before 2.42 that includes twoFactorEnabled, which counts a pending
+    enrolment in time-based one-time passwords (TOTP) as enabled, and from 2.42.0 never. api/users/twoFactor exists from
+    2.42.6 in the 2.42 line and from 2.43.1 in the 2.43 line, answers 403 to an account without the authority ALL when a
+    test says so, lists only active accounts (neither disabled nor an invitation) with their twoFactorType, and caps its
+    answer at the number of accounts a test sets, its pager counting them all. api/me gives the caller's data-capture org
+    units and authorities, ALL unless a test sets others; with api/organisationUnits, it serves the lookup of the
+    org-unit codes in the caller's hierarchy, where the fake's code comparison ignores case, unlike DHIS2's, so the
+    lookup's own exact comparison is what a test checks. The fake reads the filter parameters as the release does: 2.41
+    and earlier each as sent, 2.42 and later joined with ',' and split again, which ends an unbracketed value at its
+    first ','. Like the GET helper, the fake reads nothing under an inherited -WhatIf, and a refusal ends the read with
+    the helper's error.
 
     The accounts: alice (TOTP enabled), Bob (enrolling in TOTP, which 2.41 already reports as enabled), carol (not
     enabled), dave (disabled), erin (an open invitation), and frank (email two-factor authentication, assigned to an
@@ -113,20 +116,29 @@ InModuleScope 'NeoIPC-Tools' {
                 $record
             }
 
+            # The filters DHIS2 reads from a request's filter parameters. 2.41 and earlier read each as sent
+            # (AbstractFullReadOnlyController, getParameterValues("filter")); 2.42 and later receive them joined with ',' and
+            # split them again with this pattern (GetObjectListParams.splitFilters).
+            function Split-FakeFilter([string[]]$Filter, [string]$Version) {
+                $sent = @($Filter | Where-Object { $_ })
+                $joined = $sent -join ','
+                if ((ConvertTo-NeoIPCDhis2Version -Text $Version) -lt [version]'2.42.0' -or -not $joined.Contains(',')) { return $sent }
+                @([regex]::Matches($joined, '(?<property>[a-zA-Z0-9.]+):(?<op>[!$a-zA-Z]{2,10})(?::(?<value>\[[^]]*]|[^,\n\r]+))?') | ForEach-Object { $_.Value })
+            }
+
             function Select-FakeUser([string[]]$Filter) {
                 $rows = @($script:Fake.Users)
-                foreach ($f in @($Filter | Where-Object { $_ })) {
-                    if ($f -match '^organisationUnits\.code:in:\[(.*)\]$') { $list = $Matches[1] -split ',' }
-                    elseif ($f -match '^organisationUnits\.code:eq:(.*)$') { $list = @($Matches[1]) }
-                    else { throw "The fake does not read the user filter '$f'." }
-                    $rows = @($rows | Where-Object { @($_.ou | Where-Object { $list -ccontains $_ }).Count -gt 0 })
+                foreach ($f in @(Split-FakeFilter $Filter $script:Fake.Version)) {
+                    if ($f -cnotmatch '^organisationUnits\.id:in:\[(.*)\]$') { throw "The fake does not read the user filter '$f'." }
+                    $list = $Matches[1] -split ','
+                    $rows = @($rows | Where-Object { @($_.ou | Where-Object { $list -ccontains $script:Fake.OrgUnitIdByCode[$_] }).Count -gt 0 })
                 }
                 $rows
             }
 
             function Select-FakeOrgUnit([string[]]$Filter) {
                 $rows = @($script:Fake.OrgUnits)
-                foreach ($f in @($Filter | Where-Object { $_ })) {
+                foreach ($f in @(Split-FakeFilter $Filter $script:Fake.Version)) {
                     $property, $operator, $value = $f -split ':', 3
                     $list = if ($operator -eq 'in') { @($value.TrimStart('[').TrimEnd(']') -split ',') }
                     $rows = @($rows | Where-Object {
@@ -135,6 +147,7 @@ InModuleScope 'NeoIPC-Tools' {
                                 'path:like' { $row.path.Contains($value, [System.StringComparison]::Ordinal) }
                                 'code:in' { @($list | Where-Object { [string]::Equals($_, $row.code, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0 }
                                 'code:eq' { [string]::Equals($value, $row.code, [System.StringComparison]::OrdinalIgnoreCase) }
+                                'code:like' { ([string]$row.code).IndexOf($value, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 }
                                 default { throw "The fake does not read the filter '$f'." }
                             }
                         })
@@ -152,15 +165,18 @@ InModuleScope 'NeoIPC-Tools' {
 
         BeforeEach {
             $script:Fake = [pscustomobject]@{
-                Version         = '2.43.2'
-                OrgUnits        = [System.Collections.Generic.List[object]]::new()
-                OrgUnitIdByCode = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
-                Users           = [System.Collections.Generic.List[object]]::new()
-                Capture         = @('OuRoot00001')
-                UsersStatus     = 0
-                TwoFactorStatus = 0
-                TwoFactorCap    = 10000
-                Requests        = [System.Collections.Generic.List[object]]::new()
+                Version           = '2.43.2'
+                OrgUnits          = [System.Collections.Generic.List[object]]::new()
+                OrgUnitIdByCode   = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+                Users             = [System.Collections.Generic.List[object]]::new()
+                Capture           = @('OuRoot00001')
+                Authorities       = @('ALL')
+                UsersStatus       = 0
+                UsersListless     = $false
+                TwoFactorStatus   = 0
+                TwoFactorCap      = 10000
+                TwoFactorListless = $false
+                Requests          = [System.Collections.Generic.List[object]]::new()
             }
             foreach ($u in $script:BaseOrgUnits) { $script:Fake.OrgUnits.Add($u); $script:Fake.OrgUnitIdByCode[$u.code] = $u.id }
             foreach ($u in $script:BaseUsers) { $script:Fake.Users.Add($u) }
@@ -174,31 +190,41 @@ InModuleScope 'NeoIPC-Tools' {
                 $answer = switch ($Path) {
                     'api/system/info' { [ordered]@{ version = $script:Fake.Version } }
                     'api/me' {
-                        [ordered]@{ organisationUnits = @($script:Fake.Capture | ForEach-Object { $id = $_; $u = $script:Fake.OrgUnits | Where-Object { $_.id -ceq $id }; [ordered]@{ id = $u.id; path = $u.path } }) }
+                        $me = [ordered]@{
+                            organisationUnits = @($script:Fake.Capture | ForEach-Object { $id = $_; $u = $script:Fake.OrgUnits | Where-Object { $_.id -ceq $id }; [ordered]@{ id = $u.id; path = $u.path } })
+                            authorities       = @($script:Fake.Authorities)
+                        }
+                        Select-FakeField $me ([string[]]@($Fields | ForEach-Object { Split-FakeFieldList $_ }))
                     }
                     'api/organisationUnits' {
                         [ordered]@{ organisationUnits = @(Select-FakeOrgUnit $Filter | ForEach-Object { [ordered]@{ id = $_.id; code = $_.code; path = $_.path } }) }
                     }
                     'api/users' {
                         if ($script:Fake.UsersStatus) { & $refuse $script:Fake.UsersStatus 'You don''t have the proper permissions to read objects of this type.' }
-                        $specs = [string[]]@($Fields | ForEach-Object { Split-FakeFieldList $_ })
-                        [ordered]@{ users = @(Select-FakeUser $Filter | ForEach-Object { Select-FakeField (Get-FakeUserRecord $_) $specs }) }
+                        if ($script:Fake.UsersListless) { [ordered]@{ pager = [ordered]@{ page = 1; total = 0 } } }
+                        else {
+                            $specs = [string[]]@($Fields | ForEach-Object { Split-FakeFieldList $_ })
+                            [ordered]@{ users = @(Select-FakeUser $Filter | ForEach-Object { Select-FakeField (Get-FakeUserRecord $_) $specs }) }
+                        }
                     }
                     'api/users/twoFactor' {
                         # Before the endpoint, UserController reads 'twoFactor' as a user UID.
                         if (-not (Test-FakeAuditEndpoint)) { & $refuse 404 'User with id twoFactor could not be found.' }
                         if ($script:Fake.TwoFactorStatus) { & $refuse $script:Fake.TwoFactorStatus 'Access is denied' }
-                        $active = @($script:Fake.Users | Where-Object { -not $_.disabled -and -not $_.invitation })
-                        $sorted = [string[]]@($active | ForEach-Object { $_.username })
-                        [Array]::Sort($sorted, [System.StringComparer]::Ordinal)
-                        $listed = @($sorted | Select-Object -First $script:Fake.TwoFactorCap | ForEach-Object {
-                                $name = $_
-                                $u = $active | Where-Object { $_.username -ceq $name }
-                                [ordered]@{ id = $u.id; username = $u.username; name = "First $($u.username) Example"
-                                    twoFactorType = $(if ($u.type) { $u.type } else { 'NOT_ENABLED' }); lastLogin = '2024-03-04T05:06:07.890'
-                                    email = "$($u.username)@example.org"; disabled = $false; invitation = $false }
-                            })
-                        [ordered]@{ pager = [ordered]@{ page = 1; total = $active.Count; pageSize = [Math]::Max(1, $listed.Count); pageCount = 1 }; users = $listed }
+                        if ($script:Fake.TwoFactorListless) { [ordered]@{ pager = [ordered]@{ page = 1; total = 0 } } }
+                        else {
+                            $active = @($script:Fake.Users | Where-Object { -not $_.disabled -and -not $_.invitation })
+                            $sorted = [string[]]@($active | ForEach-Object { $_.username })
+                            [Array]::Sort($sorted, [System.StringComparer]::Ordinal)
+                            $listed = @($sorted | Select-Object -First $script:Fake.TwoFactorCap | ForEach-Object {
+                                    $name = $_
+                                    $u = $active | Where-Object { $_.username -ceq $name }
+                                    [ordered]@{ id = $u.id; username = $u.username; name = "First $($u.username) Example"
+                                        twoFactorType = $(if ($u.type) { $u.type } else { 'NOT_ENABLED' }); lastLogin = '2024-03-04T05:06:07.890'
+                                        email = "$($u.username)@example.org"; disabled = $false; invitation = $false }
+                                })
+                            [ordered]@{ pager = [ordered]@{ page = 1; total = $active.Count; pageSize = [Math]::Max(1, $listed.Count); pageCount = 1 }; users = $listed }
+                        }
                     }
                     default { throw "Unexpected GET $Path" }
                 }
@@ -265,6 +291,43 @@ InModuleScope 'NeoIPC-Tools' {
                 @($warnings).Count | Should -Be 1
                 Get-Message $warnings | Should -BeLike '*10,000*2 of 4*'
             }
+
+            It 'is empty, with a warning, when api/users/twoFactor answers without a users list' {
+                $script:Fake.TwoFactorListless = $true
+                $users = @(Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -WarningVariable warnings -WarningAction SilentlyContinue)
+                Get-TwoFactorText $users | Should -BeExactly 'Bob= alice= carol= dave= erin= frank='
+                @($warnings).Count | Should -Be 1
+                Get-Message $warnings | Should -BeExactly 'TwoFactorEnabled is empty for every user: DHIS2 answered api/users/twoFactor without a users list.'
+            }
+        }
+
+        Describe 'The accounts a user list leaves out' {
+            # NEOIPC-COMPAT(dhis2-user-list-own-roles): see Read-UserInfo in Public/UserInfo.ps1.
+            It 'warns once on DHIS2 <Version> that the list leaves out the accounts sharing a user role with an account without ALL' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+            ) {
+                $script:Fake.Version = $Version
+                $script:Fake.Authorities = @('F_USER_VIEW', 'M_dhis-web-user')
+                $users = @(Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -WarningVariable warnings -WarningAction SilentlyContinue)
+                $users.Count | Should -Be 6
+                @($warnings).Count | Should -Be 1
+                Get-Message $warnings | Should -BeExactly "DHIS2 $Version leaves out of the user list the accounts that hold any of your account's user roles, your own account included, unless the system setting that lets users grant their own user roles (keyCanGrantOwnUserAuthorityGroups) is on."
+                @((Get-FakeRequest 'api/me') | ForEach-Object { $_.Fields }) | Should -Be @('authorities')
+            }
+            It 'does not warn on DHIS2 <Version> for an account <Case>' -ForEach @(
+                @{ Version = '2.40.12'; Case = 'with ALL'; Authorities = @('ALL'); AuthorityReads = 1 }
+                @{ Version = '2.41.10'; Case = 'with ALL'; Authorities = @('ALL'); AuthorityReads = 1 }
+                @{ Version = '2.42.0'; Case = 'without ALL'; Authorities = @('F_USER_VIEW'); AuthorityReads = 0 }
+                @{ Version = '2.42.6'; Case = 'without ALL'; Authorities = @('F_USER_VIEW'); AuthorityReads = 0 }
+                @{ Version = '2.43.2'; Case = 'without ALL'; Authorities = @('F_USER_VIEW'); AuthorityReads = 0 }
+            ) {
+                $script:Fake.Version = $Version
+                $script:Fake.Authorities = $Authorities
+                $null = Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -WarningVariable warnings -WarningAction SilentlyContinue
+                @(Get-Message $warnings | Where-Object { $_ -like '*user roles*' }).Count | Should -Be 0
+                @(Get-FakeRequest 'api/me').Count | Should -Be $AuthorityReads
+            }
         }
 
         Describe 'EditUrl' {
@@ -305,6 +368,29 @@ InModuleScope 'NeoIPC-Tools' {
                 "$failure" | Should -BeLike '*F_USER_VIEW*'
                 $failure.CategoryInfo.Category | Should -Be 'PermissionDenied'
                 [int]$failure.Exception.StatusCode | Should -Be 403
+            }
+
+            It 'stops with an error when api/users answers without a users list, rather than returning no users' {
+                $script:Fake.UsersListless = $true
+                { Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -WarningAction SilentlyContinue } | Should -Throw 'The user read did not return a users list.'
+            }
+
+            # DHIS2 2.42 and later would read a filter `code:eq:DEPT,X` as `code:eq:DEPT`, and split a code inside an `in` list.
+            It 'reads on DHIS2 <Version> the users of a department whose code holds a comma, by the department''s UID' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+                @{ Version = '2.42.0' }
+                @{ Version = '2.43.2' }
+            ) {
+                $script:Fake.Version = $Version
+                $script:Fake.OrgUnits.Add(@{ id = 'OuDeptX0001'; code = 'DEPT,X'; path = '/OuRoot00001/OuHospA0001/OuDeptX0001' })
+                $script:Fake.OrgUnitIdByCode['DEPT,X'] = 'OuDeptX0001'
+                $script:Fake.Users.Add(@{ id = 'UsrHeidi001'; username = 'heidi'; ou = @('DEPT,X'); field = $false; type = 'NOT_ENABLED' })
+                $users = @(Read-UserInfo -Auth $script:Auth -Hostname $script:Host1 -OrgUnitCode 'DEPT,X' -WarningAction SilentlyContinue)
+                @($users | ForEach-Object { $_.Username }) | Should -BeExactly @('heidi')
+                $users[0].OrganisationUnits | Should -BeExactly @('DEPT,X')
+                @((Get-FakeRequest 'api/organisationUnits') | ForEach-Object { $_.Filter[1] }) | Should -Be @('code:like:DEPT')
+                @((Get-FakeRequest 'api/users') | ForEach-Object { $_.Filter }) | Should -Be @('organisationUnits.id:in:[OuDeptX0001]')
             }
 
             It 'reads the users of the org units given, and writes an error naming each code outside the hierarchy' {
