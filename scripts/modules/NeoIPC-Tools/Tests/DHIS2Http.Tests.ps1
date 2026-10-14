@@ -364,6 +364,10 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'from-variable.example.org', 'Process')
                 Resolve-NeoIPCReportHostname | Should -BeExactly 'from-variable.example.org'
             }
+            It 'stops at a host of white space, instead of reading from NEOIPC_DHIS2_HOST''s or the production instance' {
+                [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'from-variable.example.org', 'Process')
+                { Resolve-NeoIPCReportHostname -Hostname '  ' } | Should -Throw '*white space*'
+            }
             It 'falls back to the production host the reports'' R scripts default to' {
                 # No R parser is at hand in PowerShell, so the R default is matched by the exact form of its one assignment.
                 $helpers = Get-Content -Raw -LiteralPath (Join-Path $script:NeoIPCRepoRoot 'reports/common/helpers.R')

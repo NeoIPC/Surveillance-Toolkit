@@ -486,6 +486,7 @@ InModuleScope 'NeoIPC-Tools' {
                                         $row = $_
                                         switch ("${property}:$operator") {
                                             'path:like' { $row.path.Contains($value, [System.StringComparison]::Ordinal) }
+                                            'code:like' { $row.code.Contains($value, [System.StringComparison]::Ordinal) }
                                             # Looser than DHIS2 on purpose: a code differing in case comes back, and the cmdlet must not take it.
                                             'code:in' { $list -contains $row.code }
                                             'code:eq' { $row.code -eq $value }
@@ -683,6 +684,15 @@ InModuleScope 'NeoIPC-Tools' {
                 $r = Invoke-Read $Command @{ OrgUnitCode = 'DEPT_A', 'NO_SUCH_UNIT' }
                 @($r.Output.$Property) | Should -Be $Expected
                 $r.Errors.Count | Should -Be 1
+            }
+            It 'finds an org unit whose code holds ",", which DHIS2 2.42 and later would cut, by a like read' {
+                Add-FakeCorpus
+                $script:Fake.OrgUnits = @($script:Fake.OrgUnits) + @(@{ id = 'OuDeptC0001'; code = 'DEPT,C'; path = '/OuRoot00001/OuHospX0001/OuDeptC0001' })
+                Add-FakePatient -Uid 'TePat000007' -NeoIpcId 'C-7' -OrgUnit 'OuDeptC0001'
+                $r = Invoke-Read 'Read-PatientInfo' @{ OrgUnitCode = 'DEPT,C' }
+                $r.Errors.Count | Should -Be 0
+                @($r.Output.TrackedEntityId) | Should -Be @('TePat000007')
+                @($script:Fake.Requests | Where-Object { $_.Path -ceq 'api/organisationUnits' } | ForEach-Object { $_.Filter }) | Should -Contain 'code:like:DEPT'
             }
             It 'reads nothing for an empty pipeline, not every record' {
                 Add-FakeCorpus

@@ -190,21 +190,24 @@ both:
 
 The module checks a token's shape; DHIS2 checks its checksum. DHIS2 2.41 and
 later refuse every version-1 token that 2.40 issued, with HTTP 400 "Checksum
-validation failed", and the module's error then says so: after an upgrade to
-2.41 or later, create a new token on the upgraded instance (in your profile,
-under Personal access tokens).
+validation failed", and the module's error, or `Import-NeoIPCMetadata`'s
+summary, then says so: after an upgrade to 2.41 or later, create a new token on
+the upgraded instance (in your profile, under Personal access tokens).
 
 Without `-Hostname`, a cmdlet takes its host from the `NEOIPC_DHIS2_HOST`
 environment variable, and with neither it stops: the module has no built-in
-host, so nothing reaches an instance by omission. The cmdlets that write or
-delete (`Import-NeoIPCMetadata`, `Deploy-NeoIPCMetadata`,
+host, so nothing reaches an instance by omission. A `-Hostname` of white space
+only is an error too, never a reason to take the variable's host. The cmdlets
+that write or delete (`Import-NeoIPCMetadata`, `Deploy-NeoIPCMetadata`,
 `Import-NeoIPCPlayData`, `Remove-NeoIPCPatient`,
 `Remove-DHIS2PersonalAccessToken`, and `Clear-DHIS2PersonalAccessTokens`)
-require `-Hostname` itself, so that each call names its target. The report
+require `-Hostname` itself, so that each call names its target, and name that
+host when they ask for confirmation. The report
 builders (`scripts/Build-*.ps1`) and `scripts/Update-NeoIPCCache.ps1`, which
 fills their tab-completion cache, are the exception: like the reports' R
 scripts, they fall back to the NeoIPC production instance when neither names a
-host. Their `-Dhis2Path` reaches only the reports' R code and the key of the
+host, while a host of white space only stops them as well. Their `-Dhis2Path`
+reaches only the reports' R code and the key of the
 tab-completion cache; the department list is read from the instance's `/api`
 root, as every read of the module is.
 
@@ -246,7 +249,8 @@ of each line. What you see differs between releases in these ways:
    authority ALL does not see the accounts that hold any of its own user
    roles, itself included, unless the system setting that lets users grant
    their own roles (`keyCanGrantOwnUserAuthorityGroups`) is on, and
-   `Read-UserInfo` warns that its list may lack them; from 2.42 it sees them.
+   `Read-UserInfo` warns such an account, whatever the setting, that its list
+   may lack them; from 2.42 it sees them.
 4. **Attribute values.** DHIS2 2.43.2 and later leave out the values of the
    patient attributes your account may not read through their sharing.
    `Read-PatientInfo` then warns, naming the attributes whose columns may be
@@ -265,9 +269,12 @@ of each line. What you see differs between releases in these ways:
    2.40 names are among those it does not know. Every tracker read checks the
    records DHIS2 returns against its request, and a record it did not ask for
    ends the read with an error.
-8. **Org-unit codes holding a comma.** DHIS2 2.42 and later cut an org-unit
-   filter's value at its first `,`, so the module looks such a code up by its
-   longest part without one and compares the whole code itself.
+8. **Org-unit codes holding `,` or `]`.** DHIS2 2.42 and later cut a filter's
+   value at its first `,`, and a bracketed one at its first `]`. The module
+   looks such a code up within your hierarchy by a case-sensitive `like` read
+   of its longest part free of `,`, `%`, and `\`, or, where it has none, among
+   all the org units there, and compares the whole code itself. `Read-UserInfo`
+   reads the users of org units by the org units' UIDs.
 
 On 2.40, the tracker reads apply the filters DHIS2 ignores when it reads
 enrolments by UID themselves, and read such enrolments one at a time when DHIS2
@@ -293,11 +300,11 @@ silence:
   account read the org unit's metadata.
 - **Patients, enrolments, and events.** DHIS2 lets only an account with
   data-capture org units and data read access to NEOIPC_CORE read its
-  records; without either, the read ends with an error that says which. It
-  reads them as far as the account's search org units reach (its data-capture
-  org units where it has none), and for an account without ALL only the
-  records whose patient's NEOIPC_CORE record is owned within its data-capture
-  org units. An account with ALL can therefore read records in org units that
+  records; without either, the read ends with an error that says which. For an
+  account without ALL, these are the records whose patient's NEOIPC_CORE
+  record is owned within its data-capture org units, which some DHIS2 releases
+  limit further to its search org units. DHIS2 does not limit an account with
+  ALL to its data-capture org units, so it can read records in org units that
   the org-unit lookups above do not find. On DHIS2 2.43.2 and later, a patient
   attribute's values also need read access to the attribute.
 - **Users.** `Read-UserInfo` needs the authority F_USER_VIEW, which ALL
@@ -629,7 +636,10 @@ skips the question, and `-WhatIf` deletes nothing. It reports `Deleted`,
 `WouldDelete`, `Declined`, or `Failed` for each token, and HTTP 401 ends the
 run. That happens once the run has deleted the token it authenticates with: at
 once on DHIS2 2.41 and later, and on 2.40, whose token cache keeps a deleted
-token working, up to an hour later. `Clear-DHIS2PersonalAccessTokens` deletes
+token working, up to an hour later; before any deletion, a 401 means that DHIS2
+refused the credentials, and the error gives DHIS2's reason. A value given as an
+id that holds a token's prefix (`d2p_` or `d2pat_`) is never shown, and a value
+that is no DHIS2 UID is never sent. `Clear-DHIS2PersonalAccessTokens` deletes
 your expired tokens through it, `-All` all of your tokens, the one you
 authenticate with included, and `-AllUsers` extends either to every token your
 account may read. Both require `-Hostname`.

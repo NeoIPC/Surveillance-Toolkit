@@ -10,10 +10,10 @@ function Read-PatientInfo {
         NEOIPC_CORE enrolments.
     .DESCRIPTION
         Reads the NEOIPC_CORE patients that DHIS2 lets your account read: for an account without the authority ALL, the
-        patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, as far as its search
-        org units, where it has any, reach. DHIS2 does not limit an account with ALL to its data-capture org units, so a
-        read without an org-unit filter can return patients of org units that -OrgUnitCode and -OrgUnitId, which look
-        org units up within your data-capture hierarchy only, do not find. Without a filter it reads every patient it
+        patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, which some DHIS2
+        releases limit further to the account's search org units. DHIS2 does not limit an account with ALL to its
+        data-capture org units, so a read without an org-unit filter can return patients of org units that -OrgUnitCode
+        and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every patient it
         can. Each filter narrows the read, and the filters of different parameters combine, so that a patient must pass
         each of them. A patient lies in an org unit when its NEOIPC_CORE record is owned there, which is how DHIS2 selects
         patients by org unit: where the patient was registered, unless the record has been transferred.
@@ -283,10 +283,10 @@ function Read-EnrolmentInfo {
         Read the NEOIPC_CORE enrolments of NeoIPC patients, each with its events and a link that opens it in the browser.
     .DESCRIPTION
         Reads the NEOIPC_CORE enrolments that DHIS2 lets your account read: for an account without the authority ALL,
-        those of patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, as far as its
-        search org units, where it has any, reach. DHIS2 does not limit an account with ALL to its data-capture org units,
-        so a read without an org-unit filter can return enrolments in org units that -OrgUnitCode and -OrgUnitId, which
-        look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every enrolment
+        those of patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, which some
+        DHIS2 releases limit further to the account's search org units. DHIS2 does not limit an account with ALL to its
+        data-capture org units, so a read without an org-unit filter can return enrolments in org units that
+        -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every enrolment
         it can. Each filter narrows the read, and the filters of different parameters combine. An enrolment lies in an
         org unit when its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects enrolments by org unit,
         whatever org unit the enrolment was entered in.
@@ -609,10 +609,10 @@ function Read-EventInfo {
         Read the NEOIPC_CORE events of NeoIPC patients, optionally with the values of chosen data elements.
     .DESCRIPTION
         Reads the NEOIPC_CORE events that DHIS2 lets your account read: for an account without the authority ALL, those
-        of patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, as far as its
-        search org units, where it has any, reach. DHIS2 does not limit an account with ALL to its data-capture org units,
-        so a read without an org-unit filter can return events in org units that -OrgUnitCode and -OrgUnitId, which look
-        org units up within your data-capture hierarchy only, do not find. Without a filter it reads every event it can.
+        of patients whose NEOIPC_CORE record is owned within its data-capture org units or below them, which some DHIS2
+        releases limit further to the account's search org units. DHIS2 does not limit an account with ALL to its
+        data-capture org units, so a read without an org-unit filter can return events in org units that -OrgUnitCode
+        and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not find. Without a filter it reads every event it can.
         Each filter narrows the read, and the filters of different parameters combine. An event lies in an org unit when
         its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects events by org unit, whatever org unit
         the event was entered in.
