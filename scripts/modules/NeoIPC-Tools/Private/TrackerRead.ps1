@@ -285,13 +285,16 @@ function New-NeoIPCUnexpectedItemError {
 
 function Get-NeoIPCCoreOwner {
     # The org unit that owns NEOIPC_CORE's record of each given tracked entity, keyed by its UID. DHIS2 matches the org
-    # units of a tracker read with program against this owner, on every supported version, rather than against the org
-    # unit a record was registered or entered in. Read in chunks, so a tracked entity that does not exist, is deleted,
-    # or lies outside the read's scope has no entry; one the read was not asked for ends it. The scope is the one of
-    # the read the owners serve, which differ on 2.40 to 2.42: ACCESSIBLE for an enrolment read, whose ACCESSIBLE scope
-    # is the account's search org units (or its data-capture org units without them), and CAPTURE for an event read,
-    # which DHIS2 selects within the data-capture org units for a CLOSED program such as NEOIPC_CORE (and on 2.43 for a
-    # superuser everywhere, as CAPTURE then reads).
+    # units of a tracker read with program against this owner rather than against the org unit a record was registered
+    # or entered in, except that 2.42.0 and 2.42.1 select enrolments, and 2.42.0 to 2.42.2 events, by the org unit they
+    # were entered in. Read in chunks, so a tracked entity that does not exist, is deleted, or lies outside the read's
+    # scope has no entry; one the read was not asked for ends it. The scope is the one of the read the owners serve,
+    # which differ on 2.40 to 2.42: ACCESSIBLE before an enrolment read, and CAPTURE before an event read, which DHIS2
+    # selects within the data-capture org units for a CLOSED program such as NEOIPC_CORE (and on 2.43 for a superuser
+    # everywhere, as CAPTURE then reads). On 2.40 and 2.41 the tracked-entity read with program keeps, for every
+    # account, only the patients owned within the data-capture org units (the tracked-entity aggregate's ownership
+    # filter), while the enrolment read of an account with ALL skips that check and reaches its search org units, so for
+    # such an account a patient owned beyond its data-capture org units has no entry, although its enrolments are read.
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.Dictionary[string, string]])]
     param(
@@ -340,20 +343,23 @@ function Select-NeoIPCTrackerReadPatient {
     $found = [System.Collections.Generic.List[string]]::new()
     foreach ($te in $TrackedEntityId) {
         if ($owners.ContainsKey($te)) { $found.Add($te); continue }
-        Write-NeoIPCTrackerReadError -Cmdlet $Cmdlet -ErrorId 'TrackedEntityNotFound' -TargetObject $te `
-            -Message "No NEOIPC_CORE patient your account can read has the UID '$te': it does not exist, is deleted, or lies outside what your account may read."
+        $message = if ($OrgUnitMode -eq 'CAPTURE') {
+            "No NEOIPC_CORE patient whose events your account can read has the UID '$te': it does not exist, is deleted, or its record is owned outside your data-capture org units, within which DHIS2 reads NEOIPC_CORE's events."
+        }
+        else { "No NEOIPC_CORE patient your account can read has the UID '$te': it does not exist, is deleted, or lies outside what your account may read." }
+        Write-NeoIPCTrackerReadError -Cmdlet $Cmdlet -ErrorId 'TrackedEntityNotFound' -TargetObject $te -Message $message
     }
     [pscustomobject]@{ TrackedEntities = $found.ToArray(); Owners = $owners }
 }
 
 function Split-NeoIPCTrackerItemByOrgUnit {
     # NEOIPC_CORE enrolments or events, as a read returns them, split by whether they lie in the given org units: whether
-    # one of them owns their patient's NEOIPC_CORE record, which is how DHIS2 selects them on every supported version,
-    # whatever org unit a record was entered in. The items do not carry that owner, so it is read, in the scope
-    # -OrgUnitMode names (Get-NeoIPCCoreOwner), for those whose patient -Owner does not list. -AcceptEntered also counts
-    # an item entered in one of the org units as inside, without reading its owner: enough for checking that a read DHIS2
-    # filtered by org unit returned nothing outside them, since a read DHIS2 widened returns records entered elsewhere as
-    # well. Both lists keep the input order.
+    # one of them owns their patient's NEOIPC_CORE record, which is how DHIS2 selects them, whatever org unit a record
+    # was entered in, but on early 2.42 patches (Get-NeoIPCCoreOwner). The items do not carry that owner, so it is read,
+    # in the scope -OrgUnitMode names (Get-NeoIPCCoreOwner), for those whose patient -Owner does not list.
+    # -AcceptEntered also counts an item entered in one of the org units as inside, without reading its owner: enough
+    # for checking that a read DHIS2 filtered by org unit returned nothing outside them, since a read DHIS2 widened
+    # returns records entered elsewhere as well. Both lists keep the input order.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(

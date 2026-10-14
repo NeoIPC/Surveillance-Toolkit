@@ -16,8 +16,10 @@ function Read-PatientInfo {
         units that -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture hierarchy only, do not
         find. Without a filter it reads every patient it can. Each filter narrows the read, and the filters of different
         parameters combine, so that a patient must pass each of them. A patient lies in an org unit when its NEOIPC_CORE
-        record is owned there, which is how DHIS2 selects patients by org unit: the owner is the org unit the patient's
-        first NEOIPC_CORE enrolment was entered in, until the record is transferred.
+        record is owned there, which is how DHIS2 selects patients by org unit. The owner is the org unit of the
+        patient's first NEOIPC_CORE enrolment until a transfer moves the record; on DHIS2 2.40 and 2.41, a later enrolment
+        entered through the legacy enrolment API, as Tracker Capture enters them, moves it too, to that enrolment's org
+        unit.
 
         -NeoIpcId looks patients up by their NeoIPC patient ID, which DHIS2 compares ignoring case: 'de-01' also finds
         'DE-01', and patients whose IDs differ only in case are all returned. A patient ID holding ';' is looked up in a
@@ -38,10 +40,11 @@ function Read-PatientInfo {
         NEOIPC_PATIENT_ID.
 
         DHIS2 lets only an account with data-capture org units and data read access to NEOIPC_CORE read its records;
-        without either, the read ends with an error that says which. The cmdlet speaks the request dialect of the
-        instance's DHIS2 version (2.40 to 2.43), and a response holding a patient the request did not ask for ends the
-        read with an error, since DHIS2 ignores a request parameter it does not know and widens the read instead of
-        refusing it.
+        without either, the read ends with an error that says which, except that DHIS2 2.40 answers an account with the
+        authority ALL that has data-view but no data-capture org units with no patients rather than a refusal. The
+        cmdlet speaks the request dialect of the instance's DHIS2 version (2.40 to 2.43), and a response holding a
+        patient the request did not ask for ends the read with an error, since DHIS2 ignores a request parameter it does
+        not know and widens the read instead of refusing it.
     .PARAMETER TrackedEntityId
         The patients' DHIS2 UIDs (tracked-entity UIDs). Takes TrackedEntityId from the pipeline, as Read-EnrolmentInfo and
         Read-EventInfo emit it.
@@ -301,7 +304,7 @@ function Read-EnrolmentInfo {
         hierarchy only, do not find. Without a filter it reads every enrolment it can. Each filter narrows the read, and
         the filters of different parameters combine. An enrolment lies in an org unit when its patient's NEOIPC_CORE
         record is owned there, which is how DHIS2 selects enrolments by org unit, whatever org unit the enrolment was
-        entered in.
+        entered in; only DHIS2 2.42.0 and 2.42.1 select them by the org unit they were entered in.
 
         The enrolment read takes one tracked entity, so -TrackedEntityId reads each patient's enrolments in a request of
         its own, unless -EnrollmentId bounds the read; the cmdlet then compares the patients itself. It reads the given
@@ -311,6 +314,11 @@ function Read-EnrolmentInfo {
         tracked entity that is no NEOIPC_CORE patient your account can read. When none of the values given to a
         parameter names anything, it returns nothing rather than read without that filter; an empty pipeline, too,
         returns nothing.
+
+        On DHIS2 2.40 and 2.41, the read of the given tracked entities finds only patients owned within your data-capture
+        org units, for an account with ALL too, whose enrolment read reaches its search org units: such an account gets
+        an error naming a patient owned beyond its data-capture org units, although a read without -TrackedEntityId
+        returns that patient's enrolments.
 
         DashboardUrl opens the enrolment in Tracker Capture's dashboard on DHIS2 2.41 and earlier, and on DHIS2 2.42 and
         later, which have no Tracker Capture, on the Capture app's enrolment page.
@@ -324,7 +332,9 @@ function Read-EnrolmentInfo {
         UID with a refusal per enrolment, the cmdlet first checks that an account without ALL has data-capture org units.
 
         DHIS2 lets only an account with data-capture org units and data read access to NEOIPC_CORE read its records;
-        without either, the read ends with an error that says which. The cmdlet speaks the request dialect of the
+        without either, the read ends with an error that says which, except that DHIS2 2.40 reads enrolments for an
+        account with the authority ALL that has data-view but no data-capture org units: those owned within its search
+        org units, or every enrolment where it has none. The cmdlet speaks the request dialect of the
         instance's DHIS2 version (2.40 to 2.43), and a response holding an enrolment the request did not ask for ends the
         read with an error, since DHIS2 ignores a request parameter it does not know and widens the read instead of
         refusing it.
@@ -457,7 +467,9 @@ function Read-EnrolmentInfo {
             if ($names.EmptyWithoutCaptureUnits -and -not $orgUnits.Given) {
                 # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Get-NeoIPCTrackerDialect. 2.40 answers a read by query by
                 # an account without ALL that has data-view but no data-capture org units with nothing rather than a
-                # refusal, and a read by UID with a refusal per enrolment; it reads for an account with ALL either way.
+                # refusal, and a read by UID with a refusal per enrolment. For an account with ALL it reads by UID
+                # unchecked, and by query, where the account has data-view org units, within its search org units or,
+                # without them, in every org unit, refusing it otherwise in words Get-NeoIPCCoreTrackerList reports.
                 # Org units given were found within the data-capture hierarchy, so the account has some.
                 $me = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/me' -Fields 'organisationUnits[id]', 'authorities' -AsHashtable -Confirm:$false -WhatIf:$false
                 $captureUnits = @(@($me['organisationUnits']) | Where-Object { $_ -is [System.Collections.IDictionary] -and $_['id'] })
@@ -629,10 +641,11 @@ function Read-EventInfo {
         in the same way, and 2.43 and later read every event for it, so a read without an org-unit filter can return
         events in org units that -OrgUnitCode and -OrgUnitId, which look org units up within your data-capture hierarchy
         only, do not find. On 2.40 to 2.42, an account with ALL whose search org units reach beyond its data-capture org
-        units can thus read enrolments there, and on 2.42 patients, whose events it cannot read. Without a filter it reads every
-        event it can. Each filter narrows the read, and the filters of different parameters combine. An event lies in an
-        org unit when its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects events by org unit,
-        whatever org unit the event was entered in.
+        units can thus read enrolments there, and on 2.42 patients, whose events it cannot read. Without a filter it
+        reads every event it can. Each filter narrows the read, and the filters of different parameters combine. An event
+        lies in an org unit when its patient's NEOIPC_CORE record is owned there, which is how DHIS2 selects events by
+        org unit, whatever org unit the event was entered in; only DHIS2 2.42.0 to 2.42.2 select them, and limit them to
+        the data-capture org units, by the org unit they were entered in.
 
         The event read takes one org unit, one tracked entity, and one program stage. With several values of one of them,
         and no -EventId or -EnrollmentId bounding the read, the cmdlet sends one request per value of the first of
@@ -654,9 +667,10 @@ function Read-EventInfo {
         lies outside what your account may read with an error on some versions and with nothing on others. It writes an
         error naming each code or UID that names no org unit in your hierarchy, each stage that is no stage of
         NEOIPC_CORE, each data-element code your account can read no data element of, each event, enrolment, or
-        tracked-entity value that is no DHIS2 UID, and each tracked entity that is no NEOIPC_CORE patient your account can
-        read. When none of the values given to a parameter (or, for the stages, to -EventType and -ProgramStageId) names
-        anything, it returns nothing rather than read without that filter; an empty pipeline, too, returns nothing.
+        tracked-entity value that is no DHIS2 UID, and each tracked entity that is no NEOIPC_CORE patient whose events
+        your account can read. When none of the values given to a parameter (or, for the stages, to -EventType and
+        -ProgramStageId) names anything, it returns nothing rather than read without that filter; an empty pipeline,
+        too, returns nothing.
 
         DHIS2 lets only an account with data-capture org units and data read access to NEOIPC_CORE read its records;
         without either, the read ends with an error that says which. The cmdlet speaks the request dialect of the

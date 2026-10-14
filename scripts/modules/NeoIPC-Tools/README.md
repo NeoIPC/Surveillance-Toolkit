@@ -275,6 +275,12 @@ of each line. What you see differs between releases in these ways:
    of its longest part free of `,`, `%`, and `\`, or, where it has none, among
    all the org units there, and compares the whole code itself. `Read-UserInfo`
    reads the users of org units by the org units' UIDs.
+9. **Enrolments and events on early 2.42 patches.** DHIS2 2.42.0 and 2.42.1
+   select enrolments, and 2.42.0 to 2.42.2 select events, by the org unit they
+   were entered in rather than by the owner of the patient's NEOIPC_CORE
+   record: for `-OrgUnitCode` and `-OrgUnitId`, and for events also within the
+   data-capture org units. The later patches and the other releases select by
+   the owner.
 
 On 2.40, the tracker reads apply the filters DHIS2 ignores when it reads
 enrolments by UID themselves, and read such enrolments one at a time when DHIS2
@@ -298,7 +304,11 @@ a warning or an error rather than return less in silence:
   account read the org unit's metadata.
 - **Patients, enrolments, and events.** DHIS2 lets only an account with
   data-capture org units and data read access to NEOIPC_CORE read its
-  records; without either, the read ends with an error that says which. Which
+  records; without either, the read ends with an error that says which. The
+  exception is DHIS2 2.40's answer to an account with ALL that has data-view
+  but no data-capture org units: it reads that account's enrolments (those
+  owned within its search org units, or every enrolment where it has none) and
+  returns no patients rather than a refusal. Which
   records a read without an org-unit filter reaches depends on the account and
   the release (see the table below); where it reaches beyond your data-capture
   org units, it can return records of org units that the org-unit lookups
@@ -319,13 +329,20 @@ NEOIPC_CORE record is owned within those org units or below them:
 | Read | Account without ALL | Account with ALL |
 |------|---------------------|------------------|
 | Patients | owned within its data-capture org units, on 2.40 and 2.41 also within its search org units where it has any | as an account without ALL on 2.40 and 2.41; owned within its data-capture or search org units on 2.42; every patient from 2.43 |
-| Enrolments | as patients | owned within its search org units, or within its data-capture org units where it has none, on 2.40 and 2.41; owned within either on 2.42; every enrolment from 2.43 |
+| Enrolments | as patients | owned within its search org units, or within its data-capture org units where it has none, on 2.40 and 2.41 (on 2.40 without data-capture org units, see above); owned within either on 2.42; every enrolment from 2.43 |
 | Events | owned within its data-capture org units | as an account without ALL up to 2.42; every event from 2.43 |
+
+On 2.42.0 and 2.42.1 for enrolments, and on 2.42.0 to 2.42.2 for events, read
+*entered within* for *owned within* (see [DHIS2 Versions](#dhis2-versions)).
 
 So on 2.40 to 2.42, an account with ALL whose search org units reach beyond
 its data-capture org units can read enrolments there, and on 2.42 patients,
 whose events it cannot read; `Read-EventInfo -TrackedEntityId` names such a
-patient as one it cannot read.
+patient as one whose events it cannot read. On 2.40 and 2.41,
+`Read-EnrolmentInfo -TrackedEntityId` names such a patient as one it cannot
+read, too, although the account's enrolment read returns the patient's
+enrolments: the cmdlet looks the given patients up with a patient read, which
+those releases limit to the data-capture org units for every account.
 
 ## OrgUnit Inspection
 
@@ -379,9 +396,13 @@ cmdlet reads all of them; the filters of different parameters combine, so that
 a record must pass each of them. `-OrgUnitCode` and `-OrgUnitId` form one set
 of org units, and `-EventType` and `-ProgramStageId` one set of stages. A
 record lies in an org unit when its patient's NEOIPC_CORE record is owned
-there, which is how DHIS2 selects it: the owner is the org unit the patient's
-first NEOIPC_CORE enrolment was entered in, until the record is transferred. A
-record's `OrgUnitId` is where it was registered or entered.
+there, which is how DHIS2 selects it, but for enrolments and events on early
+2.42 patches (see [DHIS2 Versions](#dhis2-versions)). The owner is the org unit
+of the patient's first NEOIPC_CORE enrolment until a transfer moves the
+record; on 2.40 and 2.41, a later enrolment entered through the legacy
+enrolment API, as Tracker Capture enters them, moves it too, to that
+enrolment's org unit. A record's `OrgUnitId` is where it was registered or
+entered.
 
 Each code or UID that names no org unit in your hierarchy, each value that is
 no DHIS2 UID, each stage or data element that does not exist, and each tracked

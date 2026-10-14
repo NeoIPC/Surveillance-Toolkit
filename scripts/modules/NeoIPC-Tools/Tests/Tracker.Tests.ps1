@@ -21,9 +21,10 @@
          carries no events;
       4. the lists come under the version's key;
       5. a read's org units select by the owner of NEOIPC_CORE's record (a tracked-entity read without program by the
-         owner in some program of the patient, else the registration org unit); CAPTURE and an event read's ACCESSIBLE
-         by an owner within the caller's capture units; a tracked-entity or enrolment read's ACCESSIBLE on 2.40 and 2.41
-         also within its search units where it has any;
+         owner in some program of the patient, else the registration org unit); for an account without ALL, CAPTURE and
+         an event read's ACCESSIBLE by an owner within the caller's capture units, and a tracked-entity or enrolment
+         read's ACCESSIBLE on 2.40 and 2.41 also within its search units where it has any. The wider reach of an account
+         with ALL is not modelled: the fake consults ALL only for /api/me and 2.40's enrolment read by UID;
       6. the attribute filter's eq and in operators compare ignoring case, and their values unescape as each version
          does, before 2.42.1 putting escaped slashes back in hash order;
       7. 2.43.2 and later leave out the values of attributes the account cannot read through their sharing;
@@ -255,9 +256,10 @@ InModuleScope 'NeoIPC-Tools' {
             }
 
             # A read with program selects by the owner of the program's record, one without by the owner in some program
-            # of the patient, else by the registration org unit. CAPTURE, and an event read's ACCESSIBLE for a CLOSED
-            # program, take the owners within the caller's data-capture org units; the tracked-entity and enrolment
-            # reads' ACCESSIBLE on 2.40 and 2.41 those within its search org units as well.
+            # of the patient, else by the registration org unit. For an account without ALL, the only one modelled here,
+            # CAPTURE, and an event read's ACCESSIBLE for a CLOSED program, take the owners within the caller's
+            # data-capture org units; the tracked-entity and enrolment reads' ACCESSIBLE on 2.40 and 2.41 those within
+            # its search org units as well.
             function Test-FakeInScope($Scope, [string]$TrackedEntity, [string]$Resource, [switch]$AnyProgram) {
                 $orgUnit = Get-FakeOwner $TrackedEntity
                 if ($AnyProgram -and -not $orgUnit) {
@@ -900,6 +902,46 @@ InModuleScope 'NeoIPC-Tools' {
                 @($r.Output.EnrollmentId) | Should -Be @('EnPat000003')
                 $r.Errors.Count | Should -Be 1
                 $r.Errors[0].TargetObject | Should -BeExactly 'TePat000001'
+            }
+            It 'Read-PatientInfo names a patient outside the search org units as one it cannot read, as DHIS2 <Version> does not read it' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                $script:Fake.SearchUnits.Add('OuDeptB0001')
+                $r = Invoke-Read 'Read-PatientInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000003' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.TrackedEntityId) | Should -Be @('TePat000003')
+                $r.Errors.Count | Should -Be 1
+                $r.Errors[0].TargetObject | Should -BeExactly 'TePat000001'
+            }
+            It 'Read-EventInfo names a patient owned outside the data-capture org units as one whose events the account cannot read' {
+                Add-FakeCorpus
+                $r = Invoke-Read 'Read-EventInfo' @{ TrackedEntityId = 'TePat000001', 'TePat000004' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.EventId) | Should -Be @('EvPat000001')
+                $r.Errors.Count | Should -Be 1
+                $r.Errors[0].TargetObject | Should -BeExactly 'TePat000004'
+                $r.Errors[0].Exception.Message | Should -BeLike '*patient whose events your account can read*owned outside your data-capture org units*'
+            }
+            It 'Read-EventInfo compares listed events with several org units by owners within the data-capture org units, on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                $script:Fake.SearchUnits.Add('OuDeptB0001')
+                $r = Invoke-Read 'Read-EventInfo' @{ EventId = 'EvPat000001', 'EvPat000003'; OrgUnitCode = 'DEPT_A', 'DEPT_B' }
+                $r.Stop | Should -BeNullOrEmpty
+                $r.Errors.Count | Should -Be 0
+                @($r.Output.EventId) | Should -Be @('EvPat000001', 'EvPat000003')
+            }
+            It 'Read-EventInfo checks an event entered outside the org unit it asked for by its owner within the data-capture org units, on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                Add-FakeEvent -Uid 'EvEntered01' -TrackedEntity 'TePat000001' -OrgUnit 'OuDeptB0001'
+                $script:Fake.SearchUnits.Add('OuDeptB0001')
+                $r = Invoke-Read 'Read-EventInfo' @{ OrgUnitCode = 'DEPT_A' }
+                $r.Stop | Should -BeNullOrEmpty
+                @($r.Output.EventId | Sort-Object) | Should -Be @('EvEntered01', 'EvPat000001', 'EvPat000002')
             }
             It 'Read-EventInfo writes an error for one deleted after it was read, which DHIS2 <Version> refuses, and reads the others' -ForEach @(
                 @{ Version = '2.42.6' }, @{ Version = '2.43.2' }
