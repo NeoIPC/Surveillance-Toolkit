@@ -82,14 +82,14 @@ function Split-NeoIPCList {
 function Get-NeoIPCCodeLikeValue {
     # The value a `code:like:` filter looks a code up by: the longest of the code's runs that hold none of ',', '%', '\',
     # '[', and line breaks, each taken without its trailing ':' characters (the first of equal ones), or '' when no run is
-    # left. DHIS2 2.42 and later receive an object list's filters joined with ',' and split them again, ending a value at
-    # its first ',' or line break, and one that starts with '[' at its first ']', and reading what follows as further
-    # filters (GetObjectListParams.splitFilters). DHIS2 drops every '%' from a like value (LikeOperator.getPredicate), and
-    # PostgreSQL's LIKE takes '\' as its escape character, so a value holding either would no longer match the code, while
-    # a '_', which LIKE takes for any one character, only widens the match. DHIS2's query parsers split a filter at ':',
-    # which drops trailing empty parts: every release reads a value of nothing but ':' as none, and 2.42 and later read
-    # any other value without its trailing ':' characters (DefaultQueryParser), so every release reads a run taken without
-    # them as sent.
+    # left. DHIS2 2.42 and later receive an object list's filters joined with ',' and split them again, ending a value that
+    # starts with '[' and holds a ']' at its first ']', and any other value at its first ',' or line break, and reading
+    # what follows as further filters (GetObjectListParams.splitFilters). DHIS2 drops every '%' from a like value
+    # (LikeOperator.getPredicate), and PostgreSQL's LIKE takes '\' as its escape character, so a value holding either would
+    # no longer match the code, while a '_', which LIKE takes for any one character, only widens the match. DHIS2's query
+    # parsers split a filter at ':', which drops trailing empty parts: every release reads a value of nothing but ':' as
+    # none, and 2.42 and later read any other value without its trailing ':' characters (DefaultQueryParser), so every
+    # release reads a run taken without them as sent.
     [CmdletBinding()]
     [OutputType([string])]
     param([Parameter(Mandatory)][string]$Code)

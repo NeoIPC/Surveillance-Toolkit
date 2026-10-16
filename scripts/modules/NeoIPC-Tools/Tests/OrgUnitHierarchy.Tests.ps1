@@ -10,12 +10,12 @@
     in the group NEO_DEPARTMENT. The fake applies the metadata filters the helpers send, so a test sees which units a
     request names; its code comparison ignores case on purpose, so the helpers' own exact comparison is what a test
     checks. It reads the filter parameters as the DHIS2 release a test sets does: 2.41 and earlier each as sent, 2.42 and
-    later joined with ',' and split again, which ends a value at its first ',' or line break, and one that starts with
-    '[' at its first ']'. It then reads each filter as that release's query parser does: 2.41 and earlier take the rest
-    after the operator as the value, and 2.42 and later the parts after it joined with ':', which loses the value's
-    trailing ':' characters; a filter left without a value is refused. Its `in` list loses one bracket at each end before
-    it splits on ','. Its `like` drops every '%' from the value, as DHIS2 does, and takes '\' as the escape of the
-    character after it, as PostgreSQL's LIKE does.
+    later joined with ',' and split again, which ends a value that starts with '[' and holds a ']' at its first ']', and
+    any other at its first ',' or line break. It then reads each filter as that release's query parser does: 2.41 and
+    earlier take the rest after the operator as the value, and 2.42 and later the parts after it joined with ':', which
+    loses the value's trailing ':' characters; a filter left without a value is refused. Its `in` list loses one bracket
+    at each end before it splits on ','. Its `like` drops every '%' from the value, as DHIS2 does, and takes '\' as the
+    escape of the character after it, as PostgreSQL's LIKE does.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/OrgUnitHierarchy.Tests.ps1
@@ -223,6 +223,20 @@ InModuleScope 'NeoIPC-Tools' {
                 @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) |
                     Should -BeExactly @('code:in:[[A11,DEPT_A1]')
             }
+            # DHIS2 2.42 and later end a bracketed filter value only at its first ']', so a line break stays within the list.
+            It 'finds a code holding a line break in the code:in list on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+                @{ Version = '2.42.0' }
+                @{ Version = '2.43.2' }
+            ) {
+                $script:Version = $Version
+                $script:Units += @{ id = 'OuDeptA0012'; code = "A12`nB"; path = '/OuRoot00001/OuCtryA0001/OuHospA0001/OuDeptA0012'; groups = @('NEO_DEPARTMENT') }
+                $result = Resolve-NeoIPCOrgUnit -Endpoint $script:Endpoint -Code "A12`nB", 'DEPT_A1' -Fields 'name'
+                Get-SortedCode $result.Units | Should -BeExactly @("A12`nB", 'DEPT_A1')
+                @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) |
+                    Should -BeExactly @("code:in:[A12`nB,DEPT_A1]")
+            }
             It 'looks a code holding a comma up on DHIS2 <Version> by a run free of the % and \ that DHIS2 and PostgreSQL do not match literally' -ForEach @(
                 @{ Version = '2.40.12' }
                 @{ Version = '2.43.2' }
@@ -249,8 +263,8 @@ InModuleScope 'NeoIPC-Tools' {
                 Get-SortedCode $result.Units | Should -Be @('::,X')
                 @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) | Should -Be @('code:like:X')
             }
-            # DHIS2 2.42 and later end a filter value at a line break, and one that starts with '[' at its first ']', and read
-            # what follows as further filters.
+            # DHIS2 2.42 and later end a filter value that starts with '[' at its first ']', and any other at a line break, and
+            # read what follows as further filters.
             It 'finds <Case> on DHIS2 <Version> by a like value that no release cuts' -ForEach @(
                 foreach ($version in '2.40.12', '2.41.10', '2.42.0', '2.43.2') {
                     @{ Version = $version; Case = 'a code holding a comma that starts with "["'; Code = '[A]code:eq:Q,X'; Value = 'A]code:eq:Q' }

@@ -73,11 +73,12 @@ function Resolve-NeoIPCOrgUnit {
     # existing elsewhere.
     #
     # Codes go into `code:in:[...]` lists, which DHIS2 splits on ',' with no escape. DHIS2 2.42 and later also receive the
-    # request's filters joined with ',' and split them again, ending an unbracketed value at its first ',' and a bracketed
-    # one at its first ']' (GetObjectListParams.splitFilters), so that no filter value carries a code holding ',' there,
-    # and no `in` list one holding ']'. Such a code is looked up by `code:like:` (Get-NeoIPCCodeLikeValue), which on every
-    # release matches, case-sensitively, the codes that contain the value; a code without such a value is looked up among
-    # all the units of the hierarchy. Either way, it is compared exactly here.
+    # request's filters joined with ',' and split them again, ending a bracketed value at its first ']' and any other at
+    # its first ',' or line break (GetObjectListParams.splitFilters), so that no filter value carries a code holding ','
+    # there, and no `in` list one holding ']', while a line break within the brackets stays. A code holding ',' or ']' is
+    # looked up by `code:like:` (Get-NeoIPCCodeLikeValue), which on every release matches, case-sensitively, the codes
+    # that contain the value; a code without such a value is looked up among all the units of the hierarchy. Either way,
+    # it is compared exactly here.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(

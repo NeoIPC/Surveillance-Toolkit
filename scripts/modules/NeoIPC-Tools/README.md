@@ -270,13 +270,15 @@ of each line. What you see differs between releases in these ways:
    records DHIS2 returns against its request, and a record it did not ask for
    ends the read with an error.
 8. **Codes holding `,` or `]`.** DHIS2 2.42 and later cut an org-unit read's
-   filter value at its first `,` or line break, and one that starts with `[`
-   at its first `]`, and read every filter value without its trailing `:`
-   characters. The module looks an org-unit code holding `,` or `]` up within
-   your hierarchy by a case-sensitive `like` read of the longest of its parts
-   free of `,`, `%`, `\`, `[`, and line breaks, each taken without trailing
-   `:`, or, where no part is left, among all the org units there, and compares
-   the whole code itself. `Read-EventInfo -DataElementCode` reads data elements
+   filter value that starts with `[` at its first `]`, and any other at its
+   first `,` or line break, and read every filter value without its trailing
+   `:` characters. The module looks an org-unit code holding `,` or `]` up
+   within your hierarchy by a case-sensitive `like` read of the longest of its
+   parts free of `,`, `%`, `\`, `[`, and line breaks, each taken without
+   trailing `:`, or, where no part is left, among all the org units there, and
+   compares the whole code itself. Every other code goes into a bracketed
+   list, which those releases cut only at a `]`, so a code holding a line
+   break is listed too. `Read-EventInfo -DataElementCode` reads data elements
    through `api/metadata`, which takes each filter whole, but whose `in` lists
    split on `,` on every release, so it looks a data-element code holding `,`
    up by the same `like` value, among all data elements where no part is left.
