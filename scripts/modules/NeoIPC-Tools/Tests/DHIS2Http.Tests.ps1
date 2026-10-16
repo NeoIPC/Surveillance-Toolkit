@@ -6,10 +6,11 @@
     reader.
 
 .DESCRIPTION
-    Covers Resolve-NeoIPCDhis2Hostname, Split-NeoIPCList, Get-NeoIPCDhis2ErrorDetail, New-NeoIPCDhis2HttpError,
-    Invoke-NeoIPCDhis2Get, and Invoke-NeoIPCDhis2Delete (Private/DHIS2Http.ps1), Get-NeoIPCDhis2VersionText
-    (Private/Dhis2Version.ps1), and Resolve-NeoIPCReportHostname (Public/ReportHelpers.ps1); and, across the module, how
-    the writers take a host of white space and how the help of the functions without a built-in host describes it.
+    Covers Resolve-NeoIPCDhis2Hostname, Split-NeoIPCList, Get-NeoIPCCodeLikeValue, Get-NeoIPCDhis2ErrorDetail,
+    New-NeoIPCDhis2HttpError, Invoke-NeoIPCDhis2Get, and Invoke-NeoIPCDhis2Delete (Private/DHIS2Http.ps1),
+    Get-NeoIPCDhis2VersionText (Private/Dhis2Version.ps1), and Resolve-NeoIPCReportHostname (Public/ReportHelpers.ps1);
+    and, across the module, how the writers take a host of white space and how the help of the functions without a
+    built-in host describes it.
     Self-contained: every HTTP call is mocked, and Invoke-WebRequest and Invoke-RestMethod throw unless a test makes them
     answer, so no instance is needed and no request leaves the process. NEOIPC_DHIS2_HOST is removed before each test,
     set where a test needs it, and restored afterwards, removed again if it was absent. The tokens are made-up strings of
@@ -116,6 +117,26 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
             }
             It 'refuses a value that alone exceeds the length' {
                 { Split-NeoIPCList -Value @('abcdef') -Separator ',' -MaximumLength 5 } | Should -Throw '*does not fit*'
+            }
+        }
+
+        Describe 'Get-NeoIPCCodeLikeValue' {
+            It 'gives <Value> for the code <Code>' -ForEach @(
+                @{ Code = 'DEPT,A2'; Value = 'DEPT' }
+                @{ Code = 'DEPT%A6,B'; Value = 'DEPT' }
+                @{ Code = 'WARD\BX,C'; Value = 'WARD' }
+                @{ Code = '[A]B,C'; Value = 'A]B' }
+                @{ Code = 'A,BC:'; Value = 'BC' }
+                @{ Code = '::,X'; Value = 'X' }
+                @{ Code = ':A:,B'; Value = ':A' }
+                @{ Code = ',:'; Value = '' }
+                @{ Code = ',,'; Value = '' }
+            ) {
+                Get-NeoIPCCodeLikeValue -Code $Code | Should -BeExactly $Value
+            }
+            It 'ends a run at a line break' {
+                Get-NeoIPCCodeLikeValue -Code "AB`nCDE,F" | Should -BeExactly 'CDE'
+                Get-NeoIPCCodeLikeValue -Code "AB`rCDE,F" | Should -BeExactly 'CDE'
             }
         }
 

@@ -902,20 +902,29 @@ function Read-EventInfo {
             if (($EventType -or $askedStages.Count -gt 0) -and $stageIds.Count -eq 0) { return }
             $stageIds = Get-NeoIPCDistinctValue -Value $stageIds
 
-            # The data elements of -DataElementCode, by code: a code holding ',' cannot stand in an 'in' list, which splits
-            # on it, so it is looked up by itself with 'eq'. Unlike the object lists' filter, which DHIS2 2.42 and later
-            # cut at ',' and ']' (Resolve-NeoIPCOrgUnit), api/metadata takes each '<type>:filter' parameter whole on every
-            # supported version (DefaultMetadataExportService.getParamsFromMap), and an 'in' list loses only its outer
-            # brackets before it splits on ',' (QueryUtils.parseValue), so a code holding ']' stays in the list. An 'eq'
-            # value is all after 'code:eq:' but for trailing ':' characters, which 2.42 and later drop (DefaultQueryParser
-            # splits the filter at ':' and joins the rest), so there a code holding ',' that ends in ':' is not found.
+            # The data elements of -DataElementCode, by code, each compared exactly here. Codes go into `code:in:[...]`
+            # lists, which split on ',' with no escape. A code holding ',' is therefore looked up by `code:like:`
+            # (Get-NeoIPCCodeLikeValue), and among all data elements where it has no such value: 'eq' would not do, since
+            # 2.42 and later read a filter value without its trailing ':' characters (DefaultQueryParser). Unlike the object
+            # lists' filter, which 2.42 and later also cut at ',' and ']' (Resolve-NeoIPCOrgUnit), api/metadata takes each
+            # '<type>:filter' parameter whole on every supported version (DefaultMetadataExportService.getParamsFromMap),
+            # and an 'in' list loses only its outer brackets before it splits on ',' (QueryUtils.parseValue), so a code
+            # holding ']' stays in the list.
             $dataElementByCode = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
             if ($dataElementCodes.Count -gt 0) {
                 $filters = [System.Collections.Generic.List[string]]::new()
                 foreach ($chunk in (Split-NeoIPCList -Value ([string[]]@($dataElementCodes | Where-Object { -not $_.Contains(',') })) -Separator ',')) { $filters.Add("code:in:[$($chunk -join ',')]") }
-                foreach ($code in @($dataElementCodes | Where-Object { $_.Contains(',') })) { $filters.Add("code:eq:$code") }
-                foreach ($filter in $filters) {
-                    $metadata = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/metadata' -QueryParameters @{ 'dataElements:filter' = $filter; 'dataElements:fields' = 'id,code' } -AsHashtable -Confirm:$false -WhatIf:$false
+                $likeValues = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+                $readAll = $false
+                foreach ($code in @($dataElementCodes | Where-Object { $_.Contains(',') })) {
+                    $likeValue = Get-NeoIPCCodeLikeValue -Code $code
+                    if ($likeValue.Length -eq 0) { $readAll = $true }
+                    elseif ($likeValues.Add($likeValue)) { $filters.Add("code:like:$likeValue") }
+                }
+                # A read of every data element covers every code.
+                $queries = @(if ($readAll) { @{ 'dataElements:fields' = 'id,code' } } else { $filters | ForEach-Object { @{ 'dataElements:filter' = $_; 'dataElements:fields' = 'id,code' } } })
+                foreach ($query in $queries) {
+                    $metadata = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/metadata' -QueryParameters $query -AsHashtable -Confirm:$false -WhatIf:$false
                     if ($metadata -isnot [System.Collections.IDictionary]) { continue }
                     foreach ($de in @($metadata['dataElements'])) {
                         if ($de -is [System.Collections.IDictionary] -and $dataElementCodes -ccontains [string]$de['code'] -and (Test-NeoIPCMetadataUid -Id ([string]$de['id']))) {

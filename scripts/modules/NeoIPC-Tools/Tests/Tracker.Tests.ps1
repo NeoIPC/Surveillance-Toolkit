@@ -341,6 +341,34 @@ InModuleScope 'NeoIPC-Tools' {
             # A metadata object cut to its type's '<type>:fields' list, as api/metadata cuts it.
             function Select-FakeMetadataField($Item, [string]$Fields) { Select-FakeTree $Item (ConvertFrom-FakeFieldList $Fields) }
 
+            # The data elements an api/metadata filter keeps, the filter read as DHIS2's query parsers read it. Both split it
+            # at ':', which drops trailing empty parts, so a value of ':' only reads as none, which this fake refuses; 2.41
+            # and earlier then take the rest of the filter as the value (DefaultJpaQueryParser), and 2.42 and later the parts
+            # after the operator joined with ':', which loses the value's trailing ':' characters (DefaultQueryParser). 'eq'
+            # and 'in' compare exactly, an 'in' list split on ',' once its outer brackets are off (QueryUtils.parseValue);
+            # 'like' keeps the codes that hold the value, with every '%' dropped and '\' the escape of the character after it.
+            function Select-FakeDataElement($Rows, [string]$Filter) {
+                $parts = [System.Collections.Generic.List[string]]::new([string[]]$Filter.Split(':'))
+                while ($parts.Count -gt 0 -and $parts[$parts.Count - 1] -eq '') { $parts.RemoveAt($parts.Count - 1) }
+                if ($parts.Count -lt 3) { throw "The fake does not read the filter '$Filter', which DHIS2 reads without a value." }
+                $property = $parts[0]; $operator = $parts[1]
+                $value = if ((Get-FakeVersion) -ge [version]'2.42') { $parts.GetRange(2, $parts.Count - 2) -join ':' } else { $Filter.Substring($property.Length + $operator.Length + 2) }
+                if ($property -cne 'code') { throw "The fake does not read the filter '$Filter'." }
+                switch ($operator) {
+                    'eq' { @($Rows | Where-Object { [string]$_.code -ceq $value }) }
+                    'in' {
+                        if (-not ($value.StartsWith('[') -and $value.EndsWith(']'))) { throw "The fake does not read the filter '$Filter', whose value is no list." }
+                        $list = @($value.Substring(1, $value.Length - 2).Split(',') | Where-Object { $_ -ne '' })
+                        @($Rows | Where-Object { $list -ccontains [string]$_.code })
+                    }
+                    'like' {
+                        $text = [regex]::Replace($value.Replace('%', ''), '\\(.)', '$1')
+                        @($Rows | Where-Object { ([string]$_.code).Contains($text, [System.StringComparison]::Ordinal) })
+                    }
+                    default { throw "The fake does not read the filter '$Filter'." }
+                }
+            }
+
             function Get-FakeRefusal([string]$Resource) {
                 $version = Get-FakeVersion
                 switch ($script:Fake.Refusal) {
@@ -562,10 +590,9 @@ InModuleScope 'NeoIPC-Tools' {
                                     $r['trackedEntityAttributes'] = @($found | ForEach-Object { Select-FakeMetadataField ([ordered]@{ id = $_.id; code = $_.code }) ([string]$query['trackedEntityAttributes:fields']) })
                                 }
                             }
-                            if ($query.ContainsKey('dataElements:filter')) {
-                                $filterText = [string]$query['dataElements:filter']
-                                $codes = if ($filterText.StartsWith('code:eq:')) { @($filterText.Substring(8)) } else { @($filterText -replace '^code:in:\[|\]$', '' -split ',') }
-                                $found = @($script:Fake.DataElements | Where-Object { $codes -ccontains $_.code })
+                            if ($query.ContainsKey('dataElements:filter') -or $query.ContainsKey('dataElements:fields')) {
+                                $found = @($script:Fake.DataElements)
+                                if ($query.ContainsKey('dataElements:filter')) { $found = @(Select-FakeDataElement $found ([string]$query['dataElements:filter'])) }
                                 if ($found.Count -gt 0) {
                                     $r['dataElements'] = @($found | ForEach-Object { Select-FakeMetadataField ([ordered]@{ id = $_.id; code = $_.code }) ([string]$query['dataElements:fields']) })
                                 }
@@ -1164,15 +1191,37 @@ InModuleScope 'NeoIPC-Tools' {
                 $r.Errors.Count | Should -Be 1
                 $r.Errors[0].TargetObject | Should -BeExactly 'neoipc_bsi_pathogen_1_name'
             }
-            It 'looks a code holding "," up in an eq filter of its own, which api/metadata keeps whole' {
+            It 'looks a code holding "," up by a like value of its own, and compares the codes found exactly' {
                 Add-FakeCorpus
-                $script:Fake.DataElements = @($script:Fake.DataElements) + @(@{ id = 'DeComma0001'; code = 'NEOIPC_X,Y' })
+                $script:Fake.DataElements = @($script:Fake.DataElements) + @(@{ id = 'DeComma0001'; code = 'NEOIPC_X,Y' }, @{ id = 'DeComma0002'; code = 'NEOIPC_X,YZ' })
                 Add-FakeEvent -Uid 'EvComma0001' -TrackedEntity 'TePat000001' -DataValues @{ DeComma0001 = 'yes' }
+                Add-FakeEvent -Uid 'EvComma0002' -TrackedEntity 'TePat000002' -DataValues @{ DeComma0002 = 'no' }
                 $r = Invoke-Read 'Read-EventInfo' @{ OrgUnitCode = 'DEPT_A'; DataElementCode = 'NEOIPC_X,Y', 'NEOIPC_BSI_PATHOGEN_1_NAME' }
                 @($r.Output.EventId) | Should -Be @('EvComma0001')
                 $r.Output[0].DataValues.'NEOIPC_X,Y'.Value | Should -BeExactly 'yes'
                 $filters = @($script:Fake.Requests | Where-Object { $_.Path -ceq 'api/metadata' -and $_.Query.ContainsKey('dataElements:filter') } | ForEach-Object { $_.Query['dataElements:filter'] })
-                $filters | Should -Be @('code:in:[NEOIPC_BSI_PATHOGEN_1_NAME]', 'code:eq:NEOIPC_X,Y')
+                $filters | Should -Be @('code:in:[NEOIPC_BSI_PATHOGEN_1_NAME]', 'code:like:NEOIPC_X')
+            }
+            # Every release reads a filter value of ':' only as none, and 2.42 and later drop a value's trailing ':' characters.
+            It 'finds a code holding "," that ends in ":" on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }, @{ Version = '2.41.10' }, @{ Version = '2.42.6' }, @{ Version = '2.43.2' }
+            ) {
+                New-FakeInstance $Version; Add-FakeCorpus
+                $script:Fake.DataElements = @($script:Fake.DataElements) + @(@{ id = 'DeColon0001'; code = 'NEOIPC_X,Y:' }, @{ id = 'DeComma0001'; code = 'NEOIPC_X,Y' })
+                Add-FakeEvent -Uid 'EvColon0001' -TrackedEntity 'TePat000001' -DataValues @{ DeColon0001 = 'yes' }
+                $r = Invoke-Read 'Read-EventInfo' @{ OrgUnitCode = 'DEPT_A'; DataElementCode = 'NEOIPC_X,Y:' }
+                $r.Errors.Count | Should -Be 0
+                @($r.Output.EventId) | Should -Be @('EvColon0001')
+                $r.Output[0].DataValues.'NEOIPC_X,Y:'.Value | Should -BeExactly 'yes'
+            }
+            It 'reads every data element for a code holding "," that has no other run than colons' {
+                Add-FakeCorpus
+                $script:Fake.DataElements = @($script:Fake.DataElements) + @(@{ id = 'DeColon0002'; code = ',:' })
+                Add-FakeEvent -Uid 'EvColon0002' -TrackedEntity 'TePat000001' -DataValues @{ DeColon0002 = 'yes' }
+                $r = Invoke-Read 'Read-EventInfo' @{ OrgUnitCode = 'DEPT_A'; DataElementCode = ',:' }
+                $r.Errors.Count | Should -Be 0
+                @($r.Output.EventId) | Should -Be @('EvColon0002')
+                @($script:Fake.Requests | Where-Object { $_.Path -ceq 'api/metadata' -and $_.Query.ContainsKey('dataElements:fields') -and -not $_.Query.ContainsKey('dataElements:filter') }).Count | Should -Be 1
             }
             It 'leaves DataValues out without -DataElementCode' {
                 Add-FakeCorpus

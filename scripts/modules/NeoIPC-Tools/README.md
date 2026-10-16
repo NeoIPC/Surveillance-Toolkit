@@ -269,12 +269,18 @@ of each line. What you see differs between releases in these ways:
    2.40 names are among those it does not know. Every tracker read checks the
    records DHIS2 returns against its request, and a record it did not ask for
    ends the read with an error.
-8. **Org-unit codes holding `,` or `]`.** DHIS2 2.42 and later cut a filter's
-   value at its first `,`, and a bracketed one at its first `]`. The module
-   looks such a code up within your hierarchy by a case-sensitive `like` read
-   of its longest part free of `,`, `%`, and `\`, or, where it has none, among
-   all the org units there, and compares the whole code itself. `Read-UserInfo`
-   reads the users of org units by the org units' UIDs.
+8. **Codes holding `,` or `]`.** DHIS2 2.42 and later cut an org-unit read's
+   filter value at its first `,` or line break, and one that starts with `[`
+   at its first `]`, and read every filter value without its trailing `:`
+   characters. The module looks an org-unit code holding `,` or `]` up within
+   your hierarchy by a case-sensitive `like` read of the longest of its parts
+   free of `,`, `%`, `\`, `[`, and line breaks, each taken without trailing
+   `:`, or, where no part is left, among all the org units there, and compares
+   the whole code itself. `Read-EventInfo -DataElementCode` reads data elements
+   through `api/metadata`, which takes each filter whole, but whose `in` lists
+   split on `,` on every release, so it looks a data-element code holding `,`
+   up by the same `like` value, among all data elements where no part is left.
+   `Read-UserInfo` reads the users of org units by the org units' UIDs.
 9. **Enrolments and events on early 2.42 patches.** DHIS2 2.42.0 and 2.42.1
    select enrolments, and 2.42.0 to 2.42.2 select events, by the org unit they
    were entered in rather than by the owner of the patient's NEOIPC_CORE

@@ -67,20 +67,6 @@ function Get-NeoIPCHierarchyOrgUnit {
     , @($units.Values)
 }
 
-function Get-NeoIPCOrgUnitCodeRun {
-    # The longest run of a code that holds none of ',', '%', and '\' (the first of equal ones), or '' when it has none: the
-    # `code:like:` value Resolve-NeoIPCOrgUnit looks a code up by. DHIS2 2.42 and later end an unbracketed filter value at
-    # its first ','; DHIS2 drops every '%' from a like value (LikeOperator.getPredicate); and PostgreSQL's LIKE takes '\'
-    # as its escape character. A value holding any of them would no longer be part of the code, while a '_', which LIKE
-    # takes for any one character, only widens the match.
-    [CmdletBinding()]
-    [OutputType([string])]
-    param([Parameter(Mandatory)][string]$Code)
-    $longest = ''
-    foreach ($run in $Code.Split([char[]]@(',', '%', '\'))) { if ($run.Length -gt $longest.Length) { $longest = $run } }
-    $longest
-}
-
 function Resolve-NeoIPCOrgUnit {
     # Org units of the caller's hierarchy by code and by UID (Get-NeoIPCHierarchyOrgUnit), and the codes and UIDs that no
     # unit there has. Codes and UIDs compare exactly, and a missing one is reported as missing from the hierarchy, never as
@@ -89,9 +75,9 @@ function Resolve-NeoIPCOrgUnit {
     # Codes go into `code:in:[...]` lists, which DHIS2 splits on ',' with no escape. DHIS2 2.42 and later also receive the
     # request's filters joined with ',' and split them again, ending an unbracketed value at its first ',' and a bracketed
     # one at its first ']' (GetObjectListParams.splitFilters), so that no filter value carries a code holding ',' there,
-    # and no `in` list one holding ']'. Such a code is looked up by `code:like:` with its longest run free of ',', '%', and '\'
-    # (Get-NeoIPCOrgUnitCodeRun), which on every release matches, case-sensitively, the codes that contain the run; a code
-    # without such a run is looked up among all the units of the hierarchy. Either way, it is compared exactly here.
+    # and no `in` list one holding ']'. Such a code is looked up by `code:like:` (Get-NeoIPCCodeLikeValue), which on every
+    # release matches, case-sensitively, the codes that contain the value; a code without such a value is looked up among
+    # all the units of the hierarchy. Either way, it is compared exactly here.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -111,13 +97,13 @@ function Resolve-NeoIPCOrgUnit {
 
     $listed = [System.Collections.Generic.List[string]]::new()
     $likeFilters = [System.Collections.Generic.List[string]]::new()
-    $runs = [System.Collections.Generic.HashSet[string]]::new($ordinal)
+    $likeValues = [System.Collections.Generic.HashSet[string]]::new($ordinal)
     $readAll = $false
     foreach ($c in $codes) {
         if ($c.IndexOfAny([char[]]@(',', ']')) -lt 0) { $listed.Add($c); continue }
-        $run = Get-NeoIPCOrgUnitCodeRun -Code $c
-        if ($run.Length -eq 0) { $readAll = $true }
-        elseif ($runs.Add($run)) { $likeFilters.Add("code:like:$run") }
+        $likeValue = Get-NeoIPCCodeLikeValue -Code $c
+        if ($likeValue.Length -eq 0) { $readAll = $true }
+        elseif ($likeValues.Add($likeValue)) { $likeFilters.Add("code:like:$likeValue") }
     }
     $filters = [System.Collections.Generic.List[string]]::new()
     foreach ($chunk in (Split-NeoIPCList -Value $listed.ToArray() -Separator ',')) { $filters.Add("code:in:[$($chunk -join ',')]") }

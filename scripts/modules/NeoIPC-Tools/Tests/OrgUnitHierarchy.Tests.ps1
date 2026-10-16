@@ -9,10 +9,13 @@
     Self-contained: the DHIS2 reads go to a fake instance of two countries, each with one hospital, whose departments are
     in the group NEO_DEPARTMENT. The fake applies the metadata filters the helpers send, so a test sees which units a
     request names; its code comparison ignores case on purpose, so the helpers' own exact comparison is what a test
-    checks. It reads the filter parameters as the DHIS2 release a test sets does: 2.41 and
-    earlier each as sent, 2.42 and later joined with ',' and split again, which ends an unbracketed value at its first
-    ',' and a bracketed one at its first ']'. Its `like` drops every '%' from the value, as DHIS2 does, and takes '\' as
-    the escape of the character after it, as PostgreSQL's LIKE does.
+    checks. It reads the filter parameters as the DHIS2 release a test sets does: 2.41 and earlier each as sent, 2.42 and
+    later joined with ',' and split again, which ends a value at its first ',' or line break, and one that starts with
+    '[' at its first ']'. It then reads each filter as that release's query parser does: 2.41 and earlier take the rest
+    after the operator as the value, and 2.42 and later the parts after it joined with ':', which loses the value's
+    trailing ':' characters; a filter left without a value is refused. Its `in` list loses one bracket at each end before
+    it splits on ','. Its `like` drops every '%' from the value, as DHIS2 does, and takes '\' as the escape of the
+    character after it, as PostgreSQL's LIKE does.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/OrgUnitHierarchy.Tests.ps1
@@ -57,11 +60,27 @@ InModuleScope 'NeoIPC-Tools' {
             # '\' as the escape of the character after it. A '_', any one character there, is taken literally.
             function Get-FakeLikeText([string]$Value) { [regex]::Replace($Value.Replace('%', ''), '\\(.)', '$1') }
 
+            # A filter's property, operator, and value as DHIS2's query parsers read it. Both split the filter at ':', which
+            # drops trailing empty parts, so a value of ':' only reads as none, which this fake refuses; 2.41 and earlier then
+            # take the rest of the filter as the value (DefaultJpaQueryParser), and 2.42 and later the parts after the
+            # operator joined with ':', which loses the value's trailing ':' characters (DefaultQueryParser).
+            function ConvertFrom-FakeFilter([string]$Filter, [string]$Version) {
+                $parts = [System.Collections.Generic.List[string]]::new([string[]]$Filter.Split(':'))
+                while ($parts.Count -gt 0 -and $parts[$parts.Count - 1] -eq '') { $parts.RemoveAt($parts.Count - 1) }
+                if ($parts.Count -lt 3) { throw "The fake does not read the filter '$Filter', which DHIS2 reads without a value." }
+                $value = if ((ConvertTo-NeoIPCDhis2Version -Text $Version) -ge [version]'2.42.0') { $parts.GetRange(2, $parts.Count - 2) -join ':' }
+                else { $Filter.Substring($parts[0].Length + $parts[1].Length + 2) }
+                $parts[0], $parts[1], $value
+            }
+
             # The rows a metadata filter keeps, the way DHIS2 reads it ('like' compares case-sensitively, but this fake's
             # code comparisons ignore case).
             function Select-FakeUnit($Rows, [string]$Filter) {
-                $property, $operator, $value = $Filter -split ':', 3
-                $list = if ($operator -eq 'in') { @($value.TrimStart('[').TrimEnd(']') -split ',') }
+                $property, $operator, $value = ConvertFrom-FakeFilter $Filter $script:Version
+                $list = if ($operator -eq 'in') {
+                    if (-not ($value.StartsWith('[') -and $value.EndsWith(']'))) { throw "The fake does not read the filter '$Filter', whose value is no list." }
+                    @($value.Substring(1, $value.Length - 2) -split ',')
+                }
                 @($Rows | Where-Object {
                         $row = $_
                         switch ("${property}:$operator") {
@@ -190,6 +209,20 @@ InModuleScope 'NeoIPC-Tools' {
                 @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) |
                     Should -Be @('code:in:[DEPT_A1]', 'code:like:DEPT]A5')
             }
+            # DHIS2 drops one bracket from each end of an `in` list, so a code that starts with '[' can head the list.
+            It 'finds a code starting with "[" in the code:in list on DHIS2 <Version>' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+                @{ Version = '2.42.0' }
+                @{ Version = '2.43.2' }
+            ) {
+                $script:Version = $Version
+                $script:Units += @{ id = 'OuDeptA0011'; code = '[A11'; path = '/OuRoot00001/OuCtryA0001/OuHospA0001/OuDeptA0011'; groups = @('NEO_DEPARTMENT') }
+                $result = Resolve-NeoIPCOrgUnit -Endpoint $script:Endpoint -Code '[A11', 'DEPT_A1' -Fields 'name'
+                Get-SortedCode $result.Units | Should -BeExactly @('DEPT_A1', '[A11')
+                @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) |
+                    Should -BeExactly @('code:in:[[A11,DEPT_A1]')
+            }
             It 'looks a code holding a comma up on DHIS2 <Version> by a run free of the % and \ that DHIS2 and PostgreSQL do not match literally' -ForEach @(
                 @{ Version = '2.40.12' }
                 @{ Version = '2.43.2' }
@@ -202,6 +235,33 @@ InModuleScope 'NeoIPC-Tools' {
                 $result.MissingCode.Count | Should -Be 0
                 @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) |
                     Should -Be @('code:like:DEPT', 'code:like:WARD')
+            }
+            # Every release reads a filter value of ':' only as none, and 2.42 and later drop a value's trailing ':' characters.
+            It 'finds a code holding a comma on DHIS2 <Version> by a run without trailing colons, where its longest run is colons only' -ForEach @(
+                @{ Version = '2.40.12' }
+                @{ Version = '2.41.10' }
+                @{ Version = '2.42.0' }
+                @{ Version = '2.43.2' }
+            ) {
+                $script:Version = $Version
+                $script:Units += @{ id = 'OuDeptA0009'; code = '::,X'; path = '/OuRoot00001/OuCtryA0001/OuHospA0001/OuDeptA0009'; groups = @('NEO_DEPARTMENT') }
+                $result = Resolve-NeoIPCOrgUnit -Endpoint $script:Endpoint -Code '::,X' -Fields 'name'
+                Get-SortedCode $result.Units | Should -Be @('::,X')
+                @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) | Should -Be @('code:like:X')
+            }
+            # DHIS2 2.42 and later end a filter value at a line break, and one that starts with '[' at its first ']', and read
+            # what follows as further filters.
+            It 'finds <Case> on DHIS2 <Version> by a like value that no release cuts' -ForEach @(
+                foreach ($version in '2.40.12', '2.41.10', '2.42.0', '2.43.2') {
+                    @{ Version = $version; Case = 'a code holding a comma that starts with "["'; Code = '[A]code:eq:Q,X'; Value = 'A]code:eq:Q' }
+                    @{ Version = $version; Case = 'a code holding a comma and a line break'; Code = "AB`ncode:eq:Q,X"; Value = 'code:eq:Q' }
+                }
+            ) {
+                $script:Version = $Version
+                $script:Units += @{ id = 'OuDeptA0010'; code = $Code; path = '/OuRoot00001/OuCtryA0001/OuHospA0001/OuDeptA0010'; groups = @('NEO_DEPARTMENT') }
+                $result = Resolve-NeoIPCOrgUnit -Endpoint $script:Endpoint -Code $Code -Fields 'name'
+                Get-SortedCode $result.Units | Should -BeExactly @($Code)
+                @($script:Requests | Where-Object { $_.Path -eq 'api/organisationUnits' } | ForEach-Object { $_.Filter[1] }) | Should -BeExactly @("code:like:$Value")
             }
             It 'finds a code of nothing but commas on DHIS2 <Version> among all the units of the hierarchy' -ForEach @(
                 @{ Version = '2.40.12' }
