@@ -450,16 +450,6 @@ function Test-NeoIPCTrackerDate {
     $true
 }
 
-function Get-NeoIPCDhis2BaseUrl {
-    # The address a browser opens the instance at: <scheme>://<host>[:<port>], https by default, the host from
-    # Resolve-NeoIPCDhis2Hostname.
-    [CmdletBinding()]
-    [OutputType([string])]
-    param([string]$Scheme, [string]$Hostname, [Nullable[int]]$Port)
-    $builder = [UriBuilder]::new($(if ($Scheme) { $Scheme } else { 'https' }), (Resolve-NeoIPCDhis2Hostname -Hostname $Hostname), $(if ($null -ne $Port) { $Port } else { -1 }))
-    $builder.Uri.GetLeftPart([UriPartial]::Authority)
-}
-
 function Get-NeoIPCEnrollmentDashboardUrl {
     # Where an enrolment opens in the browser. Up to 2.41 that is Tracker Capture's dashboard. 2.42 and later have no
     # Tracker Capture, and their global shell answers its address with "Unable to find an app for this URL."; they serve

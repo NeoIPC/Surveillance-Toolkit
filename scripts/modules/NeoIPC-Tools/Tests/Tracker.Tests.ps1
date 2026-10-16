@@ -1375,6 +1375,11 @@ InModuleScope 'NeoIPC-Tools' {
                 $r = Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000001'; Scheme = 'http'; Port = 8080 }
                 $r.Output[0].DashboardUrl | Should -BeExactly $Url
             }
+            It 'writes the scheme in lower case and leaves out its default port, as EditUrl does' {
+                Add-FakeCorpus
+                $r = Invoke-Read 'Read-EnrolmentInfo' @{ EnrollmentId = 'EnPat000001'; Scheme = 'HTTPS'; Port = 443 }
+                $r.Output[0].DashboardUrl | Should -BeExactly 'https://dhis2.example.org/apps/capture#/enrollment?enrollmentId=EnPat000001&orgUnitId=OuDeptA0001&programId=PrgCore0001&teiId=TePat000001'
+            }
         }
 
         Context 'a widened read' {

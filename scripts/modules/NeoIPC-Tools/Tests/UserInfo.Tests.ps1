@@ -359,6 +359,11 @@ InModuleScope 'NeoIPC-Tools' {
                 $users = @(Read-UserInfo -Auth $script:Auth -Scheme 'http' -Hostname 'localhost' -Port 8080 -WarningAction SilentlyContinue)
                 ($users | Where-Object { $_.Username -ceq 'alice' }).EditUrl | Should -BeExactly 'http://localhost:8080/apps/user#/users/edit/UsrAlice001'
             }
+
+            It 'writes the scheme in lower case and leaves out its default port, as DashboardUrl does' {
+                $users = @(Read-UserInfo -Auth $script:Auth -Scheme 'HTTPS' -Hostname $script:Host1 -Port 443 -WarningAction SilentlyContinue)
+                ($users | Where-Object { $_.Username -ceq 'alice' }).EditUrl | Should -BeExactly 'https://dhis2.example.org/apps/user#/users/edit/UsrAlice001'
+            }
         }
 
         Describe 'Reading the users' {

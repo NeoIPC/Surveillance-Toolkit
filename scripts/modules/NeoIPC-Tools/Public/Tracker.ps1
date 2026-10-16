@@ -903,7 +903,12 @@ function Read-EventInfo {
             $stageIds = Get-NeoIPCDistinctValue -Value $stageIds
 
             # The data elements of -DataElementCode, by code: a code holding ',' cannot stand in an 'in' list, which splits
-            # on it, so it is looked up by itself.
+            # on it, so it is looked up by itself with 'eq'. Unlike the object lists' filter, which DHIS2 2.42 and later
+            # cut at ',' and ']' (Resolve-NeoIPCOrgUnit), api/metadata takes each '<type>:filter' parameter whole on every
+            # supported version (DefaultMetadataExportService.getParamsFromMap), and an 'in' list loses only its outer
+            # brackets before it splits on ',' (QueryUtils.parseValue), so a code holding ']' stays in the list. An 'eq'
+            # value is all after 'code:eq:' but for trailing ':' characters, which 2.42 and later drop (DefaultQueryParser
+            # splits the filter at ':' and joins the rest), so there a code holding ',' that ends in ':' is not found.
             $dataElementByCode = [System.Collections.Generic.Dictionary[string, string]]::new($ordinal)
             if ($dataElementCodes.Count -gt 0) {
                 $filters = [System.Collections.Generic.List[string]]::new()

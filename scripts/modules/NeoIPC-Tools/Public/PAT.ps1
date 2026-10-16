@@ -132,6 +132,9 @@ function Read-DHIS2PersonalAccessToken {
         if ($PSCmdlet.ParameterSetName -eq 'Id') {
             $found = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
             if ($wanted.Count -eq 1) {
+                # DHIS2 answers a token that does not exist and one the account may not read alike, with 404: it reads a
+                # token by UID through its sharing, and the token's schema demands no read authority, so no account gets
+                # a 403 here that the list read of several ids would not get too.
                 $single = $null
                 try { $single = Invoke-NeoIPCDhis2Get @endpoint -Path "api/apiToken/$($wanted[0])" -Fields $fields -Confirm:$false -WhatIf:$false }
                 catch {

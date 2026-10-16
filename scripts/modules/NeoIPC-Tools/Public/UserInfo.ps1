@@ -58,13 +58,14 @@ The user name for Basic authentication, passed to Resolve-NeoIPCAuth when -Auth 
 is available; the password is then asked for.
 
 .PARAMETER Scheme
-http or https. Default https.
+http or https. Default https. Also the scheme of EditUrl.
 
 .PARAMETER Hostname
-The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
+The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops. Also the
+host of EditUrl.
 
 .PARAMETER Port
-The DHIS2 port. Default: the scheme's.
+The DHIS2 port. Default: the scheme's. Also the port of EditUrl.
 
 .OUTPUTS
 System.Management.Automation.PSCustomObject. One per user, in ordinal order of Username: UserId, Username,
@@ -217,9 +218,7 @@ function Read-UserInfo {
                 Write-Warning "TwoFactorEnabled is empty for every user: DHIS2 $versionText shows no other user's two-factor state. The first patches that do (api/users/twoFactor) are 2.42.6 and 2.43.1."
             }
 
-            $effectiveScheme = if ($Scheme) { $Scheme } else { 'https' }
-            $baseUrl = "${effectiveScheme}://$(Resolve-NeoIPCDhis2Hostname -Hostname $Hostname)"
-            if ($null -ne $Port) { $baseUrl += ":$Port" }
+            $baseUrl = Get-NeoIPCDhis2BaseUrl -Scheme $Scheme -Hostname $Hostname -Port $Port
 
             $records = [System.Collections.Generic.List[object]]::new()
             foreach ($user in $users.Values) {

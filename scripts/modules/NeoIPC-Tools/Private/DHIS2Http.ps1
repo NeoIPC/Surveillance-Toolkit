@@ -19,6 +19,18 @@ function Resolve-NeoIPCDhis2Hostname {
     throw 'No DHIS2 host given: pass -Hostname or set the NEOIPC_DHIS2_HOST environment variable.'
 }
 
+function Get-NeoIPCDhis2BaseUrl {
+    # The address a browser opens the instance at, which every link the module emits starts from:
+    # <scheme>://<host>[:<port>], https by default, the host from Resolve-NeoIPCDhis2Hostname, written as System.Uri
+    # writes the requests' authority: the scheme and host in lower case, an IPv6 address in brackets, and no port where
+    # it is the scheme's default.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([string]$Scheme, [string]$Hostname, [Nullable[int]]$Port)
+    $builder = [UriBuilder]::new($(if ($Scheme) { $Scheme } else { 'https' }), (Resolve-NeoIPCDhis2Hostname -Hostname $Hostname), $(if ($null -ne $Port) { $Port } else { -1 }))
+    $builder.Uri.GetLeftPart([UriPartial]::Authority)
+}
+
 function New-NeoIPCDhis2Uri {
     # Build the request URI from scheme/host/port/path plus pre-built, already-encoded query parts. Shared by
     # the GET / DELETE / POST verbs so the UriBuilder construction (port=-1/null handled cleanly) lives once.
