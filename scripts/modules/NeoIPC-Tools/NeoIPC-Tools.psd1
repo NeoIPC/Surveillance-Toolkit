@@ -30,7 +30,6 @@
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
         # Auth
-        'Resolve-NeoIPCToken'
         'Resolve-NeoIPCAuth'
         'Get-NeoIPCAuthPassword'
         'Test-DHIS2PersonalAccessToken'
@@ -43,6 +42,7 @@
         # QuartoHelpers
         'Get-NeoIPCRenderLogLevel'
         'Test-NeoIPCRenderWarningHead'
+        'Resolve-NeoIPCReportHostname'
         'Invoke-WithNeoIPCAuth'
         'Invoke-QuartoRender'
         'Invoke-Rscript'

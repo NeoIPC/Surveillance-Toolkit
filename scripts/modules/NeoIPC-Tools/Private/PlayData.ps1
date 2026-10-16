@@ -49,7 +49,7 @@ function Get-NeoIPCPlayDataCodeMap {
     param(
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
         [string[]]$OrgUnitCode,
         [string[]]$OrgUnitId

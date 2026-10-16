@@ -1,8 +1,7 @@
 #Requires -Version 7.6
-# Planning for Deploy-NeoIPCMetadata, free of I/O: the DHIS2 version parse, the comparison of a package object with
-# its live counterpart, the write bodies, link deferral, option-group-set staging, children moved between parents,
-# and the hazard gate. Each rule names the DHIS2 behaviour it answers to; docs/metadata-deployment.md describes them
-# together.
+# Planning for Deploy-NeoIPCMetadata, free of I/O: the verified releases, the comparison of a package object with its
+# live counterpart, the write bodies, link deferral, option-group-set staging, children moved between parents, and the
+# hazard gate. Each rule names the DHIS2 behaviour it answers to; docs/metadata-deployment.md describes them together.
 
 # The DHIS2 releases whose source the deployment's rules were read in and on which they were observed, one per line.
 # A later patch of one of these lines counts as verified; an earlier patch or another line is an UnverifiedVersion
@@ -43,37 +42,6 @@ $script:NeoIPCDeployOutsideProgramTypes = [System.Collections.Generic.HashSet[st
 # a package that supplies one has its users written.
 $script:NeoIPCDeployUserScalars = @('username', 'firstName', 'surname')
 $script:NeoIPCDeployUserRefs = @('userRoles', 'organisationUnits', 'dataViewOrganisationUnits', 'teiSearchOrganisationUnits')
-
-function ConvertTo-NeoIPCDhis2Version {
-    # DHIS2's version text (/api/system/info `version`: '2.41.10', '2.42.6.1', '2.43-SNAPSHOT') -> [version], from its
-    # leading numeric components. Throws on text without major.minor, so a misread version never selects a branch.
-    [CmdletBinding()]
-    [OutputType([version])]
-    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
-    if ($Text -notmatch '^(\d+)\.(\d+)(?:\.(\d+))?(?:\.(\d+))?') { throw "Unparsable DHIS2 version '$Text'." }
-    $parts = [System.Collections.Generic.List[string]]::new()
-    $parts.Add($Matches[1]); $parts.Add($Matches[2])
-    $parts.Add($(if ($Matches[3]) { $Matches[3] } else { '0' }))
-    if ($Matches[4]) { $parts.Add($Matches[4]) }
-    [version]($parts -join '.')
-}
-
-function Test-NeoIPCVerifiedDhis2Version {
-    # Whether DHIS2's version text names one of the given verified releases or a later patch of its line. A build with
-    # a suffix ('2.43.1-SNAPSHOT', '2.43.1-RC1') is none of them, whatever its numbers.
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param(
-        [Parameter(Mandatory)][AllowEmptyString()][string]$Text,
-        [Parameter(Mandatory)][version[]]$Release
-    )
-    if ($Text -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') { return $false }
-    $version = ConvertTo-NeoIPCDhis2Version -Text $Text
-    foreach ($v in $Release) {
-        if ($version.Major -eq $v.Major -and $version.Minor -eq $v.Minor) { return $version -ge $v }
-    }
-    $false
-}
 
 function Test-NeoIPCDeployVerifiedVersion {
     # Whether DHIS2's version text names a release the deployment was verified on ($NeoIPCDeployVerifiedReleases).

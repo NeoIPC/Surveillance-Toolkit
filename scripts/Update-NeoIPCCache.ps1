@@ -25,10 +25,29 @@ Refresh the data-element-codes cache.
 Optional token string or path to a file containing the token. If omitted,
 uses environment variable or prompts for credentials.
 
+.PARAMETER Dhis2Scheme
+http or https. Default https.
+
+.PARAMETER Dhis2Hostname
+The DHIS2 host whose caches to refresh. Without it, the NEOIPC_DHIS2_HOST
+environment variable; with neither, the NeoIPC production instance, which
+the report builds default to as well, so that the caches this fills are the
+ones their tab completion reads. Unlike the module's own functions, this
+script reaches the production instance when no host is given.
+
+.PARAMETER Dhis2Port
+The DHIS2 port. Default: the scheme's.
+
+.PARAMETER Dhis2Path
+The API base path the report builds' R code reads from, used here only as
+the last part of the key that keeps each instance's caches apart. The
+department and data-element codes are read from the instance's /api root
+whatever this says, as every read of the NeoIPC-Tools module is.
+
 .EXAMPLE
 .\Update-NeoIPCCache.ps1                      # default: refresh everything
 .\Update-NeoIPCCache.ps1 -Sites               # only site codes
-.\Update-NeoIPCCache.ps1 -DataElements        # only DE codes
+.\Update-NeoIPCCache.ps1 -DataElements        # only data-element codes
 .\Update-NeoIPCCache.ps1 -Dhis2Hostname neoipc-demo.charite.de
 #>
 [CmdletBinding()]
@@ -56,6 +75,9 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
+# The host the report builds default to, so the cache this fills is the one their completion reads. Resolved inside a
+# try, so that a blank host stops the script even where the caller's SilentlyContinue would let the resolver's error pass.
+try { $Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname } catch { $PSCmdlet.ThrowTerminatingError($_) }
 
 # Default: refresh all caches
 if (-not $Sites -and -not $DataElements) {
@@ -70,7 +92,7 @@ if ($Dhis2Scheme)   { $connArgs.Scheme   = $Dhis2Scheme }
 if ($Dhis2Hostname) { $connArgs.Hostname = $Dhis2Hostname }
 if ($Dhis2Port)     { $connArgs.Port     = $Dhis2Port }
 # -Dhis2Path is used only for cache-key partitioning (Get-NeoIPCServerKey
-# above); the readers hardcode 'api/<endpoint>' paths.
+# below); the readers hardcode 'api/<endpoint>' paths.
 
 $serverKey = Get-NeoIPCServerKey -Scheme $Dhis2Scheme -Hostname $Dhis2Hostname -Port $Dhis2Port -Path $Dhis2Path
 $cacheDir = Join-Path $PSScriptRoot '..' 'data' $serverKey

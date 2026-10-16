@@ -22,9 +22,10 @@ function Remove-NeoIPCPatient {
              contradict each other, or are malformed are refused; more than -MaximumCount patients end the run;
           2. checks that the DHIS2 release is one the removal was verified on (see -AllowUnverifiedVersion), and
              resolves by code the program NEOIPC_CORE, the tracked-entity type NEOIPC_PATIENT, the attribute
-             NEOIPC_PATIENT_ID, and the department, which must be a member of the org-unit group NEO_DEPARTMENT; a piped
-             OrgUnitId must name such a department, the same one as -OrgUnitCode if both are given; and a patient ID
-             holding more than one '/' is refused before DHIS2 2.42, which may look it up as another patient ID:
+             NEOIPC_PATIENT_ID, and the department, which must be a member of the org-unit group NEO_DEPARTMENT and lie in
+             your hierarchy (one of your account's data-capture org units, or below one); a piped OrgUnitId must name
+             such a department, the same one as -OrgUnitCode if both are given; and a patient ID
+             holding more than one '/' is refused before DHIS2 2.42.1, which may look it up as another patient ID:
              select such a patient by its UID;
           3. reads each patient with its enrolments and events, and refuses one whose patient ID matches more than one
              patient (DHIS2 compares patient IDs ignoring case, the run exactly), that is registered or owned outside
@@ -180,6 +181,8 @@ function Remove-NeoIPCPatient {
         # under SilentlyContinue or Ignore, PowerShell drops a throw that no try encloses and runs on past it.
         $callerErrorAction = $ErrorActionPreference
         $ErrorActionPreference = 'Stop'
+        # Resolved here, so that the confirmation names the host the requests go to, and a blank host stops the run first.
+        $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
         # With -NeoIpcId or -TrackedEntityId the selection is in the arguments, and piped objects would bind to nothing:
         # the run would delete the arguments' patients and drop the pipeline's with an error per object.
         if ($PSCmdlet.ParameterSetName -ne 'InputObject' -and $MyInvocation.ExpectingInput) {
@@ -250,9 +253,8 @@ function Remove-NeoIPCPatient {
         # ---- 2. version, metadata, and departments -----------------------------------------------------------------------
         # Every read passes -WhatIf:$false: the GET helper asks ShouldProcess, and a -WhatIf given to this cmdlet reaches it,
         # which would leave the preview nothing to read.
-        try { $info = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false }
+        try { $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint }
         catch { Stop-PatientRemoval 'PreflightFailed' "Reading the DHIS2 version failed: $($_.Exception.Message) Nothing was deleted." }
-        $versionText = [string]$info['version']
         if (-not (Test-NeoIPCVerifiedDhis2Version -Text $versionText -Release $script:NeoIPCPatientRemovalVerifiedReleases)) {
             $detail = 'DHIS2 {0} is no release this removal was verified on ({1}, or a later patch of one of their lines).' -f $versionText,
             (($script:NeoIPCPatientRemovalVerifiedReleases | ForEach-Object { "$_" }) -join ', ')
@@ -287,21 +289,20 @@ function Remove-NeoIPCPatient {
         $typeId = [string]$patientType['id']
         $attributeId = [string]$attributes[0]['id']
 
-        # Org-unit roles are told by org-unit group code, not by hierarchy level.
+        # Org-unit roles are told by org-unit group code, not by hierarchy level, and only the caller's hierarchy is looked in.
         $departments = [System.Collections.Generic.Dictionary[string, object]]::new($ordinal)
-        function Read-OrgUnit([string]$Filter) {
-            try { $found = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/organisationUnits' -Filter $Filter -Fields 'id', 'code', 'organisationUnitGroups[code]' -AsHashtable -Confirm:$false -WhatIf:$false }
+        function Read-OrgUnit([string[]]$Code = @(), [string[]]$Id = @()) {
+            try { $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code $Code -Id $Id -Fields 'organisationUnitGroups[code]' }
             catch { Stop-PatientRemoval 'PreflightFailed' "Reading the departments failed: $($_.Exception.Message) Nothing was deleted." }
-            foreach ($ou in @($found['organisationUnits'])) {
-                if ($ou -isnot [System.Collections.IDictionary]) { continue }
+            foreach ($ou in $found.Units) {
                 $groups = @(@($ou['organisationUnitGroups']) | Where-Object { $_ -is [System.Collections.IDictionary] } | ForEach-Object { [string]$_['code'] })
                 [pscustomobject]@{ Id = [string]$ou['id']; Code = [string]$ou['code']; IsDepartment = $groups -ccontains 'NEO_DEPARTMENT' }
             }
         }
         $statedId = $null
         if ($OrgUnitCode) {
-            $hits = @(Read-OrgUnit "code:eq:$OrgUnitCode" | Where-Object { $_.Code -ceq $OrgUnitCode })
-            if ($hits.Count -ne 1) { Stop-PatientRemoval 'DepartmentNotFound' "No org unit has the code '$OrgUnitCode' (codes compare exactly). Nothing was deleted." 'ObjectNotFound' }
+            $hits = @(Read-OrgUnit -Code $OrgUnitCode | Where-Object { $_.Code -ceq $OrgUnitCode })
+            if ($hits.Count -ne 1) { Stop-PatientRemoval 'DepartmentNotFound' "No org unit in your hierarchy has the code '$OrgUnitCode' (codes compare exactly). Nothing was deleted." 'ObjectNotFound' }
             if (-not $hits[0].IsDepartment) {
                 Stop-PatientRemoval 'NotADepartment' "The org unit '$OrgUnitCode' is not a department: it is not in the org-unit group NEO_DEPARTMENT. Nothing was deleted." 'InvalidArgument'
             }
@@ -311,18 +312,18 @@ function Remove-NeoIPCPatient {
         $pipedIds = [System.Collections.Generic.HashSet[string]]::new($ordinal)
         foreach ($item in $items) { if (-not $item.Outcome -and $item.OrgUnitId -and -not $departments.ContainsKey($item.OrgUnitId)) { [void]$pipedIds.Add($item.OrgUnitId) } }
         if ($pipedIds.Count -gt 0) {
-            foreach ($ou in @(Read-OrgUnit ('id:in:[{0}]' -f ($pipedIds -join ',')))) { if ($pipedIds.Contains($ou.Id)) { $departments[$ou.Id] = $ou } }
+            foreach ($ou in @(Read-OrgUnit -Id @($pipedIds))) { if ($pipedIds.Contains($ou.Id)) { $departments[$ou.Id] = $ou } }
         }
         foreach ($item in $items) {
             if ($item.Outcome) { continue }
             $id = if ($item.OrgUnitId) { $item.OrgUnitId } else { $statedId }
             if ($statedId -and $id -cne $statedId) { Set-Refusal $item 'DepartmentMismatch' "The input names the org unit '$id', not the department $OrgUnitCode." }
-            elseif (-not $departments.ContainsKey($id)) { Set-Refusal $item 'NotADepartment' "No org unit has the UID '$id'." }
+            elseif (-not $departments.ContainsKey($id)) { Set-Refusal $item 'NotADepartment' "No org unit in your hierarchy has the UID '$id'." }
             elseif (-not $departments[$id].IsDepartment) { Set-Refusal $item 'NotADepartment' "The org unit $($departments[$id].Code) is not a department: it is not in the org-unit group NEO_DEPARTMENT." }
             else { $item.Department = $departments[$id] }
         }
         foreach ($item in $items) {
-            # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Test-NeoIPCTrackerFilterValue in Private/TrackerDialect.ps1.
+            # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue in Private/TrackerDialect.ps1.
             if (-not $item.Outcome -and $item.Kind -eq 'NeoIpcId' -and -not (Test-NeoIPCTrackerFilterValue -Dialect $dialect -Value $item.Value)) {
                 Set-Refusal $item 'InvalidInput' "DHIS2 $versionText may look a patient ID that holds more than one '/' up as another one; select this patient by its UID."
             }

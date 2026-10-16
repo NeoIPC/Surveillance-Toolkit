@@ -16,6 +16,12 @@ function New-NeoIPCPlayDataPackage {
         metadata/play/demo_data under the repo root.
     .PARAMETER Auth
         Auth hashtable from Resolve-NeoIPCAuth (Token or Basic).
+    .PARAMETER Scheme
+        http or https. Default https.
+    .PARAMETER Hostname
+        The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
+    .PARAMETER Port
+        DHIS2 port. Default none (the scheme's).
     .PARAMETER OrgUnitCode
         Optional department-code filter — include only tracked entities in these departments.
     .PARAMETER OutputPath
@@ -32,7 +38,7 @@ function New-NeoIPCPlayDataPackage {
         [string]$Path,
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null,
         [string[]]$OrgUnitCode,
         [string]$OutputPath,
@@ -134,6 +140,10 @@ function Import-NeoIPCPlayData {
         [switch]$DryRun,
         [switch]$SkipRuleEngine
     )
+    # Resolved here, so that the confirmation names the host the import goes to, and a blank host stops the cmdlet before
+    # it reads or asks anything.
+    try { $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname }
+    catch { $PSCmdlet.ThrowTerminatingError($_) }
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Play-data payload not found: '$Path'." }
         $payload = [System.IO.File]::ReadAllText($Path)
@@ -155,8 +165,7 @@ function Import-NeoIPCPlayData {
         reportMode     = 'FULL'
     }
 
-    # -WhatIf:$false: a read under -WhatIf would return nothing, which leaves no version to choose the dialect by.
-    $versionText = [string]((Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false)['version'])
+    $versionText = Get-NeoIPCDhis2VersionText -Endpoint $endpoint
     $dialect = Get-NeoIPCTrackerDialect -Version (ConvertTo-NeoIPCDhis2Version -Text $versionText)
 
     # Skip the rule engine on the two 2.43.0.x patches whose SupplementaryDataProvider 409s our
@@ -331,6 +340,12 @@ function Export-NeoIPCPlayDataCsv {
         (created if absent).
     .PARAMETER Auth
         Auth hashtable from Resolve-NeoIPCAuth (Token or Basic) for the code-map fetch.
+    .PARAMETER Scheme
+        http or https. Default https.
+    .PARAMETER Hostname
+        The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
+    .PARAMETER Port
+        DHIS2 port. Default none (the scheme's).
     #>
     [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
     param(
@@ -339,7 +354,7 @@ function Export-NeoIPCPlayDataCsv {
         [Parameter(Mandatory)][string]$OutputDirectory,
         [Parameter(Mandatory)][hashtable]$Auth,
         [string]$Scheme = 'https',
-        [string]$Hostname = 'neoipc.charite.de',
+        [string]$Hostname,
         [Nullable[int]]$Port = $null
     )
     $payloads = if ($PSCmdlet.ParameterSetName -eq 'Path') {

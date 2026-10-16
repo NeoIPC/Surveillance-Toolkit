@@ -12,6 +12,15 @@ to feed the `-DataElementCode` argument completer on `Read-EventInfo`.
 .PARAMETER Auth
 Authentication hashtable from Resolve-NeoIPCAuth.
 
+.PARAMETER Scheme
+http or https. Default https.
+
+.PARAMETER Hostname
+The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
+
+.PARAMETER Port
+The DHIS2 port. Default: the scheme's.
+
 .OUTPUTS
 Sorted array of data-element code strings.
 #>

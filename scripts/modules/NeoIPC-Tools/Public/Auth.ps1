@@ -1,41 +1,55 @@
 #Requires -Version 7.6
-# DHIS2 version-1 personal access tokens consist of three parts:
-# 1. The prefix: (d2pat_)
-# 2. A 32-character alphanumeric [A-Za-z0-9] random part. There is no
-#    letter-first constraint, so the first character may be a digit (e.g.
-#    DHIS2's own `d2pat_5xVA...`). The deployed 2.40 line builds it with the
-#    Base64 `getRandomSecureToken(24)` ('-'/'_' replaced by 'x'); a newer
-#    dhis2-core (the 2025 `ApiKeyTokenGenerator`) builds it letter-first —
-#    either way it is alphanumeric, hence the `[a-zA-Z0-9]` first character.
-# 3. The CRC32 checksum: 10 digits, zero-padded (a CRC32 value is at most
-#    4294967295, so `%010d` is always exactly ten digits).
-#
-# The DHIS2 codebase shows that there are also version-2 personal access
-# tokens but since we haven't seen them in the wild yet, we don't support
-# them.
-#
-# See `ApiTokenServiceImpl.initToken` (generation) + `CodeGenerator
-# .getRandomSecureToken` in dhis2-core, and:
-# * https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-242/introduction.html#b-creating-a-token-via-the-api
+# DHIS2 personal access tokens come in two versions, told apart by their prefix (dhis2-core ApiTokenType and
+# ApiKeyTokenGenerator):
+#   1. Version 1: `d2pat_`, 32 alphanumeric characters, and their CRC32 in decimal, zero-padded to 10 digits; 48
+#      characters. Only DHIS2 2.40 and earlier issue it. 2.40 builds the 32 characters from Base64 with '-' and '_'
+#      replaced by 'x', so the first may be a digit. DHIS2 2.41 and later still read this version, but refuse every
+#      token 2.40 issued with 400 "Checksum validation failed" (see Get-NeoIPCDhis2TokenHint).
+#   2. Version 2: `d2p_`, 44 alphanumeric characters, and their CRC32 in Base62 (0-9A-Za-z), zero-padded to 6
+#      characters; 54 characters. DHIS2 2.41 and later issue only this version.
+# The checksum is left to DHIS2, which checks it from 2.41 on; 2.40 checks none.
 
 function Test-DHIS2PersonalAccessToken {
+    <#
+    .SYNOPSIS
+        Test whether a string has the shape of a DHIS2 personal access token, of version 1 or 2.
+    .DESCRIPTION
+        A version-1 token is `d2pat_`, 32 letters or digits, and a 10-digit checksum (48 characters); a version-2 token
+        is `d2p_`, 44 letters or digits, and a 6-character checksum of letters and digits (54 characters). Only ASCII
+        letters and digits count, and the whole string must match, so a token with anything around it, a line break
+        included, does not. The checksum itself is not verified: DHIS2 does that when the token is used.
+
+        DHIS2 2.41 and later refuse every version-1 token, which only DHIS2 2.40 and earlier issued: create a new token
+        on the instance.
+    .PARAMETER Token
+        The string to test.
+    .PARAMETER Invert
+        Return the opposite answer: $true when the string is no token.
+    .PARAMETER Throw
+        Throw instead of returning $false. With -Invert, throw when the string is a token.
+    .OUTPUTS
+        [bool]
+    .EXAMPLE
+        Test-DHIS2PersonalAccessToken (Get-Content ./token.txt -TotalCount 1)
+
+        Tells whether the first line of token.txt is a token.
+    #>
     [CmdletBinding()]
     [OutputType([bool])]
     param(
         [Parameter(Mandatory, Position = 0)]
+        [AllowEmptyString()]
         [string]$Token,
 
         [switch]$Invert,
         [switch]$Throw
     )
 
-    # First char of the random part is intentionally unconstrained (see the
-    # token-format note above): a valid PAT random part may start with a digit.
-    # The pattern is anchored (^...$) so a match can never be a substring of a
-    # longer string, and the checksum tail uses [0-9], not \d: in .NET/PowerShell
-    # \d matches Unicode decimal digits, so [0-9] is the ASCII-exact class (the
-    # same \d -> [0-9] reasoning as the gestational-age regexes in this package).
-    $result = $Token.Length -eq 48 -and $Token -cmatch '^d2pat_[a-zA-Z0-9]{32}[0-9]{10}$'
+    # [0-9] and [A-Za-z0-9] rather than \d and \w, which match Unicode digits and letters in .NET; -cmatch, since a
+    # case-insensitive match lets [A-Za-z] take the Kelvin sign; \A and \z, since $ also matches before a final line break.
+    # NEOIPC-COMPAT(dhis2-version-1-token): the d2pat_ branch; remove once no supported instance runs DHIS2 2.40 or earlier
+    # (/api/system/info version 2.41 or later everywhere), since 2.41 and later refuse every version-1 token 2.40 issued.
+    $result = $Token -cmatch '\A(?:d2pat_[A-Za-z0-9]{32}[0-9]{10}|d2p_[A-Za-z0-9]{44}[A-Za-z0-9]{6})\z'
 
     if ($Invert) {
         $result = -not $result
@@ -51,84 +65,41 @@ function Test-DHIS2PersonalAccessToken {
     return $result
 }
 
-<#
-.SYNOPSIS
-Resolve a DHIS2 API token from multiple sources in priority order.
-
-.DESCRIPTION
-Resolution order:
-  1. Explicit -Token parameter value
-  2. NEOIPC_DHIS2_TOKEN environment variable
-  3. If the resolved value is a file path, reads the first line as the token
-
-When a token is resolved, it is validated against Test-DHIS2PersonalAccessToken.
-
-.PARAMETER Token
-Optional token string or path to a file containing the token.
-#>
-function Resolve-NeoIPCToken {
-    [CmdletBinding()]
-    [OutputType([string])]
-    param(
-        [Parameter(Position = 0)]
-        [string]$Token
-    )
-
-    $candidate = $Token
-    if ([string]::IsNullOrWhiteSpace($candidate)) {
-        $candidate = $env:NEOIPC_DHIS2_TOKEN
-    }
-
-    if ([string]::IsNullOrWhiteSpace($candidate)) {
-        throw 'No DHIS2 token provided. Set -Token <token-or-path> or the NEOIPC_DHIS2_TOKEN environment variable.'
-    }
-
-    # If the candidate is a file path, read the token from it
-    if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-        try {
-            $content = Get-Content -LiteralPath $candidate -TotalCount 1 -Encoding UTF8 -ErrorAction Stop
-            if ([string]::IsNullOrWhiteSpace($content)) {
-                throw "Token file '$candidate' is empty."
-            }
-            $candidate = $content.Trim()
-        }
-        catch [System.Management.Automation.ItemNotFoundException] {
-            throw "Token file '$candidate' not found."
-        }
-        catch {
-            throw "Token file '$candidate' could not be read: $($_.Exception.Message)"
-        }
-    }
-
-    $candidate = $candidate.Trim()
-
-    # Validate PAT format
-    Test-DHIS2PersonalAccessToken $candidate -Throw | Out-Null
-
-    return $candidate
-}
-
-<#
-.SYNOPSIS
-Resolve DHIS2 authentication credentials.
-
-.DESCRIPTION
-Tries token-based auth first (parameter, env var, file), then falls back
-to prompting for username/password if no token is available.
-
-Returns a hashtable with:
-  @{ AuthType = 'Token'; Token = '...' }
-  @{ AuthType = 'Basic'; Username = '...'; Password = <SecureString> }
-
-.PARAMETER Token
-Optional token string or path to a file containing the token.
-
-.PARAMETER UserName
-Optional username for Basic auth. When provided (and no token is available),
-the password prompt is shown without asking for the username first.
-#>
 function Resolve-NeoIPCAuth {
+    <#
+    .SYNOPSIS
+        Resolve the credentials for DHIS2: a personal access token if one is given, else a username and password.
+    .DESCRIPTION
+        Takes the token from -Token or, when -Token is empty, from the environment variable NEOIPC_DHIS2_TOKEN. Either
+        may hold the token itself or the path of a file whose first line is the token; a token of either version is
+        accepted (see Test-DHIS2PersonalAccessToken). A value that is neither a token nor the path of an existing file,
+        an empty file, and a file whose first line holds no token each end the call with an error that names where the
+        value came from, never the value itself.
+
+        With no token at all, it asks for the username (unless -UserName gives it) and the password.
+
+        Returns a hashtable the module's DHIS2 functions take as -Auth:
+          @{ AuthType = 'Token'; Token = '...' }
+          @{ AuthType = 'Basic'; Username = '...'; Password = <SecureString> }
+    .PARAMETER Token
+        A personal access token, or the path of a file whose first line is one. When empty, the environment variable
+        NEOIPC_DHIS2_TOKEN is read instead.
+    .PARAMETER UserName
+        The DHIS2 username for Basic authentication when no token is available; the prompt then asks only for the
+        password.
+    .OUTPUTS
+        [hashtable]
+    .EXAMPLE
+        $auth = Resolve-NeoIPCAuth -Token ./my-token.txt
+
+        Reads the token from the first line of my-token.txt.
+    .EXAMPLE
+        $auth = Resolve-NeoIPCAuth -UserName admin
+
+        Without -Token and NEOIPC_DHIS2_TOKEN, asks for the password of the user admin.
+    #>
     [CmdletBinding()]
+    [OutputType([hashtable])]
     param(
         [Parameter(Position = 0)]
         [string]$Token,
@@ -137,42 +108,14 @@ function Resolve-NeoIPCAuth {
         [string]$UserName
     )
 
-    # Try token first: explicit param -> env var -> file
-    $candidate = $Token
-    if ([string]::IsNullOrWhiteSpace($candidate)) {
-        $candidate = $env:NEOIPC_DHIS2_TOKEN
-    }
-
-    if (-not [string]::IsNullOrWhiteSpace($candidate)) {
-        # If it's a file path, read the token from it
-        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-            try {
-                $content = Get-Content -LiteralPath $candidate -TotalCount 1 -Encoding UTF8 -ErrorAction Stop
-                if ([string]::IsNullOrWhiteSpace($content)) {
-                    throw "Token file '$candidate' is empty."
-                }
-                $candidate = $content.Trim()
-            }
-            catch [System.Management.Automation.ItemNotFoundException] {
-                throw "Token file '$candidate' not found."
-            }
-            catch {
-                throw "Token file '$candidate' could not be read: $($_.Exception.Message)"
-            }
-        }
-
-        $candidate = $candidate.Trim()
-
-        # Validate PAT format
-        Test-DHIS2PersonalAccessToken $candidate -Throw | Out-Null
-
+    $resolved = Read-NeoIPCToken -Token $Token
+    if ($resolved) {
         return @{
             AuthType = 'Token'
-            Token    = $candidate
+            Token    = $resolved
         }
     }
 
-    # No token available -- prompt for username/password
     if ([string]::IsNullOrWhiteSpace($UserName)) {
         $UserName = Read-Host -Prompt 'DHIS2 username'
     }
@@ -188,16 +131,20 @@ function Resolve-NeoIPCAuth {
     }
 }
 
-<#
-.SYNOPSIS
-Get the plaintext password from a Resolve-NeoIPCAuth result.
-
-.DESCRIPTION
-Converts the SecureString password in a Basic auth result to plaintext.
-Returns $null for Token auth.
-#>
 function Get-NeoIPCAuthPassword {
+    <#
+    .SYNOPSIS
+        Get the plaintext password from a Resolve-NeoIPCAuth result.
+    .DESCRIPTION
+        Converts the SecureString password of a Basic auth result to plaintext, for a child process that needs it.
+        Returns $null for Token auth.
+    .PARAMETER Auth
+        The hashtable Resolve-NeoIPCAuth returned.
+    .OUTPUTS
+        [string]
+    #>
     [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory)]
         [hashtable]$Auth

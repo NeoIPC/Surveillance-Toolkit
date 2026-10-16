@@ -13,7 +13,7 @@
     2.43.2 says of the tracked-entity read: the parameter names each version reads (2.40: orgUnit, ouMode, and
     trackedEntity joined with ';', the list under 'instances'; 2.41: those and orgUnits, orgUnitMode, and
     trackedEntities joined with ',', answering 400 to both forms of one; 2.42 and later: only the new names, ignoring
-    the old ones, which widens the read); the attribute filter's unescaping, which before 2.42 puts escaped slashes
+    the old ones, which widens the read); the attribute filter's unescaping, which before 2.42.1 puts escaped slashes
     back in hash order, and its comparison ignoring case; the org-unit match, per program of the type, against the
     program owner or, where that program has no owner for the entity, its registration org unit; and includeDeleted,
     without which soft-deleted entities and children stay hidden. A DELETE import soft-deletes the entity with its
@@ -55,6 +55,8 @@ InModuleScope 'NeoIPC-Tools' {
                 TypeCode       = 'NEOIPC_PATIENT'
                 AttributeId    = 'AttPatId001'
                 OrgUnits       = [System.Collections.Generic.List[object]]::new()
+                # The capture units /api/me names, whose hierarchy the department lookup searches.
+                MeUnits        = [System.Collections.Generic.List[string]]::new([string[]]@('OuRoot00001'))
                 Capture        = [System.Collections.Generic.HashSet[string]]::new([string[]]@('OuDeptA0001', 'OuDeptB0001'), $ordinal)
                 # The programs of the patient type the caller can read, which the org-unit match runs over.
                 TypePrograms   = [System.Collections.Generic.List[string]]::new([string[]]@('PrgCore0001', 'PrgOthr0001'))
@@ -72,9 +74,10 @@ InModuleScope 'NeoIPC-Tools' {
                 ThrowStatus    = $false
                 Unauthorized   = $false
             }
-            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; groups = @('NEO_DEPARTMENT') })
-            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptB0001'; code = 'DEPT_B'; groups = @('NEO_DEPARTMENT') })
-            $script:Fake.OrgUnits.Add(@{ id = 'OuHospX0001'; code = 'HOSP_X'; groups = @('HOSPITAL') })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuRoot00001'; code = 'ROOT'; path = '/OuRoot00001'; groups = @() })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; path = '/OuRoot00001/OuHospX0001/OuDeptA0001'; groups = @('NEO_DEPARTMENT') })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuDeptB0001'; code = 'DEPT_B'; path = '/OuRoot00001/OuHospX0001/OuDeptB0001'; groups = @('NEO_DEPARTMENT') })
+            $script:Fake.OrgUnits.Add(@{ id = 'OuHospX0001'; code = 'HOSP_X'; path = '/OuRoot00001/OuHospX0001'; groups = @('HOSPITAL') })
         }
 
         # A patient with -Enrollments enrolments of -Events events each. Children's ids derive from the patient's UID.
@@ -136,7 +139,7 @@ InModuleScope 'NeoIPC-Tools' {
 
         function Get-FakeVersion { ConvertTo-NeoIPCDhis2Version -Text $script:Fake.Version }
 
-        # An attribute filter as DHIS2 reads it. Before 2.42 (RequestParamUtils / RequestParamsValidator.filterList)
+        # An attribute filter as DHIS2 reads it. Before 2.42.1 (RequestParamUtils / RequestParamsValidator.filterList)
         # every '//' found scanning left to right is taken out, the scan then stepping past the next character; one '/'
         # goes back per pair taken out, at its recorded position, in the iteration order of the java.util.HashMap that
         # recorded the positions: by the position masked by the table size, then by insertion. The table starts at 16
@@ -144,10 +147,10 @@ InModuleScope 'NeoIPC-Tools' {
         # position lands in a bucket that already holds eight; the tree such a bucket turns into from 64 on is not
         # modelled. The rest splits at every ':' that is not escaped, which must leave one operator and one value
         # (DHIS2 also reads two operator-value pairs, which no test sends), and '/,' and '/:' lose their slash. From
-        # 2.42 (FilterParser) '//', '/,', and '/:' lose a slash, in that order.
+        # 2.42.1 (FilterParser) '//', '/,', and '/:' lose a slash, in that order.
         function ConvertFrom-FakeFilter([string]$Filter) {
             $attribute, $rest = $Filter -split ':', 2
-            if ((Get-FakeVersion) -ge [version]'2.42') {
+            if ((Get-FakeVersion) -ge [version]'2.42.1') {
                 return @{ Attribute = $attribute; Value = ($rest -split ':', 2)[1].Replace('//', '/').Replace('/,', ',').Replace('/:', ':') }
             }
             $sb = [System.Text.StringBuilder]::new($Filter)
@@ -277,12 +280,27 @@ InModuleScope 'NeoIPC-Tools' {
                         }
                         return $r
                     }
+                    'api/me' {
+                        return @{ organisationUnits = @($script:Fake.MeUnits | ForEach-Object { $id = $_; @($script:Fake.OrgUnits | Where-Object { $_.id -ceq $id } | ForEach-Object { @{ id = $_.id; path = $_.path } }) }) }
+                    }
                     'api/organisationUnits' {
-                        $f = [string]$Filter[0]
-                        # Looser than DHIS2 on purpose: a code differing in case comes back, and the cmdlet must not take it.
-                        $rows = if ($f.StartsWith('code:eq:')) { $code = $f.Substring(8); @($script:Fake.OrgUnits | Where-Object { $_.code -eq $code }) }
-                        else { $ids = $f.Substring(7).TrimEnd(']') -split ','; @($script:Fake.OrgUnits | Where-Object { $ids -ccontains $_.id }) }
-                        return @{ organisationUnits = @($rows | ForEach-Object { @{ id = $_.id; code = $_.code; organisationUnitGroups = @($_.groups | ForEach-Object { @{ code = $_ } }) } }) }
+                        $rows = @($script:Fake.OrgUnits)
+                        foreach ($f in @($Filter)) {
+                            $property, $operator, $value = ([string]$f) -split ':', 3
+                            $list = @($value.TrimStart('[').TrimEnd(']') -split ',')
+                            $rows = @($rows | Where-Object {
+                                    $row = $_
+                                    switch ("${property}:$operator") {
+                                        'path:like' { $row.path.Contains($value, [System.StringComparison]::Ordinal) }
+                                        # Looser than DHIS2 on purpose: a code differing in case comes back, and the cmdlet must not take it.
+                                        'code:in' { $list -contains $row.code }
+                                        'code:eq' { $row.code -eq $value }
+                                        'id:in' { $list -ccontains $row.id }
+                                        default { throw "The fake does not read the filter '$f'." }
+                                    }
+                                })
+                        }
+                        return @{ organisationUnits = @($rows | ForEach-Object { @{ id = $_.id; code = $_.code; path = $_.path; organisationUnitGroups = @($_.groups | ForEach-Object { @{ code = $_ } }) } }) }
                     }
                     'api/tracker/trackedEntities' { return Get-FakeTrackedEntityList $QueryParameters }
                 }
@@ -412,17 +430,20 @@ InModuleScope 'NeoIPC-Tools' {
             ConvertTo-NeoIPCTrackerFilterValue -Value 'a/b:c,d' | Should -BeExactly 'a//b/:c/,d'
         }
         It 'lets DHIS2 <Version> look up <Value>: <Expected>' -ForEach @(
-            # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Private/TrackerDialect.ps1.
+            # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Private/TrackerDialect.ps1.
             @{ Version = '2.40.12'; Value = 'x/2:a,b'; Expected = $true }
             @{ Version = '2.40.12'; Value = 'A//1'; Expected = $false }
             @{ Version = '2.41.10'; Value = 'DE-BER-01/2024-0000001/b'; Expected = $false }
+            # 2.42.0 still parses filters with 2.41's RequestParamsValidator.filterList; FilterParser came with 2.42.1.
+            @{ Version = '2.42.0'; Value = 'DE-BER-01/2024-0000001/b'; Expected = $false }
+            @{ Version = '2.42.1'; Value = 'DE-BER-01/2024-0000001/b'; Expected = $true }
             @{ Version = '2.42.6'; Value = 'DE-BER-01/2024-0000001/b'; Expected = $true }
             @{ Version = '2.43.2'; Value = 'A//1'; Expected = $true }
         ) {
             Test-NeoIPCTrackerFilterValue -Dialect (Get-NeoIPCTrackerDialect -Version $Version) -Value $Value | Should -Be $Expected
         }
         Context 'the fake DHIS2 reads a filter back the way the source does' {
-            # A value with two slashes comes back changed before 2.42 (the cause of the check above); one slash, ':', and
+            # A value with two slashes comes back changed before 2.42.1 (the cause of the check above); one slash, ':', and
             # ',' come back exactly on every version.
             It 'reads <Value> back on DHIS2 <Version> as <ReadAs>' -ForEach @(
                 @{ Version = '2.40.12'; Value = 'x/2:a,b'; ReadAs = 'x/2:a,b' }
@@ -432,6 +453,8 @@ InModuleScope 'NeoIPC-Tools' {
                 # Nine positions 16 apart share a bucket of the table of 16, which then doubles to 32.
                 @{ Version = '2.41.10'; Value = (('x' * 16) + '/') * 9
                     ReadAs = ((('x' * 20), ('x' * 12), ('x' * 19), ('x' * 13), ('x' * 18), ('x' * 14), ('x' * 17), ('x' * 15), ('x' * 16)) -join '/') + '/' }
+                @{ Version = '2.42.0'; Value = 'DE-BER-01/2024-0000001/b'; ReadAs = 'DE-BER-012/024-0000001/b' }
+                @{ Version = '2.42.1'; Value = 'DE-BER-01/2024-0000001/b'; ReadAs = 'DE-BER-01/2024-0000001/b' }
                 @{ Version = '2.42.6'; Value = 'DE-BER-01/2024-0000001/b'; ReadAs = 'DE-BER-01/2024-0000001/b' }
                 @{ Version = '2.43.2'; Value = 'A//1:x,y'; ReadAs = 'A//1:x,y' }
             ) {
@@ -441,7 +464,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
     }
 
-    Describe 'Get-NeoIPCTrackerDialect: the tracked-entity read names' {
+    Describe 'Get-NeoIPCTrackerDialect: the list read names' {
         It 'names the org units, the tracked entities, and their separator of DHIS2 <Version>' -ForEach @(
             # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
             @{ Version = '2.40.12'; OrgUnits = 'orgUnit'; TrackedEntities = 'trackedEntity'; Separator = ';' }
@@ -452,6 +475,31 @@ InModuleScope 'NeoIPC-Tools' {
             $q.OrgUnits | Should -BeExactly $OrgUnits
             $q.TrackedEntities | Should -BeExactly $TrackedEntities
             $q.Separator | Should -BeExactly $Separator
+        }
+        It 'names the enrolment read''s org units, enrolments, and separator of DHIS2 <Version>' -ForEach @(
+            # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+            @{ Version = '2.40.12'; OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; IgnoresFilters = $true }
+            @{ Version = '2.41.10'; OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; IgnoresFilters = $false }
+            @{ Version = '2.42.0'; OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; IgnoresFilters = $false }
+            @{ Version = '2.43.2'; OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; IgnoresFilters = $false }
+        ) {
+            $q = (Get-NeoIPCTrackerDialect -Version $Version).EnrollmentQuery
+            $q.OrgUnits | Should -BeExactly $OrgUnits
+            $q.Enrollments | Should -BeExactly $Enrollments
+            $q.Separator | Should -BeExactly $Separator
+            $q.UidReadIgnoresFilters | Should -Be $IgnoresFilters
+        }
+        It 'names the event read''s events with their separator, and its enrolments, of DHIS2 <Version>' -ForEach @(
+            # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): see Private/TrackerDialect.ps1.
+            @{ Version = '2.40.12'; Events = 'event'; EventSeparator = ';' }
+            @{ Version = '2.41.10'; Events = 'events'; EventSeparator = ',' }
+            @{ Version = '2.42.0'; Events = 'events'; EventSeparator = ',' }
+            @{ Version = '2.43.2'; Events = 'events'; EventSeparator = ',' }
+        ) {
+            $q = (Get-NeoIPCTrackerDialect -Version $Version).EventQuery
+            $q.Events | Should -BeExactly $Events
+            $q.EventSeparator | Should -BeExactly $EventSeparator
+            $q.Enrollments | Should -BeExactly 'enrollments'
         }
     }
 
@@ -490,9 +538,10 @@ InModuleScope 'NeoIPC-Tools' {
             @(Get-FakeRequest 'GET').Count | Should -Be 0
         }
         It 'refuses before any request a filter value DHIS2 <Version> would look up as another value' -ForEach @(
-            # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Private/TrackerDialect.ps1.
+            # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Private/TrackerDialect.ps1.
             @{ Version = '2.40.12' }
             @{ Version = '2.41.10' }
+            @{ Version = '2.42.0' }
         ) {
             New-FakeInstance $Version; Set-FakeMock
             $value = 'DE-BER-01/2024-0000001/b'
@@ -995,6 +1044,13 @@ InModuleScope 'NeoIPC-Tools' {
                 { Invoke-Removal @{ OrgUnitCode = $Code; NeoIpcId = 'A-1' } } | Should -Throw
                 @(Get-FakeRequest 'GET' -Path 'api/tracker/trackedEntities').Count | Should -Be 0
             }
+            It 'looks for the department of -OrgUnitCode only in your hierarchy' {
+                $script:Fake.MeUnits.Clear()
+                $script:Fake.MeUnits.Add('OuDeptB0001')
+                { Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' } } | Should -Throw "*No org unit in your hierarchy has the code 'DEPT_A'*"
+                @(Get-FakeRequest 'GET' -Path 'api/organisationUnits' | ForEach-Object { $_.Filter[0] }) | Should -Be @('path:like:OuDeptB0001')
+                @(Get-FakeRequest 'GET' -Path 'api/tracker/trackedEntities').Count | Should -Be 0
+            }
             It 'ends the run when NEOIPC_CORE registers another type' {
                 $script:Fake.TypeCode = 'OTHER'
                 { Invoke-Removal @{ OrgUnitCode = 'DEPT_A'; NeoIpcId = 'A-1' } } | Should -Throw '*NEOIPC_PATIENT*'
@@ -1020,7 +1076,7 @@ InModuleScope 'NeoIPC-Tools' {
                 $script:Fake.Patients['TePat000001']['deleted'] | Should -BeFalse
             }
             It 'refuses on DHIS2 <Version> the patient ID <NeoIpcId>, without looking it up' -ForEach @(
-                # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Private/TrackerDialect.ps1.
+                # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Private/TrackerDialect.ps1.
                 @{ Version = '2.40.12'; NeoIpcId = 'A//1' }
                 @{ Version = '2.40.12'; NeoIpcId = 'DE-BER-01/2024-0000001/b' }
                 @{ Version = '2.41.10'; NeoIpcId = 'A//1' }
@@ -1123,7 +1179,7 @@ InModuleScope 'NeoIPC-Tools' {
             It 'refuses a piped record whose OrgUnitId <Case>, and sends nothing for it' -ForEach @(
                 @{ Case = 'names another department than -OrgUnitCode'; OrgUnitId = 'OuDeptB0001'; OrgUnitCode = 'DEPT_A'; Reason = 'DepartmentMismatch'; Message = "*'OuDeptB0001', not the department DEPT_A*" }
                 @{ Case = 'names an org unit that is no department'; OrgUnitId = 'OuHospX0001'; OrgUnitCode = $null; Reason = 'NotADepartment'; Message = '*HOSP_X is not a department*' }
-                @{ Case = 'names no org unit'; OrgUnitId = 'OuNone00001'; OrgUnitCode = $null; Reason = 'NotADepartment'; Message = "*No org unit has the UID 'OuNone00001'*" }
+                @{ Case = 'names no org unit'; OrgUnitId = 'OuNone00001'; OrgUnitCode = $null; Reason = 'NotADepartment'; Message = "*No org unit in your hierarchy has the UID 'OuNone00001'*" }
             ) {
                 Add-FakePatient -Uid 'TePat000001' -NeoIpcId 'A-1' -OrgUnit $OrgUnitId
                 Add-FakePatient -Uid 'TePat000002' -NeoIpcId 'A-2'
@@ -1325,7 +1381,8 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
         switch (`$Path) {
             'api/system/info' { return @{ version = '2.43.2' } }
             'api/metadata' { return @{ programs = @(@{ id = 'PrgCore0001'; code = 'NEOIPC_CORE'; trackedEntityType = @{ id = 'TetPatnt001'; code = 'NEOIPC_PATIENT' } }); trackedEntityAttributes = @(@{ id = 'AttPatId001'; code = 'NEOIPC_PATIENT_ID' }) } }
-            'api/organisationUnits' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }) } }
+            'api/me' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; path = '/OuDeptA0001' }) } }
+            'api/organisationUnits' { return @{ organisationUnits = @(@{ id = 'OuDeptA0001'; code = 'DEPT_A'; path = '/OuDeptA0001'; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }) } }
             'api/tracker/trackedEntities' {
                 return @{ trackedEntities = @(([string]`$QueryParameters['trackedEntities']) -split ',' | ForEach-Object {
                             [ordered]@{ trackedEntity = `$_; trackedEntityType = 'TetPatnt001'; orgUnit = 'OuDeptA0001'; deleted = `$script:Committed.Contains(`$_); attributes = @()

@@ -181,6 +181,8 @@ function Deploy-NeoIPCMetadata {
     # Every refusal below, and every failure inside a helper, ends the deployment whatever the caller's error
     # preference: under SilentlyContinue or Ignore, PowerShell drops a throw that no try encloses and runs on past it.
     $ErrorActionPreference = 'Stop'
+    # Resolved here, so that the confirmation and the summary's Target name the host the requests go to.
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
     $ordinal = [System.StringComparer]::Ordinal
     $endpoint = @{ Auth = $Auth; Scheme = $Scheme; Hostname = $Hostname }
     if ($null -ne $Port) { $endpoint['Port'] = $Port }
@@ -380,9 +382,8 @@ function Deploy-NeoIPCMetadata {
     # Every read passes -WhatIf:$false: the GET helper asks ShouldProcess, and a -WhatIf given to this cmdlet reaches
     # it (-Confirm:$false does not stop that), which would leave a dry run nothing to plan with. A read that fails ends
     # the run like any other failure, with the summary.
-    try { $info = Invoke-NeoIPCDhis2Get @endpoint -Path 'api/system/info' -Fields 'version' -AsHashtable -Confirm:$false -WhatIf:$false }
+    try { $summary.Dhis2Version = Get-NeoIPCDhis2VersionText -Endpoint $endpoint }
     catch { Exit-Deployment "Reading the DHIS2 version failed: $($_.Exception.Message)" }
-    $summary.Dhis2Version = [string]$info['version']
     $version = ConvertTo-NeoIPCDhis2Version -Text $summary.Dhis2Version
     Write-Host ("Deploying metadata to {0} (DHIS2 {1}){2}{3}" -f $target, $summary.Dhis2Version,
         $(if ($DryRun) { ', dry run' } else { '' }), $(if ($SyntheticInstance) { ', synthetic instance' } else { '' }))

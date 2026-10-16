@@ -604,11 +604,13 @@ function Import-NeoIPCMetadata {
 
         The summary object carries DryRun, HttpStatusCode (transport), Status (OK / WARNING / ERROR), the create/
         update/delete/ignore/total counts, the per-type reports, ErrorMessage (the top-level WebMessage
-        message when the body carries no structured report — e.g. a Hibernate persistence error), and Raw (the
-        full parsed response) for callers that need the conflict detail. A non-OK status is reported, not thrown:
-        the caller decides how to react (Deploy-NeoIPCMetadata fails on any status but OK). The body is read
-        whatever the transport code, because DHIS2 answers an import with conflicts HTTP 409 while still returning
-        the full report.
+        message when the body carries no structured report — e.g. a Hibernate persistence error, or the HTTP 400
+        "Checksum validation failed" with which DHIS2 2.41 and later refuse a token 2.40 issued, which ErrorMessage
+        follows with what to do about the token), and Raw (the full parsed response) for callers that need the
+        conflict detail.
+        A non-OK status is reported, not thrown: the caller decides how to react (Deploy-NeoIPCMetadata fails on any
+        status but OK). The body is read whatever the transport code, because DHIS2 answers an import with conflicts
+        HTTP 409 while still returning the full report.
     .PARAMETER Path
         Path to a metadata package JSON file to import.
     .PARAMETER Json
@@ -641,6 +643,10 @@ function Import-NeoIPCMetadata {
         [ValidateSet('ALL', 'NONE')][string]$AtomicMode = 'ALL',
         [switch]$DryRun
     )
+    # Resolved here, so that the confirmation names the host the import goes to, and a blank host stops the cmdlet before
+    # it asks anything.
+    try { $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname }
+    catch { $PSCmdlet.ThrowTerminatingError($_) }
     if ($PSCmdlet.ParameterSetName -eq 'Path') {
         if (-not (Test-Path -LiteralPath $Path)) { throw "Metadata package not found: '$Path'." }
         $payload = [System.IO.File]::ReadAllText($Path)
@@ -693,6 +699,9 @@ function Import-NeoIPCMetadata {
         (@($m, $dm) | Where-Object { $_ }) -join ' / '
     }
     else { $null }
+    # The POST is the only request, so DHIS2's refusal of the token's checksum arrives here rather than in a GET's error.
+    $hint = Get-NeoIPCDhis2TokenHint -StatusCode ([int]$response.StatusCode) -Message $errorMessage -Auth $Auth
+    if ($hint) { $errorMessage = "$($errorMessage.TrimEnd('.')). $hint" }
 
     Write-Verbose ("metadata import ({0}): HTTP {1}, status {2}{3}{4}." -f `
         ($(if ($DryRun) { 'dry-run' } else { 'commit' })), $response.StatusCode, $status,

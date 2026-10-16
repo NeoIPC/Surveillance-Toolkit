@@ -90,6 +90,37 @@ function Test-NeoIPCRenderWarningHead {
 
 <#
 .SYNOPSIS
+The DHIS2 host a report build reads from.
+
+.DESCRIPTION
+The given host, else the NEOIPC_DHIS2_HOST environment variable, else the
+NeoIPC production host: the order in which the reports' R scripts resolve
+theirs (get_connection_options in reports/common/helpers.R). A build resolves
+its host once and passes it to every part, its R and Quarto children
+included, so the department list and the report data come from the same
+instance. The report tooling is the only place with a default host; the
+module's DHIS2 functions have none. A host given as white space only is an
+error rather than none, since the build would otherwise read from another
+instance than the one it was given.
+
+.PARAMETER Hostname
+The host given to the build, or nothing.
+#>
+function Resolve-NeoIPCReportHostname {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([string]$Hostname)
+    if (-not [string]::IsNullOrEmpty($Hostname)) {
+        if ([string]::IsNullOrWhiteSpace($Hostname)) { throw 'The DHIS2 host given holds only white space, which names no host.' }
+        return $Hostname.Trim()
+    }
+    $fromEnvironment = $env:NEOIPC_DHIS2_HOST
+    if (-not [string]::IsNullOrWhiteSpace($fromEnvironment)) { return $fromEnvironment.Trim() }
+    'neoipc.charite.de'
+}
+
+<#
+.SYNOPSIS
 Run a script block with NeoIPC auth environment variables scoped.
 
 .DESCRIPTION

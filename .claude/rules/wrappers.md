@@ -15,7 +15,7 @@ Every script file and exported function uses an approved PowerShell verb (`Get-V
 - The PowerShell wrappers pass parameters to Quarto via `-P key:value` flags
 - `dhis2_connection_options()` / `dhis2_dataset_options()` in neoipcr coerce string inputs internally — single source of truth for types and defaults
 - Casing per layer: PowerShell `PascalCase` → Quarto document `camelCase` → R `snake_case`, mapped once at each boundary
-- Defaults defined only in neoipcr functions, not duplicated in PowerShell scripts or Quarto document YAML — **except the DHIS2 host**: neoipcr, a public library, defaults to no deployment's host, so the production host default lives in `reports/common/helpers.R::get_connection_options()` (used by every report R entry point). Pass `--host` / `-P dhis2Hostname` to override it.
+- Defaults defined only in neoipcr functions, not duplicated in PowerShell scripts or Quarto document YAML — **except the DHIS2 host**: neoipcr, a public library, defaults to no deployment's host, so the production host default lives in `reports/common/helpers.R::get_connection_options()` (used by every report R entry point). Its PowerShell side is the NeoIPC-Tools function `Resolve-NeoIPCReportHostname`, which the `Build-*.ps1` scripts and `scripts/Update-NeoIPCCache.ps1` use and a module test (`DHIS2Http.Tests.ps1`) holds equal to `helpers.R`'s `NEOIPC_PRODUCTION_DHIS2_HOST`: one default, written in each language. Pass `--host` / `-P dhis2Hostname` to override it.
 
 ### Auth Flow
 

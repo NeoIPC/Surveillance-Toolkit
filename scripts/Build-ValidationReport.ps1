@@ -23,6 +23,11 @@ or password, any '?' or '#', which begins a query or fragment, or any whitespace
 The report refuses any other value outside this shape, such as one with a bracketed host such as an IPv6
 literal. No refusal repeats the value.
 
+.PARAMETER Dhis2Path
+The API base path the report's R code reads the data from, and the last part of the key that keeps each
+instance's tab-completion cache apart. The site list is read from the instance's /api root whatever this
+says, as every read of the NeoIPC-Tools module is.
+
 .PARAMETER IncludeUnusedValidationExceptions
 Add an appendix listing the records of the -ValidationExceptionFile list for the report's departments that
 match no record, or match one but exempt nothing, for the list's upkeep. The appendix names patients and is
@@ -47,7 +52,7 @@ param(
         Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
         $serverKey = Get-NeoIPCServerKey `
             -Scheme $fakeBoundParameters['Dhis2Scheme'] `
-            -Hostname $fakeBoundParameters['Dhis2Hostname'] `
+            -Hostname (Resolve-NeoIPCReportHostname -Hostname $fakeBoundParameters['Dhis2Hostname']) `
             -Port $fakeBoundParameters['Dhis2Port'] `
             -Path $fakeBoundParameters['Dhis2Path']
         $cacheFile = Join-Path $PSScriptRoot '..' 'data' $serverKey 'site-codes.txt'
@@ -119,6 +124,9 @@ param(
 )
 
 Import-Module (Join-Path $PSScriptRoot 'modules' 'NeoIPC-Tools') -Force -Verbose:$false
+# One host for every part of the build, the department list and the report data alike. Resolved inside a try, so
+# that a blank host stops the build even where the caller's SilentlyContinue would let the resolver's error pass.
+try { $Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname } catch { $PSCmdlet.ThrowTerminatingError($_) }
 
 # -Dhis2PublicBaseUrl is checked before anything else runs: authentication can
 # prompt for credentials, -OutputDir is created, the build report records the
@@ -204,7 +212,6 @@ if (-not $isCombined) {
     if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
     if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
     if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
-    if ($Dhis2Path) { $deptArgs.Path = $Dhis2Path }
     $siteCodes = Get-NeoIPCDepartments @deptArgs
 
     if (-not $siteCodes -or $siteCodes.Count -eq 0) {

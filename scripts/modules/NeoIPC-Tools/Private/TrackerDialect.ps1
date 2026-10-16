@@ -3,13 +3,22 @@
 
 function Get-NeoIPCTrackerDialect {
     # The parameters a tracker list read takes on a DHIS2 version, and the key its response lists the items under.
-    # 2.41 renamed the org-unit mode and paging parameters, the tracked-entity read's org-unit and tracked-entity
-    # parameters (with ',' in place of ';' between their values), and the list key; 2.40 answers the new names with a
-    # silently widened or paged read, and 2.42 ignores the old names, so a read in the wrong dialect widens rather than
-    # fails.
+    # 2.41 renamed the org-unit mode and paging parameters, the list reads' org-unit and UID parameters (with ',' in
+    # place of ';' between their values), and the list key; 2.41 reads both name sets, and 2.42 binds only the new ones.
+    # DHIS2 ignores a parameter name it does not know, on every version, so a read in the wrong dialect does not fail
+    # cleanly: 2.40 refuses a tracked-entity or enrolment read whose org units come only in the new names (409, no org
+    # unit) and widens or pages an event read, and 2.42 widens a read in the old names, or pages it where only the
+    # paging switch was old. On every version the event read takes one org unit, tracked entity, and program stage, the
+    # enrolment read one tracked entity, and the event read's enrolment list is separated by ','; the dates keep their
+    # names. A single-value parameter given a joined list answers 400.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][version]$Version)
+    $enrollmentNames = @{ TrackedEntity = 'trackedEntity'; EnrolledAfter = 'enrolledAfter'; EnrolledBefore = 'enrolledBefore'; UpdatedAfter = 'updatedAfter' }
+    $eventNames = @{
+        OrgUnit = 'orgUnit'; TrackedEntity = 'trackedEntity'; ProgramStage = 'programStage'; Enrollments = 'enrollments'
+        OccurredAfter = 'occurredAfter'; OccurredBefore = 'occurredBefore'; UpdatedAfter = 'updatedAfter'; UpdatedBefore = 'updatedBefore'
+    }
     if ($Version -lt [version]'2.41') {
         # NEOIPC-COMPAT(dhis2-2.40-tracker-dialect): remove once no supported instance runs 2.40 (/api/system/info
         # version 2.41 or later everywhere).
@@ -18,7 +27,17 @@ function Get-NeoIPCTrackerDialect {
             Paging                = @{ skipPaging = 'true' }
             ListKey               = @{ events = 'instances'; enrollments = 'instances'; trackedEntities = 'instances' }
             TrackedEntityQuery    = [pscustomobject]@{ OrgUnits = 'orgUnit'; TrackedEntities = 'trackedEntity'; Separator = ';' }
-            # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Test-NeoIPCTrackerFilterValue.
+            # An enrolment read by UID takes no other filter on 2.40: DHIS2 reads each listed enrolment and ignores
+            # the program, org unit, and the rest (TrackerEnrollmentsExportController), and refuses the whole read
+            # with 409 when the account may not read one of them. An enrolment read by query carries no events,
+            # however the fields ask (AbstractEnrollmentService.getEnrollments maps each with EnrollmentParams.FALSE);
+            # one read by UID does. A read by query without org units answers an account without the authority ALL
+            # that has data-view but no data-capture org units with an empty list rather than a refusal
+            # (DefaultProgramInstanceService), and a read by UID refuses it each enrolment.
+            EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnit'; Enrollments = 'enrollment'; Separator = ';'; UidReadIgnoresFilters = $true; QueryReadOmitsEvents = $true; EmptyWithoutCaptureUnits = $true } + $enrollmentNames)
+            # 'event' drops a value that is no UID instead of refusing it; 'enrollments' is a set Spring binds, so ','.
+            EventQuery            = [pscustomobject](@{ Events = 'event'; EventSeparator = ';' } + $eventNames)
+            # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue.
             RestoresFilterSlashes = $false
         }
     }
@@ -28,8 +47,10 @@ function Get-NeoIPCTrackerDialect {
         Paging                = @{}
         ListKey               = @{ events = 'events'; enrollments = 'enrollments'; trackedEntities = 'trackedEntities' }
         TrackedEntityQuery    = [pscustomobject]@{ OrgUnits = 'orgUnits'; TrackedEntities = 'trackedEntities'; Separator = ',' }
-        # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): see Test-NeoIPCTrackerFilterValue.
-        RestoresFilterSlashes = $Version -ge [version]'2.42'
+        EnrollmentQuery       = [pscustomobject](@{ OrgUnits = 'orgUnits'; Enrollments = 'enrollments'; Separator = ','; UidReadIgnoresFilters = $false; QueryReadOmitsEvents = $false; EmptyWithoutCaptureUnits = $false } + $enrollmentNames)
+        EventQuery            = [pscustomobject](@{ Events = 'events'; EventSeparator = ',' } + $eventNames)
+        # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): see Test-NeoIPCTrackerFilterValue.
+        RestoresFilterSlashes = $Version -ge [version]'2.42.1'
     }
 }
 
@@ -68,13 +89,14 @@ function ConvertTo-NeoIPCTrackerFilterValue {
 }
 
 function Test-NeoIPCTrackerFilterValue {
-    # Whether DHIS2 reads an attribute-filter value back as ConvertTo-NeoIPCTrackerFilterValue sent it. Before 2.42 the
-    # filter parser (RequestParamUtils.filterList on 2.40, RequestParamsValidator.filterList on 2.41) takes every
-    # escaped slash out, skipping the second of two adjacent ones, and puts the slashes back in java.util.HashMap order
-    # rather than in position order, so a value holding more than one '/' can be looked up as another value; a single
-    # '/' comes back exactly. 2.42 replaced that parser with one that unescapes in order.
-    # NEOIPC-COMPAT(dhis2-pre-2.42-filter-escape): remove once no supported instance runs a release before 2.42
-    # (/api/system/info version 2.42 or later everywhere).
+    # Whether DHIS2 reads an attribute-filter value back as ConvertTo-NeoIPCTrackerFilterValue sent it. Before 2.42.1
+    # the filter parser (RequestParamUtils.filterList on 2.40, RequestParamsValidator.filterList on 2.41 and 2.42.0)
+    # takes every escaped slash out, skipping the second of two adjacent ones, and puts the slashes back in
+    # java.util.HashMap order rather than in position order, so a value holding more than one '/' can be looked up as
+    # another value; a single '/' comes back exactly. 2.42.1 replaced that parser with one that unescapes in order
+    # (FilterParser).
+    # NEOIPC-COMPAT(dhis2-pre-2.42.1-filter-escape): remove once no supported instance runs a release before 2.42.1
+    # (/api/system/info version 2.42.1 or later everywhere).
     [CmdletBinding()]
     [OutputType([bool])]
     param([Parameter(Mandatory)]$Dialect, [Parameter(Mandatory)][string]$Value)
@@ -88,7 +110,7 @@ function Get-NeoIPCTrackedEntityList {
     # at a time), which DHIS2 looks for within the caller's data-capture org units, and on 2.43 for a superuser in every
     # org unit. CAPTURE always counts as a search inside the capture scope, where the type's maximum search result does
     # not apply. Every returned entity is checked against the request, and one the request did not ask for makes the
-    # read throw, since 2.42 and later ignore a parameter name they do not know rather than refuse it.
+    # read throw, since DHIS2 ignores a parameter name it does not know rather than refuse it.
     [CmdletBinding()]
     [OutputType([object[]])]
     param(
@@ -108,7 +130,7 @@ function Get-NeoIPCTrackedEntityList {
     if ($OrgUnitMode -eq 'CAPTURE' -and $OrgUnitId) { throw 'A CAPTURE tracked-entity read takes no org unit; DHIS2 2.41 and later refuse one.' }
     if ([bool]$AttributeId -ne [bool]$AttributeValue) { throw 'An attribute filter needs both the attribute and the value.' }
     if ($AttributeId -and -not (Test-NeoIPCTrackerFilterValue -Dialect $Dialect -Value $AttributeValue)) {
-        throw "DHIS2 before 2.42 may look the value '$AttributeValue' up as another value: it holds more than one '/'."
+        throw "DHIS2 before 2.42.1 may look the value '$AttributeValue' up as another value: it holds more than one '/'."
     }
     $ids = @($TrackedEntityId | Where-Object { $_ })
     foreach ($id in @($ids + @($TrackedEntityTypeId, $OrgUnitId, $AttributeId) | Where-Object { $_ })) {
