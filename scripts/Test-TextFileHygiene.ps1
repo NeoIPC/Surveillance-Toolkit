@@ -411,6 +411,17 @@ $unusable = foreach ($repo in $repoList) {
         [pscustomobject]@{ Repo = $repo; Reason = 'the directory does not exist' }
         continue
     }
+    # A declared submodule that is not checked out is an empty directory inside the superproject, so git run
+    # there answers for the superproject: it enumerates without error, and the sweep would count the
+    # superproject's paths as the submodule's. Only a directory at the top level of its own repository is a
+    # checked-out submodule.
+    if ($repo -ne $rootPath) {
+        $prefix = & git -C $repo rev-parse --show-prefix 2>$null
+        if ($LASTEXITCODE -eq 0 -and $prefix) {
+            [pscustomobject]@{ Repo = $repo; Reason = 'not checked out: git there answers for the superproject' }
+            continue
+        }
+    }
     # `--eol`, not a bare `ls-files`: this preflight exists to establish that the sweep below can enumerate,
     # and the sweep runs `git ls-files --eol` (see Get-EolRow), which inspects no exit code of its own. Prove
     # the guarantee with the command that will actually be used, so the two are about the same thing by
@@ -431,7 +442,14 @@ if ($unusable) {
     if ($unusable.Repo -contains $rootPath) {
         Write-Host "'$rootPath' is not a usable git working tree, so it has no tracked files to check." -ForegroundColor DarkGray
     } else {
-        Write-Host "Check the submodules out first: git submodule update --init -- $SubmodulePrefix" -ForegroundColor DarkGray
+        # Scoped to what this gate actually sweeps, and to the submodules not checked out where it knows them:
+        # `update` also moves every checked-out submodule it is given to its recorded commit, off the branch it
+        # is on, and a bare `--init` would also clone the third-party upstream checkouts this gate deliberately
+        # excludes.
+        $notCheckedOut = @($unusable | Where-Object { $_.Reason -like 'not checked out*' } |
+                ForEach-Object { [System.IO.Path]::GetRelativePath($rootPath, $_.Repo) -replace '\\', '/' })
+        $paths = if ($notCheckedOut) { $notCheckedOut -join ' ' } else { $SubmodulePrefix }
+        Write-Host "Check the submodules out first: git submodule update --init -- $paths" -ForegroundColor DarkGray
     }
     exit 1
 }
