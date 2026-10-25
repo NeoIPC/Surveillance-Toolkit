@@ -201,7 +201,7 @@ environment variable, and with neither it stops: the module has no built-in
 host, so nothing reaches an instance by omission. A `-Hostname` of white space
 only is an error too, never a reason to take the variable's host. The cmdlets
 that write or delete (`Import-NeoIPCMetadata`, `Deploy-NeoIPCMetadata`,
-`Import-NeoIPCPlayData`, `Remove-NeoIPCPatient`,
+`Import-NeoIPCPlayData`, `Add-NeoIPCPartnerSite`, `Remove-NeoIPCPatient`,
 `Remove-DHIS2PersonalAccessToken`, and `Clear-DHIS2PersonalAccessTokens`)
 require `-Hostname` itself, so that each call names its target, and name that
 host when they ask for confirmation. The report
@@ -861,15 +861,8 @@ then object key ordinal, then token order — independent of how the package ord
 objects), so re-running the refresh produces a minimal, reviewable diff.
 
 ```powershell
-# Canonical refresh of the committed component, from the assembled common-base package.
-$overlay = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-pot-' + [guid]::NewGuid())
-New-Item -ItemType Directory -Path $overlay | Out-Null
-'id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing' | Set-Content (Join-Path $overlay 'organisationUnits.csv')
-'username,firstName,surname'        | Set-Content (Join-Path $overlay 'users.csv')
-'username,role'                     | Set-Content (Join-Path $overlay 'userRoleAssignments.csv')
-'username,organisationUnit'         | Set-Content (Join-Path $overlay 'userOrgUnitAssignments.csv')
-$pkg = (New-NeoIPCMetadataPackage -ExportPath ./metadata.json -MetadataDirectory ./metadata `
-            -Variant production -OverlayPath $overlay -PassThru).Package
+# Canonical refresh of the committed component, from the assembled package (the install base; -Play serves as well).
+$pkg = (New-NeoIPCMetadataPackage -MetadataDirectory ./metadata -PassThru).Package
 Export-NeoIPCMetadataTranslation -Package $pkg -PoDirectory ./po -Validate   # regenerates po/metadata.pot only
 
 # Quick ad-hoc extract from a raw export (NOT for the committed component — stale family names):

@@ -6,8 +6,10 @@ Create a partner's hospital and department org units in DHIS2 and set them up fo
 
 .DESCRIPTION
 Creates the hospital below its country's org unit and the department below the hospital, puts each in its
-org-unit groups, and assigns the department to the program NEOIPC_CORE. Everything is found by code, never by UID:
-the country by its code in the group COUNTRY, the groups and the program by their codes.
+org-unit groups, and assigns the department to the program NEOIPC_CORE. The units, the groups, and the program are
+found by code. A country the country list holds is also looked for by the UID the list gives it, which it keeps in
+DHIS2: to tell whether it exists, whether another org unit carries that UID, and whether a creation DHIS2 refused left
+it behind.
 
 A country the instance lacks is created first, from the toolkit's country list, the org-unit scaffold
 common/organisationUnits.csv of -MetadataDirectory, so that the country in DHIS2 and in the list carry the same UID: it
@@ -17,15 +19,16 @@ its World Bank income classes. A country the list lacks too is added to it first
 one, with -CountryName and -CountryShortName where given, which writes three files: common/organisationUnits.csv,
 the country's income classes in common/organisationUnitGroupMemberships.csv, and its test units in
 play/organisationUnits.csv. Its UID is drawn anew on each call, so the one -WhatIf shows is not the one a later run
-writes. The files are written once the instance has been read and the country can be created there, and before it is.
-When the creation fails, what DHIS2 holds decides. A country DHIS2 refused and does not hold, as a read by its UID
-after the refusal shows, leaves the files as they were, except one changed since by another run, which is named. A
-country DHIS2 holds although it answered with an error, a failure DHIS2 did not answer with its refusal, such as a
-gateway's error or a dropped connection, after which DHIS2 may still create the country, and a call stopped in between
-keep the list entry for the next run, which completes the country or creates it with that UID; the call ends with a
-reminder to commit the three files. An org unit below the parent which carries the country's name under another code,
-or one which carries the country's UID, ends the call before anything is written, since the country would then exist
-twice.
+writes. The files are written once the instance has been read and the country can be created there, and before it is;
+a file that another run changed after the call read it ends the call before anything is written, since the entry would
+discard that change. When the creation fails, what DHIS2 holds decides. A country DHIS2 refused and does not hold, as a
+read by its UID after the refusal shows, leaves the files as they were, except one changed since by another run and
+one that can no longer be read or written, each of which is named. A country DHIS2 holds although it answered with an
+error, a failure DHIS2 did not answer with its refusal, such as a gateway's error or a dropped connection, after which
+DHIS2 may still create the country, and a call stopped in between keep the list entry for the next run, which completes
+the country or creates it with that UID; the call ends with a reminder to commit the three files. An org unit below the
+parent which carries the country's name under another code, or one which carries the country's UID, ends the call before
+anything is written, since the country would then exist twice.
 
 The hospital joins the group HOSPITAL. The department joins the group NEO_DEPARTMENT and, by switch, the groups
 NEOIPC_ALL_PATIENTS_ELIGIBLE and TEST_UNITS. A country that exists with the UID the country list gives it is completed
@@ -36,15 +39,25 @@ The groups of any other country that exists are not touched; it has to be in the
 World Bank class draws a warning.
 
 The cmdlet is safe to repeat. A unit that exists is kept, not changed, and only its missing memberships and, for the
-department, a missing assignment to the program are added; a hospital whose parent is not the country, or a
-department whose parent is not the hospital, ends the call before anything is written, because a code names one
-unit in DHIS2. Every unit and membership is looked up and written only within your hierarchy and with your
-authorities, so an org unit outside it reads as missing, and -WhatIf lists what would be created and added after
-reading, without writing. A write counts as done only when DHIS2's own answer says so, and the answer to a creation
-names the id; a write that fails after the call wrote something names everything the call wrote, with its id.
+department, a missing assignment to the program are added. A code names one unit in DHIS2, so a hospital whose
+parent is not the country, or a department whose parent is not the hospital, ends the call before anything is
+written, and so does a hospital or department that DHIS2 holds under another name than the one given, which may be
+another partner's unit under the same code; names that differ only in case, or in spaces at either end, count as the
+same. Every unit and membership is looked up and written only within your hierarchy and with your authorities, so an
+org unit outside it reads as missing. A write counts as done only when DHIS2's own answer says so, and the answer to
+a creation names the id; a write that fails after the call wrote something names everything the call wrote, with its
+id.
 
-DHIS2 requires an opening date and a short name of at most 50 characters. The short name defaults to the name when
-that fits, and the call stops when it does not, instead of cutting the name.
+Once everything has been read, the cmdlet asks once before it writes, naming the instance and listing every write:
+the addition to the country list, the units it creates, and the memberships and the program assignment it adds.
+-WhatIf shows that list and writes nothing, -Confirm:$false writes without asking, and a call with nothing to write
+asks nothing. Where PowerShell cannot ask, as when it was started with -NonInteractive or its input has ended, the call
+ends before it writes anything, listing what it would have written. Whatever -ErrorAction says, an error ends the call.
+
+DHIS2 requires an opening date, a name of at most 230 characters, and a short name and a code of at most 50. The short
+name defaults to the name when that fits, and the call stops when it does not, instead of cutting the name, as it stops
+for a name or a code longer than DHIS2 allows. A code that an org unit outside your hierarchy carries reads as missing,
+so DHIS2 refuses it only when the call writes the unit.
 
 .PARAMETER Auth
 Auth hashtable from Resolve-NeoIPCAuth (Token or Basic).
@@ -72,21 +85,24 @@ The department's name.
 The department's short name. Default: the name.
 
 .PARAMETER OpeningDate
-The opening date of both units. Default: today.
+The opening date of both units. Default: today. Tracker Capture, which DHIS2 2.41 and earlier bundle beside the
+Capture app, offers no enrolment or event date before a unit's opening date, though neither the Capture app nor the
+server checks it, so give the day surveillance starts when it comes before the onboarding.
 
 .PARAMETER HospitalLatitude
-The hospital's latitude in decimal degrees, with -HospitalLongitude. A unit created with a position gets it as its
-point geometry; a unit that exists is not changed.
+The hospital's latitude in decimal degrees, with -HospitalLongitude: a number, or text that writes one with a decimal
+point; blank text counts as none. A unit created with a position gets it as its point geometry; a unit that exists is
+not changed.
 
 .PARAMETER HospitalLongitude
-The hospital's longitude in decimal degrees.
+The hospital's longitude in decimal degrees, given as -HospitalLatitude is.
 
 .PARAMETER DepartmentLatitude
-The department's latitude, with -DepartmentLongitude, for a department that stands elsewhere than its hospital.
-Default: the hospital's position.
+The department's latitude, given as -HospitalLatitude is, with -DepartmentLongitude, for a department that stands
+elsewhere than its hospital. Default: the hospital's position.
 
 .PARAMETER DepartmentLongitude
-The department's longitude.
+The department's longitude, given as -HospitalLatitude is.
 
 .PARAMETER AllPatientsEligible
 Put the department in the group NEOIPC_ALL_PATIENTS_ELIGIBLE.
@@ -110,36 +126,36 @@ DHIS2 allows.
 http or https. Default https.
 
 .PARAMETER Hostname
-The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
+The DHIS2 host. Mandatory, with no default, so that every call names the instance it writes to.
 
 .PARAMETER Port
 The DHIS2 port. Default: the scheme's.
 
 .OUTPUTS
 System.Management.Automation.PSCustomObject. One record each for the hospital and the department, after one for a
-country the call creates or completes, with Kind, Code, Id (empty under -WhatIf for a unit that does not exist yet),
-Created, the codes of the GroupsAdded, for the country whether the call AddedToList, and for the department whether it
-was ProgramAssigned.
+country the call creates or completes, with Kind, Code, Id (empty for a unit that does not exist yet when -WhatIf or
+a declined question leaves it uncreated), Created, the codes of the GroupsAdded, for the country whether the call
+AddedToList, and for the department whether it was ProgramAssigned.
 
 .EXAMPLE
-Add-NeoIPCPartnerSite -Auth $auth -CountryCode DE -HospitalCode DE_BER_CHA -HospitalName 'Example Hospital' -DepartmentName 'Example Hospital Neonatology' -WhatIf
+Add-NeoIPCPartnerSite -Auth $auth -Hostname dhis2.example.org -CountryCode DE -HospitalCode DE_BER_CHA -HospitalName 'Example Hospital' -DepartmentName 'Example Hospital Neonatology' -WhatIf
 
-Reads the instance and lists what would be created and added: the hospital DE_BER_CHA and its department
-DE_BER_CHA_NEO.
+Reads the instance and lists what would be written there: the hospital DE_BER_CHA and its department DE_BER_CHA_NEO,
+their groups, and the department's assignment to NEOIPC_CORE.
 #>
 function Add-NeoIPCPartnerSite {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)]
         [hashtable]$Auth,
 
         [Parameter(Mandatory)]
-        [ValidateScript({ $_ -cmatch '^[A-Z]{2}$' }, ErrorMessage = "The country code '{0}' is not two upper-case letters.")]
+        [ValidateScript({ $_ -cmatch $script:NeoIPCHospitalCodeParts.Country.Pattern }, ErrorMessage = "The country code '{0}' is not two upper-case letters.")]
         [string]$CountryCode,
 
         [Parameter(Mandatory)]
-        [ValidateScript({ $_ -cmatch '^[A-Z]{2}_[A-Z2-9]{3}_[A-Z0-9]+$' }, ErrorMessage = "The hospital code '{0}' does not have the form <country>_<location>_<acronym>.")]
+        [ValidateScript({ $_ -cmatch $script:NeoIPCHospitalCodePattern }, ErrorMessage = "The hospital code '{0}' does not have the form <country>_<location>_<acronym>.")]
         [string]$HospitalCode,
 
         [Parameter(Mandatory)]
@@ -163,16 +179,16 @@ function Add-NeoIPCPartnerSite {
         [datetime]$OpeningDate = [datetime]::Today,
 
         [Parameter()]
-        [Nullable[double]]$HospitalLatitude = $null,
+        [object]$HospitalLatitude,
 
         [Parameter()]
-        [Nullable[double]]$HospitalLongitude = $null,
+        [object]$HospitalLongitude,
 
         [Parameter()]
-        [Nullable[double]]$DepartmentLatitude = $null,
+        [object]$DepartmentLatitude,
 
         [Parameter()]
-        [Nullable[double]]$DepartmentLongitude = $null,
+        [object]$DepartmentLongitude,
 
         [Parameter()]
         [switch]$AllPatientsEligible,
@@ -189,15 +205,26 @@ function Add-NeoIPCPartnerSite {
         [Parameter()]
         [string]$CountryShortName,
 
-        [Parameter()] [string]$Scheme = $null,
-        [Parameter()] [string]$Hostname = $null,
+        [Parameter()] [string]$Scheme = 'https',
+        [Parameter(Mandatory)] [string]$Hostname,
         [Parameter()] [Nullable[int]]$Port = $null
     )
 
+    # Everything runs under Stop, so that a failure ends the call whatever the caller's preference: under
+    # SilentlyContinue or Ignore, PowerShell drops a throw that no try encloses and runs on past it, into the writes.
+    $ErrorActionPreference = 'Stop'
+    # Resolved before anything is read, so that the question names the host the requests go to, and a host of white
+    # space only ends the call first.
+    $Hostname = Resolve-NeoIPCDhis2Hostname -Hostname $Hostname
+    $target = Get-NeoIPCDhis2BaseUrl -Scheme $Scheme -Hostname $Hostname -Port $Port
     if (-not $HospitalCode.StartsWith("${CountryCode}_", [System.StringComparison]::Ordinal)) {
         throw [System.ArgumentException]::new("The hospital code '$HospitalCode' does not begin with the country code '${CountryCode}_'.", 'HospitalCode')
     }
     if ([string]::IsNullOrWhiteSpace($DepartmentCode)) { $DepartmentCode = "${HospitalCode}_NEO" }
+    $HospitalLatitude = ConvertTo-NeoIPCCoordinate -Value $HospitalLatitude -Name 'HospitalLatitude'
+    $HospitalLongitude = ConvertTo-NeoIPCCoordinate -Value $HospitalLongitude -Name 'HospitalLongitude'
+    $DepartmentLatitude = ConvertTo-NeoIPCCoordinate -Value $DepartmentLatitude -Name 'DepartmentLatitude'
+    $DepartmentLongitude = ConvertTo-NeoIPCCoordinate -Value $DepartmentLongitude -Name 'DepartmentLongitude'
     foreach ($pair in @(@('Hospital', $HospitalLatitude, $HospitalLongitude), @('Department', $DepartmentLatitude, $DepartmentLongitude))) {
         if (($null -ne $pair[1]) -xor ($null -ne $pair[2])) {
             throw [System.ArgumentException]::new("Give the $($pair[0].ToLowerInvariant())'s latitude and longitude together, or neither.", "$($pair[0])Latitude")
@@ -214,12 +241,15 @@ function Add-NeoIPCPartnerSite {
         @{ Kind = 'Hospital'; Code = $HospitalCode; Name = $HospitalName; ShortName = ($HospitalShortName ? $HospitalShortName : $HospitalName); OpeningDate = $opening; At = ($null -ne $HospitalLatitude ? @($HospitalLatitude, $HospitalLongitude) : $null) }
         @{ Kind = 'Department'; Code = $DepartmentCode; Name = $DepartmentName; ShortName = ($DepartmentShortName ? $DepartmentShortName : $DepartmentName); OpeningDate = $opening; At = $departmentAt }
     )
-    # DHIS2 keeps a code to 50 characters and to one org unit, so a code that breaks either would be refused only after
-    # the hospital was written.
+    # DHIS2 keeps a name to 230 characters, a short name and a code to 50, and a code to one org unit, so a value that
+    # breaks any of these would be refused only after the hospital was written.
     if ($DepartmentCode -ceq $HospitalCode) {
         throw [System.ArgumentException]::new("The department code '$DepartmentCode' is the hospital's code, and DHIS2 gives a code to one org unit only.", 'DepartmentCode')
     }
     foreach ($unit in $units) {
+        if ($unit.Name.Length -gt 230) {
+            throw [System.ArgumentException]::new("The $($unit.Kind.ToLowerInvariant()) name '$($unit.Name)' is $($unit.Name.Length) characters long, and DHIS2 allows 230.", "$($unit.Kind)Name")
+        }
         if ($unit.ShortName.Length -gt 50) {
             throw [System.ArgumentException]::new("The $($unit.Kind.ToLowerInvariant()) short name '$($unit.ShortName)' is $($unit.ShortName.Length) characters long, and DHIS2 allows 50: give a short name.", "$($unit.Kind)ShortName")
         }
@@ -232,13 +262,13 @@ function Add-NeoIPCPartnerSite {
         @(@{ NEOIPC_ALL_PATIENTS_ELIGIBLE = $AllPatientsEligible; TEST_UNITS = $TestUnit }.GetEnumerator() |
             Where-Object { $_.Value } | ForEach-Object { $_.Key } | Sort-Object)
 
-    $endpoint = @{ Auth = $Auth }
+    # A scheme given as empty text is left to the helpers, whose default, https, is the one the question names.
+    $endpoint = @{ Auth = $Auth; Hostname = $Hostname }
     if ($Scheme) { $endpoint.Scheme = $Scheme }
-    if ($Hostname) { $endpoint.Hostname = $Hostname }
     if ($null -ne $Port) { $endpoint.Port = $Port }
     $ordinal = [System.StringComparer]::Ordinal
 
-    $readFields = 'parent[id]', 'organisationUnitGroups[code]', 'programs[id]'
+    $readFields = 'name', 'parent[id]', 'organisationUnitGroups[code]', 'programs[id]'
     $found = Resolve-NeoIPCOrgUnit -Endpoint $endpoint -Code @($CountryCode, $HospitalCode, $DepartmentCode) -Fields $readFields
     $country = $found.ByCode.ContainsKey($CountryCode) ? $found.ByCode[$CountryCode] : $null
     $metadataRoot = [System.IO.Path]::GetFullPath($PSCmdlet.GetUnresolvedProviderPathFromPSPath($MetadataDirectory))
@@ -331,6 +361,9 @@ function Add-NeoIPCPartnerSite {
             Kind = 'Country'; Code = $CountryCode; Id = $countryId; Name = $planned.Name; ShortName = $planned.ShortName; OpeningDate = $planned.OpeningDate; At = $null
             Groups = @('COUNTRY') + @($listedGroups | Where-Object { $_ -cne 'COUNTRY' } | Sort-Object -Unique -CaseSensitive)
         }
+        if ($countryUnit.Name.Length -gt 230) {
+            throw [System.InvalidOperationException]::new("The country list '$listPath' gives '$CountryCode' the name '$($countryUnit.Name)', which is longer than the 230 characters DHIS2 allows.")
+        }
         if ($countryUnit.ShortName.Length -gt 50) {
             throw [System.InvalidOperationException]::new("The country list '$listPath' gives '$CountryCode' the short name '$($countryUnit.ShortName)', which is longer than the 50 characters DHIS2 allows.")
         }
@@ -352,6 +385,18 @@ function Add-NeoIPCPartnerSite {
     }
     if ($department -and [string]$department['parent']['id'] -cne [string]$hospital['id']) {
         throw [System.InvalidOperationException]::new("The department '$DepartmentCode' exists below another org unit than the hospital '$HospitalCode'.")
+    }
+    # Nothing keeps two partners from being given the same code, so a unit found by its code is this partner's only when
+    # it carries the name given: otherwise the call would add memberships to another partner's unit, TEST_UNITS among
+    # them.
+    foreach ($check in @(
+            @{ Kind = 'hospital'; Unit = $hospital; Code = $HospitalCode; Name = $HospitalName; Remedy = "give -HospitalName as DHIS2 has it if the hospital is this partner's, or another acronym" }
+            @{ Kind = 'department'; Unit = $department; Code = $DepartmentCode; Name = $DepartmentName; Remedy = "give -DepartmentName as DHIS2 has it if the department is this partner's, or another -DepartmentCode" })) {
+        if (-not $check.Unit) { continue }
+        $held = [string]$check.Unit['name']
+        if (-not [string]::Equals($held.Trim(), $check.Name.Trim(), [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw [System.InvalidOperationException]::new("The $($check.Kind) '$($check.Code)' exists in DHIS2 with the name '$held' and the id $([string]$check.Unit['id']), not with the name '$($check.Name)', so it may be another partner's: $($check.Remedy).")
+        }
     }
 
     $groupCodes = [string[]]@($units | ForEach-Object { $_.Groups } | Sort-Object -Unique -CaseSensitive)
@@ -378,7 +423,63 @@ function Add-NeoIPCPartnerSite {
     if ($program.Count -ne 1) { throw [System.InvalidOperationException]::new('DHIS2 returns no program with the code NEOIPC_CORE to these credentials: it is missing, or not shared with this user.') }
     $programId = [string]$program[0]['id']
 
-    $parentKind = $null
+    # What each unit gets: created when it does not exist, then the groups it lacks, and for the department the program
+    # assignment it lacks.
+    foreach ($unit in $units) {
+        $unit.Existing = $found.ByCode.ContainsKey($unit.Code) ? $found.ByCode[$unit.Code] : $null
+        $present = $unit.Existing ? @(Get-NeoIPCOrgUnitGroupCode -Unit $unit.Existing) : @()
+        $unit.Joins = [string[]]@($unit.Groups | Where-Object { $present -cnotcontains $_ })
+        $unit.Assigns = $unit.Kind -ceq 'Department' -and -not ($unit.Existing -and @(@($unit.Existing['programs']) | Where-Object { $null -ne $_ -and [string]$_['id'] -ceq $programId }).Count -gt 0)
+    }
+    $andList = { param([string[]]$Items) $Items.Count -le 1 ? "$Items" : "$(@($Items | Select-Object -SkipLast 1) -join ', ')$($Items.Count -gt 2 ? ',' : '') and $($Items[-1])" }
+    $groupText = { param([string[]]$Codes) "the group$($Codes.Count -gt 1 ? 's' : '') $(& $andList $Codes)" }
+    # The files an entry is written to, the country list itself among them, as the messages name them.
+    $listFiles = ''
+    if ($listPlan) {
+        $listFiles = "$(& $andList @($listPlan.Files | ForEach-Object { [System.IO.Path]::GetRelativePath($metadataRoot, $_.Path).Replace('\', '/') })) of '$metadataRoot'"
+    }
+
+    # Everything the call writes, in words, for the one question, which names the instance: a question for each write
+    # would let a site be left half written, such as a country without its groups or a hospital without its department.
+    $planned = [System.Collections.Generic.List[string]]::new()
+    if ($listPlan) { $planned.Add("add $($listPlan.Summary) to the country list, in $listFiles") }
+    foreach ($unit in $units) {
+        $kind = $unit.Kind.ToLowerInvariant()
+        $steps = [System.Collections.Generic.List[string]]::new()
+        if (-not $unit.Existing) {
+            $below = switch ($unit.Kind) { 'Country' { "'$parentCode'" } 'Hospital' { "the country '$CountryCode'" } default { "the hospital '$HospitalCode'" } }
+            $steps.Add("create the $kind '$($unit.Code)' named '$($unit.Name)'$($unit.Id ? " with the id $($unit.Id)" : '') below $below")
+        }
+        $subject = $unit.Existing ? "the $kind '$($unit.Code)'" : 'it'
+        if ($unit.Joins.Count -gt 0) { $steps.Add("add $subject to $(& $groupText $unit.Joins)") }
+        if ($unit.Assigns) { $steps.Add("assign $($steps.Count -gt 0 ? 'it' : $subject) to the program NEOIPC_CORE") }
+        if ($steps.Count -gt 0) { $planned.Add((& $andList $steps.ToArray())) }
+    }
+    $listing = @(for ($i = 0; $i -lt $planned.Count; $i++) { "  $($i + 1). $($planned[$i])" }) -join "`n"
+
+    $listWritten = $false
+    $newRecord = {
+        param($Unit, $Id, [bool]$Created, [string[]]$Added, [bool]$Assigned)
+        $record = [ordered]@{ Kind = $Unit.Kind; Code = $Unit.Code; Id = $Id; Created = $Created; GroupsAdded = [string[]]$Added }
+        if ($Unit.Kind -ceq 'Country') { $record.AddedToList = $listWritten }
+        if ($Unit.Kind -ceq 'Department') { $record.ProgramAssigned = $Assigned }
+        [pscustomobject]$record
+    }
+    if ($planned.Count -gt 0) {
+        # A PowerShell that cannot ask, one started with -NonInteractive, one whose input has ended, or a host without a
+        # user interface, fails the question with an error, which under Stop ends the call before any write; the catch
+        # gives that error the writes it would have made and the way to make them without asking.
+        try { $confirmed = $PSCmdlet.ShouldProcess("On ${target}:`n$listing", "Write this on ${target}?`n$listing", 'Onboarding a partner site') }
+        catch {
+            throw [System.InvalidOperationException]::new("PowerShell could not ask before writing on $target, so nothing is written: give -Confirm:`$false to write without asking. The call would:`n$listing", $_.Exception)
+        }
+        if (-not $confirmed) {
+            # Under -WhatIf, or declined: nothing is written, and the records show what exists.
+            foreach ($unit in $units) { & $newRecord $unit ($unit.Existing ? [string]$unit.Existing['id'] : $null) $false @() $false }
+            return
+        }
+    }
+
     # What this call writes: the list entry, the units it creates, and the memberships and the program assignment it
     # adds. The error of a later write names only identifiers, and a caller that keeps the output loses the records
     # written before it, so the error names them.
@@ -387,96 +488,65 @@ function Add-NeoIPCPartnerSite {
         param([string]$Kind, [string]$Code, [string]$Id, [bool]$Created, [string[]]$Added, [bool]$Assigned)
         $unitText = "the $($Kind.ToLowerInvariant()) '$Code' with the id $Id"
         if ($Created) { "created $unitText" }
-        if ($Added.Count -gt 0) {
-            $groupText = $Added.Count -eq 1 ? "the group $($Added[0])" : "the groups $(@($Added | Select-Object -SkipLast 1) -join ', ')$($Added.Count -gt 2 ? ',' : '') and $($Added[-1])"
-            "added $($Created ? 'it' : $unitText) to $groupText"
-        }
+        if ($Added.Count -gt 0) { "added $($Created ? 'it' : $unitText) to $(& $groupText $Added)" }
         if ($Assigned) { "assigned $(($Created -or $Added.Count -gt 0) ? 'it' : $unitText) to the program NEOIPC_CORE" }
     }
     # The list entry comes first, so that a run failing after it leaves a listed country that the next run creates, and
     # never a country in DHIS2 whose UID the list lacks. The writer keeps what the files held, for a country DHIS2
     # refuses, such as one outside the hierarchy that the lookups read as missing.
-    $listWritten = $false
     $listBackup = $null
-    # The files an entry is written to, the country list itself among them, as the messages name them.
-    $listFiles = ''
     if ($listPlan) {
-        $names = @($listPlan.Files | ForEach-Object { [System.IO.Path]::GetRelativePath($metadataRoot, $_.Path).Replace('\', '/') })
-        $listFiles = "$($names.Count -gt 1 ? "$(@($names | Select-Object -SkipLast 1) -join ', ')$($names.Count -gt 2 ? ',' : '') and " : '')$($names[-1]) of '$metadataRoot'"
-    }
-    if ($listPlan -and $PSCmdlet.ShouldProcess($listPlan.Directory, "Add $($listPlan.Summary) to the country list")) {
         try { $listBackup = Write-NeoIPCMetadataCountryPlan -Plan $listPlan }
         catch { throw [System.InvalidOperationException]::new("The country '$CountryCode' could not be added to the country list: $($_.Exception.Message)", $_.Exception) }
         $listWritten = $true
         $written.Add("added the country '$CountryCode' to the country list with the id $countryId, in $listFiles")
     }
-    # A call stopped by Ctrl+C, at a prompt of -Confirm or during a write, runs no catch block and nothing after the
-    # loop, so the finally block below gives the reminder that the list entry is to be kept.
+    # A call stopped by Ctrl+C during a write runs no catch block and nothing after the loop, so the finally block below
+    # gives the reminder that the list entry is to be kept.
     $finished = $false
     $reported = $false
     try {
         foreach ($unit in $units) {
-            $existing = $found.ByCode.ContainsKey($unit.Code) ? $found.ByCode[$unit.Code] : $null
             $created = $false
-            $id = $existing ? [string]$existing['id'] : $null
+            $id = $unit.Existing ? [string]$unit.Existing['id'] : $null
             $added = [System.Collections.Generic.List[string]]::new()
             $assigned = $false
             # Set for each unit, so that a failure before an answer reads no earlier answer, nor a variable of the session.
             $response = $null
             try {
-                if (-not $existing) {
-                    # A country whose list entry was declined under -Confirm would carry a UID the list lacks, and a unit
-                    # whose parent's creation was declined has nowhere to go, so neither is asked for; -WhatIf still lists
-                    # them.
-                    if ($unit.Kind -ceq 'Country' -and $listPlan -and -not $listWritten -and -not $WhatIfPreference) {
-                        Write-Warning "The country '$($unit.Code)' is not created, since it was not added to the country list."
+                if (-not $unit.Existing) {
+                    # A country brings the UID of the country list, which DHIS2 keeps for an object it creates.
+                    $payload = [ordered]@{}
+                    if ($unit.Id) { $payload['id'] = $unit.Id }
+                    $payload['name'] = $unit.Name
+                    $payload['shortName'] = $unit.ShortName
+                    $payload['code'] = $unit.Code
+                    $payload['openingDate'] = $unit.OpeningDate
+                    $payload['parent'] = [ordered]@{ id = $parentId }
+                    # GeoJSON orders a position longitude first.
+                    if ($unit.At) { $payload['geometry'] = [ordered]@{ type = 'Point'; coordinates = @([double]$unit.At[1], [double]$unit.At[0]) } }
+                    $body = ConvertTo-Json -Depth 100 -Compress -InputObject $payload
+                    $response = Invoke-NeoIPCDhis2Post @endpoint -Path 'api/organisationUnits' -Body $body -Confirm:$false
+                    Assert-NeoIPCDhis2WriteOk -Response $response -Path 'api/organisationUnits' -Auth $Auth
+                    # DHIS2's answer to a creation names what it created (the object report's uid).
+                    $id = [string]$response.Body.response.uid
+                    if (-not $id) {
+                        throw [System.InvalidOperationException]::new("DHIS2's answer to the creation of the $($unit.Kind.ToLowerInvariant()) '$($unit.Code)' names no id.")
                     }
-                    elseif (-not $parentId -and -not $WhatIfPreference) {
-                        Write-Warning "The $($unit.Kind.ToLowerInvariant()) '$($unit.Code)' is not created, since its $parentKind was not."
-                    }
-                    elseif ($PSCmdlet.ShouldProcess($unit.Code, "Create the $($unit.Kind.ToLowerInvariant()) org unit '$($unit.Name)'")) {
-                        # A country brings the UID of the country list, which DHIS2 keeps for an object it creates.
-                        $payload = [ordered]@{}
-                        if ($unit.Id) { $payload['id'] = $unit.Id }
-                        $payload['name'] = $unit.Name
-                        $payload['shortName'] = $unit.ShortName
-                        $payload['code'] = $unit.Code
-                        $payload['openingDate'] = $unit.OpeningDate
-                        $payload['parent'] = [ordered]@{ id = $parentId }
-                        # GeoJSON orders a position longitude first.
-                        if ($unit.At) { $payload['geometry'] = [ordered]@{ type = 'Point'; coordinates = @([double]$unit.At[1], [double]$unit.At[0]) } }
-                        $body = ConvertTo-Json -Depth 100 -Compress -InputObject $payload
-                        $response = Invoke-NeoIPCDhis2Post @endpoint -Path 'api/organisationUnits' -Body $body -Confirm:$false
-                        Assert-NeoIPCDhis2WriteOk -Response $response -Path 'api/organisationUnits' -Auth $Auth
-                        # DHIS2's answer to a creation names what it created (the object report's uid).
-                        $id = [string]$response.Body.response.uid
-                        if (-not $id) {
-                            throw [System.InvalidOperationException]::new("DHIS2's answer to the creation of the $($unit.Kind.ToLowerInvariant()) '$($unit.Code)' names no id.")
-                        }
-                        $created = $true
-                        if ($unit.Id -and $id -cne $unit.Id) {
-                            throw [System.InvalidOperationException]::new("DHIS2 created the $($unit.Kind.ToLowerInvariant()) '$($unit.Code)' with the id $id instead of $($unit.Id), the one the country list gives it.")
-                        }
+                    $created = $true
+                    if ($unit.Id -and $id -cne $unit.Id) {
+                        throw [System.InvalidOperationException]::new("DHIS2 created the $($unit.Kind.ToLowerInvariant()) '$($unit.Code)' with the id $id instead of $($unit.Id), the one the country list gives it.")
                     }
                 }
-
-                $present = $existing ? @(Get-NeoIPCOrgUnitGroupCode -Unit $existing) : @()
-                $alreadyAssigned = $existing -and @(@($existing['programs']) | Where-Object { $null -ne $_ -and [string]$_['id'] -ceq $programId }).Count -gt 0
-                # A unit whose creation was declined under -Confirm has nothing to add to; -WhatIf still lists what would be.
-                if ($id -or $WhatIfPreference) {
-                    foreach ($groupCode in $unit.Groups) {
-                        if ($present -ccontains $groupCode) { continue }
-                        if ($PSCmdlet.ShouldProcess($unit.Code, "Add the org unit to the group $groupCode")) {
-                            $path = "api/organisationUnitGroups/$($groupIds[$groupCode])/organisationUnits/$id"
-                            Assert-NeoIPCDhis2WriteOk -Response (Invoke-NeoIPCDhis2Post @endpoint -Path $path -Confirm:$false) -Path $path -Auth $Auth
-                            $added.Add($groupCode)
-                        }
-                    }
-                    if ($unit.Kind -ceq 'Department' -and -not $alreadyAssigned -and $PSCmdlet.ShouldProcess($unit.Code, 'Assign the org unit to the program NEOIPC_CORE')) {
-                        $path = "api/programs/$programId/organisationUnits/$id"
-                        Assert-NeoIPCDhis2WriteOk -Response (Invoke-NeoIPCDhis2Post @endpoint -Path $path -Confirm:$false) -Path $path -Auth $Auth
-                        $assigned = $true
-                    }
+                foreach ($groupCode in $unit.Joins) {
+                    $path = "api/organisationUnitGroups/$($groupIds[$groupCode])/organisationUnits/$id"
+                    Assert-NeoIPCDhis2WriteOk -Response (Invoke-NeoIPCDhis2Post @endpoint -Path $path -Confirm:$false) -Path $path -Auth $Auth
+                    $added.Add($groupCode)
+                }
+                if ($unit.Assigns) {
+                    $path = "api/programs/$programId/organisationUnits/$id"
+                    Assert-NeoIPCDhis2WriteOk -Response (Invoke-NeoIPCDhis2Post @endpoint -Path $path -Confirm:$false) -Path $path -Auth $Auth
+                    $assigned = $true
                 }
             }
             catch {
@@ -498,8 +568,9 @@ function Add-NeoIPCPartnerSite {
                     if ($held) {
                         throw [System.InvalidOperationException]::new("DHIS2 refused the country '$($unit.Code)' but holds it with the id $($unit.Id), so the country list keeps it, and the next run completes the country; commit $($listFiles): $message", $failure.Exception)
                     }
-                    $unrestored = @(Restore-NeoIPCFileBackup -Backup $listBackup.Before -Written $listBackup.Written)
-                    $state = $unrestored.Count -gt 0 ? "the call put the country list back but for $($unrestored -join ' and '), which changed since it wrote them or could not be written" : 'the country list is as it was before the call'
+                    $why = @{ Changed = 'changed since the call wrote it'; Unreadable = 'could not be read'; Unwritable = 'could not be written back' }
+                    $kept = @(Restore-NeoIPCFileBackup -Backup $listBackup.Before -Written $listBackup.Written | ForEach-Object { "$($_.Path), which $($why[$_.Reason])" })
+                    $state = $kept.Count -eq 0 ? 'the country list is as it was before the call' : "the call put the country list back but for $($kept.Count -le 2 ? ($kept -join ', and ') : "$(@($kept | Select-Object -SkipLast 1) -join ', '), and $($kept[-1])")"
                     throw [System.InvalidOperationException]::new("DHIS2 refused the country '$($unit.Code)' and does not hold it, so $($state): $message", $failure.Exception)
                 }
                 $done = @($written) + @(& $describeWrites $unit.Kind $unit.Code $id $created $added.ToArray() $assigned)
@@ -511,14 +582,10 @@ function Add-NeoIPCPartnerSite {
                 throw
             }
 
-            $record = [ordered]@{ Kind = $unit.Kind; Code = $unit.Code; Id = $id; Created = $created; GroupsAdded = [string[]]$added.ToArray() }
-            if ($unit.Kind -ceq 'Country') { $record.AddedToList = $listWritten }
-            if ($unit.Kind -ceq 'Department') { $record.ProgramAssigned = $assigned }
-            [pscustomobject]$record
+            & $newRecord $unit $id $created $added.ToArray() $assigned
             $written.AddRange([string[]]@(& $describeWrites $unit.Kind $unit.Code $id $created $added.ToArray() $assigned))
 
             $parentId = $id
-            $parentKind = $unit.Kind.ToLowerInvariant()
         }
         $finished = $true
     }

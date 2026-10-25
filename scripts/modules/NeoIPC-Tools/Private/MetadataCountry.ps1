@@ -129,8 +129,8 @@ function Get-NeoIPCMetadataCountryPlan {
     # writes, read and checked without writing anything (Add-NeoIPCMetadataCountry's help says from where): the rows of
     # the three files with the country's rows inserted, under Files, and the values they give the country: its random
     # Id, Name, ShortName, OpeningDate, the Id and Code of its Parent, its IncomeClass and the Groups it joins, its
-    # TestHospital and TestDepartment, the resolved Directory, and Summary, the addition in words.
-    # Write-NeoIPCMetadataCountryPlan writes the files.
+    # TestHospital and TestDepartment, the resolved Directory, and Summary, the addition in words; and under Read what
+    # each file of the scaffold held when it was read, path -> bytes. Write-NeoIPCMetadataCountryPlan writes the files.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -162,7 +162,19 @@ function Get-NeoIPCMetadataCountryPlan {
     if ($ShortName.Length -gt 50) {
         throw [System.ArgumentException]::new("The short name '$ShortName' is $($ShortName.Length) characters long, and DHIS2 allows 50: give a short name.", 'ShortName')
     }
+    # DHIS2 keeps a name to 230 characters, the names of the test units too, which are built from the country's.
+    $testHospitalName = "Test Hospital - $Name"
+    $testDepartmentName = "Test Department - $Name"
+    foreach ($unitName in $Name, $testHospitalName, $testDepartmentName) {
+        if ($unitName.Length -gt 230) {
+            throw [System.ArgumentException]::new("The name '$unitName' is $($unitName.Length) characters long, and DHIS2 allows 230: give a shorter name for the country.", 'Name')
+        }
+    }
 
+    # What each file held, which the writer checks before it writes, read before the rows, so that a change in between
+    # fails that check rather than passes it.
+    $read = @{}
+    foreach ($path in $paths.Values) { $read[$path] = [System.IO.File]::ReadAllBytes($path) }
     # Lists, so that the rows are inserted in place.
     $orgUnits = [System.Collections.Generic.List[object]]::new([object[]]@(Read-NeoIPCMetadataCsv -Path $paths.OrgUnits))
     $memberships = [System.Collections.Generic.List[object]]::new([object[]]@(Read-NeoIPCMetadataCsv -Path $paths.Memberships))
@@ -224,6 +236,14 @@ function Get-NeoIPCMetadataCountryPlan {
             if ($download -and (Test-Path -LiteralPath $download)) { [System.IO.Directory]::Delete($download, $true) }
         }
 
+        # The workbook lists every economy for each of its fiscal years, so a year it lacks is one it ends before, never
+        # an economy it left unclassified, which its cell says ('' or '..'): such a copy is older than the scaffold, and
+        # the country would miss that year's membership, which every country has.
+        $uncovered = @($years | Where-Object { -not $history.ContainsKey($_) })
+        if ($uncovered.Count -gt 0) {
+            $source = [string]::IsNullOrWhiteSpace($ClassificationHistoryPath) ? 'The World Bank''s classification history' : "The classification history '$ClassificationHistoryPath'"
+            throw [System.InvalidOperationException]::new("$source has no fiscal year $($uncovered -join ' or '), which the scaffold's income-class groups cover, so it is older than the scaffold and nothing is written: give a newer copy, or leave out -ClassificationHistoryPath to download it.")
+        }
         # The API's current class and the workbook's newest year are the same classification, unless the workbook is
         # older than the API's; INX is the API's word for a year the workbook leaves blank or marks '..'.
         if ($economy) {
@@ -239,10 +259,6 @@ function Get-NeoIPCMetadataCountryPlan {
         }
 
         foreach ($year in $years) {
-            if (-not $history.ContainsKey($year)) {
-                Write-Warning "The World Bank's classification history has no fiscal year $year, so '$Code' joins no income-class group for it."
-                continue
-            }
             $class = $history[$year]
             if ($class -cin '', '..') {
                 Write-Warning "The World Bank did not classify '$Code' in its fiscal year $year, so it joins no income-class group for that year."
@@ -283,10 +299,10 @@ function Get-NeoIPCMetadataCountryPlan {
         Add-NeoIPCOrderedRow -Rows $memberships -Key { "$($args[0]['organisationUnit'])`0$($args[0]['organisationUnitGroup'])" } -Row ([ordered]@{ organisationUnitGroup = $groupCode; organisationUnit = $Code })
     }
     Add-NeoIPCOrderedRow -Rows $playUnits -Key { $args[0]['code'] } -Row (& $newRow $playColumns @{
-            id = $hospitalId; code = $testHospitalCode; name = "Test Hospital - $Name"; shortName = "Test Hospital $Code"; openingDate = $openingDate; level = $level + 2; parent = $countryId
+            id = $hospitalId; code = $testHospitalCode; name = $testHospitalName; shortName = "Test Hospital $Code"; openingDate = $openingDate; level = $level + 2; parent = $countryId
         })
     Add-NeoIPCOrderedRow -Rows $playUnits -Key { $args[0]['code'] } -Row (& $newRow $playColumns @{
-            id = $departmentId; code = $testDepartmentCode; name = "Test Department - $Name"; shortName = "Test Department $Code"; openingDate = $openingDate; level = $level + 3; parent = $hospitalId
+            id = $departmentId; code = $testDepartmentCode; name = $testDepartmentName; shortName = "Test Department $Code"; openingDate = $openingDate; level = $level + 3; parent = $hospitalId
         })
 
     $groupText = $joins.Count -gt 0 ? "the groups $($joins -join ', ')" : 'no income-class group'
@@ -304,6 +320,7 @@ function Get-NeoIPCMetadataCountryPlan {
         TestDepartment = $testDepartmentCode
         Directory      = $directory
         Summary        = "the country $Code '$Name' with the id $countryId, $groupText, and the test units $testHospitalCode and $testDepartmentCode"
+        Read           = $read
         Files          = @(
             [pscustomobject]@{ Path = $paths.OrgUnits; Columns = $columns; Rows = $orgUnits }
             [pscustomobject]@{ Path = $paths.Memberships; Columns = @($memberships.Count -gt 0 ? $memberships[0].Keys : @('organisationUnitGroup', 'organisationUnit')); Rows = $memberships }
@@ -314,13 +331,24 @@ function Get-NeoIPCMetadataCountryPlan {
 
 function Write-NeoIPCMetadataCountryPlan {
     # Write the files of a plan from Get-NeoIPCMetadataCountryPlan, all or none: when a write fails, the files written
-    # so far are put back and the call ends, naming any file it could not put back. Returns what the files held before
-    # (Before) and what the call wrote (Written), each path -> bytes, for a caller that has to put them back later.
+    # so far are put back and the call ends, naming any file it could not put back. A file of the scaffold that no longer
+    # holds what the plan read, changed since by another run, an editor, or git, ends the call before anything is
+    # written, since the plan's rows would discard that change. Returns what the files held before (Before) and what the
+    # call wrote (Written), each path -> bytes, for a caller that has to put them back later.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][pscustomobject]$Plan)
 
     $ErrorActionPreference = 'Stop'
+    $changed = @($Plan.Read.Keys | Sort-Object | Where-Object {
+            # The comma keeps the bytes one array through the try's output, an empty file's too, so that $null means
+            # only a file that could not be read.
+            $now = try { , [System.IO.File]::ReadAllBytes($_) } catch { $null }
+            $null -eq $now -or -not [System.Linq.Enumerable]::SequenceEqual([byte[]]$now, [byte[]]$Plan.Read[$_])
+        })
+    if ($changed.Count -gt 0) {
+        throw [System.IO.IOException]::new("$($changed -join ' and ') changed since the call read the scaffold, so nothing is written: run the call again, which reads the scaffold anew.")
+    }
     $before = @{}
     foreach ($file in $Plan.Files) { $before[$file.Path] = [System.IO.File]::ReadAllBytes($file.Path) }
     $touched = [System.Collections.Generic.List[string]]::new()
@@ -332,7 +360,7 @@ function Write-NeoIPCMetadataCountryPlan {
     }
     catch {
         $failure = $_
-        $unrestored = @(Restore-NeoIPCFileBackup -Backup $before -Path $touched.ToArray())
+        $unrestored = @(Restore-NeoIPCFileBackup -Backup $before -Path $touched.ToArray() | ForEach-Object { $_.Path })
         $state = $unrestored.Count -gt 0 ? "and $($unrestored -join ' and ') could not be put back" : 'so the files are as they were'
         throw [System.IO.IOException]::new("Writing the country to the scaffold failed, $($state): $($failure.Exception.Message)", $failure.Exception)
     }
@@ -346,9 +374,10 @@ function Restore-NeoIPCFileBackup {
     # others put back. A file that still holds its backup, such as one whose write failed before it was opened because
     # another program holds it, is left as it is. With -Written, what the call to be undone wrote, path -> bytes, a file
     # is put back only while it holds that: one changed since, by another run say, keeps the change, which putting it
-    # back would discard, and is named. Returns the paths that are not put back.
+    # back would discard, and so does one that cannot be read to tell. Returns each file that is not put back, with its
+    # Path and the Reason: Changed, Unreadable, or Unwritable.
     [CmdletBinding()]
-    [OutputType([string])]
+    [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)][hashtable]$Backup,
         [string[]]$Path = @($Backup.Keys),
@@ -356,16 +385,15 @@ function Restore-NeoIPCFileBackup {
     )
     $same = { param($One, $Other) $null -ne $One -and $null -ne $Other -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$One, [byte[]]$Other) }
     foreach ($file in $Path) {
-        try {
-            $now = try { [System.IO.File]::ReadAllBytes($file) } catch { $null }
-            if (& $same $now $Backup[$file]) { continue }
-            if ($Written -and -not (& $same $now $Written[$file])) {
-                $file
-                continue
-            }
-            [System.IO.File]::WriteAllBytes($file, $Backup[$file])
+        # The comma keeps an empty file's bytes an array, so that $null means only a file that could not be read.
+        $now = try { , [System.IO.File]::ReadAllBytes($file) } catch { $null }
+        if (& $same $now $Backup[$file]) { continue }
+        if ($Written -and -not (& $same $now $Written[$file])) {
+            [pscustomobject]@{ Path = $file; Reason = ($null -eq $now) ? 'Unreadable' : 'Changed' }
+            continue
         }
-        catch { $file }
+        try { [System.IO.File]::WriteAllBytes($file, $Backup[$file]) }
+        catch { [pscustomobject]@{ Path = $file; Reason = 'Unwritable' } }
     }
 }
 

@@ -14,23 +14,30 @@ from the scaffold's root.
 
 Its name is the English name .NET gives the region, from the platform's globalization data, so that it can differ
 between machines, unless -Name gives another. NeoIPC names countries as the WHO style guide does, which differs for
-some: .NET calls KR "Korea", WHO the "Republic of Korea".
+some: .NET calls KR "Korea" on one machine and "South Korea" on another, WHO the "Republic of Korea".
 
 Its memberships in the World Bank income-class groups come from the World Bank, one for each fiscal year that the
 scaffold's groups WORLD_BANK_CLASS_<class>_FY_<year> cover, and go into common/organisationUnitGroupMemberships.csv.
 The class of each year is read from the World Bank's "historical classification by income" workbook, which is
-downloaded unless -ClassificationHistoryPath names a copy. The World Bank's
-API gives the economy's own code, by which the workbook lists it, and its current class, which the workbook's newest
-year has to match, so that a workbook older than the API's classification stops the call. A year in which the World Bank
-did not classify the economy gets no membership and a warning. The World Bank publishes both under the Creative Commons
-Attribution 4.0 licence, which asks for it to be credited as the source.
+downloaded unless -ClassificationHistoryPath names a copy, and which has to cover every fiscal year the groups cover.
+The World Bank's API gives the economy's own code, by which the workbook lists it, and its current class, which the
+workbook's newest year has to match. So a workbook older than the scaffold's newest fiscal year stops the call, and so
+does one older than the API's classification of an economy whose class has changed since. A year in which the World
+Bank did not classify the economy gets no membership and a warning. The World Bank publishes both under the Creative
+Commons Attribution 4.0 licence, which asks for it to be credited as the source.
 
 The play package gets the country's test hospital <code>_TEST and test department <code>_TEST_TEST in
 play/organisationUnits.csv, as every country has there.
 
 Each row goes where the order of its file puts it, and every other row stays as it is. Nothing is written until every
 source has been read and checked, and the three files are written all or none: a write that fails puts back the files
-written before it and ends the call. -WhatIf reads the sources and writes nothing. No DHIS2 instance is called.
+written before it and ends the call. A file of the scaffold that changed after the call read it, by another run or a
+git command say, ends the call before anything is written, since writing the rows read earlier would discard the
+change. -WhatIf reads the sources and writes nothing. No DHIS2 instance is called. Whatever -ErrorAction says, an error
+ends the call.
+
+The name of the country, and the names of its test units built from it, have to fit in the 230 characters DHIS2
+allows a name.
 
 The World Bank's API does not serve every economy its workbook classifies (TW, which the workbook lists as TWN); for
 such a code the workbook is read by the ISO alpha-3 code, without the API's check of its newest year, and a warning
@@ -73,7 +80,7 @@ function Add-NeoIPCMetadataCountry {
     [OutputType([pscustomobject])]
     param(
         [Parameter(Mandatory)]
-        [ValidateScript({ $_ -cmatch '^[A-Z]{2}$' }, ErrorMessage = "The country code '{0}' is not two upper-case letters.")]
+        [ValidateScript({ $_ -cmatch '\A[A-Z]{2}\z' }, ErrorMessage = "The country code '{0}' is not two upper-case letters.")]
         [string]$Code,
 
         [Parameter()]
@@ -89,6 +96,9 @@ function Add-NeoIPCMetadataCountry {
         [string]$ClassificationHistoryPath
     )
 
+    # Under Stop, so that a failure ends the call whatever the caller's preference: under SilentlyContinue or Ignore,
+    # PowerShell drops a throw that no try encloses and runs on past it.
+    $ErrorActionPreference = 'Stop'
     $plan = Get-NeoIPCMetadataCountryPlan -Code $Code -Name $Name -ShortName $ShortName -MetadataDirectory $MetadataDirectory -ClassificationHistoryPath $ClassificationHistoryPath
     $added = $false
     if ($PSCmdlet.ShouldProcess($plan.Directory, "Add $($plan.Summary)")) {

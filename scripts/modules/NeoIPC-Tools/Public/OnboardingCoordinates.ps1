@@ -11,18 +11,20 @@ stands. Both given as parameters are validated and returned.
 With neither given, in an interactive session, the cmdlet opens Google Maps in the default browser with a search for
 -Query, and asks for the coordinates to be pasted as Google Maps copies them: right-click the place, click the
 coordinates at the top of the menu, and paste ("52.5200, 13.4050"). An empty answer skips them, and an input that has
-ended stops the call. A text of another shape is asked for again. With -NonInteractive, or in a session that Windows
-reports as having no user, nothing is opened or asked, and the cmdlet returns nothing. Elsewhere .NET reports every
-session as having a user, so only -NonInteractive turns the question off there.
+ended stops the call. A text of another shape, such as one number with a decimal comma, is asked for again. With
+-NonInteractive, or in a session that Windows reports as having no user, nothing is opened or asked, and the cmdlet
+returns nothing. A PowerShell started with -NonInteractive refuses the question, which the cmdlet learns only by
+asking, so it returns nothing there too, after it has opened the map. Elsewhere than on Windows, .NET reports every
+session as having a user.
 
 Exactly one of -Latitude and -Longitude is an error, and so is a value outside +-90 degrees (latitude) or +-180
-degrees (longitude).
+degrees (longitude). Whatever -ErrorAction says, an error ends the call.
 
 .PARAMETER Latitude
-The latitude in decimal degrees.
+The latitude in decimal degrees: a number, or text that writes one with a decimal point. Blank text counts as none.
 
 .PARAMETER Longitude
-The longitude in decimal degrees.
+The longitude in decimal degrees, given as -Latitude is.
 
 .PARAMETER Query
 What to search for on the map, usually the hospital's name and town. Required when coordinates may have to be asked
@@ -49,10 +51,10 @@ function Get-NeoIPCMapCoordinates {
     [OutputType([pscustomobject])]
     param(
         [Parameter()]
-        [Nullable[double]]$Latitude = $null,
+        [object]$Latitude,
 
         [Parameter()]
-        [Nullable[double]]$Longitude = $null,
+        [object]$Longitude,
 
         [Parameter()]
         [string]$Query,
@@ -64,6 +66,11 @@ function Get-NeoIPCMapCoordinates {
         [switch]$NonInteractive
     )
 
+    # Under Stop, so that a refused value ends the call whatever the caller's preference: under SilentlyContinue or
+    # Ignore, PowerShell drops a throw that no try encloses and runs on past it, into returning the value.
+    $ErrorActionPreference = 'Stop'
+    $Latitude = ConvertTo-NeoIPCCoordinate -Value $Latitude -Name 'Latitude'
+    $Longitude = ConvertTo-NeoIPCCoordinate -Value $Longitude -Name 'Longitude'
     if (($null -ne $Latitude) -xor ($null -ne $Longitude)) {
         throw [System.ArgumentException]::new('Give the latitude and the longitude together, or neither.', 'Latitude')
     }
@@ -84,7 +91,10 @@ function Get-NeoIPCMapCoordinates {
     Write-Information -MessageData "Opening the map: $url" -InformationAction ($PSBoundParameters['InformationAction'] ?? 'Continue')
     Open-NeoIPCUrl -Url $url
     while ($true) {
-        $answer = Read-Host -Prompt "Coordinates of $Label as copied from the map, latitude and longitude (empty to skip)"
+        # A PowerShell started with -NonInteractive refuses the question (Test-NeoIPCInteractive says why that is not
+        # known before): nobody can be asked, as with -NonInteractive.
+        try { $answer = Read-Host -Prompt "Coordinates of $Label as copied from the map, latitude and longitude (empty to skip)" }
+        catch [System.Management.Automation.PSInvalidOperationException] { return }
         # An empty answer skips the coordinates, so an input that has ended must not be taken for one.
         if ($null -eq $answer) { throw [System.OperationCanceledException]::new("The input ended before the coordinates of $Label.") }
         if ([string]::IsNullOrWhiteSpace($answer)) { return }

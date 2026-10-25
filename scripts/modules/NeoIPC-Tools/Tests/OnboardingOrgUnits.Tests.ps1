@@ -8,9 +8,13 @@
     Covers Public/OnboardingOrgUnits.ps1 against mocks of the module's own DHIS2 helpers: the reads of the groups and
     the program, the lookups of the units by code and UID and of the units below a parent, and the writes. What the
     tests check is the cmdlet's decisions and the requests it sends: what it creates, below which parent, which
-    memberships it adds, what it leaves alone on a repeat, and what it refuses before it writes anything. A country the
-    instance lacks comes from a country list of the tests' own, so that no test depends on the toolkit's. That DHIS2
-    accepts these requests is not shown here; a run against an instance is the evidence for that.
+    memberships it adds, what it leaves alone on a repeat, what it refuses before it writes anything, and what its one
+    question names. The question as a person sees it, answered Yes or No or not at all, is put in a runspace of the
+    scripted host of ScriptedHost.ps1, which also shows that a refusal ends the call under -ErrorAction
+    SilentlyContinue: only a call with no try above it, as a console runs one, can show that, and Pester runs each
+    test inside one. A country the instance lacks comes from a country list of the tests' own, so that no test depends
+    on the toolkit's. That DHIS2 accepts these requests is not shown here; a run against an instance is the evidence
+    for that.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/OnboardingOrgUnits.Tests.ps1
@@ -67,14 +71,17 @@ Describe 'Add-NeoIPCPartnerSite' {
             ListWrites = [System.Collections.Generic.List[string]]::new()
             RefuseListWrite = $false
         }
+        # The cmdlet asks before it writes, so the calls answer for it; the tests of the question ask it to say it.
         $script:params = @{
             Auth              = @{ AuthType = 'Token'; Token = 'x' }
+            Hostname          = 'dhis2.example.org'
             CountryCode       = 'DE'
             HospitalCode      = 'DE_BER_CHA'
             HospitalName      = 'Example Hospital'
             DepartmentName    = 'Example Hospital Neonatology'
             OpeningDate       = [datetime]'2026-10-19'
             MetadataDirectory = $script:metadataDir
+            Confirm           = $false
         }
 
         # The mocks are defined in the module's scope, so that they read the scenario from its script scope: a mock
@@ -159,10 +166,14 @@ Describe 'Add-NeoIPCPartnerSite' {
                     [System.IO.File]::WriteAllText($file, 'after')
                     $written[$file] = [System.IO.File]::ReadAllBytes($file)
                 }
-                # A file of the backup that cannot be put back: its path is a directory when the call puts the files back.
-                if ($s.UnrestorablePath) {
-                    $before[$s.UnrestorablePath] = [byte[]](1, 2, 3)
-                    $written[$s.UnrestorablePath] = [byte[]](4, 5, 6)
+                # A file written that another program then blocks: made read-only, it still holds what was written but
+                # cannot be written back; made a directory, it cannot even be read.
+                if ($s.Block) {
+                    if ($s.Block.How -ceq 'ReadOnly') { [System.IO.File]::SetAttributes($s.Block.Path, [System.IO.FileAttributes]::ReadOnly) }
+                    else {
+                        [System.IO.File]::Delete($s.Block.Path)
+                        [void][System.IO.Directory]::CreateDirectory($s.Block.Path)
+                    }
                 }
                 $s.ListWrites.Add($Plan.Code)
                 [pscustomobject]@{ Before = $before; Written = $written }
@@ -174,7 +185,7 @@ Describe 'Add-NeoIPCPartnerSite' {
                 if ($parent.Count -ne 1) { throw "unexpected hierarchy read with the filters $($Filter -join ', ')" }
                 , @($s.Units.Values | Where-Object { $_.Contains('parent') -and $_['parent']['id'] -ceq $parent[0] } | ForEach-Object { [ordered]@{ id = $_['id']; code = $_['code']; name = $_['name'] } })
             }
-            # The answers are DHIS2's web messages, as 2.40 writes them, with the status code they name.
+            # The answers are DHIS2's web messages, as 2.40 to 2.43 write them, with the status code they name.
             Mock Invoke-NeoIPCDhis2Post {
                 $s = $script:OnboardingTestScenario
                 $refusal = { param($Code) [pscustomobject]@{ StatusCode = 409; Body = [pscustomobject]@{ httpStatus = 'Conflict'; httpStatusCode = 409; status = 'ERROR'; message = 'One or more errors occurred'; response = [pscustomobject]@{ errorReports = @([pscustomobject]@{ message = "Property code with value $Code already exists" }) } } } }
@@ -302,8 +313,8 @@ Describe 'Add-NeoIPCPartnerSite' {
     }
 
     It 'keeps existing units and adds only what is missing' {
-        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }) }
-        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Example Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }) }
+        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; name = 'Example Hospital Neonatology'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }) }
 
         $result = Add-NeoIPCPartnerSite @script:params
 
@@ -313,8 +324,29 @@ Describe 'Add-NeoIPCPartnerSite' {
         $result[0].GroupsAdded.Count | Should -Be 0
     }
 
+    It 'takes an existing unit whose name differs from the one given only in case or in spaces at its ends for this partner''s' {
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = ' EXAMPLE hospital '; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
+
+        $result = Add-NeoIPCPartnerSite @script:params
+
+        $result[0].GroupsAdded | Should -Be @('HOSPITAL')
+    }
+
+    It 'refuses a <Kind> that exists under another name before it asks or writes anything, naming the unit' -ForEach @(
+        @{ Kind = 'hospital'; Message = "*hospital 'DE_BER_CHA' exists in DHIS2 with the name 'Another Hospital' and the id HospitalUid1, not with the name 'Example Hospital', so it may be another partner's*" }
+        @{ Kind = 'department'; Message = "*department 'DE_BER_CHA_NEO' exists in DHIS2 with the name 'Another Hospital Neonatology' and the id DepartmentU1, not with the name 'Example Hospital Neonatology'*-DepartmentCode*" }
+    ) {
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = ($Kind -ceq 'hospital' ? 'Another Hospital' : 'Example Hospital'); parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }) }
+        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; name = 'Another Hospital Neonatology'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @() }
+
+        { Add-NeoIPCPartnerSite @script:params } | Should -Throw $Message
+        { Add-NeoIPCPartnerSite @script:params -WhatIf } | Should -Throw $Message
+
+        Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly
+    }
+
     It 'adds a membership an existing unit lacks' {
-        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Example Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
 
         $result = Add-NeoIPCPartnerSite @script:params
 
@@ -328,6 +360,78 @@ Describe 'Add-NeoIPCPartnerSite' {
         Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly
         $result.Count | Should -Be 2
         $result.Created | Should -Not -Contain $true
+    }
+
+    It 'declares a mandatory -Hostname without a default and asks before it writes' {
+        $command = Get-Command Add-NeoIPCPartnerSite
+        $command.Parameters['Hostname'].Attributes.Where({ $_ -is [System.Management.Automation.ParameterAttribute] }).Mandatory | Should -Not -Contain $false
+        $command.ScriptBlock.Attributes.Where({ $_ -is [System.Management.Automation.CmdletBindingAttribute] })[0].ConfirmImpact | Should -Be 'High'
+    }
+
+    # Confirmed by -Confirm:$false, ShouldProcess writes under -Verbose the description it would have asked with, and
+    # nothing else here writes to the verbose stream; the question a person sees is checked in a runspace of its own
+    # below.
+    It 'confirms once before it writes, describing the instance and every write' {
+        $output = @(Add-NeoIPCPartnerSite @script:params -Verbose 4>&1)
+
+        $asked = @($output | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] })
+        $asked.Count | Should -Be 1
+        $asked[0].Message | Should -BeExactly (@(
+                "On https://dhis2.example.org:"
+                "  1. create the hospital 'DE_BER_CHA' named 'Example Hospital' below the country 'DE' and add it to the group HOSPITAL"
+                "  2. create the department 'DE_BER_CHA_NEO' named 'Example Hospital Neonatology' below the hospital 'DE_BER_CHA', add it to the group NEO_DEPARTMENT, and assign it to the program NEOIPC_CORE"
+            ) -join "`n")
+    }
+
+    It 'names the scheme and the port given in its question' {
+        $output = @(Add-NeoIPCPartnerSite @script:params -Scheme http -Port 8080 -Verbose 4>&1)
+
+        @($output | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] -and $_.Message -like 'On http://dhis2.example.org:8080:*' }).Count | Should -Be 1
+    }
+
+    It 'reads and writes over https, the instance its question names, when the scheme is given as empty text' {
+        $output = @(Add-NeoIPCPartnerSite @script:params -Scheme '' -Verbose 4>&1)
+
+        @($output | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] -and $_.Message -like 'On https://dhis2.example.org:*' }).Count | Should -Be 1
+        # The helpers take https when no scheme reaches them, and refuse an empty one.
+        Should -Invoke -ModuleName NeoIPC-Tools Resolve-NeoIPCOrgUnit -Times 0 -Exactly -ParameterFilter { $Endpoint.ContainsKey('Scheme') -and -not $Endpoint['Scheme'] }
+        Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Get -Times 0 -Exactly -ParameterFilter { $PesterBoundParameters.ContainsKey('Scheme') -and -not $Scheme }
+        Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly -ParameterFilter { $PesterBoundParameters.ContainsKey('Scheme') -and -not $Scheme }
+        Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 2 -Exactly -ParameterFilter { $Path -ceq 'api/organisationUnits' }
+    }
+
+    It 'names in its question only what an existing unit lacks' {
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Example Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }) }
+        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; name = 'Example Hospital Neonatology'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @() }
+
+        $output = @(Add-NeoIPCPartnerSite @script:params -Verbose 4>&1)
+
+        @($output | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] }).Message | Should -BeExactly (@(
+                "On https://dhis2.example.org:"
+                "  1. add the department 'DE_BER_CHA_NEO' to the group NEO_DEPARTMENT and assign it to the program NEOIPC_CORE"
+            ) -join "`n")
+    }
+
+    It 'asks nothing when there is nothing to write' {
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Example Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }) }
+        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; name = 'Example Hospital Neonatology'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }); programs = @(@{ id = 'ProgramUid01' }) }
+
+        $output = @(Add-NeoIPCPartnerSite @script:params -Verbose 4>&1)
+
+        @($output | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] }).Count | Should -Be 0
+        @($output | Where-Object { $_ -isnot [System.Management.Automation.VerboseRecord] }).Count | Should -Be 2
+    }
+
+    It 'takes blank text for no position and text with a decimal point for one' {
+        [void](Add-NeoIPCPartnerSite @script:params -HospitalLatitude '' -HospitalLongitude ' ' -DepartmentLatitude '52.6' -DepartmentLongitude '13.5')
+
+        Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
+            $Path -ceq 'api/organisationUnits' -and ($j = $Body | ConvertFrom-Json) -and $j.code -ceq 'DE_BER_CHA' -and $j.PSObject.Properties.Name -notcontains 'geometry'
+        }
+        Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 1 -Exactly -ParameterFilter {
+            $Path -ceq 'api/organisationUnits' -and ($j = $Body | ConvertFrom-Json) -and $j.code -ceq 'DE_BER_CHA_NEO' -and
+            $j.geometry.coordinates[0] -eq 13.5 -and $j.geometry.coordinates[1] -eq 52.6
+        }
     }
 
     It 'refuses <Name> before it writes anything' -ForEach @(
@@ -351,8 +455,8 @@ Describe 'Add-NeoIPCPartnerSite' {
     }
 
     It 'leaves a department''s assignment to the program alone when it has it, and does not report one' {
-        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }); programs = @() }
-        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }); programs = @(@{ id = 'ProgramUid01' }) }
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Example Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @(@{ code = 'HOSPITAL' }); programs = @() }
+        $script:state.Units['DE_BER_CHA_NEO'] = [ordered]@{ id = 'DepartmentU1'; code = 'DE_BER_CHA_NEO'; name = 'Example Hospital Neonatology'; parent = @{ id = 'HospitalUid1' }; organisationUnitGroups = @(@{ code = 'NEO_DEPARTMENT' }); programs = @(@{ id = 'ProgramUid01' }) }
 
         $result = Add-NeoIPCPartnerSite @script:params
 
@@ -377,13 +481,19 @@ Describe 'Add-NeoIPCPartnerSite' {
     It 'refuses <Name> before it reads or writes anything' -ForEach @(
         @{ Name = 'the hospital''s code for the department'; Extra = @{ DepartmentCode = 'DE_BER_CHA' }; Message = '*department code ''DE_BER_CHA'' is the hospital''s code*' }
         @{ Name = 'a hospital code whose department code is longer than DHIS2 allows'; Extra = @{ HospitalCode = 'DE_BER_' + ('A' * 40) }; Message = '*department code*is 51 characters long, and DHIS2 allows 50*' }
+        @{ Name = 'a department name longer than DHIS2 allows'; Extra = @{ DepartmentName = 'D' * 231; DepartmentShortName = 'Neonatology' }; Message = '*department name*is 231 characters long, and DHIS2 allows 230*' }
         @{ Name = 'a coordinate that is not a number'; Extra = @{ HospitalLatitude = [double]::NaN; HospitalLongitude = 0.0 }; Message = '*latitude lies between*' }
+        @{ Name = 'a coordinate written with a decimal comma'; Extra = @{ HospitalLatitude = '52,52'; HospitalLongitude = '13,405' }; Message = '*-HospitalLatitude ''52,52'' is not a number of decimal degrees written with a point*' }
+        @{ Name = 'a hospital code that ends in a line feed'; Extra = @{ HospitalCode = "DE_BER_CHA`n" }; Message = '*does not have the form <country>_<location>_<acronym>*' }
+        @{ Name = 'a country code that ends in a line feed'; Extra = @{ CountryCode = "DE`n" }; Message = '*is not two upper-case letters*' }
     ) {
         $bad = $script:params.Clone()
         foreach ($key in $Extra.Keys) { $bad[$key] = $Extra[$key] }
 
         { Add-NeoIPCPartnerSite @bad } | Should -Throw $Message
 
+        Should -Invoke -ModuleName NeoIPC-Tools Resolve-NeoIPCOrgUnit -Times 0 -Exactly
+        Should -Invoke -ModuleName NeoIPC-Tools Get-NeoIPCHierarchyOrgUnit -Times 0 -Exactly
         Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Get -Times 0 -Exactly
         Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly
     }
@@ -511,6 +621,21 @@ Describe 'Add-NeoIPCPartnerSite' {
             Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly -ParameterFilter { $Path -ceq 'api/organisationUnits' -and ($Body | ConvertFrom-Json).code -ceq 'AR_BUE_HOS' }
         }
 
+        It 'refuses a country the list gives a name longer than DHIS2 allows, before it writes anything' {
+            $common = Join-Path -Path $TestDrive -ChildPath 'long-name' -AdditionalChildPath 'common'
+            [void](New-Item -ItemType Directory -Path $common -Force)
+            @(
+                'id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing'
+                "ArgentinaU1,AR,$('A' * 231),Argentina,2023-01-01,,2,RootUid0001,,"
+                'RootUid0001,NEOIPC,NeoIPC,NeoIPC,2023-01-01,,1,,,'
+            ) | Set-TestFileContent -LiteralPath (Join-Path -Path $common -ChildPath 'organisationUnits.csv')
+            $script:params.MetadataDirectory = Split-Path -Path $common -Parent
+
+            { Add-NeoIPCPartnerSite @script:params } | Should -Throw '*gives ''AR'' the name ''AAA*, which is longer than the 230 characters DHIS2 allows*'
+
+            Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly
+        }
+
         It 'refuses <Name> before it writes anything' -ForEach @(
             @{ Name = 'a parent the list names outside the hierarchy'; Setup = { $script:state.Units.Remove('NEOIPC') }; Message = '*cannot be created there*parent in the country list, ''NEOIPC'', lies outside that hierarchy too*' }
             @{ Name = 'an org unit below the parent with the country''s name under another code'; Setup = { $script:state.Units['ARG'] = [ordered]@{ id = 'OtherArgUid'; code = 'ARG'; name = ' argentina '; parent = @{ id = 'RootUid0001' }; organisationUnitGroups = @() } }; Message = '*'' argentina '' below ''NEOIPC'' carries the country''s name under the code ''ARG''*' }
@@ -557,6 +682,18 @@ Describe 'Add-NeoIPCPartnerSite' {
             $warnings.Message | Should -BeLike '*added the country ''KE'' to the country list with the UID KenyaUid001, in *list-stand-in.txt, *memberships-stand-in.txt, and *play-stand-in.txt of*commit them*'
         }
 
+        It 'names the addition to the country list first in its one question, then the country with that UID' {
+            $output = @(Add-NeoIPCPartnerSite @script:params -Verbose 4>&1 3>$null)
+
+            $asked = @($output | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] })
+            $asked.Count | Should -Be 1
+            $lines = $asked[0].Message -split "`n"
+            $lines[0] | Should -BeExactly 'On https://dhis2.example.org:'
+            $lines[1] | Should -BeLike "  1. add the country KE 'Kenya' with the id KenyaUid001 to the country list, in *list-stand-in.txt, *memberships-stand-in.txt, and *play-stand-in.txt of*"
+            $lines[2] | Should -BeExactly "  2. create the country 'KE' named 'Kenya' with the id KenyaUid001 below 'NEOIPC' and add it to the groups COUNTRY, WORLD_BANK_CLASS_LM_FY_2025, and WORLD_BANK_CLASS_LM_FY_2026"
+            $lines[3] | Should -BeExactly "  3. create the hospital 'KE_NBO_EXH' named 'Example Hospital' below the country 'KE' and add it to the group HOSPITAL"
+        }
+
         It 'says that the call stopped only when it stopped, not after a failure it names itself' {
             $script:state.RefuseCode = 'KE'
 
@@ -595,13 +732,44 @@ Describe 'Add-NeoIPCPartnerSite' {
             Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly -ParameterFilter { $Path -ceq 'api/organisationUnits' -and ($Body | ConvertFrom-Json).code -ceq 'KE_NBO_EXH' }
         }
 
-        It 'names a file of the list it could not put back when DHIS2 refuses the country, and puts back the others' {
+        It 'names a file of the list it can no longer read when DHIS2 refuses the country, keeps it, and puts back the others' {
             $script:state.RefuseCode = 'KE'
-            $script:state.UnrestorablePath = (New-Item -ItemType Directory -Path (Join-Path -Path $TestDrive -ChildPath "unrestorable-$([guid]::NewGuid().ToString('N'))")).FullName
+            $script:state.Block = @{ Path = $script:listFiles[1]; How = 'Directory' }
+            try {
+                { Add-NeoIPCPartnerSite @script:params } | Should -Throw "*DHIS2 refused the country 'KE' and does not hold it, so the call put the country list back but for $($script:listFiles[1]), which could not be read:*value KE already exists*"
 
-            { Add-NeoIPCPartnerSite @script:params } | Should -Throw "*DHIS2 refused the country 'KE' and does not hold it, so the call put the country list back but for $($script:state.UnrestorablePath), which changed since*value KE already exists*"
+                Get-Content -LiteralPath $script:listFiles[0] -Raw | Should -BeExactly 'before'
+                Test-Path -LiteralPath $script:listFiles[1] -PathType Container | Should -BeTrue
+                Get-Content -LiteralPath $script:listFiles[2] -Raw | Should -BeExactly 'before'
+            }
+            finally {
+                Remove-Item -LiteralPath $script:listFiles[1] -Recurse -Force
+            }
+        }
 
-            foreach ($file in $script:listFiles) { Get-Content -LiteralPath $file -Raw | Should -BeExactly 'before' }
+        It 'names a file of the list it cannot write back when DHIS2 refuses the country, and puts back the others' {
+            # An account that writes a read-only file all the same, as root does, cannot reach this branch so.
+            $probe = Join-Path -Path $TestDrive -ChildPath "read-only-$([guid]::NewGuid().ToString('N'))"
+            [System.IO.File]::WriteAllText($probe, 'probe')
+            [System.IO.File]::SetAttributes($probe, [System.IO.FileAttributes]::ReadOnly)
+            $writable = try { [System.IO.File]::WriteAllText($probe, 'written'); $true } catch { $false }
+            [System.IO.File]::SetAttributes($probe, [System.IO.FileAttributes]::Normal)
+            if ($writable) {
+                Set-ItResult -Skipped -Because 'this account writes a read-only file, as root does'
+                return
+            }
+            $script:state.RefuseCode = 'KE'
+            $script:state.Block = @{ Path = $script:listFiles[2]; How = 'ReadOnly' }
+            try {
+                { Add-NeoIPCPartnerSite @script:params } | Should -Throw "*DHIS2 refused the country 'KE' and does not hold it, so the call put the country list back but for $($script:listFiles[2]), which could not be written back:*value KE already exists*"
+
+                Get-Content -LiteralPath $script:listFiles[0] -Raw | Should -BeExactly 'before'
+                Get-Content -LiteralPath $script:listFiles[1] -Raw | Should -BeExactly 'before'
+                Get-Content -LiteralPath $script:listFiles[2] -Raw | Should -BeExactly 'after'
+            }
+            finally {
+                [System.IO.File]::SetAttributes($script:listFiles[2], [System.IO.FileAttributes]::Normal)
+            }
         }
 
         It 'keeps the change another run made to a file of the list since, naming it, when DHIS2 refuses the country' {
@@ -803,5 +971,146 @@ Describe 'Add-NeoIPCPartnerSite' {
 
             Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly
         }
+    }
+}
+
+Describe 'Add-NeoIPCPartnerSite as a console runs it' {
+    BeforeAll {
+        . (Join-Path -Path $PSScriptRoot -ChildPath 'ScriptedHost.ps1')
+        # A runspace of the scripted host, which shows the question as a person sees it and answers it. Pester's mocks
+        # reach no other runspace, so there the module's DHIS2 helpers are stood in for as the mocks above stand in for
+        # them: the country DE exists, in COUNTRY, and nothing else does unless a test gives other units; each write is
+        # recorded.
+        $script:ScriptedHost = [NeoIPCTests.ScriptedHost]::new()
+        $script:Runspace = [runspacefactory]::CreateRunspace($script:ScriptedHost)
+        $script:Runspace.Open()
+        $setup = [powershell]::Create()
+        try {
+            $setup.Runspace = $script:Runspace
+            $manifest = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'NeoIPC-Tools.psd1'
+            [void]$setup.AddScript(@"
+Import-Module '$($manifest.Replace("'", "''"))' -Force
+`$global:Posts = [System.Collections.Generic.List[string]]::new()
+`$global:Existing = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
+& (Get-Module NeoIPC-Tools) {
+    function script:Resolve-NeoIPCOrgUnit {
+        param(`$Endpoint, [string[]]`$Code, [string[]]`$Id, [string[]]`$Fields)
+        `$byCode = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
+        if (`$Code -ccontains 'DE') { `$byCode['DE'] = [ordered]@{ id = 'CountryUid01'; code = 'DE'; name = 'Germany'; parent = @{ id = 'RootUid0001' }; organisationUnitGroups = @(@{ code = 'COUNTRY' }, @{ code = 'WORLD_BANK_CLASS_H_FY_2026' }) } }
+        foreach (`$wanted in `$Code) { if (`$global:Existing.ContainsKey(`$wanted)) { `$byCode[`$wanted] = `$global:Existing[`$wanted] } }
+        [pscustomobject]@{ Units = @(`$byCode.Values); ByCode = `$byCode; ById = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal) }
+    }
+    function script:Invoke-NeoIPCDhis2Get {
+        [CmdletBinding(SupportsShouldProcess)]
+        param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path, `$Filter, `$Fields, [switch]`$AsHashtable)
+        if (`$Path -ceq 'api/organisationUnitGroups') { return @{ organisationUnitGroups = @(@{ id = 'GroupHosp01'; code = 'HOSPITAL' }, @{ id = 'GroupNeoD01'; code = 'NEO_DEPARTMENT' }) } }
+        if (`$Path -ceq 'api/programs') { return @{ programs = @(@{ id = 'ProgramUid01'; code = 'NEOIPC_CORE' }) } }
+        throw "unexpected read of `$Path"
+    }
+    function script:Invoke-NeoIPCDhis2Post {
+        [CmdletBinding(SupportsShouldProcess)]
+        param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path, `$Body)
+        `$global:Posts.Add(`$Path)
+        if (`$Path -ceq 'api/organisationUnits') {
+            `$uid = @{ DE_BER_CHA = 'HospitalUid1'; DE_BER_CHA_NEO = 'DepartmentU1' }[(`$Body | ConvertFrom-Json).code]
+            return [pscustomobject]@{ StatusCode = 201; Body = [pscustomobject]@{ httpStatus = 'Created'; httpStatusCode = 201; status = 'OK'; response = [pscustomobject]@{ uid = `$uid } } }
+        }
+        [pscustomobject]@{ StatusCode = 200; Body = [pscustomobject]@{ httpStatus = 'OK'; httpStatusCode = 200; status = 'OK' } }
+    }
+}
+"@)
+            [void]$setup.Invoke()
+            if ($setup.Streams.Error.Count -gt 0) { throw "Preparing the scripted runspace failed: $($setup.Streams.Error[0])" }
+        }
+        finally { $setup.Dispose() }
+
+        # Calls the cmdlet in the scripted runspace with the answers, the further arguments, and the units besides the
+        # country given, as a console runs a line, with no try above it. A try anywhere above a call, Pester's own
+        # included, makes an error that ends a statement unwind to it, where without one the next statement runs; it does
+        # the same to a throw under -ErrorAction SilentlyContinue, which PowerShell drops where no try is. Returns the
+        # records, the errors, the prompts the host was shown, and the writes sent.
+        $script:ask = {
+            param([string[]]$Answers = @(), [string]$Arguments = '', [hashtable]$Existing = @{})
+            $ui = $script:ScriptedHost.ScriptedUI
+            $ui.Answers.Clear(); $ui.Prompts.Clear(); $ui.Inputs.Clear()
+            foreach ($answer in $Answers) { $ui.Answers.Enqueue($answer) }
+            $script:Runspace.SessionStateProxy.GetVariable('Posts').Clear()
+            $units = $script:Runspace.SessionStateProxy.GetVariable('Existing')
+            $units.Clear()
+            foreach ($code in $Existing.Keys) { $units[$code] = $Existing[$code] }
+            $ps = [powershell]::Create()
+            try {
+                $ps.Runspace = $script:Runspace
+                [void]$ps.AddScript("Add-NeoIPCPartnerSite -Auth @{ AuthType = 'Token'; Token = 'x' } -Hostname 'dhis2.example.org' -CountryCode DE -HospitalCode DE_BER_CHA -HospitalName 'Example Hospital' -DepartmentName 'Example Hospital Neonatology' -OpeningDate '2026-10-19' -MetadataDirectory '$((Join-Path -Path $TestDrive -ChildPath 'no-list').Replace("'", "''"))' $Arguments")
+                $thrown = $null
+                $output = try { @($ps.Invoke()) } catch { $thrown = $_; @() }
+                [pscustomobject]@{
+                    Records = @($output)
+                    # Written to the error stream, or thrown out of the runspace's pipeline, which an error that ends the
+                    # call does there.
+                    Errors  = @(@($ps.Streams.Error | ForEach-Object { $_.Exception.Message }) + @(if ($thrown) { $thrown.Exception.InnerException.Message }))
+                    Prompts = @($ui.Prompts)
+                    Posts   = @($script:Runspace.SessionStateProxy.GetVariable('Posts'))
+                }
+            }
+            finally { $ps.Dispose() }
+        }
+        $script:listing = @(
+            "  1. create the hospital 'DE_BER_CHA' named 'Example Hospital' below the country 'DE' and add it to the group HOSPITAL"
+            "  2. create the department 'DE_BER_CHA_NEO' named 'Example Hospital Neonatology' below the hospital 'DE_BER_CHA', add it to the group NEO_DEPARTMENT, and assign it to the program NEOIPC_CORE"
+        ) -join "`n"
+    }
+    AfterAll {
+        if ($script:Runspace) { $script:Runspace.Dispose() }
+    }
+
+    It 'shows one question that names the instance and every write, and writes nothing when the answer is No' {
+        $run = & $script:ask -Answers 'No'
+
+        $run.Prompts | Should -Be @("Write this on https://dhis2.example.org?`n$script:listing")
+        $run.Posts.Count | Should -Be 0
+        $run.Records.Count | Should -Be 2
+        $run.Records.Created | Should -Not -Contain $true
+    }
+
+    It 'writes what it listed when the answer is Yes, and asks nothing more' {
+        $run = & $script:ask -Answers 'Yes'
+
+        $run.Prompts.Count | Should -Be 1
+        $run.Posts | Should -Be @(
+            'api/organisationUnits'
+            'api/organisationUnitGroups/GroupHosp01/organisationUnits/HospitalUid1'
+            'api/organisationUnits'
+            'api/organisationUnitGroups/GroupNeoD01/organisationUnits/DepartmentU1'
+            'api/programs/ProgramUid01/organisationUnits/DepartmentU1')
+        $run.Records.Created | Should -Be @($true, $true)
+    }
+
+    It 'writes nothing where nobody can answer the question, and ends the call listing what it would have written' {
+        # With no answer left the host fails the question, as a PowerShell started with -NonInteractive fails it.
+        $run = & $script:ask
+
+        $run.Prompts.Count | Should -Be 1
+        $run.Posts.Count | Should -Be 0
+        $run.Records.Count | Should -Be 0
+        @($run.Errors | Where-Object { $_ -like "PowerShell could not ask before writing on https://dhis2.example.org, so nothing is written: give -Confirm:`$false to write without asking. The call would:*" }).Count | Should -Be 1
+        @($run.Errors | Where-Object { $_ -like "*$script:listing" }).Count | Should -Be 1
+    }
+
+    It 'asks its one question and nothing more when the caller passes -Confirm, which reaches every command it calls' {
+        $run = & $script:ask -Answers 'Yes' -Arguments '-Confirm'
+
+        $run.Prompts.Count | Should -Be 1
+        $run.Posts.Count | Should -Be 5
+    }
+
+    It 'ends at a refusal before it writes anything, although the caller passes -ErrorAction SilentlyContinue' {
+        $other = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Another Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
+
+        $run = & $script:ask -Arguments '-ErrorAction SilentlyContinue -Confirm:$false' -Existing @{ DE_BER_CHA = $other }
+
+        $run.Posts.Count | Should -Be 0
+        $run.Records.Count | Should -Be 0
+        @($run.Errors | Where-Object { $_ -like "The hospital 'DE_BER_CHA' exists in DHIS2 with the name 'Another Hospital'*" }).Count | Should -Be 1
     }
 }

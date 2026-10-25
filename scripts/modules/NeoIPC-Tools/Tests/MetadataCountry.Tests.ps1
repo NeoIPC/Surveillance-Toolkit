@@ -9,12 +9,15 @@
     a classification-history workbook the tests build with the OpenXml SDK in the World Bank's layout: title rows above
     the row of fiscal years, which begins in column C, then an economy per row with its code in column A, its classes as
     shared strings, and blank, absent, numeric, inline, and rich-text cells among them. The World Bank's API and the
-    workbook's download are mocked at Invoke-WebRequest, the module's way out to the network. The workbook is built
-    here rather than with the module's own writer, so that the reader is checked against the layout and not against a
-    writer that agrees with it.
+    workbook's download are mocked at Invoke-WebRequest, the module's way out to the network. The cases that run the
+    cmdlet as a console runs it, with no try above the call, which Pester puts around each test, do so in a runspace of
+    their own, where a stand-in takes Invoke-WebRequest's place, since Pester's mocks reach no other runspace. The
+    workbook is built here rather than with the module's own writer, so that the reader is checked against the layout
+    and not against a writer that agrees with it.
 
-    Every case reads the workbook, so the suite is skipped unless the DocumentFormat.OpenXml assembly is provisioned,
-    as the module's other workbook tests are.
+    The cases of Add-NeoIPCMetadataCountry and of the workbook reader read the workbook, so they are skipped unless the
+    DocumentFormat.OpenXml assembly is provisioned, as the module's other workbook tests are; those of
+    Restore-NeoIPCFileBackup read none and always run.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataCountry.Tests.ps1
@@ -192,12 +195,16 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
 
         InModuleScope NeoIPC-Tools {
             $script:CountryTestDownloads.Clear()
+            $script:CountryTestChange = $null
             # The API answers as the World Bank's does, HTTP 200 for a code it does not know too; TO gets a server error.
             # The download writes the test workbook where it is asked to.
             Mock Invoke-WebRequest {
                 if ([string]$Uri -cmatch '^https://api\.worldbank\.org/v2/country/(?<code>[A-Z]{2})\?format=json$') {
-                    if ($Matches['code'] -ceq 'TO') { return [pscustomobject]@{ StatusCode = 503; Content = 'Service Unavailable' } }
-                    return [pscustomobject]@{ StatusCode = 200; Content = $script:CountryTestResponses[$Matches['code']] }
+                    $code = $Matches['code']
+                    # Another run that writes the scaffold while this one waits for the World Bank.
+                    if ($script:CountryTestChange) { [System.IO.File]::AppendAllText($script:CountryTestChange.Path, $script:CountryTestChange.Text) }
+                    if ($code -ceq 'TO') { return [pscustomobject]@{ StatusCode = 503; Content = 'Service Unavailable' } }
+                    return [pscustomobject]@{ StatusCode = 200; Content = $script:CountryTestResponses[$code] }
                 }
                 if ([string]$Uri -ceq 'https://ddh-openapi.worldbank.org/resources/DR0095334/download') {
                     $script:CountryTestDownloads.Add($OutFile)
@@ -281,8 +288,8 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
     }
 
     It 'writes the three files all or none' {
-        # Pester 6 runs no real command for a call that no filter matches, so the unfiltered mock hands it to the
-        # function itself, taken from the module before it is mocked, since a mock's body sees none of its functions.
+        # Pester 6 throws for a call that no filter matches, so the unfiltered mock hands it to the function itself,
+        # taken from the module before it is mocked, since a mock's body sees none of its functions.
         $write = & (Get-Module -Name NeoIPC-Tools) { ${function:Write-NeoIPCMetadataCsv} }
         Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { & $write @PesterBoundParameters }
         Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { throw 'The disk is full.' } -ParameterFilter { $Path -like '*play*organisationUnits.csv' }
@@ -301,6 +308,55 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
         { Add-NeoIPCMetadataCountry -Code AR @script:params } | Should -Throw '*failed, so the files are as they were*disk is full*'
 
         & $script:unchanged
+    }
+
+    It 'names a file it could not put back when a later write fails, and puts back the others' {
+        # A file the call wrote that is a directory by the time it is put back cannot be written on any platform, as root
+        # neither.
+        $orgUnits = $script:files[0]
+        $write = & (Get-Module -Name NeoIPC-Tools) { ${function:Write-NeoIPCMetadataCsv} }
+        Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { & $write @PesterBoundParameters }
+        Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv {
+            Remove-Item -LiteralPath $orgUnits
+            [void](New-Item -ItemType Directory -Path $orgUnits)
+            throw 'The disk is full.'
+        } -ParameterFilter { $Path -like '*play*organisationUnits.csv' }
+        try {
+            { Add-NeoIPCMetadataCountry -Code AR @script:params } | Should -Throw "*failed, and $orgUnits could not be put back*disk is full*"
+
+            foreach ($file in $script:files[1], $script:files[2]) {
+                [System.Linq.Enumerable]::SequenceEqual([System.IO.File]::ReadAllBytes($file), $script:before[$file]) | Should -BeTrue -Because "$file is as it was"
+            }
+        }
+        finally {
+            Remove-Item -LiteralPath $orgUnits -Recurse -Force
+        }
+    }
+
+    It 'writes nothing when a file of the scaffold changes after the call read it, and keeps that change' {
+        $other = "WORLD_BANK_CLASS_H_FY_2026,ZZ`n"
+        InModuleScope NeoIPC-Tools -Parameters @{ Path = $script:files[1]; Text = $other } { $script:CountryTestChange = @{ Path = $Path; Text = $Text } }
+
+        { Add-NeoIPCMetadataCountry -Code AR @script:params } | Should -Throw "*$($script:files[1]) changed since the call read the scaffold, so nothing is written*"
+
+        $kept = [byte[]]($script:before[$script:files[1]] + [System.Text.Encoding]::UTF8.GetBytes($other))
+        [System.Linq.Enumerable]::SequenceEqual([System.IO.File]::ReadAllBytes($script:files[1]), $kept) | Should -BeTrue -Because 'the other run''s change is kept'
+        foreach ($file in $script:files[0], $script:files[2]) {
+            [System.Linq.Enumerable]::SequenceEqual([System.IO.File]::ReadAllBytes($file), $script:before[$file]) | Should -BeTrue -Because "$file is left as it was"
+        }
+    }
+
+    It 'writes nothing when a file of the scaffold changes between the reads of its bytes and its rows, and keeps that change' {
+        # The bytes the writer compares are read before the rows, so that a change in between fails that check.
+        $read = & (Get-Module -Name NeoIPC-Tools) { ${function:Read-NeoIPCMetadataCsv} }
+        Mock -ModuleName NeoIPC-Tools Read-NeoIPCMetadataCsv {
+            & $read @PesterBoundParameters
+            if ($Path -like '*common*organisationUnits.csv') { [System.IO.File]::AppendAllText($Path, "OtherRunUid,XX,Other,Other,2023-01-01,,2,RootUid0001,,`n") }
+        }
+
+        { Add-NeoIPCMetadataCountry -Code AR @script:params } | Should -Throw '*changed since the call read the scaffold*'
+
+        [System.IO.File]::ReadAllText($script:files[0]) | Should -BeLike '*OtherRunUid,XX,Other*'
     }
 
     It 'adds the rows to files that hold only their header' {
@@ -412,7 +468,9 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
         @{ Name = 'a country the scaffold has'; Code = 'AL'; Message = '*has the country ''AL'' already*' }
         @{ Name = 'a code .NET does not know'; Code = 'ZZ'; Message = '*''ZZ'' is not a country code that .NET knows*' }
         @{ Name = 'a code of the wrong shape'; Code = 'ar'; Message = '*not two upper-case letters*' }
+        @{ Name = 'a code that ends in a line feed'; Code = "AR`n"; Message = '*not two upper-case letters*' }
         @{ Name = 'a short name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 51 }; Message = '*51 characters long, and DHIS2 allows 50: give a short name*' }
+        @{ Name = 'a name that makes a test unit''s name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 213; ShortName = 'Argentina' }; Message = '*''Test Department - A*is 231 characters long, and DHIS2 allows 230*' }
         @{ Name = 'test units the play package has for a country the scaffold lacks'; Code = 'AR'; Setup = {
                 $playFile = $script:files[2]
                 @(Get-Content -LiteralPath $playFile) + 'StrayHosp01,AR_TEST,Stray,Stray,2023-01-01,,3,AlbaniaUid1,,' | Set-TestFileContent -LiteralPath $playFile
@@ -441,12 +499,87 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
                 @(Get-Content -LiteralPath $groupFile | Where-Object { $_ -notlike '*WORLD_BANK_CLASS_UM_FY_2026*' }) | Set-TestFileContent -LiteralPath $groupFile
             }; Message = '*has no group WORLD_BANK_CLASS_UM_FY_2026*'
         }
+        # The workbook's newest year matches the API, so only the scaffold's groups can tell that it is too old.
+        @{ Name = 'a history that ends before the newest fiscal year the scaffold''s groups cover'; Code = 'AR'; Setup = {
+                $groupFile = Join-Path $script:dir 'common/organisationUnitGroups.csv'
+                @(Get-Content -LiteralPath $groupFile) + 'WbGroup9999,WORLD_BANK_CLASS_UM_FY_2028,World Bank UM 2028,World Bank UM 2028,,,,NEOIPC_READ' | Set-TestFileContent -LiteralPath $groupFile
+            }; Message = '*has no fiscal year 2028, which the scaffold''s income-class groups cover, so it is older than the scaffold and nothing is written*'
+        }
     ) {
         if ($Setup) { & $Setup }
 
         { Add-NeoIPCMetadataCountry -Code $Code @script:params } | Should -Throw $Message
 
         & $script:unchanged
+    }
+
+    Context 'as a console runs it' {
+        BeforeAll {
+            # Runs the cmdlet with -Arguments as a console runs a line, in a runspace of its own with nothing around it:
+            # a try anywhere above a call, Pester's own included, makes an error that ends a statement unwind to it, where
+            # without one the next statement runs, and does the same to a throw under -ErrorAction SilentlyContinue, which
+            # PowerShell drops where no try is. Pester's mocks reach no other runspace, so a stand-in there records each
+            # request and answers it with -Response, or fails it when none is given. The runspace's host cannot ask a
+            # question. Returns the output, the error that ended the call, and the requests.
+            $script:atConsole = {
+                param([string]$Arguments, [string]$Response = '')
+                $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+                $runspace = [runspacefactory]::CreateRunspace()
+                $runspace.Open()
+                $ps = [powershell]::Create()
+                try {
+                    $ps.Runspace = $runspace
+                    $runspace.SessionStateProxy.SetVariable('Response', $Response)
+                    [void]$ps.AddScript(@"
+Import-Module '$($manifest.Replace("'", "''"))' -Force
+`$global:Requests = [System.Collections.Generic.List[string]]::new()
+function global:Invoke-WebRequest {
+    `$global:Requests.Add("`$args")
+    if (-not `$global:Response) { throw 'A test made an HTTP call.' }
+    [pscustomobject]@{ StatusCode = 200; Content = `$global:Response }
+}
+Add-NeoIPCMetadataCountry -MetadataDirectory '$($script:dir.Replace("'", "''"))' -ClassificationHistoryPath '$($script:history.Replace("'", "''"))' $Arguments
+"@)
+                    $thrown = $null
+                    $output = try { @($ps.Invoke()) } catch { $thrown = $_; @() }
+                    [pscustomobject]@{
+                        Output   = $output
+                        # Thrown out of the runspace's pipeline, which a throw that ends the call is there, or written to
+                        # its error stream, where an error that ends only the line's statement goes.
+                        Errors   = @(@($ps.Streams.Error | ForEach-Object { $_.Exception }) + @(if ($thrown) { $thrown.Exception.InnerException }))
+                        Requests = @($runspace.SessionStateProxy.GetVariable('Requests'))
+                    }
+                }
+                finally {
+                    $ps.Dispose()
+                    $runspace.Dispose()
+                }
+            }
+        }
+
+        It 'ends at a refusal with an error, asking and writing nothing, although the caller passes -ErrorAction SilentlyContinue' {
+            $run = & $script:atConsole -Arguments '-Code AL -Confirm:$false -ErrorAction SilentlyContinue'
+
+            $run.Output.Count | Should -Be 0
+            $run.Requests.Count | Should -Be 0
+            $run.Errors | Should -HaveCount 1
+            $run.Errors[0].Message | Should -BeLike '*has the country ''AL'' already*'
+            & $script:unchanged
+        }
+
+        It 'ends with an error where -Confirm asks and nobody can answer, writing nothing, although the caller passes -ErrorAction SilentlyContinue' {
+            $argentina = '[{"page":1,"pages":1,"per_page":"50","total":1},[{"id":"ARG","iso2Code":"AR","name":"Argentina","region":{"id":"LCN","value":"Region"},"incomeLevel":{"id":"UMC","value":"Income"}}]]'
+
+            $run = & $script:atConsole -Arguments '-Code AR -Confirm -ErrorAction SilentlyContinue' -Response $argentina
+
+            $run.Requests.Count | Should -Be 1 -Because 'the call reads the World Bank before it asks'
+            $run.Output.Count | Should -Be 0
+            # The question's failure, whose text is in the session's language.
+            $run.Errors | Should -HaveCount 1
+            $run.Errors[0] | Should -BeOfType ([System.Management.Automation.MethodInvocationException])
+            $run.Errors[0].InnerException | Should -BeOfType ([System.Management.Automation.Host.HostException])
+            & $script:unchanged
+        }
     }
 }
 
@@ -494,23 +627,49 @@ Describe 'Restore-NeoIPCFileBackup' {
 
         $unrestored = @(InModuleScope NeoIPC-Tools -Parameters @{ Backup = $backup } { Restore-NeoIPCFileBackup -Backup $Backup })
 
-        $unrestored | Should -Be @($blocked)
+        $unrestored.Count | Should -Be 1
+        $unrestored[0].Path | Should -BeExactly $blocked
+        $unrestored[0].Reason | Should -BeExactly 'Unwritable'
         [System.IO.File]::ReadAllText($changed) | Should -BeExactly 'before'
         [System.IO.File]::GetLastWriteTimeUtc($kept) | Should -Be $keptTime
     }
 
-    It 'puts back only a file that still holds what the call wrote, and returns one changed since, keeping its change' {
+    It 'puts back only a file that still holds what the call wrote, and returns one changed since or unreadable, keeping it' {
         $ours = Join-Path $TestDrive 'ours.csv'
         $theirs = Join-Path $TestDrive 'theirs.csv'
+        $gone = Join-Path $TestDrive 'gone.csv'
         [System.IO.File]::WriteAllText($ours, 'after')
         [System.IO.File]::WriteAllText($theirs, 'after and another run')
-        $backup = @{ $ours = [System.Text.Encoding]::UTF8.GetBytes('before'); $theirs = [System.Text.Encoding]::UTF8.GetBytes('before') }
-        $written = @{ $ours = [System.Text.Encoding]::UTF8.GetBytes('after'); $theirs = [System.Text.Encoding]::UTF8.GetBytes('after') }
+        # A path that is a directory by the time the call reads it cannot be read to tell whether it changed.
+        [void](New-Item -ItemType Directory -Path $gone)
+        $backup = @{ $ours = [System.Text.Encoding]::UTF8.GetBytes('before'); $theirs = [System.Text.Encoding]::UTF8.GetBytes('before'); $gone = [System.Text.Encoding]::UTF8.GetBytes('before') }
+        $written = @{ $ours = [System.Text.Encoding]::UTF8.GetBytes('after'); $theirs = [System.Text.Encoding]::UTF8.GetBytes('after'); $gone = [System.Text.Encoding]::UTF8.GetBytes('after') }
+
+        $unrestored = @(InModuleScope NeoIPC-Tools -Parameters @{ Backup = $backup; Written = $written; Paths = @($ours, $theirs, $gone) } { Restore-NeoIPCFileBackup -Backup $Backup -Written $Written -Path $Paths })
+
+        @($unrestored | ForEach-Object { "$($_.Reason) $($_.Path)" }) | Should -Be @("Changed $theirs", "Unreadable $gone")
+        [System.IO.File]::ReadAllText($ours) | Should -BeExactly 'before'
+        [System.IO.File]::ReadAllText($theirs) | Should -BeExactly 'after and another run'
+        Test-Path -LiteralPath $gone -PathType Container | Should -BeTrue
+    }
+
+    It 'takes a file emptied since the call wrote it for one that changed, not one it cannot read' {
+        $emptied = Join-Path $TestDrive 'emptied.csv'
+        [System.IO.File]::WriteAllBytes($emptied, [byte[]]@())
+        $backup = @{ $emptied = [System.Text.Encoding]::UTF8.GetBytes('before') }
+        $written = @{ $emptied = [System.Text.Encoding]::UTF8.GetBytes('after') }
 
         $unrestored = @(InModuleScope NeoIPC-Tools -Parameters @{ Backup = $backup; Written = $written } { Restore-NeoIPCFileBackup -Backup $Backup -Written $Written })
 
-        $unrestored | Should -Be @($theirs)
-        [System.IO.File]::ReadAllText($ours) | Should -BeExactly 'before'
-        [System.IO.File]::ReadAllText($theirs) | Should -BeExactly 'after and another run'
+        @($unrestored | ForEach-Object { "$($_.Reason) $($_.Path)" }) | Should -Be @("Changed $emptied")
+    }
+}
+
+Describe 'Write-NeoIPCMetadataCountryPlan' {
+    It 'takes a file of the scaffold that was empty when it was read, and still is, for one that did not change' {
+        $empty = Join-Path $TestDrive 'empty.csv'
+        [System.IO.File]::WriteAllBytes($empty, [byte[]]@())
+
+        { InModuleScope NeoIPC-Tools -Parameters @{ Path = $empty } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = [byte[]]@() }; Files = @() }) } } | Should -Not -Throw
     }
 }

@@ -54,6 +54,33 @@ Describe 'Get-NeoIPCMapCoordinates with parameters' {
         $result | Should -Not -BeNullOrEmpty
         $result.Latitude | Should -Be 0
     }
+
+    It 'reads coordinates given as text with a decimal point, in any culture' {
+        $culture = [cultureinfo]::CurrentCulture
+        try {
+            [cultureinfo]::CurrentCulture = [cultureinfo]::new('de-DE')
+            $result = Get-NeoIPCMapCoordinates -Latitude '52.52' -Longitude ' -13.405 '
+        }
+        finally {
+            [cultureinfo]::CurrentCulture = $culture
+        }
+
+        $result.Latitude | Should -Be 52.52
+        $result.Longitude | Should -Be -13.405
+    }
+
+    It 'takes blank text for coordinates not given, not for zero' {
+        Get-NeoIPCMapCoordinates -Latitude '' -Longitude ' ' -NonInteractive | Should -BeNullOrEmpty
+        { Get-NeoIPCMapCoordinates -Latitude '' -Longitude 13.405 -NonInteractive } | Should -Throw '*together, or neither*'
+    }
+
+    It 'refuses <Name>, naming the parameter' -ForEach @(
+        @{ Name = 'text with a decimal comma, which PowerShell would read as a thousands separator'; Arguments = @{ Latitude = '6,5'; Longitude = '13,4' }; Message = "*-Latitude '6,5' is not a number of decimal degrees written with a point*" }
+        @{ Name = 'text that is no number'; Arguments = @{ Latitude = '52.52'; Longitude = 'east' }; Message = "*-Longitude 'east' is not a number*" }
+        @{ Name = 'a value that is neither number nor text'; Arguments = @{ Latitude = $true; Longitude = 13.405 }; Message = '*-Latitude is a Boolean, not a number of decimal degrees*' }
+    ) {
+        { Get-NeoIPCMapCoordinates @Arguments -NonInteractive } | Should -Throw $Message
+    }
 }
 
 Describe 'Get-NeoIPCMapCoordinates asking for the coordinates' {
@@ -98,6 +125,13 @@ Describe 'Get-NeoIPCMapCoordinates asking for the coordinates' {
         { Get-NeoIPCMapCoordinates -Query 'Example Hospital' -InformationAction SilentlyContinue } | Should -Throw '*input ended*'
     }
 
+    It 'returns nothing, as with -NonInteractive, in a PowerShell that refuses to ask' -Skip:$noUser {
+        # What Read-Host throws in a PowerShell started with -NonInteractive.
+        Mock -ModuleName NeoIPC-Tools Read-Host { throw [System.Management.Automation.PSInvalidOperationException]::new('PowerShell is in NonInteractive mode. Read and Prompt functionality is not available.') }
+
+        Get-NeoIPCMapCoordinates -Query 'Example Hospital' -InformationAction SilentlyContinue | Should -BeNullOrEmpty
+    }
+
     It 'opens and asks for nothing under -NonInteractive' {
         Get-NeoIPCMapCoordinates -Query 'Example Hospital' -NonInteractive | Should -BeNullOrEmpty
 
@@ -116,15 +150,40 @@ Describe 'Get-NeoIPCMapCoordinates asking for the coordinates' {
     }
 
     It 'rejects <Text> as coordinates' -Skip:$noUser -ForEach @(
-        @{ Text = '91, 0' }
-        @{ Text = '0, 181' }
+        @{ Text = '91.0, 0.0' }
+        @{ Text = '0.0, 181.0' }
         @{ Text = '52,5200, 13,4050' }
         @{ Text = '52.5200' }
+        @{ Text = '48,137' }
+        @{ Text = '48, 11' }
     ) {
         $queue.Enqueue($Text)
         $queue.Enqueue('')
 
         Get-NeoIPCMapCoordinates -Query 'Example Hospital' -InformationAction SilentlyContinue -WarningAction SilentlyContinue | Should -BeNullOrEmpty
         Should -Invoke -ModuleName NeoIPC-Tools Read-Host -Times 2 -Exactly
+    }
+}
+
+Describe 'Get-NeoIPCMapCoordinates as a console runs it' {
+    It 'ends with its error at <Name>, although the caller passes -ErrorAction SilentlyContinue' -ForEach @(
+        @{ Name = 'a latitude out of range'; Arguments = '-Latitude 95 -Longitude 10'; Message = '*latitude lies between -90 and 90*' }
+        @{ Name = 'a decimal comma'; Arguments = "-Latitude '6,5' -Longitude '3,4'"; Message = "*-Latitude '6,5' is not a number of decimal degrees*" }
+    ) {
+        # As a console runs a line, in a runspace of its own with nothing around it: a try anywhere above a call,
+        # Pester's own included, makes a throw under -ErrorAction SilentlyContinue unwind to it, which PowerShell drops
+        # where no try is.
+        $manifest = Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'NeoIPC-Tools.psd1'
+        $ps = [powershell]::Create()
+        try {
+            [void]$ps.AddScript("Import-Module '$($manifest.Replace("'", "''"))' -Force`nGet-NeoIPCMapCoordinates $Arguments -NonInteractive -ErrorAction SilentlyContinue")
+            $thrown = $null
+            $output = try { @($ps.Invoke()) } catch { $thrown = $_; @() }
+            $errors = @(@($ps.Streams.Error | ForEach-Object { $_.Exception.Message }) + @(if ($thrown) { $thrown.Exception.InnerException.Message }))
+        }
+        finally { $ps.Dispose() }
+
+        $output.Count | Should -Be 0
+        @($errors | Where-Object { $_ -like $Message }).Count | Should -Be 1
     }
 }

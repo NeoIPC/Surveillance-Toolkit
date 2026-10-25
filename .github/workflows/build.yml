@@ -819,11 +819,15 @@ jobs:
             - name: Provision and test NeoIPC-Tools
               shell: pwsh
               run: |
-                # Provision the DocumentFormat.OpenXml assembly the .xlsx writer loads, then run the module
-                # tests so the OpenXmlValidator-backed XLSX schema-validity gate runs in CI (it is skipped only
-                # when the assembly is absent).
+                # Provision the DocumentFormat.OpenXml assembly that the .xlsx writer and the reader of the World
+                # Bank's classification workbook load, then run the module tests, so that the OpenXmlValidator-backed
+                # XLSX schema-validity gate and the workbook cases of MetadataCountry.Tests.ps1 run in CI: both are
+                # skipped when the assembly is absent.
                 dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin -c Release --nologo
-                Install-Module -Name Pester -MinimumVersion 5.5 -Force -Scope CurrentUser -SkipPublisherCheck
+                # The tests run under Pester 5 and 6. The major is pinned, since a new one can change what a mock
+                # does, as Pester 6 did by throwing for a call that no parameter filter matches, and is taken on
+                # deliberately rather than by whichever pull request runs first after its release.
+                Install-Module -Name Pester -MinimumVersion 6.0 -MaximumVersion 6.999 -Force -Scope CurrentUser -SkipPublisherCheck
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens, and ReportInterpolationHygiene reads
                 # the reports' string resources with it.
