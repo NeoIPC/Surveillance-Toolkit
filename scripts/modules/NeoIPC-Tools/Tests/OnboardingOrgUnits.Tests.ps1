@@ -281,13 +281,15 @@ Describe 'Add-NeoIPCPartnerSite' {
         }
     }
 
-    It 'refuses a position that is <Name> before it writes anything' -ForEach @(
-        @{ Name = 'half given'; Extra = @{ HospitalLatitude = 1.0 } }
-        @{ Name = 'a department''s half'; Extra = @{ DepartmentLongitude = 1.0 } }
-        @{ Name = 'a latitude beyond 90'; Extra = @{ HospitalLatitude = 91.0; HospitalLongitude = 0.0 } }
-        @{ Name = 'a longitude beyond 180'; Extra = @{ DepartmentLatitude = 0.0; DepartmentLongitude = 181.0 } }
+    It 'refuses a position that is <Name> before it writes anything, naming the parameter' -ForEach @(
+        @{ Name = 'half given'; Extra = @{ HospitalLatitude = 1.0 }; Parameter = 'HospitalLatitude' }
+        @{ Name = 'a department''s half'; Extra = @{ DepartmentLongitude = 1.0 }; Parameter = 'DepartmentLatitude' }
+        @{ Name = 'a latitude beyond 90'; Extra = @{ HospitalLatitude = 91.0; HospitalLongitude = 0.0 }; Parameter = 'HospitalLatitude' }
+        @{ Name = 'a longitude beyond 180'; Extra = @{ DepartmentLatitude = 0.0; DepartmentLongitude = 181.0 }; Parameter = 'DepartmentLongitude' }
     ) {
-        { Add-NeoIPCPartnerSite @script:params @Extra } | Should -Throw
+        $failure = { Add-NeoIPCPartnerSite @script:params @Extra } | Should -Throw -ExceptionType ([System.ArgumentException]) -PassThru
+
+        $failure.Exception.ParamName | Should -BeExactly $Parameter
 
         Should -Invoke -ModuleName NeoIPC-Tools Invoke-NeoIPCDhis2Post -Times 0 -Exactly
     }
@@ -328,6 +330,21 @@ Describe 'Add-NeoIPCPartnerSite' {
         $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = ' EXAMPLE hospital '; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
 
         $result = Add-NeoIPCPartnerSite @script:params
+
+        $result[0].GroupsAdded | Should -Be @('HOSPITAL')
+    }
+
+    It 'takes an existing unit whose name differs from the one given only <Name>' -ForEach @(
+        # DHIS2 holds the a with its diaeresis as one character, and it is given as an a and the combining diaeresis.
+        @{ Name = 'in whether a letter with a diacritic is one character or two'; Held = "Universit$([char]0x00E4)t Hospital"; Given = "Universita$([char]0x0308)t Hospital" }
+        # j with a caron has a character of its own, J with a caron has none.
+        @{ Name = 'in case, at a letter whose diacritic only one case composes'; Held = "j$([char]0x030C)ilin hospital"; Given = "J$([char]0x030C)ilin Hospital" }
+    ) {
+        $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = $Held; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
+        $params = $script:params.Clone()
+        $params.HospitalName = $Given
+
+        $result = Add-NeoIPCPartnerSite @params
 
         $result[0].GroupsAdded | Should -Be @('HOSPITAL')
     }
@@ -486,6 +503,8 @@ Describe 'Add-NeoIPCPartnerSite' {
         @{ Name = 'a coordinate written with a decimal comma'; Extra = @{ HospitalLatitude = '52,52'; HospitalLongitude = '13,405' }; Message = '*-HospitalLatitude ''52,52'' is not a number of decimal degrees written with a point*' }
         @{ Name = 'a hospital code that ends in a line feed'; Extra = @{ HospitalCode = "DE_BER_CHA`n" }; Message = '*does not have the form <country>_<location>_<acronym>*' }
         @{ Name = 'a country code that ends in a line feed'; Extra = @{ CountryCode = "DE`n" }; Message = '*is not two upper-case letters*' }
+        @{ Name = 'a department code that ends in a line feed'; Extra = @{ DepartmentCode = "DE_BER_CHA_NEO`n" }; Message = '*department code*is not the hospital code ''DE_BER_CHA'', an underscore*' }
+        @{ Name = 'a department code of another hospital'; Extra = @{ DepartmentCode = 'DE_BER_XYZ_NEO' }; Message = '*department code ''DE_BER_XYZ_NEO'' is not the hospital code*' }
     ) {
         $bad = $script:params.Clone()
         foreach ($key in $Extra.Keys) { $bad[$key] = $Extra[$key] }
@@ -1000,16 +1019,20 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
         foreach (`$wanted in `$Code) { if (`$global:Existing.ContainsKey(`$wanted)) { `$byCode[`$wanted] = `$global:Existing[`$wanted] } }
         [pscustomobject]@{ Units = @(`$byCode.Values); ByCode = `$byCode; ById = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal) }
     }
+    # Each helper asks as the real one does, at its ConfirmImpact, so that a call made without -Confirm:`$false asks
+    # under a caller's -Confirm.
     function script:Invoke-NeoIPCDhis2Get {
-        [CmdletBinding(SupportsShouldProcess)]
+        [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
         param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path, `$Filter, `$Fields, [switch]`$AsHashtable)
+        if (-not `$PSCmdlet.ShouldProcess("GET `$Path", 'Read DHIS2 data')) { return }
         if (`$Path -ceq 'api/organisationUnitGroups') { return @{ organisationUnitGroups = @(@{ id = 'GroupHosp01'; code = 'HOSPITAL' }, @{ id = 'GroupNeoD01'; code = 'NEO_DEPARTMENT' }) } }
         if (`$Path -ceq 'api/programs') { return @{ programs = @(@{ id = 'ProgramUid01'; code = 'NEOIPC_CORE' }) } }
         throw "unexpected read of `$Path"
     }
     function script:Invoke-NeoIPCDhis2Post {
-        [CmdletBinding(SupportsShouldProcess)]
+        [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
         param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path, `$Body)
+        if (-not `$PSCmdlet.ShouldProcess("POST `$Path", 'Send data to DHIS2')) { return }
         `$global:Posts.Add(`$Path)
         if (`$Path -ceq 'api/organisationUnits') {
             `$uid = @{ DE_BER_CHA = 'HospitalUid1'; DE_BER_CHA_NEO = 'DepartmentU1' }[(`$Body | ConvertFrom-Json).code]

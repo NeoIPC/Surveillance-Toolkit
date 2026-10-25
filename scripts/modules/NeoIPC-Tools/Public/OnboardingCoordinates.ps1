@@ -13,9 +13,10 @@ With neither given, in an interactive session, the cmdlet opens Google Maps in t
 coordinates at the top of the menu, and paste ("52.5200, 13.4050"). An empty answer skips them, and an input that has
 ended stops the call. A text of another shape, such as one number with a decimal comma, is asked for again. With
 -NonInteractive, or in a session that Windows reports as having no user, nothing is opened or asked, and the cmdlet
-returns nothing. A PowerShell started with -NonInteractive refuses the question, which the cmdlet learns only by
-asking, so it returns nothing there too, after it has opened the map. Elsewhere than on Windows, .NET reports every
-session as having a user.
+returns nothing. A PowerShell started with -NonInteractive refuses the question, as does a host without a user
+interface, such as the default host of a runspace a program creates, which the cmdlet learns only by asking, so it
+returns nothing there too, after it has opened the map. Elsewhere than on Windows, .NET reports every session as having
+a user.
 
 Exactly one of -Latitude and -Longitude is an error, and so is a value outside +-90 degrees (latitude) or +-180
 degrees (longitude). Whatever -ErrorAction says, an error ends the call.
@@ -91,10 +92,10 @@ function Get-NeoIPCMapCoordinates {
     Write-Information -MessageData "Opening the map: $url" -InformationAction ($PSBoundParameters['InformationAction'] ?? 'Continue')
     Open-NeoIPCUrl -Url $url
     while ($true) {
-        # A PowerShell started with -NonInteractive refuses the question (Test-NeoIPCInteractive says why that is not
-        # known before): nobody can be asked, as with -NonInteractive.
+        # A PowerShell started with -NonInteractive, or a host without a user interface, refuses the question
+        # (Test-NeoIPCInteractive says why that is not known before): nobody can be asked, as with -NonInteractive.
         try { $answer = Read-Host -Prompt "Coordinates of $Label as copied from the map, latitude and longitude (empty to skip)" }
-        catch [System.Management.Automation.PSInvalidOperationException] { return }
+        catch [System.Management.Automation.PSInvalidOperationException], [System.Management.Automation.Host.HostException] { return }
         # An empty answer skips the coordinates, so an input that has ended must not be taken for one.
         if ($null -eq $answer) { throw [System.OperationCanceledException]::new("The input ended before the coordinates of $Label.") }
         if ([string]::IsNullOrWhiteSpace($answer)) { return }

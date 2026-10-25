@@ -42,11 +42,11 @@ The cmdlet is safe to repeat. A unit that exists is kept, not changed, and only 
 department, a missing assignment to the program are added. A code names one unit in DHIS2, so a hospital whose
 parent is not the country, or a department whose parent is not the hospital, ends the call before anything is
 written, and so does a hospital or department that DHIS2 holds under another name than the one given, which may be
-another partner's unit under the same code; names that differ only in case, or in spaces at either end, count as the
-same. Every unit and membership is looked up and written only within your hierarchy and with your authorities, so an
-org unit outside it reads as missing. A write counts as done only when DHIS2's own answer says so, and the answer to
-a creation names the id; a write that fails after the call wrote something names everything the call wrote, with its
-id.
+another partner's unit under the same code; names that differ only in case, in spaces at either end, or in whether a
+letter with a diacritic is written as one character or two, count as the same. Every unit and membership is looked up
+and written only within your hierarchy and with your authorities, so an org unit outside it reads as missing. A write
+counts as done only when DHIS2's own answer says so, and the answer to a creation names the id; a write that fails
+after the call wrote something names everything the call wrote, with its id.
 
 Once everything has been read, the cmdlet asks once before it writes, naming the instance and listing every write:
 the addition to the country list, the units it creates, and the memberships and the program assignment it adds.
@@ -75,8 +75,8 @@ The hospital's name.
 The hospital's short name. Default: the name.
 
 .PARAMETER DepartmentCode
-The department's code. Default: the hospital code and '_NEO', since a hospital has one neonatology department;
-give it for the hospital that has more.
+The department's code: the hospital code, an underscore, and upper-case letters A-Z or digits 0-9. Default: the
+hospital code and '_NEO', since a hospital has one neonatology department; give it for the hospital that has more.
 
 .PARAMETER DepartmentName
 The department's name.
@@ -230,8 +230,11 @@ function Add-NeoIPCPartnerSite {
             throw [System.ArgumentException]::new("Give the $($pair[0].ToLowerInvariant())'s latitude and longitude together, or neither.", "$($pair[0])Latitude")
         }
         # Asked as "within range", so that NaN, which no comparison holds for, is refused too.
-        if ($null -ne $pair[1] -and -not ([math]::Abs($pair[1]) -le 90 -and [math]::Abs($pair[2]) -le 180)) {
-            throw [System.ArgumentOutOfRangeException]::new("$($pair[0])Latitude", "The $($pair[0].ToLowerInvariant())'s latitude lies between -90 and 90 degrees and its longitude between -180 and 180.")
+        if ($null -ne $pair[1] -and -not ([math]::Abs($pair[1]) -le 90)) {
+            throw [System.ArgumentOutOfRangeException]::new("$($pair[0])Latitude", $pair[1], "The $($pair[0].ToLowerInvariant())'s latitude lies between -90 and 90 degrees.")
+        }
+        if ($null -ne $pair[2] -and -not ([math]::Abs($pair[2]) -le 180)) {
+            throw [System.ArgumentOutOfRangeException]::new("$($pair[0])Longitude", $pair[2], "The $($pair[0].ToLowerInvariant())'s longitude lies between -180 and 180 degrees.")
         }
     }
     # A department stands where its hospital does unless it is given a position of its own.
@@ -242,9 +245,15 @@ function Add-NeoIPCPartnerSite {
         @{ Kind = 'Department'; Code = $DepartmentCode; Name = $DepartmentName; ShortName = ($DepartmentShortName ? $DepartmentShortName : $DepartmentName); OpeningDate = $opening; At = $departmentAt }
     )
     # DHIS2 keeps a name to 230 characters, a short name and a code to 50, and a code to one org unit, so a value that
-    # breaks any of these would be refused only after the hospital was written.
+    # breaks any of these would be refused only after an earlier write, the country's or the hospital's.
     if ($DepartmentCode -ceq $HospitalCode) {
         throw [System.ArgumentException]::new("The department code '$DepartmentCode' is the hospital's code, and DHIS2 gives a code to one org unit only.", 'DepartmentCode')
+    }
+    # A department's code is its hospital's and a suffix, as <hospital>_NEO and the test departments' <country>_TEST_TEST
+    # are, in the letters of the hospital code, so that one of another shape, such as one ending in a line feed, is refused
+    # before it is looked up.
+    if ($DepartmentCode -cnotmatch "\A$([regex]::Escape($HospitalCode))_[A-Z0-9]+\z") {
+        throw [System.ArgumentException]::new("The department code '$DepartmentCode' is not the hospital code '$HospitalCode', an underscore, and upper-case letters A-Z or digits 0-9.", 'DepartmentCode')
     }
     foreach ($unit in $units) {
         if ($unit.Name.Length -gt 230) {
@@ -353,7 +362,7 @@ function Add-NeoIPCPartnerSite {
         $parentId = [string]$near.ByCode[$parentCode]['id']
         # An org unit below the parent that carries the country's name under another code is the country already.
         $siblings = Get-NeoIPCHierarchyOrgUnit -Endpoint $endpoint -Filter "parent.id:eq:$parentId" -Fields 'name', 'code'
-        $twin = @($siblings | Where-Object { [string]::Equals(([string]$_['name']).Trim(), $planned.Name.Trim(), [System.StringComparison]::OrdinalIgnoreCase) })
+        $twin = @($siblings | Where-Object { [string]::Equals(([string]$_['name']).Trim().Normalize([System.Text.NormalizationForm]::FormD), $planned.Name.Trim().Normalize([System.Text.NormalizationForm]::FormD), [System.StringComparison]::OrdinalIgnoreCase) })
         if ($twin.Count -gt 0) {
             throw [System.InvalidOperationException]::new("${missing}, but the org unit '$([string]$twin[0]['name'])' below '$parentCode' carries the country's name under the code '$([string]$twin[0]['code'])': give it the code $CountryCode, or correct the country list, so that the country does not exist twice.")
         }
@@ -394,7 +403,11 @@ function Add-NeoIPCPartnerSite {
             @{ Kind = 'department'; Unit = $department; Code = $DepartmentCode; Name = $DepartmentName; Remedy = "give -DepartmentName as DHIS2 has it if the department is this partner's, or another -DepartmentCode" })) {
         if (-not $check.Unit) { continue }
         $held = [string]$check.Unit['name']
-        if (-not [string]::Equals($held.Trim(), $check.Name.Trim(), [System.StringComparison]::OrdinalIgnoreCase)) {
+        # Decomposed, since a letter with a diacritic can be written as one character or two, as input methods differ, and
+        # composing would make a pair that differs in case unequal where only one case has a character of its own (J and
+        # j with a caron).
+        $form = [System.Text.NormalizationForm]::FormD
+        if (-not [string]::Equals($held.Trim().Normalize($form), $check.Name.Trim().Normalize($form), [System.StringComparison]::OrdinalIgnoreCase)) {
             throw [System.InvalidOperationException]::new("The $($check.Kind) '$($check.Code)' exists in DHIS2 with the name '$held' and the id $([string]$check.Unit['id']), not with the name '$($check.Name)', so it may be another partner's: $($check.Remedy).")
         }
     }

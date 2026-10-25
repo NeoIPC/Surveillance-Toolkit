@@ -77,10 +77,11 @@ which to use: the code, or the parts, whose missing members then come from the c
 than its own (New-NeoIPCHospitalCode describes them) ends the call before anything is opened or asked.
 
 Nobody is asked, and a missing part or a contradiction is an error, with -NonInteractive or in a session that Windows
-reports as having no user; nothing is opened then. A PowerShell started with -NonInteractive refuses the question,
-which the cmdlet learns only by asking, so there it ends with the same error, after it has opened the UN/LOCODE page
-when the question was for the country or the location. Elsewhere than on Windows, .NET reports every session as
-having a user. Whatever -ErrorAction says, an error ends the call.
+reports as having no user; nothing is opened then. A PowerShell started with -NonInteractive refuses the question, as
+does a host without a user interface, such as the default host of a runspace a program creates, which the cmdlet
+learns only by asking, so there it ends with the same error, after it has opened the UN/LOCODE page when the question
+was for the country or the location; an input that has ended does the same. Elsewhere than on Windows, .NET reports
+every session as having a user. Whatever -ErrorAction says, an error ends the call.
 
 .PARAMETER HospitalCode
 The whole code, such as DE_BER_CHA.
@@ -140,8 +141,12 @@ function Resolve-NeoIPCHospitalCode {
     if ([string]::IsNullOrEmpty($HospitalCode)) {
         $missing = @($script:NeoIPCHospitalCodeParts.Keys | Where-Object { [string]::IsNullOrEmpty($given[$_]) })
         if ($missing.Count -gt 0) {
-            $nobody = [System.ArgumentException]::new("Missing: $($missing -join ', ').", $missing[0])
-            if (-not (Test-NeoIPCInteractive -NonInteractive:$NonInteractive)) { throw $nobody }
+            # Built when it is thrown, so that it names only the parts still missing then.
+            $nobody = {
+                $left = @($script:NeoIPCHospitalCodeParts.Keys | Where-Object { [string]::IsNullOrEmpty($given[$_]) })
+                [System.ArgumentException]::new("Missing: $($left -join ', ').", $left[0])
+            }
+            if (-not (Test-NeoIPCInteractive -NonInteractive:$NonInteractive)) { throw (& $nobody) }
             try {
                 # The directory page depends on the country, so the country is asked first and the page for the
                 # location is opened once it is known; the list of countries is opened only to look the country up.
@@ -152,12 +157,15 @@ function Resolve-NeoIPCHospitalCode {
                         Write-Information -MessageData "Opening the UN/LOCODE directory: $url" -InformationAction ($PSBoundParameters['InformationAction'] ?? 'Continue')
                         Open-NeoIPCUrl -Url $url
                     }
-                    $given[$name] = Read-NeoIPCHospitalCodePart -Name $name
+                    $answer = Read-NeoIPCHospitalCodePart -Name $name
+                    # An input that has ended is nobody to ask, as at the contradiction below.
+                    if ($null -eq $answer) { throw (& $nobody) }
+                    $given[$name] = $answer
                 }
             }
-            # A PowerShell started with -NonInteractive refuses the first question; Test-NeoIPCInteractive says why it is
-            # not known before.
-            catch [System.Management.Automation.PSInvalidOperationException] { throw $nobody }
+            # A PowerShell that cannot ask refuses the first question; Test-NeoIPCInteractive says why it is not known
+            # before.
+            catch [System.Management.Automation.PSInvalidOperationException], [System.Management.Automation.Host.HostException] { throw (& $nobody) }
         }
         return New-NeoIPCHospitalCode -Country $given['Country'] -Location $given['Location'] -Acronym $given['Acronym']
     }
@@ -174,9 +182,10 @@ function Resolve-NeoIPCHospitalCode {
     if (-not (Test-NeoIPCInteractive -NonInteractive:$NonInteractive)) { throw $contradiction }
     Write-Warning "The hospital code '$HospitalCode' and its parts contradict each other: $detail."
     while ($true) {
-        # Read-Host returns nothing at the end of its input, and a PowerShell started with -NonInteractive refuses the
-        # question: either way, nobody is there to choose.
-        $choice = try { Read-Host -Prompt 'Use the code (c) or the parts (p)?' } catch [System.Management.Automation.PSInvalidOperationException] { $null }
+        # Read-Host returns nothing at the end of its input, and a PowerShell that cannot ask refuses the question:
+        # either way, nobody is there to choose.
+        $choice = try { Read-Host -Prompt 'Use the code (c) or the parts (p)?' }
+        catch [System.Management.Automation.PSInvalidOperationException], [System.Management.Automation.Host.HostException] { $null }
         if ($null -eq $choice) { throw $contradiction }
         if ($choice.Trim() -ieq 'c') { return $HospitalCode }
         if ($choice.Trim() -ieq 'p') {

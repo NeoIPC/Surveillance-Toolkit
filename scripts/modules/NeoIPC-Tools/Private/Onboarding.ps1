@@ -44,8 +44,9 @@ function Assert-NeoIPCHospitalCodePart {
 # a session without a user apart; .NET reports every session elsewhere as having one. PowerShell offers no way to ask
 # whether its host can put a question: a pwsh started with -NonInteractive shows the switch only in the process's
 # command line, among its own parameters, which end where the script or command it runs begins, and a program that
-# hosts PowerShell has a command line of its own. So the callers learn it when Read-Host refuses a question there with a
-# PSInvalidOperationException, which they take as nobody to ask.
+# hosts PowerShell has a command line of its own. So the callers learn it when Read-Host refuses a question, with a
+# PSInvalidOperationException where pwsh was started with -NonInteractive, and with a HostException in a host without a
+# user interface, such as the default host of a runspace a program creates; they take either as nobody to ask.
 function Test-NeoIPCInteractive {
     [CmdletBinding()]
     [OutputType([bool])]
@@ -127,8 +128,9 @@ function Test-NeoIPCDhis2Refusal {
     [string]$status -ceq 'ERROR'
 }
 
-# Ask for one part of the hospital code until the answer has its shape. An empty answer, or an input that has ended,
-# ends the call; a PowerShell that refuses to ask throws Read-Host's PSInvalidOperationException, which the caller takes.
+# Ask for one part of the hospital code until the answer has its shape. An empty answer ends the call; an input that has
+# ended returns nothing, and a PowerShell that cannot ask throws Read-Host's refusal, both of which the caller takes as
+# nobody to ask.
 function Read-NeoIPCHospitalCodePart {
     [CmdletBinding()]
     [OutputType([string])]
@@ -141,6 +143,7 @@ function Read-NeoIPCHospitalCodePart {
     $shape = $script:NeoIPCHospitalCodeParts[$Name]
     while ($true) {
         $answer = Read-Host -Prompt "$Name ($($shape.Expected))"
+        if ($null -eq $answer) { return }
         if ([string]::IsNullOrWhiteSpace($answer)) {
             throw [System.OperationCanceledException]::new("No $Name given.")
         }

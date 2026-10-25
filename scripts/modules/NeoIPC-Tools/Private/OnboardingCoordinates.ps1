@@ -59,5 +59,8 @@ function ConvertTo-NeoIPCCoordinate {
     }
     $type = [System.Type]::GetTypeCode($Value.GetType())
     if ($type -ge [System.TypeCode]::SByte -and $type -le [System.TypeCode]::Decimal) { return [double]$Value }
-    throw [System.ArgumentException]::new("-$Name is a $($Value.GetType().Name), not a number of decimal degrees.", $Name)
+    if ($Value -is [System.Collections.IList]) {
+        throw [System.ArgumentException]::new("-$Name is a list of $($Value.Count) values, not one number of decimal degrees such as 52.52: written with a comma and unquoted, a number is a list to PowerShell.", $Name)
+    }
+    throw [System.ArgumentException]::new("-$Name is of type $($Value.GetType().Name), not a number of decimal degrees such as 52.52.", $Name)
 }

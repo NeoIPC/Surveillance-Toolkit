@@ -159,15 +159,18 @@ function Get-NeoIPCMetadataCountryPlan {
     }
     if ([string]::IsNullOrWhiteSpace($Name)) { $Name = $region.EnglishName }
     if ([string]::IsNullOrWhiteSpace($ShortName)) { $ShortName = $Name }
+    # The messages name no parameter, since the callers name the country's names differently: -ShortName and -Name, or
+    # -CountryShortName and -CountryName.
     if ($ShortName.Length -gt 50) {
-        throw [System.ArgumentException]::new("The short name '$ShortName' is $($ShortName.Length) characters long, and DHIS2 allows 50: give a short name.", 'ShortName')
+        throw [System.ArgumentException]::new("The country's short name '$ShortName' is $($ShortName.Length) characters long, and DHIS2 allows 50: give a shorter one.")
     }
-    # DHIS2 keeps a name to 230 characters, the names of the test units too, which are built from the country's.
+    # DHIS2 keeps a name to 230 characters, the names of the test units too, which are built from the country's: the
+    # longest, the test department's, leaves 212 for the country's.
     $testHospitalName = "Test Hospital - $Name"
     $testDepartmentName = "Test Department - $Name"
     foreach ($unitName in $Name, $testHospitalName, $testDepartmentName) {
         if ($unitName.Length -gt 230) {
-            throw [System.ArgumentException]::new("The name '$unitName' is $($unitName.Length) characters long, and DHIS2 allows 230: give a shorter name for the country.", 'Name')
+            throw [System.ArgumentException]::new("The name '$unitName' is $($unitName.Length) characters long, and DHIS2 allows 230: give the country a name of at most $(230 - 'Test Department - '.Length) characters, which its test department's name leaves.")
         }
     }
 
@@ -241,8 +244,15 @@ function Get-NeoIPCMetadataCountryPlan {
         # the country would miss that year's membership, which every country has.
         $uncovered = @($years | Where-Object { -not $history.ContainsKey($_) })
         if ($uncovered.Count -gt 0) {
-            $source = [string]::IsNullOrWhiteSpace($ClassificationHistoryPath) ? 'The World Bank''s classification history' : "The classification history '$ClassificationHistoryPath'"
-            throw [System.InvalidOperationException]::new("$source has no fiscal year $($uncovered -join ' or '), which the scaffold's income-class groups cover, so it is older than the scaffold and nothing is written: give a newer copy, or leave out -ClassificationHistoryPath to download it.")
+            # The remedy depends on the source: the download is the World Bank's newest, and Add-NeoIPCPartnerSite, which
+            # adds a country through this plan, takes no copy of its own.
+            $message = if ([string]::IsNullOrWhiteSpace($ClassificationHistoryPath)) {
+                "The World Bank's classification history has no fiscal year $($uncovered -join ' or '), which the scaffold's income-class groups cover, so nothing is written: once the World Bank has published that year, run the call again, or add the country with Add-NeoIPCMetadataCountry -ClassificationHistoryPath and a copy that covers it."
+            }
+            else {
+                "The classification history '$ClassificationHistoryPath' has no fiscal year $($uncovered -join ' or '), which the scaffold's income-class groups cover, so it is older than the scaffold and nothing is written: give a newer copy, or leave out -ClassificationHistoryPath to download the World Bank's newest."
+            }
+            throw [System.InvalidOperationException]::new($message)
         }
         # The API's current class and the workbook's newest year are the same classification, unless the workbook is
         # older than the API's; INX is the API's word for a year the workbook leaves blank or marks '..'.
@@ -332,20 +342,28 @@ function Get-NeoIPCMetadataCountryPlan {
 function Write-NeoIPCMetadataCountryPlan {
     # Write the files of a plan from Get-NeoIPCMetadataCountryPlan, all or none: when a write fails, the files written
     # so far are put back and the call ends, naming any file it could not put back. A file of the scaffold that no longer
-    # holds what the plan read, changed since by another run, an editor, or git, ends the call before anything is
-    # written, since the plan's rows would discard that change. Returns what the files held before (Before) and what the
-    # call wrote (Written), each path -> bytes, for a caller that has to put them back later.
+    # holds what the plan read, changed since by another run, an editor, or git, or gone, ends the call before anything
+    # is written, since the plan's rows would discard that change, and so does one that cannot be read, named with the
+    # reason. Returns what the files held before (Before) and what the call wrote (Written), each path -> bytes, for a
+    # caller that has to put them back later.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][pscustomobject]$Plan)
 
     $ErrorActionPreference = 'Stop'
-    $changed = @($Plan.Read.Keys | Sort-Object | Where-Object {
-            # The comma keeps the bytes one array through the try's output, an empty file's too, so that $null means
-            # only a file that could not be read.
-            $now = try { , [System.IO.File]::ReadAllBytes($_) } catch { $null }
-            $null -eq $now -or -not [System.Linq.Enumerable]::SequenceEqual([byte[]]$now, [byte[]]$Plan.Read[$_])
-        })
+    $changed = [System.Collections.Generic.List[string]]::new()
+    $unreadable = [System.Collections.Generic.List[string]]::new()
+    foreach ($path in @($Plan.Read.Keys | Sort-Object)) {
+        # A file that is gone has changed too; one that is there but cannot be read, such as one an editor holds open,
+        # is named with the reason, since running the call again would not help.
+        try { $now = [System.IO.File]::ReadAllBytes($path) }
+        catch [System.IO.FileNotFoundException], [System.IO.DirectoryNotFoundException] { $changed.Add($path); continue }
+        catch { $unreadable.Add("$path ($($_.Exception.Message))"); continue }
+        if (-not [System.Linq.Enumerable]::SequenceEqual([byte[]]$now, [byte[]]$Plan.Read[$path])) { $changed.Add($path) }
+    }
+    if ($unreadable.Count -gt 0) {
+        throw [System.IO.IOException]::new("$($unreadable -join ' and ') could not be read, so nothing is written.")
+    }
     if ($changed.Count -gt 0) {
         throw [System.IO.IOException]::new("$($changed -join ' and ') changed since the call read the scaffold, so nothing is written: run the call again, which reads the scaffold anew.")
     }

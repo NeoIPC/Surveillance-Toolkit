@@ -77,7 +77,8 @@ Describe 'Get-NeoIPCMapCoordinates with parameters' {
     It 'refuses <Name>, naming the parameter' -ForEach @(
         @{ Name = 'text with a decimal comma, which PowerShell would read as a thousands separator'; Arguments = @{ Latitude = '6,5'; Longitude = '13,4' }; Message = "*-Latitude '6,5' is not a number of decimal degrees written with a point*" }
         @{ Name = 'text that is no number'; Arguments = @{ Latitude = '52.52'; Longitude = 'east' }; Message = "*-Longitude 'east' is not a number*" }
-        @{ Name = 'a value that is neither number nor text'; Arguments = @{ Latitude = $true; Longitude = 13.405 }; Message = '*-Latitude is a Boolean, not a number of decimal degrees*' }
+        @{ Name = 'a value that is neither number nor text'; Arguments = @{ Latitude = $true; Longitude = 13.405 }; Message = '*-Latitude is of type Boolean, not a number of decimal degrees such as 52.52.*' }
+        @{ Name = 'a number written with an unquoted decimal comma, which PowerShell binds as a list'; Arguments = @{ Latitude = @(52, 52); Longitude = 13.405 }; Message = '*-Latitude is a list of 2 values, not one number of decimal degrees such as 52.52: written with a comma and unquoted*' }
     ) {
         { Get-NeoIPCMapCoordinates @Arguments -NonInteractive } | Should -Throw $Message
     }
@@ -125,11 +126,25 @@ Describe 'Get-NeoIPCMapCoordinates asking for the coordinates' {
         { Get-NeoIPCMapCoordinates -Query 'Example Hospital' -InformationAction SilentlyContinue } | Should -Throw '*input ended*'
     }
 
-    It 'returns nothing, as with -NonInteractive, in a PowerShell that refuses to ask' -Skip:$noUser {
-        # What Read-Host throws in a PowerShell started with -NonInteractive.
-        Mock -ModuleName NeoIPC-Tools Read-Host { throw [System.Management.Automation.PSInvalidOperationException]::new('PowerShell is in NonInteractive mode. Read and Prompt functionality is not available.') }
+    It 'returns nothing, as with -NonInteractive, in <Name>' -Skip:$noUser -ForEach @(
+        @{ Name = 'a PowerShell started with -NonInteractive, which refuses to ask'; Refusal = [System.Management.Automation.PSInvalidOperationException]::new('PowerShell is in NonInteractive mode. Read and Prompt functionality is not available.') }
+        @{ Name = 'a host without a user interface, which refuses to ask'; Refusal = [System.Management.Automation.Host.HostException]::new('A command that prompts the user failed because the host program or the command type does not support user interaction.') }
+    ) {
+        Mock -ModuleName NeoIPC-Tools Read-Host -MockWith ({ throw $Refusal }.GetNewClosure())
 
         Get-NeoIPCMapCoordinates -Query 'Example Hospital' -InformationAction SilentlyContinue | Should -BeNullOrEmpty
+    }
+
+    It 'takes a pasted pair separated by <Name>' -Skip:$noUser -ForEach @(
+        @{ Name = 'a space'; Text = '52.5200 13.4050'; Latitude = 52.52; Longitude = 13.405 }
+        @{ Name = 'a tab'; Text = "-1.2921`t36.8219"; Latitude = -1.2921; Longitude = 36.8219 }
+    ) {
+        $queue.Enqueue($Text)
+
+        $result = Get-NeoIPCMapCoordinates -Query 'Example Hospital' -InformationAction SilentlyContinue
+
+        $result.Latitude | Should -Be $Latitude
+        $result.Longitude | Should -Be $Longitude
     }
 
     It 'opens and asks for nothing under -NonInteractive' {

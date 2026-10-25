@@ -17,7 +17,7 @@
 
     The cases of Add-NeoIPCMetadataCountry and of the workbook reader read the workbook, so they are skipped unless the
     DocumentFormat.OpenXml assembly is provisioned, as the module's other workbook tests are; those of
-    Restore-NeoIPCFileBackup read none and always run.
+    Restore-NeoIPCFileBackup and Write-NeoIPCMetadataCountryPlan read none and always run.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/MetadataCountry.Tests.ps1
@@ -359,6 +359,15 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
         [System.IO.File]::ReadAllText($script:files[0]) | Should -BeLike '*OtherRunUid,XX,Other*'
     }
 
+    It 'refuses a downloaded history that ends before the newest fiscal year the scaffold''s groups cover, naming what serves instead, and writes nothing' {
+        $groupFile = Join-Path $script:dir 'common/organisationUnitGroups.csv'
+        @(Get-Content -LiteralPath $groupFile) + 'WbGroup9999,WORLD_BANK_CLASS_UM_FY_2028,World Bank UM 2028,World Bank UM 2028,,,,NEOIPC_READ' | Set-TestFileContent -LiteralPath $groupFile
+
+        { Add-NeoIPCMetadataCountry -Code AR -MetadataDirectory $script:dir -Confirm:$false } | Should -Throw "The World Bank's classification history has no fiscal year 2028*: once the World Bank has published that year, run the call again, or add the country with Add-NeoIPCMetadataCountry -ClassificationHistoryPath and a copy that covers it."
+
+        & $script:unchanged
+    }
+
     It 'adds the rows to files that hold only their header' {
         foreach ($pair in @(@($script:files[1], 'organisationUnitGroup,organisationUnit'), @($script:files[2], 'id,code,name,shortName,openingDate,closedDate,level,parent,image,sharing'))) {
             Set-TestFileContent -LiteralPath $pair[0] -Value $pair[1]
@@ -469,8 +478,8 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
         @{ Name = 'a code .NET does not know'; Code = 'ZZ'; Message = '*''ZZ'' is not a country code that .NET knows*' }
         @{ Name = 'a code of the wrong shape'; Code = 'ar'; Message = '*not two upper-case letters*' }
         @{ Name = 'a code that ends in a line feed'; Code = "AR`n"; Message = '*not two upper-case letters*' }
-        @{ Name = 'a short name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 51 }; Message = '*51 characters long, and DHIS2 allows 50: give a short name*' }
-        @{ Name = 'a name that makes a test unit''s name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 213; ShortName = 'Argentina' }; Message = '*''Test Department - A*is 231 characters long, and DHIS2 allows 230*' }
+        @{ Name = 'a short name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 51 }; Message = '*country''s short name*is 51 characters long, and DHIS2 allows 50: give a shorter one.' }
+        @{ Name = 'a name that makes a test unit''s name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 213; ShortName = 'Argentina' }; Message = '*''Test Department - A*is 231 characters long, and DHIS2 allows 230: give the country a name of at most 212 characters*' }
         @{ Name = 'test units the play package has for a country the scaffold lacks'; Code = 'AR'; Setup = {
                 $playFile = $script:files[2]
                 @(Get-Content -LiteralPath $playFile) + 'StrayHosp01,AR_TEST,Stray,Stray,2023-01-01,,3,AlbaniaUid1,,' | Set-TestFileContent -LiteralPath $playFile
@@ -671,5 +680,16 @@ Describe 'Write-NeoIPCMetadataCountryPlan' {
         [System.IO.File]::WriteAllBytes($empty, [byte[]]@())
 
         { InModuleScope NeoIPC-Tools -Parameters @{ Path = $empty } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = [byte[]]@() }; Files = @() }) } } | Should -Not -Throw
+    }
+
+    It 'names a file of the scaffold it cannot read, and one gone since, apart' {
+        # A path that is a directory by the time the call reads it cannot be read, on any platform.
+        $blocked = Join-Path $TestDrive 'blocked.csv'
+        [void](New-Item -ItemType Directory -Path $blocked)
+        $gone = Join-Path $TestDrive 'gone.csv'
+        $before = [System.Text.Encoding]::UTF8.GetBytes('before')
+
+        { InModuleScope NeoIPC-Tools -Parameters @{ Path = $blocked; Bytes = $before } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = $Bytes }; Files = @() }) } } | Should -Throw "$blocked (*) could not be read, so nothing is written."
+        { InModuleScope NeoIPC-Tools -Parameters @{ Path = $gone; Bytes = $before } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = $Bytes }; Files = @() }) } } | Should -Throw "$gone changed since the call read the scaffold*"
     }
 }

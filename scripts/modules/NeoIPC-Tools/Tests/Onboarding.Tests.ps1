@@ -25,8 +25,6 @@ BeforeDiscovery {
 
 BeforeAll {
     Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'NeoIPC-Tools.psd1') -Force
-    # What Read-Host throws in a PowerShell started with -NonInteractive.
-    $script:refusal = [System.Management.Automation.PSInvalidOperationException]::new('PowerShell is in NonInteractive mode. Read and Prompt functionality is not available.')
 }
 
 Describe 'New-NeoIPCHospitalCode' {
@@ -135,6 +133,16 @@ Describe 'Resolve-NeoIPCHospitalCode asking for a missing part' {
         Should -Invoke -ModuleName NeoIPC-Tools Read-Host -Times 2 -Exactly
     }
 
+    It 'names only the parts still missing when the input ends after an answer' -Skip:$noUser {
+        # A queue of objects, since a queue of strings takes $null for an empty answer.
+        $replies = [System.Collections.Generic.Queue[object]]::new()
+        $replies.Enqueue('BER')
+        $replies.Enqueue($null)
+        Mock -ModuleName NeoIPC-Tools Read-Host -MockWith ({ $replies.Dequeue() }.GetNewClosure())
+
+        { Resolve-NeoIPCHospitalCode -Country DE -InformationAction SilentlyContinue } | Should -Throw 'Missing: Acronym.*' -ExceptionType ([System.ArgumentException])
+    }
+
     It 'stops on an empty answer' -Skip:$noUser {
         $queue.Enqueue('')
 
@@ -154,8 +162,12 @@ Describe 'Resolve-NeoIPCHospitalCode asking for a missing part' {
         Should -Invoke -ModuleName NeoIPC-Tools Read-Host -Times 0 -Exactly
     }
 
-    It 'fails as with -NonInteractive in a PowerShell that refuses to ask, naming the missing parts' -Skip:$noUser {
-        Mock -ModuleName NeoIPC-Tools Read-Host { throw $script:refusal }
+    It 'fails as with -NonInteractive in <Name>, naming the missing parts' -Skip:$noUser -ForEach @(
+        @{ Name = 'a PowerShell started with -NonInteractive, which refuses to ask'; Refusal = [System.Management.Automation.PSInvalidOperationException]::new('PowerShell is in NonInteractive mode. Read and Prompt functionality is not available.') }
+        @{ Name = 'a host without a user interface, which refuses to ask'; Refusal = [System.Management.Automation.Host.HostException]::new('A command that prompts the user failed because the host program or the command type does not support user interaction.') }
+        @{ Name = 'a session whose input has ended'; Refusal = $null }
+    ) {
+        Mock -ModuleName NeoIPC-Tools Read-Host -MockWith ({ if ($Refusal) { throw $Refusal } }.GetNewClosure())
 
         { Resolve-NeoIPCHospitalCode -Country DE -InformationAction SilentlyContinue } | Should -Throw '*Missing: Location, Acronym*' -ExceptionType ([System.ArgumentException])
     }
@@ -229,8 +241,11 @@ Describe 'Resolve-NeoIPCHospitalCode' {
         Should -Invoke -ModuleName NeoIPC-Tools Read-Host -Times 1 -Exactly
     }
 
-    It 'stops on a contradiction in a PowerShell that refuses to ask, as with -NonInteractive' -Skip:$noUser {
-        Mock -ModuleName NeoIPC-Tools Read-Host { throw $script:refusal }
+    It 'stops on a contradiction in <Name>, as with -NonInteractive' -Skip:$noUser -ForEach @(
+        @{ Name = 'a PowerShell started with -NonInteractive, which refuses to ask'; Refusal = [System.Management.Automation.PSInvalidOperationException]::new('PowerShell is in NonInteractive mode. Read and Prompt functionality is not available.') }
+        @{ Name = 'a host without a user interface, which refuses to ask'; Refusal = [System.Management.Automation.Host.HostException]::new('A command that prompts the user failed because the host program or the command type does not support user interaction.') }
+    ) {
+        Mock -ModuleName NeoIPC-Tools Read-Host -MockWith ({ throw $Refusal }.GetNewClosure())
 
         { Resolve-NeoIPCHospitalCode -HospitalCode DE_BER_CHA -Country AT 3>$null } | Should -Throw "*contradict*country 'AT' against 'DE'*" -ExceptionType ([System.ArgumentException])
     }
