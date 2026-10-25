@@ -337,8 +337,8 @@ Describe 'Add-NeoIPCPartnerSite' {
     It 'takes an existing unit whose name differs from the one given only <Name>' -ForEach @(
         # DHIS2 holds the a with its diaeresis as one character, and it is given as an a and the combining diaeresis.
         @{ Name = 'in whether a letter with a diacritic is one character or two'; Held = "Universit$([char]0x00E4)t Hospital"; Given = "Universita$([char]0x0308)t Hospital" }
-        # j with a caron has a character of its own, J with a caron has none.
-        @{ Name = 'in case, at a letter whose diacritic only one case composes'; Held = "j$([char]0x030C)ilin hospital"; Given = "J$([char]0x030C)ilin Hospital" }
+        # j with a caron has a character of its own, which DHIS2 holds, and J with a caron has none.
+        @{ Name = 'in case, at a letter whose diacritic only one case composes'; Held = "$([char]0x01F0)ilin hospital"; Given = "J$([char]0x030C)ilin Hospital" }
     ) {
         $script:state.Units['DE_BER_CHA'] = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = $Held; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
         $params = $script:params.Clone()
@@ -898,6 +898,11 @@ Describe 'Add-NeoIPCPartnerSite' {
         It 'refuses <Name> before it writes the list' -ForEach @(
             @{ Name = 'a country the World Bank cannot classify'; Setup = { $script:state.Plans.Remove('KE') }; Message = '*knows no economy with the code ''KE''*' }
             @{ Name = 'an org unit below the parent with the country''s name under another code'; Setup = { $script:state.Units['KEN'] = [ordered]@{ id = 'KenyaOther1'; code = 'KEN'; name = 'Kenya'; parent = @{ id = 'RootUid0001' }; organisationUnitGroups = @() } }; Message = '*''Kenya'' below ''NEOIPC'' carries the country''s name under the code ''KEN''*' }
+            @{ Name = 'an org unit below the parent with the country''s name, a letter of which it writes as two characters'; Setup = {
+                    $script:state.Plans.KE.Name = "K$([char]0x00E9)nya"
+                    $script:state.Units['KEN'] = [ordered]@{ id = 'KenyaOther1'; code = 'KEN'; name = "Ke$([char]0x0301)nya"; parent = @{ id = 'RootUid0001' }; organisationUnitGroups = @() }
+                }; Message = '*below ''NEOIPC'' carries the country''s name under the code ''KEN''*'
+            }
             @{ Name = 'a parent outside the hierarchy'; Setup = { $script:state.Units.Remove('NEOIPC') }; Message = '*parent in the country list, ''NEOIPC'', lies outside that hierarchy too*' }
             @{ Name = 'an income-class group missing or not shared'; Setup = { $script:state.Groups = @($script:state.Groups | Where-Object { $_.code -cne 'WORLD_BANK_CLASS_LM_FY_2026' }) }; Message = '*returns no org-unit group with the code WORLD_BANK_CLASS_LM_FY_2026*' }
         ) {
@@ -997,9 +1002,9 @@ Describe 'Add-NeoIPCPartnerSite as a console runs it' {
     BeforeAll {
         . (Join-Path -Path $PSScriptRoot -ChildPath 'ScriptedHost.ps1')
         # A runspace of the scripted host, which shows the question as a person sees it and answers it. Pester's mocks
-        # reach no other runspace, so there the module's DHIS2 helpers are stood in for as the mocks above stand in for
-        # them: the country DE exists, in COUNTRY, and nothing else does unless a test gives other units; each write is
-        # recorded.
+        # reach no other runspace, so there the module's HTTP helpers are stood in for, and its org-unit lookups run as
+        # they are over them: the account's capture unit is the root, below which the country DE exists, in COUNTRY, and
+        # nothing else does unless a test gives other units; each write is recorded.
         $script:ScriptedHost = [NeoIPCTests.ScriptedHost]::new()
         $script:Runspace = [runspacefactory]::CreateRunspace($script:ScriptedHost)
         $script:Runspace.Open()
@@ -1012,19 +1017,18 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
 `$global:Posts = [System.Collections.Generic.List[string]]::new()
 `$global:Existing = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
 & (Get-Module NeoIPC-Tools) {
-    function script:Resolve-NeoIPCOrgUnit {
-        param(`$Endpoint, [string[]]`$Code, [string[]]`$Id, [string[]]`$Fields)
-        `$byCode = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal)
-        if (`$Code -ccontains 'DE') { `$byCode['DE'] = [ordered]@{ id = 'CountryUid01'; code = 'DE'; name = 'Germany'; parent = @{ id = 'RootUid0001' }; organisationUnitGroups = @(@{ code = 'COUNTRY' }, @{ code = 'WORLD_BANK_CLASS_H_FY_2026' }) } }
-        foreach (`$wanted in `$Code) { if (`$global:Existing.ContainsKey(`$wanted)) { `$byCode[`$wanted] = `$global:Existing[`$wanted] } }
-        [pscustomobject]@{ Units = @(`$byCode.Values); ByCode = `$byCode; ById = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::Ordinal) }
-    }
     # Each helper asks as the real one does, at its ConfirmImpact, so that a call made without -Confirm:`$false asks
-    # under a caller's -Confirm.
+    # under a caller's -Confirm, the org-unit lookups' own included.
     function script:Invoke-NeoIPCDhis2Get {
         [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
         param(`$Auth, `$Scheme, `$Hostname, `$Port, `$Path, `$Filter, `$Fields, [switch]`$AsHashtable)
         if (-not `$PSCmdlet.ShouldProcess("GET `$Path", 'Read DHIS2 data')) { return }
+        if (`$Path -ceq 'api/me') { return @{ organisationUnits = @(@{ id = 'RootUid0001'; path = '/RootUid0001' }) } }
+        if (`$Path -ceq 'api/organisationUnits') {
+            `$codes = @(`$Filter | Where-Object { `$_.StartsWith('code:in:[') } | ForEach-Object { `$_.Substring(9).TrimEnd(']').Split(',') })
+            `$country = [ordered]@{ id = 'CountryUid01'; code = 'DE'; name = 'Germany'; path = '/RootUid0001/CountryUid01'; parent = @{ id = 'RootUid0001' }; organisationUnitGroups = @(@{ code = 'COUNTRY' }, @{ code = 'WORLD_BANK_CLASS_H_FY_2026' }) }
+            return @{ organisationUnits = @(@(`$country) + @(`$global:Existing.Values) | Where-Object { `$codes -ccontains [string]`$_['code'] }) }
+        }
         if (`$Path -ceq 'api/organisationUnitGroups') { return @{ organisationUnitGroups = @(@{ id = 'GroupHosp01'; code = 'HOSPITAL' }, @{ id = 'GroupNeoD01'; code = 'NEO_DEPARTMENT' }) } }
         if (`$Path -ceq 'api/programs') { return @{ programs = @(@{ id = 'ProgramUid01'; code = 'NEOIPC_CORE' }) } }
         throw "unexpected read of `$Path"
@@ -1128,7 +1132,7 @@ Import-Module '$($manifest.Replace("'", "''"))' -Force
     }
 
     It 'ends at a refusal before it writes anything, although the caller passes -ErrorAction SilentlyContinue' {
-        $other = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Another Hospital'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
+        $other = [ordered]@{ id = 'HospitalUid1'; code = 'DE_BER_CHA'; name = 'Another Hospital'; path = '/RootUid0001/CountryUid01/HospitalUid1'; parent = @{ id = 'CountryUid01' }; organisationUnitGroups = @() }
 
         $run = & $script:ask -Arguments '-ErrorAction SilentlyContinue -Confirm:$false' -Existing @{ DE_BER_CHA = $other }
 

@@ -162,7 +162,7 @@ function Get-NeoIPCMetadataCountryPlan {
     # The messages name no parameter, since the callers name the country's names differently: -ShortName and -Name, or
     # -CountryShortName and -CountryName.
     if ($ShortName.Length -gt 50) {
-        throw [System.ArgumentException]::new("The country's short name '$ShortName' is $($ShortName.Length) characters long, and DHIS2 allows 50: give a shorter one.")
+        throw [System.ArgumentException]::new("The country's short name '$ShortName' is $($ShortName.Length) characters long, and DHIS2 allows 50: give a short name of at most 50 characters, which the name stands in for when none is given.")
     }
     # DHIS2 keeps a name to 230 characters, the names of the test units too, which are built from the country's: the
     # longest, the test department's, leaves 212 for the country's.
@@ -246,11 +246,13 @@ function Get-NeoIPCMetadataCountryPlan {
         if ($uncovered.Count -gt 0) {
             # The remedy depends on the source: the download is the World Bank's newest, and Add-NeoIPCPartnerSite, which
             # adds a country through this plan, takes no copy of its own.
+            $one = $uncovered.Count -eq 1
+            $missingYears = $one ? "fiscal year $($uncovered[0])" : "fiscal years $($uncovered -join ' and ')"
             $message = if ([string]::IsNullOrWhiteSpace($ClassificationHistoryPath)) {
-                "The World Bank's classification history has no fiscal year $($uncovered -join ' or '), which the scaffold's income-class groups cover, so nothing is written: once the World Bank has published that year, run the call again, or add the country with Add-NeoIPCMetadataCountry -ClassificationHistoryPath and a copy that covers it."
+                "The World Bank's classification history has no $missingYears, which the scaffold's income-class groups cover, so nothing is written: once the World Bank has published $($one ? 'that year' : 'those years'), run the call again, or add the country with Add-NeoIPCMetadataCountry -ClassificationHistoryPath and a copy that covers $($one ? 'it' : 'them')."
             }
             else {
-                "The classification history '$ClassificationHistoryPath' has no fiscal year $($uncovered -join ' or '), which the scaffold's income-class groups cover, so it is older than the scaffold and nothing is written: give a newer copy, or leave out -ClassificationHistoryPath to download the World Bank's newest."
+                "The classification history '$ClassificationHistoryPath' has no $missingYears, which the scaffold's income-class groups cover, so it is older than the scaffold and nothing is written: give a newer copy, or leave out -ClassificationHistoryPath to download the World Bank's newest."
             }
             throw [System.InvalidOperationException]::new($message)
         }
@@ -355,10 +357,11 @@ function Write-NeoIPCMetadataCountryPlan {
     $unreadable = [System.Collections.Generic.List[string]]::new()
     foreach ($path in @($Plan.Read.Keys | Sort-Object)) {
         # A file that is gone has changed too; one that is there but cannot be read, such as one an editor holds open,
-        # is named with the reason, since running the call again would not help.
+        # is named with the reason, which running the call again does not remove by itself. The base exception is the
+        # reason, under PowerShell's wrapper of the method call.
         try { $now = [System.IO.File]::ReadAllBytes($path) }
         catch [System.IO.FileNotFoundException], [System.IO.DirectoryNotFoundException] { $changed.Add($path); continue }
-        catch { $unreadable.Add("$path ($($_.Exception.Message))"); continue }
+        catch { $unreadable.Add("$path ($($_.Exception.GetBaseException().Message))"); continue }
         if (-not [System.Linq.Enumerable]::SequenceEqual([byte[]]$now, [byte[]]$Plan.Read[$path])) { $changed.Add($path) }
     }
     if ($unreadable.Count -gt 0) {

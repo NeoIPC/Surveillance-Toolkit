@@ -60,7 +60,9 @@ function ConvertTo-NeoIPCCoordinate {
     $type = [System.Type]::GetTypeCode($Value.GetType())
     if ($type -ge [System.TypeCode]::SByte -and $type -le [System.TypeCode]::Decimal) { return [double]$Value }
     if ($Value -is [System.Collections.IList]) {
-        throw [System.ArgumentException]::new("-$Name is a list of $($Value.Count) values, not one number of decimal degrees such as 52.52: written with a comma and unquoted, a number is a list to PowerShell.", $Name)
+        # The hint fits a list of several values only, which a number written with an unquoted decimal comma gives.
+        $hint = $Value.Count -gt 1 ? ': written with a comma and unquoted, a number is a list to PowerShell' : ''
+        throw [System.ArgumentException]::new("-$Name is a list, not one number of decimal degrees such as 52.52$hint.", $Name)
     }
     throw [System.ArgumentException]::new("-$Name is of type $($Value.GetType().Name), not a number of decimal degrees such as 52.52.", $Name)
 }

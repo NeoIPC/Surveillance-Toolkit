@@ -478,7 +478,7 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
         @{ Name = 'a code .NET does not know'; Code = 'ZZ'; Message = '*''ZZ'' is not a country code that .NET knows*' }
         @{ Name = 'a code of the wrong shape'; Code = 'ar'; Message = '*not two upper-case letters*' }
         @{ Name = 'a code that ends in a line feed'; Code = "AR`n"; Message = '*not two upper-case letters*' }
-        @{ Name = 'a short name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 51 }; Message = '*country''s short name*is 51 characters long, and DHIS2 allows 50: give a shorter one.' }
+        @{ Name = 'a short name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 51 }; Message = '*country''s short name*is 51 characters long, and DHIS2 allows 50: give a short name of at most 50 characters, which the name stands in for when none is given.' }
         @{ Name = 'a name that makes a test unit''s name longer than DHIS2 allows'; Code = 'AR'; Extra = @{ Name = 'A' * 213; ShortName = 'Argentina' }; Message = '*''Test Department - A*is 231 characters long, and DHIS2 allows 230: give the country a name of at most 212 characters*' }
         @{ Name = 'test units the play package has for a country the scaffold lacks'; Code = 'AR'; Setup = {
                 $playFile = $script:files[2]
@@ -513,6 +513,11 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
                 $groupFile = Join-Path $script:dir 'common/organisationUnitGroups.csv'
                 @(Get-Content -LiteralPath $groupFile) + 'WbGroup9999,WORLD_BANK_CLASS_UM_FY_2028,World Bank UM 2028,World Bank UM 2028,,,,NEOIPC_READ' | Set-TestFileContent -LiteralPath $groupFile
             }; Message = '*has no fiscal year 2028, which the scaffold''s income-class groups cover, so it is older than the scaffold and nothing is written*'
+        }
+        @{ Name = 'a history that ends two fiscal years before the newest the scaffold''s groups cover'; Code = 'AR'; Setup = {
+                $groupFile = Join-Path $script:dir 'common/organisationUnitGroups.csv'
+                @(Get-Content -LiteralPath $groupFile) + 'WbGroup9998,WORLD_BANK_CLASS_UM_FY_2028,World Bank UM 2028,World Bank UM 2028,,,,NEOIPC_READ' + 'WbGroup9999,WORLD_BANK_CLASS_UM_FY_2029,World Bank UM 2029,World Bank UM 2029,,,,NEOIPC_READ' | Set-TestFileContent -LiteralPath $groupFile
+            }; Message = '*has no fiscal years 2028 and 2029, which the scaffold''s income-class groups cover*'
         }
     ) {
         if ($Setup) { & $Setup }
@@ -688,8 +693,10 @@ Describe 'Write-NeoIPCMetadataCountryPlan' {
         [void](New-Item -ItemType Directory -Path $blocked)
         $gone = Join-Path $TestDrive 'gone.csv'
         $before = [System.Text.Encoding]::UTF8.GetBytes('before')
+        # The reason itself, not PowerShell's wrapper of the method call.
+        $reason = try { [System.IO.File]::ReadAllBytes($blocked) } catch { $_.Exception.GetBaseException().Message }
 
-        { InModuleScope NeoIPC-Tools -Parameters @{ Path = $blocked; Bytes = $before } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = $Bytes }; Files = @() }) } } | Should -Throw "$blocked (*) could not be read, so nothing is written."
+        { InModuleScope NeoIPC-Tools -Parameters @{ Path = $blocked; Bytes = $before } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = $Bytes }; Files = @() }) } } | Should -Throw "$blocked ($reason) could not be read, so nothing is written."
         { InModuleScope NeoIPC-Tools -Parameters @{ Path = $gone; Bytes = $before } { Write-NeoIPCMetadataCountryPlan -Plan ([pscustomobject]@{ Read = @{ $Path = $Bytes }; Files = @() }) } } | Should -Throw "$gone changed since the call read the scaffold*"
     }
 }

@@ -226,6 +226,7 @@ function Add-NeoIPCPartnerSite {
     $DepartmentLatitude = ConvertTo-NeoIPCCoordinate -Value $DepartmentLatitude -Name 'DepartmentLatitude'
     $DepartmentLongitude = ConvertTo-NeoIPCCoordinate -Value $DepartmentLongitude -Name 'DepartmentLongitude'
     foreach ($pair in @(@('Hospital', $HospitalLatitude, $HospitalLongitude), @('Department', $DepartmentLatitude, $DepartmentLongitude))) {
+        # The message names both halves, and the error the pair by its first, as Get-NeoIPCMapCoordinates does.
         if (($null -ne $pair[1]) -xor ($null -ne $pair[2])) {
             throw [System.ArgumentException]::new("Give the $($pair[0].ToLowerInvariant())'s latitude and longitude together, or neither.", "$($pair[0])Latitude")
         }

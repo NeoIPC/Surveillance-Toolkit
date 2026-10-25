@@ -78,7 +78,8 @@ Describe 'Get-NeoIPCMapCoordinates with parameters' {
         @{ Name = 'text with a decimal comma, which PowerShell would read as a thousands separator'; Arguments = @{ Latitude = '6,5'; Longitude = '13,4' }; Message = "*-Latitude '6,5' is not a number of decimal degrees written with a point*" }
         @{ Name = 'text that is no number'; Arguments = @{ Latitude = '52.52'; Longitude = 'east' }; Message = "*-Longitude 'east' is not a number*" }
         @{ Name = 'a value that is neither number nor text'; Arguments = @{ Latitude = $true; Longitude = 13.405 }; Message = '*-Latitude is of type Boolean, not a number of decimal degrees such as 52.52.*' }
-        @{ Name = 'a number written with an unquoted decimal comma, which PowerShell binds as a list'; Arguments = @{ Latitude = @(52, 52); Longitude = 13.405 }; Message = '*-Latitude is a list of 2 values, not one number of decimal degrees such as 52.52: written with a comma and unquoted*' }
+        @{ Name = 'a number written with an unquoted decimal comma, which PowerShell binds as a list'; Arguments = @{ Latitude = @(52, 52); Longitude = 13.405 }; Message = '*-Latitude is a list, not one number of decimal degrees such as 52.52: written with a comma and unquoted*' }
+        @{ Name = 'a list of one number'; Arguments = @{ Latitude = @(52.52); Longitude = 13.405 }; Message = '*-Latitude is a list, not one number of decimal degrees such as 52.52. (Parameter*' }
     ) {
         { Get-NeoIPCMapCoordinates @Arguments -NonInteractive } | Should -Throw $Message
     }
