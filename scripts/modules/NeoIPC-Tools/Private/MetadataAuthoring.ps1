@@ -2,7 +2,8 @@
 # Authoring-input helpers for the play / production overlay. Org-unit INSTANCES and user accounts are
 # anonymised in the export, so their package content comes from the canonical UID-keyed directory, not the
 # capture: org units are read straight through the converter (preserving the committed ids — real production
-# UIDs for the live org units, deterministic mints for the rest); users are compiled from the normalized
+# UIDs for the live org units, deterministic mints or, for a country added later, random UIDs for the rest);
+# users are compiled from the normalized
 # tables (preserving a committed user id, else minting from the username); group memberships are compiled from
 # the structural hierarchy + the junction overlays. (Closure config and the access-control / org-unit-group
 # DEFINITIONS keep their real export UIDs and are captured by the converter, not authored here.)
@@ -15,8 +16,9 @@ function Read-NeoIPCAuthoredOrgUnit {
         The org-unit scaffold and the play test hierarchy are committed UID-keyed — the standard converter
         shape (id, code, name, shortName, openingDate, level, parent={id}) — so they are read straight through
         the per-type converter, NOT minted from code. This preserves the committed ids verbatim: the real
-        production UIDs for the org units that exist in the live system, deterministic mints for the rest, and
-        the real parent UIDs. Multiple files are concatenated (e.g. the common scaffold + a variant overlay).
+        production UIDs for the org units that exist in the live system, deterministic mints for the rest or, for
+        a country added later (Add-NeoIPCMetadataCountry) and its test units, random UIDs, and the real parent
+        UIDs. Multiple files are concatenated (e.g. the common scaffold + a variant overlay).
         Authored content is validated up front (fail in the reader, not late at import): each id and parent id
         must be a valid UID, ids and codes must be unique across the merged set, every parent must resolve to a
         unit in that set, and the DHIS2 not-null fields (name, shortName, openingDate) must be present.

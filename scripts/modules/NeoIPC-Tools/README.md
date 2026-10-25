@@ -46,6 +46,8 @@ principles, the capability matrix, and the verification gates — lives in
 | `Public/Auth.ps1` + `Private/Auth.ps1`, `Private/DHIS2Http.ps1`, `Private/Dhis2Version.ps1` | DHIS2 auth (a personal access token of either version, or a username and password), the instance's DHIS2 version, and the REST GET/POST/PUT/DELETE layer every live call goes through, whose errors carry DHIS2's own message |
 | `Public/OrgUnits.ps1`, `Tracker.ps1`, `UserInfo.ps1`, `DataElements.ps1`, `PAT.ps1` | Live, pipeline-composable inspection of org units, patients/enrolments/events, users, data-element codes, and personal-access-token lifecycle; `Private/OrgUnits.ps1`, `Private/TrackerRead.ps1`, and `Private/UserInfo.ps1` hold what each needs beside the requests |
 | `Private/OrgUnitHierarchy.ps1` | The org units of the caller's hierarchy (its data-capture org units and those below them), read per capture unit, and org units looked up by code or UID within it |
+| `Public/Onboarding.ps1` + `Private/Onboarding.ps1`, `Public/OnboardingCoordinates.ps1` + `Private/OnboardingCoordinates.ps1`, `Public/OnboardingOrgUnits.ps1` | **Onboard a partner site**: the NeoIPC hospital code from the UN/LOCODE and an acronym (`New-NeoIPCHospitalCode`, `Resolve-NeoIPCHospitalCode`), the coordinates looked up on a map (`Get-NeoIPCMapCoordinates`), and the hospital and department org units with their groups and the department's program assignment (`Add-NeoIPCPartnerSite`), found by code within the caller's hierarchy, after a country the instance lacks, created from the org-unit scaffold with the scaffold's UID and added to the scaffold first when the scaffold lacks it too |
+| `Public/MetadataCountry.ps1` + `Private/MetadataCountry.ps1` | **Add a country to the org-unit scaffold** (`Add-NeoIPCMetadataCountry`): a random UID, the English name .NET gives the region, a World Bank income-class membership for each fiscal year the groups cover (the World Bank's API, and its historical classification workbook, read with `DocumentFormat.OpenXml`), and the country's test units in the play package |
 | `Public/PatientRemoval.ps1` + `Private/PatientRemoval.ps1` | **Remove patients** entered in error (`Remove-NeoIPCPatient`): select them by department and patient ID or by UID, refuse what a deletion would take with it unseen, preview with DHIS2's own dry run, confirm once, delete one patient per request, and prove each deletion by reading it back; the planning half is free of I/O ([Removing Patients](#removing-patients)) |
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/InfectiousAgents.ps1` | Infectious-agent ontology helpers (next free `Id`) |
@@ -56,7 +58,7 @@ principles, the capability matrix, and the verification gates — lives in
 | `Public/MetadataReconcile.ps1` | **Reconcile** the canonical directory against a fresh export (`Update-NeoIPCMetadataDirectory`) — classify drift, auto-write CSV-owned config + PO, report-only for authored / generated / domain |
 | `Public/Generation.ps1` | The ontology/matrix-driven object generators (pathogen + substance + field-gating + virus-classification) |
 | `Public/Regeneration.ps1` | Re-materialize the generated families into `metadata/common/` (`Update-NeoIPCGeneratedMetadataDirectory`) — the generators are the source of truth; this writes their current output back so drift shows as a git diff |
-| `Private/Metadata.ps1` | Pipeline **core** — JSON parse, deterministic UID mint, row↔object cell coercion, sharing-profile registry, noise-strip, canonicalize, CSV I/O, package↔directory, semantic compare |
+| `Private/Metadata.ps1` | Pipeline **core** — JSON parse, deterministic and random UID mints, row↔object cell coercion, sharing-profile registry, noise-strip, canonicalize, CSV I/O, package↔directory, semantic compare |
 | `Private/MetadataTypeMaps.ps1` | Per-type field classification (translatable vs technical vs nested), the normalization strip-list, and the non-closure type list — the data the core consults |
 | `Private/MetadataClosure.ps1` | The dependency-closure prune from `NEOIPC_CORE` (structured + expression ref-walk) + the whole-type base⊕supplement merge |
 | `Private/MetadataExpression.ps1` | Program-rule expression handling — canonicalizer, issue linter, embedded-UID scanner, UID-regeneration rewrite |
@@ -828,8 +830,9 @@ DHIS2 marks `name` translatable on every object, so the **full** surface is larg
 and mostly internal labels. Nothing is dropped; instead each string gets a Weblate
 **priority** (`#, priority:NNN`) from `$NeoIPCMetadataTranslationPriorities`, so
 translators clear the user-facing strings first: form-entry labels (`200`) > option
-values / notifications / org-unit names (`150`) > user-facing titles (`100`, the
-default) > the internal remainder (program-rule / data-element names, `10`). Retune
+values / notifications (`150`) > user-facing titles (`100`, the default) > the internal
+remainder (program-rule / data-element names, `10`). Org units are not in the catalogue
+at all: the excluded types (`$NeoIPCMetadataExcludedTypes`) never reach it. Retune
 that table as needs change. The flag goes in the template and nowhere else: Weblate
 treats `po/metadata.pot` as this bilingual component's source translation, reads the
 flag there, and strips it when writing each language.
@@ -851,11 +854,9 @@ their rules / variables) and the antibiotic domain are deliberately absent from 
 generators and `po/antibiotics.*` own them). The assembler regenerates those families
 with their corrected names, so feeding its package is what carries the fixed strings into
 the `.pot`; a raw `-Path ./metadata.json` extract would instead capture the *stale deployed*
-family names and the deployed antibiotic domain. Build the variant-**independent common
-base** so no synthetic `play` hospital/department names (or real production org units) leak
-into the translator catalogue — an empty `production` overlay yields the country scaffold
-only. (A first-class common-only emit mode is planned; until then the empty overlay is the
-seam.) Units are emitted in a **deterministic, locale-independent order** (type-map order,
+family names and the deployed antibiotic domain. Either variant serves, since what the
+variants add, org units and users, are excluded types, so no hospital, department, or country
+name reaches the catalogue. Units are emitted in a **deterministic, locale-independent order** (type-map order,
 then object key ordinal, then token order — independent of how the package orders its
 objects), so re-running the refresh produces a minimal, reviewable diff.
 
@@ -891,6 +892,7 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 |----------|-----------|
 | Auth | `Resolve-NeoIPCAuth`, `Get-NeoIPCAuthPassword`, `Test-DHIS2PersonalAccessToken` |
 | OrgUnits | `Get-NeoIPCDepartments`, `Get-NeoIPCServerKey`, `Read-OrgUnitInfo` |
+| Onboarding | `New-NeoIPCHospitalCode`, `Resolve-NeoIPCHospitalCode`, `Get-NeoIPCMapCoordinates`, `Add-NeoIPCPartnerSite`, `Add-NeoIPCMetadataCountry` |
 | Tracker | `Read-PatientInfo`, `Read-EnrolmentInfo`, `Read-EventInfo`, `Remove-NeoIPCPatient` |
 | DataElements | `Get-NeoIPCDataElementCodes` |
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |

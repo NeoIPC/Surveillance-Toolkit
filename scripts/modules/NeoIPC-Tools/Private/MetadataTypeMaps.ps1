@@ -372,9 +372,9 @@ $script:NeoIPCMetadataTranslationIgnoredTokens = @{
 # every (type, TOKEN) listed below is ELEVATED to the given Weblate priority (higher = translated first); every
 # (type, TOKEN) NOT listed is DEPRIORITIZED to $NeoIPCMetadataLowTranslationPriority so translators clear the
 # user-facing strings first and the internal ones sink to the bottom of the queue (nothing is excluded — the
-# whole surface stays translatable). The bands: form-entry labels (200) > option values / notifications /
-# org-unit names (150) > user-facing titles + descriptions (100, the Weblate default — no flag emitted) > the
-# unlisted internal remainder (low). Retune as translation needs change.
+# whole surface stays translatable). The bands: form-entry labels (200) > option values / notifications (150) >
+# user-facing titles + descriptions (100, the Weblate default — no flag emitted) > the unlisted internal remainder
+# (low). Retune as translation needs change.
 $script:NeoIPCMetadataLowTranslationPriority = 10
 $script:NeoIPCMetadataTranslationPriorities = [ordered]@{
     dataElements                 = [ordered]@{ FORM_NAME = 200 }                                                   # data-entry field labels
@@ -385,7 +385,6 @@ $script:NeoIPCMetadataTranslationPriorities = [ordered]@{
     programStages                = [ordered]@{ EXECUTION_DATE_LABEL = 200; NAME = 150; DESCRIPTION = 100 }
     options                      = [ordered]@{ NAME = 150 }                                                        # dropdown values
     programNotificationTemplates = [ordered]@{ SUBJECT_TEMPLATE = 150; MESSAGE_TEMPLATE = 150 }                    # messages users receive
-    organisationUnits            = [ordered]@{ NAME = 150; SHORT_NAME = 150 }
     organisationUnitGroups       = [ordered]@{ NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
     organisationUnitGroupSets    = [ordered]@{ NAME = 100; SHORT_NAME = 100; DESCRIPTION = 100 }
     optionSets                   = [ordered]@{ NAME = 100 }

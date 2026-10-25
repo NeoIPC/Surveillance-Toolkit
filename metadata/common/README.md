@@ -6,12 +6,25 @@ This directory contains the common metadata to populate the NeoIPC metadata pack
 
 `organisationUnits.csv` is the UID-keyed scaffold: the `NEOIPC` project root and one unit per country. The units
 that exist in the production system (the root, the participating countries, and the `TEST_UNITS` explore
-container) carry their **real production UIDs**; the remaining countries are eligible-but-not-yet-participating
-and carry deterministically minted UIDs. Country codes are **ISO 3166-1 alpha-2** (`GR`, `GB`, …) and names are
-English; the non-participating set was seeded from the eurostat country list and recoded to ISO. There is **no
-region level** (production has none) — the `play` variant adds one test hospital + department per country.
-Per-locale name translations live in the gettext PO component (`po/metadata.<lang>.po`) with the rest of the
-metadata translations, converted to/from each object's `translations[]` by the pipeline.
+container) carry their **real production UIDs**; the other countries of the set seeded from the eurostat country
+list are eligible but not yet participating and carry deterministically minted UIDs. Country codes are
+**ISO 3166-1 alpha-2** (`GR`, `GB`, …) and names are English. There is **no region level** (production has none) —
+the `play` variant adds one test hospital + department per country. Org units carry no name translations: the
+gettext PO component leaves them out, and the scaffold has no column for them.
+
+`Add-NeoIPCMetadataCountry -Code <ISO code>` (NeoIPC-Tools) adds a country: its row here, its World Bank
+income-class memberships in `organisationUnitGroupMemberships.csv`, and its test hospital and department in
+`../play/organisationUnits.csv`. Its UID is **random**, drawn once and kept: an onboarding that finds the country
+missing from a DHIS2 instance creates it from this row with this UID (`Add-NeoIPCPartnerSite`), so the scaffold and
+production agree, and adds the country here first, as the command does, when the scaffold lacks it too. Its name is
+the English name .NET gives the region unless one is given; NeoIPC names countries as the WHO style guide does, so
+where .NET's name differs from the WHO one, give the WHO one.
+
+The income-class memberships, one group `WORLD_BANK_CLASS_<class>_FY_<year>` per country and fiscal year, record the
+World Bank's classification of economies by income ("Historical classification by income", in its
+[World Development Indicators](https://datacatalog.worldbank.org/search/dataset/0037712)), which the World Bank
+publishes under the [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) licence. Source:
+The World Bank.
 
 ## Row order
 

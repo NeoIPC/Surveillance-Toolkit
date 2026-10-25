@@ -467,18 +467,19 @@ function Get-NeoIPCDataDictionaryLibDir {
 }
 
 function Assert-NeoIPCOpenXmlAvailable {
-    # Ensure the DocumentFormat.OpenXml assembly is loaded, loading it from the provisioned lib dir if needed.
-    # Throws an actionable message when it is not provisioned — the ordinary missing-dependency story.
+    # Ensure the DocumentFormat.OpenXml assembly, which reads and writes the module's .xlsx workbooks, is loaded, loading
+    # it from the provisioned lib dir if needed. Throws an actionable message when it is not provisioned — the ordinary
+    # missing-dependency story — ending with -Alternative, the caller's way around the workbook, when it has one.
     [CmdletBinding()]
-    param()
+    param([string]$Alternative)
     if ('DocumentFormat.OpenXml.Packaging.SpreadsheetDocument' -as [type]) { return }
     $libDir = Get-NeoIPCDataDictionaryLibDir
     $main = Join-Path $libDir 'DocumentFormat.OpenXml.dll'
     if (-not (Test-Path -LiteralPath $main)) {
-        throw ("The DocumentFormat.OpenXml assembly required for .xlsx output is not provisioned (looked in '$libDir'). " +
+        throw ("The DocumentFormat.OpenXml assembly, which reads and writes .xlsx workbooks, is not provisioned (looked in '$libDir'). " +
             "Run 'Invoke-Workspace.ps1 -InstallDeps' to restore it (or, standalone, " +
-            "'dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin'), " +
-            'or pass -Format Csv to skip the workbook.')
+            "'dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin')" +
+            ($Alternative ? ", $Alternative." : '.'))
     }
     # Load the runtime + framework dependencies first so the main assembly resolves them from this directory
     # (the default load context probes the host base dir, not lib/bin, so pre-load them explicitly).
@@ -552,7 +553,7 @@ function Write-NeoIPCDataDictionaryXlsx {
     [CmdletBinding()]
     [OutputType([string])]
     param([Parameter(Mandatory)][object[]]$Sheet, [Parameter(Mandatory)][string]$Path)
-    Assert-NeoIPCOpenXmlAvailable
+    Assert-NeoIPCOpenXmlAvailable -Alternative 'or pass -Format Csv to skip the workbook'
 
     $ssDict = [System.Collections.Generic.Dictionary[string, int]]::new([System.StringComparer]::Ordinal)
     $ssList = [System.Collections.Generic.List[string]]::new()

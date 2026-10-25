@@ -3,7 +3,8 @@
   <!--
     Provisioning-only project. It carries NO source of its own; its sole purpose is to pin and restore the
     DocumentFormat.OpenXml assemblies (MIT-licensed; https://github.com/dotnet/Open-XML-SDK) that the
-    NeoIPC-Tools module loads to write the data-dictionary .xlsx workbook (Public/DataDictionary.ps1).
+    NeoIPC-Tools module loads to write the data-dictionary .xlsx workbook (Public/DataDictionary.ps1) and to read
+    the World Bank's classification history when it adds a country (Public/MetadataCountry.ps1).
 
     Restore the assemblies into the gitignored ./bin output dir the module loads from:
         dotnet publish scripts/modules/NeoIPC-Tools/lib -o scripts/modules/NeoIPC-Tools/lib/bin
