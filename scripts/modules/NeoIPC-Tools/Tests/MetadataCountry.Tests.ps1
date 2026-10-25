@@ -281,6 +281,10 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
     }
 
     It 'writes the three files all or none' {
+        # Pester 6 runs no real command for a call that no filter matches, so the unfiltered mock hands it to the
+        # function itself, taken from the module before it is mocked, since a mock's body sees none of its functions.
+        $write = & (Get-Module -Name NeoIPC-Tools) { ${function:Write-NeoIPCMetadataCsv} }
+        Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { & $write @PesterBoundParameters }
         Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { throw 'The disk is full.' } -ParameterFilter { $Path -like '*play*organisationUnits.csv' }
 
         { Add-NeoIPCMetadataCountry -Code AR @script:params } | Should -Throw '*failed, so the files are as they were*disk is full*'
@@ -290,6 +294,8 @@ Describe 'Add-NeoIPCMetadataCountry' -Skip:(-not $script:XlsxAvailable) {
 
     It 'puts back a file whose own write failed partway' {
         # Write-NeoIPCMetadataCsv opens a file emptied, so a write that fails partway leaves part of the new text in it.
+        $write = & (Get-Module -Name NeoIPC-Tools) { ${function:Write-NeoIPCMetadataCsv} }
+        Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { & $write @PesterBoundParameters }
         Mock -ModuleName NeoIPC-Tools Write-NeoIPCMetadataCsv { [System.IO.File]::WriteAllText($Path, 'id,co'); throw 'The disk is full.' } -ParameterFilter { $Path -like '*play*organisationUnits.csv' }
 
         { Add-NeoIPCMetadataCountry -Code AR @script:params } | Should -Throw '*failed, so the files are as they were*disk is full*'
