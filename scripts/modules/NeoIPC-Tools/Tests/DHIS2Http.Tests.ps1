@@ -9,8 +9,8 @@
     Covers Resolve-NeoIPCDhis2Hostname, Split-NeoIPCList, Get-NeoIPCCodeLikeValue, Get-NeoIPCDhis2ErrorDetail,
     New-NeoIPCDhis2HttpError, Invoke-NeoIPCDhis2Get, and Invoke-NeoIPCDhis2Delete (Private/DHIS2Http.ps1),
     Get-NeoIPCDhis2VersionText (Private/Dhis2Version.ps1), and Resolve-NeoIPCReportHostname (Public/ReportHelpers.ps1);
-    and, across the module, how the writers take a host of white space and how the help of the functions without a
-    built-in host describes it.
+    and, across the module, how the writers require a host, refuse one of white space, and name it when they ask, and
+    how the help of the functions without a built-in host describes it.
     Self-contained: every HTTP call is mocked, and Invoke-WebRequest and Invoke-RestMethod throw unless a test makes them
     answer, so no instance is needed and no request leaves the process. NEOIPC_DHIS2_HOST is removed before each test,
     set where a test needs it, and restored afterwards, removed again if it was absent. The tokens are made-up strings of
@@ -324,6 +324,25 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
         }
 
         Describe 'The writers'' host' {
+            BeforeAll {
+                # What each writer needs besides its host to get as far as a request.
+                function Get-WriterArgument([Parameter(Mandatory)][string]$Command) {
+                    $arguments = @{ Auth = $script:TestAuth }
+                    switch ($Command) {
+                        'Remove-DHIS2PersonalAccessToken' { $arguments.Id = 'TokAAAAAA01'; $arguments.Force = $true }
+                        'Clear-DHIS2PersonalAccessTokens' { $arguments.Force = $true }
+                        'Import-NeoIPCMetadata' { $arguments.Json = '{}'; $arguments.Confirm = $false }
+                        'Deploy-NeoIPCMetadata' { $arguments.Json = '{}'; $arguments.Confirm = $false }
+                        'Import-NeoIPCPlayData' { $arguments.Json = '{"trackedEntities":[]}'; $arguments.Confirm = $false }
+                        'Add-NeoIPCPartnerSite' {
+                            $arguments.CountryCode = 'DE'; $arguments.HospitalCode = 'DE_BER_CHA'; $arguments.HospitalName = 'Example Hospital'
+                            $arguments.DepartmentName = 'Example Hospital Neonatology'; $arguments.Confirm = $false
+                        }
+                        'Remove-NeoIPCPatient' { $arguments.OrgUnitCode = 'DEPT_A1'; $arguments.NeoIpcId = 'NEO-0001'; $arguments.Confirm = $false }
+                    }
+                    $arguments
+                }
+            }
             # A writer's -Hostname is mandatory, and a value of white space passes that check; were it taken as no host, the
             # request would go to the instance NEOIPC_DHIS2_HOST names while the confirmation named none.
             It '<Command> stops at a -Hostname of white space before any request, although NEOIPC_DHIS2_HOST names a host' -ForEach @(
@@ -332,21 +351,46 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 @{ Command = 'Import-NeoIPCMetadata' }
                 @{ Command = 'Deploy-NeoIPCMetadata' }
                 @{ Command = 'Import-NeoIPCPlayData' }
+                @{ Command = 'Add-NeoIPCPartnerSite' }
                 @{ Command = 'Remove-NeoIPCPatient' }
             ) {
                 [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'from-variable.example.org', 'Process')
-                $arguments = @{ Auth = $script:TestAuth; Hostname = ' ' }
-                switch ($Command) {
-                    'Remove-DHIS2PersonalAccessToken' { $arguments.Id = 'TokAAAAAA01'; $arguments.Force = $true }
-                    'Clear-DHIS2PersonalAccessTokens' { $arguments.Force = $true }
-                    'Import-NeoIPCMetadata' { $arguments.Json = '{}'; $arguments.Confirm = $false }
-                    'Deploy-NeoIPCMetadata' { $arguments.Json = '{}'; $arguments.Confirm = $false }
-                    'Import-NeoIPCPlayData' { $arguments.Json = '{"trackedEntities":[]}'; $arguments.Confirm = $false }
-                    'Remove-NeoIPCPatient' { $arguments.OrgUnitCode = 'DEPT_A1'; $arguments.NeoIpcId = 'NEO-0001'; $arguments.Confirm = $false }
-                }
+                $arguments = Get-WriterArgument -Command $Command
+                $arguments.Hostname = ' '
                 { & $Command @arguments 6>$null } | Should -Throw '-Hostname holds only white space, which names no DHIS2 host.'
                 Should -Invoke Invoke-WebRequest -Times 0 -Exactly
                 Should -Invoke Invoke-RestMethod -Times 0 -Exactly
+            }
+            It '<Command> requires -Hostname, rather than taking the host NEOIPC_DHIS2_HOST names' -ForEach @(
+                @{ Command = 'Remove-DHIS2PersonalAccessToken' }
+                @{ Command = 'Clear-DHIS2PersonalAccessTokens' }
+                @{ Command = 'Import-NeoIPCMetadata' }
+                @{ Command = 'Deploy-NeoIPCMetadata' }
+                @{ Command = 'Import-NeoIPCPlayData' }
+                @{ Command = 'Add-NeoIPCPartnerSite' }
+                @{ Command = 'Remove-NeoIPCPatient' }
+            ) {
+                # A runspace of its own has no host to ask for a missing mandatory parameter, so a call without it fails
+                # where it is bound; one that took the variable's host would go on to a request.
+                [Environment]::SetEnvironmentVariable('NEOIPC_DHIS2_HOST', 'from-variable.example.org', 'Process')
+                $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+                $ps = [powershell]::Create()
+                try {
+                    $null = $ps.AddScript(@"
+param(`$Arguments)
+Import-Module '$($manifest.Replace("'", "''"))' -Force
+function global:Invoke-WebRequest { throw 'A test made an HTTP call.' }
+function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
+$Command @Arguments
+"@).AddArgument((Get-WriterArgument -Command $Command))
+                    $null = $ps.Invoke()
+                    # By the error's id and parameter, since its message is in the language of the session.
+                    $missing = @($ps.Streams.Error | Where-Object { $_.FullyQualifiedErrorId -like 'MissingMandatoryParameter,*' })
+                    $missing.Count | Should -Be 1
+                    @($missing[0].Exception.ParameterName.Trim() -split ',\s*') | Should -Contain 'Hostname'
+                    @($ps.Streams.Error | Where-Object { $_.Exception.Message -like '*A test made an HTTP call*' }).Count | Should -Be 0
+                }
+                finally { $ps.Dispose() }
             }
             It '<Command> asks for confirmation naming the host trimmed, and at a host of white space stops before it asks' -ForEach @(
                 @{ Command = 'Import-NeoIPCMetadata'; Payload = '{}'; Target = 'https://dhis2.example.org/api/metadata' }

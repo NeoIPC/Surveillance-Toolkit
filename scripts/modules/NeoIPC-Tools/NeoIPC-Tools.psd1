@@ -37,6 +37,12 @@
         'Get-NeoIPCDepartments'
         'Get-NeoIPCServerKey'
         'Read-OrgUnitInfo'
+        # Onboarding
+        'New-NeoIPCHospitalCode'
+        'Resolve-NeoIPCHospitalCode'
+        'Add-NeoIPCPartnerSite'
+        'Get-NeoIPCMapCoordinates'
+        'Add-NeoIPCMetadataCountry'
         # DataElements
         'Get-NeoIPCDataElementCodes'
         # QuartoHelpers

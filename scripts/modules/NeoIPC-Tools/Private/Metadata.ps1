@@ -1,6 +1,6 @@
 #Requires -Version 7.6
 # NeoIPC metadata pipeline — shared core (private, not exported).
-# Type-map-independent primitives: UID validity + deterministic mint, the one list
+# Type-map-independent primitives: UID validity + deterministic and random mints, the one list
 # tokenizer, parent-id grouping, and the recursive noise normalizer. Static data tables
 # (strip-list, excluded types, default UIDs) live in Private/MetadataTypeMaps.ps1.
 
@@ -49,6 +49,23 @@ function New-NeoIPCMetadataUid {
     [void]$sb.Append($letters[$hash[0] % $letters.Length])
     for ($i = 1; $i -lt 11; $i++) {
         [void]$sb.Append($alphabet[$hash[$i] % $alphabet.Length])
+    }
+    $sb.ToString()
+}
+
+function New-NeoIPCRandomUid {
+    # A random UID in the shape of the DHIS2 CodeGenerator, for an object written into the directory once and kept
+    # verbatim from then on, such as a country added to the org-unit scaffold, where nothing is re-run that a
+    # deterministic mint would have to reproduce.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+    $alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    $letters  = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    $sb = [System.Text.StringBuilder]::new(11)
+    [void]$sb.Append($letters[[System.Security.Cryptography.RandomNumberGenerator]::GetInt32($letters.Length)])
+    for ($i = 1; $i -lt 11; $i++) {
+        [void]$sb.Append($alphabet[[System.Security.Cryptography.RandomNumberGenerator]::GetInt32($alphabet.Length)])
     }
     $sb.ToString()
 }

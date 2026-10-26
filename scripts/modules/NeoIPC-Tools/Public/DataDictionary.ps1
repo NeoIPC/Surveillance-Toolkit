@@ -60,7 +60,7 @@ function Export-NeoIPCDataDictionary {
     $wantCsv = $Format -eq 'Csv' -or $Format -eq 'Both'
 
     # Fail fast: don't assemble or write anything if XLSX is requested but its dependency is missing.
-    if ($wantXlsx) { Assert-NeoIPCOpenXmlAvailable }
+    if ($wantXlsx) { Assert-NeoIPCOpenXmlAvailable -Alternative 'or pass -Format Csv to skip the workbook' }
 
     $pkg = if ($PSCmdlet.ParameterSetName -eq 'Package') {
         $Package

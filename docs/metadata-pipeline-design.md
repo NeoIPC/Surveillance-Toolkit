@@ -55,7 +55,10 @@ but that does not change the import scheme.
 
 A fresh UID is minted (deterministically, `f(natural key)`) **only** for a genuinely new
 authored object that has no production UID yet — the synthetic play accounts and the
-eurostat-only org units — and is then stored verbatim like the rest. `-RegenerateUids`
+eurostat-only org units — and is then stored verbatim like the rest. A country added to the
+scaffold later (`Add-NeoIPCMetadataCountry`) gets a random UID instead, drawn once and stored
+verbatim, which an onboarding gives the country it creates in DHIS2, so that production takes
+the scaffold's UID rather than the scaffold capturing production's. `-RegenerateUids`
 re-mints all UIDs consistently, rewriting every inbound reference (structured **and**
 expression-embedded).
 
@@ -66,7 +69,7 @@ antibiotic option/group/group-set families carry their UIDs in their richer cura
 Org units and users are **not** real config in the export (it carries only anonymized
 instances), so their package content is *authored*: org units reuse the real production UIDs
 captured from the export's de-anonymized scaffold for the units that exist live, and mint for
-the rest; users mint `f(username)`.
+the rest, or draw a random UID for a country added later; users mint `f(username)`.
 
 ## 3. Two variants from one directory — `production` (default) and `play`
 
