@@ -52,7 +52,7 @@ principles, the capability matrix, and the verification gates — lives in
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/BuildReport.ps1` | The build report every report wrapper writes (`Write-NeoIPCBuildReport`), its steps, and the parameters it records, with the report's JSON schema owned in one place |
 | `Private/TextFile.ps1` | The module's one write point for generated text files (`Write-NeoIPCTextFile`): UTF-8 without a BOM, with LF line endings, on every platform |
-| `Public/InfectiousAgents.ps1` + `Private/InfectiousAgentValidation.ps1` | Infectious-agent ontology helpers (next free `Id`) and the list's checks — its keys, structure, and value forms, its nodes, the option labels, the UID sidecar, append-only releases against the `infectious-agents-v*` tags, the frozen CSVs — which `MetadataContent.Tests.ps1` applies to the committed list |
+| `Public/InfectiousAgents.ps1` + `Private/InfectiousAgentValidation.ps1` | Infectious-agent ontology helpers (the next free `Id`, and a random UID in the sidecar for each `Id` without one) and the list's checks — its keys, structure, and value forms, its nodes, the option labels, the UID sidecar, append-only releases against the `infectious-agents-v*` tags, the frozen CSVs — which `MetadataContent.Tests.ps1` applies to the committed list |
 | `Private/YamlPortability.ps1` | The check that a YAML text keeps to YAML 1.2.2's portable subset (`Get-NeoIPCYamlPortabilityFinding`): plain scalars typed alike under YAML 1.1 and 1.2.2 and by powershell-yaml, R's yaml, yaml12, and ruamel.yaml, plain keys that read as strings, block scalars that R's yaml reads as strings, none ending the text but one that strips its final line break, and no anchor, alias, tag, directive, second document, key that is a collection, or repeated or case-variant key. `YamlPortability.Tests.ps1` holds every committed YAML file to it and each reader's model to the reader, and the sharing-profile writer checks its output with it |
 | `Public/AntibioticGeneration.ps1` + `Private/AntibioticGeneration.ps1` | The antibiotic-domain generators — the `NEOIPC_ANTIMICROBIAL_SUBSTANCES` option set, its option groups, and the group set — built from the reconciled sources in `metadata/common/antibiotics/` |
 | `Public/AntibioticTranslation.ps1` + `Private/AntibioticTranslation.ps1` | The antibiotic translation catalogue (`Export-NeoIPCAntibioticTranslation`): `po/antibiotics.pot` from the canonical sources, and the per-locale catalogues merged up to it |
@@ -109,9 +109,11 @@ only the dependency-closure seed and the round-trip oracle.
 `NEOIPC_CORE` closure, adds the non-closure definitions (org-unit groups, roles),
 noise-strips, then overlays the authored org units / users / memberships read from the
 `metadata/` directory and emits importable JSON. The generators produce the pathogen /
-substance / field-gating objects from the ontology + capability matrix, each preserving
-the deployed UIDs where they exist (else minting deterministically) so a regenerated
-object replaces its deployed counterpart cleanly.
+substance / field-gating objects from the ontology + capability matrix. Each
+infectious-agent option takes its UID from the list's UID sidecar, which holds the
+deployed options' UIDs and a random one for every other option; every other generated
+object keeps its deployed UID where one exists and is minted deterministically
+otherwise, so a regenerated object replaces its deployed counterpart cleanly.
 
 `Update-NeoIPCMetadataDirectory` is the reverse path: it ingests a fresh export and brings the
 directory into line with it (report-only unless `-Apply`), auto-writing only the CSV-owned config
@@ -900,7 +902,7 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | PAT | `Read-DHIS2PersonalAccessToken`, `Remove-DHIS2PersonalAccessToken`, `Clear-DHIS2PersonalAccessTokens` |
 | User | `Read-UserInfo` |
 | Quarto | `Resolve-NeoIPCReportHostname`, `Invoke-WithNeoIPCAuth`, `Invoke-QuartoRender`, `Invoke-Rscript`, `Build-QmdParamPairs`, `Write-NeoIPCBuildReport`, `New-NeoIPCBuildStep`, `Complete-NeoIPCBuildStep`, `Get-NeoIPCParameterSnapshot`, `Get-NeoIPCRenderLogLevel`, `Test-NeoIPCRenderWarningHead`, `Test-QuartoInstallation`, `Split-NeoIPCLocale`, `Resolve-NeoIPCLocaleQmd` |
-| InfectiousAgents | `Find-NextFreeInfectiousAgentId` |
+| InfectiousAgents | `Find-NextFreeInfectiousAgentId`, `Add-NeoIPCInfectiousAgentUid` |
 | Metadata pipeline | `ConvertFrom-NeoIPCMetadataJson`, `ConvertTo-NeoIPCMetadataJson`, `Compare-NeoIPCMetadata`, `Test-NeoIPCMetadataRoundTrip`, `Merge-NeoIPCMetadataJson`, `Select-NeoIPCMetadataClosure`, `Test-NeoIPCMetadataExpression`, `Update-NeoIPCMetadata`, `New-NeoIPCMetadataPackage`, `Export-NeoIPCMetadataTranslation`, `Import-NeoIPCMetadataTranslation`, `Update-NeoIPCMetadataDirectory` |
 | Metadata deployment | `Deploy-NeoIPCMetadata`, `Import-NeoIPCMetadata`, `Test-NeoIPCMetadataImport`, `Test-NeoIPCProgramRuleActionServed` |
 | Play data | `New-NeoIPCPlayDataPackage`, `Import-NeoIPCPlayData`, `Export-NeoIPCPlayDataCsv` |

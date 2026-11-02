@@ -274,19 +274,40 @@ Hierarchies:
         }
 
         It 'reports nothing for a sidecar of the list''s Ids with well-formed, unique UIDs' {
-            $rows = @([pscustomobject]@{ id = '10'; uid = 'a1234567890' }, [pscustomobject]@{ id = '20'; uid = 'B1234567890' })
+            $rows = @(@{ id = '0'; uid = 'z1234567890' }, @{ id = '10'; uid = 'a1234567890' }, @{ id = '11'; uid = 'c1234567890' }, @{ id = '20'; uid = 'B1234567890' }) |
+                ForEach-Object { [pscustomobject]$_ }
             @(Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow $rows) | Should -BeNullOrEmpty
         }
 
         It 'reports <Rule> for <Defect>' -ForEach @(
-            @{ Defect = 'an id that is no Id of the list'; Rule = 'uid-orphan'; Rows = @(@{ id = '99'; uid = 'a1234567890' }) }
+            @{ Defect = 'an id that is no Id of the list'; Rule = 'uid-orphan'; Rows = @(@{ id = '99'; uid = 'd1234567890' }) }
             @{ Defect = 'a uid that starts with a digit'; Rule = 'uid-format'; Rows = @(@{ id = '10'; uid = '11234567890' }) }
             @{ Defect = 'a uid of ten characters'; Rule = 'uid-format'; Rows = @(@{ id = '10'; uid = 'a123456789' }) }
-            @{ Defect = 'one uid for two ids'; Rule = 'uid-duplicate'; Rows = @(@{ id = '10'; uid = 'a1234567890' }, @{ id = '20'; uid = 'a1234567890' }) }
-            @{ Defect = 'an id listed twice'; Rule = 'uid-id-duplicate'; Rows = @(@{ id = '10'; uid = 'a1234567890' }, @{ id = '10'; uid = 'b1234567890' }) }
+            @{ Defect = 'one uid for two ids'; Rule = 'uid-duplicate'; Rows = @(@{ id = '20'; uid = 'a1234567890' }) }
+            @{ Defect = 'an id listed twice'; Rule = 'uid-id-duplicate'; Rows = @(@{ id = '10'; uid = 'b1234567890' }) }
         ) {
-            $rows = @($Rows | ForEach-Object { [pscustomobject]$_ })
+            # A complete sidecar, with the defect's rows replacing the clean rows of their ids or added to them; the row
+            # listed twice keeps the clean one too.
+            $clean = [ordered]@{ '0' = 'z1234567890'; '10' = 'a1234567890'; '11' = 'c1234567890'; '20' = 'B1234567890' }
+            $replaced = if ($Defect -ne 'an id listed twice') { @($Rows | ForEach-Object { $_.id }) } else { @() }
+            $rows = @($clean.GetEnumerator() | Where-Object { $_.Key -notin $replaced } | ForEach-Object { [pscustomobject]@{ id = $_.Key; uid = $_.Value } }) +
+                @($Rows | ForEach-Object { [pscustomobject]$_ })
             Get-Rule (Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow $rows) | Should -Be @($Rule)
+        }
+
+        It 'reports uid-duplicate for the option set''s own uid' {
+            $rows = @(@{ id = '0'; uid = 'z1234567890' }, @{ id = '10'; uid = 'a1234567890' }, @{ id = '11'; uid = $script:NeoIPCPathogenOptionSetUid }, @{ id = '20'; uid = 'B1234567890' }) |
+                ForEach-Object { [pscustomobject]$_ }
+            $findings = @(Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow $rows)
+            Get-Rule $findings | Should -Be @('uid-duplicate')
+            $findings[0].Location | Should -BeExactly 'id 11'
+        }
+
+        It 'reports each Id of the list that the sidecar lacks, since no option UID is derived' {
+            $rows = @([pscustomobject]@{ id = '10'; uid = 'a1234567890' }, [pscustomobject]@{ id = '20'; uid = 'B1234567890' })
+            $findings = @(Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow $rows)
+            Get-Rule $findings | Should -Be @('uid-missing', 'uid-missing')
+            @($findings.Location) | Should -Be @('Id 0', 'Id 11')
         }
 
         It 'reports Ids it cannot read instead of throwing' {
@@ -295,8 +316,8 @@ Hierarchies:
         }
 
         It 'reports an empty row instead of throwing' {
-            Get-Rule (Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow @($null)) | Should -Be @('uid')
-            @(Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow $null) | Should -BeNullOrEmpty
+            Get-Rule (Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow @($null)) | Should -Be @('uid', 'uid-missing', 'uid-missing', 'uid-missing', 'uid-missing')
+            Get-Rule (Get-NeoIPCInfectiousAgentUidFinding -Tree $script:Tree -UidRow $null) | Should -Be @('uid-missing', 'uid-missing', 'uid-missing', 'uid-missing')
         }
     }
 
@@ -387,9 +408,9 @@ Hierarchies:
             @{ Defect = 'a released Id that is gone'; Rule = 'release-id-removed'; Concepts = @{ 10 = 'Staphylococcus' }; Uids = @{ 10 = 'a1234567890' } }
             @{ Defect = 'a released Id renamed'; Rule = 'release-name-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus luteus' }; Uids = @{ 10 = 'a1234567890' } }
             @{ Defect = 'a released Id renamed in letter case alone'; Rule = 'release-name-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'micrococcus' }; Uids = @{ 10 = 'a1234567890' } }
-            @{ Defect = 'a deployed option with another uid'; Rule = 'release-uid-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{ 10 = 'b1234567890' } }
-            @{ Defect = 'a deployed option whose uid changed in letter case alone'; Rule = 'release-uid-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{ 10 = 'A1234567890' } }
-            @{ Defect = 'a deployed option gone from the sidecar'; Rule = 'release-uid-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{} }
+            @{ Defect = 'a released uid replaced'; Rule = 'release-uid-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{ 10 = 'b1234567890' } }
+            @{ Defect = 'a released uid changed in letter case alone'; Rule = 'release-uid-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{ 10 = 'A1234567890' } }
+            @{ Defect = 'a released uid gone from the sidecar'; Rule = 'release-uid-changed'; Concepts = @{ 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{} }
             @{ Defect = 'a new Id below a released one'; Rule = 'release-id-reused'; Concepts = @{ 5 = 'Kocuria'; 10 = 'Staphylococcus'; 11 = 'Micrococcus' }; Uids = @{ 10 = 'a1234567890' } }
         ) {
             $current = [pscustomobject]@{ Concepts = ConvertTo-OrdinalMap $Concepts; Uids = ConvertTo-OrdinalMap $Uids }

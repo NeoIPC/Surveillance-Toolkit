@@ -452,6 +452,29 @@ InModuleScope 'NeoIPC-Tools' {
             (New-NeoIPCMetadataUid -Type 'ab' -NaturalKey 'c') |
                 Should -Not -Be (New-NeoIPCMetadataUid -Type 'a' -NaturalKey 'bc')
         }
+        It 'takes a UID only as the whole text, as DHIS2''s CodeGenerator.isValidUid does' {
+            Test-NeoIPCMetadataUid -Id 'abcdefghijk' | Should -BeTrue
+            Test-NeoIPCMetadataUid -Id "abcdefghijk`n" | Should -BeFalse
+            Test-NeoIPCMetadataUid -Id '1bcdefghijk' | Should -BeFalse
+            Test-NeoIPCMetadataUid -Id 'abcdefghij' | Should -BeFalse
+        }
+        It 'draws a random UID from DHIS2''s CodeGenerator alphabets: a letter, then ten letters or digits, each of them used' {
+            # CodeGenerator.generateUid draws the first character from its letters and the other ten from its digits
+            # and letters. Of 5,000 draws, all leave a letter out of the first place with a chance below 1e-40, and a
+            # character out of the others with one below 1e-300.
+            $letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            $uids = @(for ($i = 0; $i -lt 5000; $i++) { New-NeoIPCRandomUid })
+            @($uids | Where-Object { $_.Length -ne 11 }) | Should -BeNullOrEmpty
+            $first = [System.Collections.Generic.HashSet[char]]::new()
+            $rest = [System.Collections.Generic.HashSet[char]]::new()
+            foreach ($uid in $uids) {
+                [void]$first.Add($uid[0])
+                $rest.UnionWith($uid.Substring(1).ToCharArray())
+            }
+            $inOrder = { param($Characters) -join @($Characters | Sort-Object { [int]$_ }) }
+            (& $inOrder $first) | Should -BeExactly (& $inOrder $letters.ToCharArray())
+            (& $inOrder $rest) | Should -BeExactly (& $inOrder ('0123456789' + $letters).ToCharArray())
+        }
         It 'preserves a present valid id, mints for an id-less object, and throws on collision' {
             $seen = [System.Collections.Generic.HashSet[string]]::new()
             $de = [ordered]@{ id = 'dataElmnt01'; code = 'NEOIPC_X' }
@@ -2866,12 +2889,15 @@ Hierarchies:
       - Name: Bacillus coli
         Id: 12
 '@
-            $script:GenYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            # In a directory of its own, with the UID sidecar beside it that the generator reads by default.
+            $onto = Join-Path $TestDrive 'onto'
+            $null = New-Item -ItemType Directory -Path $onto -Force
+            $script:GenYaml = Join-Path $onto 'NeoIPC-Infectious-Agents.yaml'
             Set-TestFileContent -LiteralPath $script:GenYaml -Value $yaml -Encoding utf8
             $script:GenTree = (Get-Content -LiteralPath $script:GenYaml -Raw | ConvertFrom-Yaml)
-        }
-        AfterAll {
-            if ($script:GenYaml -and (Test-Path -LiteralPath $script:GenYaml)) { Remove-Item -LiteralPath $script:GenYaml -Force }
+            $script:GenUids = [ordered]@{ '0' = 'optNotLst00'; '10' = 'optEscher10'; '11' = 'optEcoli011'; '12' = 'optBcoli012' }
+            $script:GenSidecarText = "id,uid`n" + (@($script:GenUids.GetEnumerator() | ForEach-Object { "$($_.Key),$($_.Value)" }) -join "`n")
+            Set-TestFileContent -LiteralPath (Join-Path $onto 'NeoIPC-Infectious-Agents.uids.csv') -Value $script:GenSidecarText -Encoding utf8
         }
 
         It 'walks the tree depth-first (Hierarchies/Synonyms/Children), emitting every Id-bearing node (synonyms included)' {
@@ -2907,7 +2933,7 @@ Hierarchies:
             (Get-NeoIPCPathogenOptionLabel -Name 'Blank rank' -ConceptType '' -IsSynonym $false) | Should -BeExactly 'Blank rank'
         }
         It 'a synonym carrying its own ConceptType is still tagged [synonym] (synonym precedence) end-to-end' {
-            $y = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-syn-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            $y = Join-Path $TestDrive 'onto-synonym.yaml'
             Set-TestFileContent -LiteralPath $y -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Escherichia coli
@@ -2918,12 +2944,11 @@ Hierarchies:
     ConceptType: Species
     Id: 12
 '@
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $y
-                (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['name']) | Should -BeExactly 'Bacillus coli [synonym]'
-                (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['name']) | Should -BeExactly 'Escherichia coli [species]'
-            }
-            finally { Remove-Item -LiteralPath $y -Force }
+            $sidecar = Join-Path $TestDrive 'uids-synonym.csv'
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optEcoli011`n12,optBcoli012"
+            $frag = New-NeoIPCPathogenOptionSet -Path $y -UidSidecarPath $sidecar
+            (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['name']) | Should -BeExactly 'Bacillus coli [synonym]'
+            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['name']) | Should -BeExactly 'Escherichia coli [species]'
         }
         It 'emits a node''s synonyms before its children (deterministic visit order, not file order)' {
             # A node carrying BOTH an Id-bearing Synonym and an Id-bearing Child, child listed first in the source.
@@ -2956,56 +2981,43 @@ Hierarchies:
             (@($frag['options'])[0]['optionSet']['id']) | Should -BeExactly $os['id']
             (Test-NeoIPCMetadataUid -Id $os['id']) | Should -BeTrue
         }
-        It 'mints deterministic UIDs — pure across runs, and option uid = f(optionSet uid, code)' {
-            $a = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
-            $b = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
-            (@($a['optionSets'])[0]['id']) | Should -BeExactly (@($b['optionSets'])[0]['id'])
-            @($a['options'] | ForEach-Object { $_['id'] }) | Should -Be @($b['options'] | ForEach-Object { $_['id'] })
-            $osUid = @($a['optionSets'])[0]['id']
-            $expected = New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11')
-            (@($a['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly $expected
+        It 'takes every option UID from the sidecar beside the ontology, deriving none' {
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml
+            @($frag['options'] | ForEach-Object { "$($_['code']),$($_['id'])" }) |
+                Should -Be @($script:GenUids.GetEnumerator() | ForEach-Object { "$($_.Key),$($_.Value)" })
         }
         It 'takes the option-set + option UIDs from source (-OptionSetUid + the sidecar) and sharing from the export' {
-            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optExist001"
+            $sidecar = Join-Path $TestDrive 'uids-export.csv'
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n0,optExist000`n10,optExist010`n11,optExist001`n12,optExist012"
             $existing = @{
                 optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'NEOIPC_PATHOGENS'; name = 'old'; sharing = @{ public = 'rw------' } })
                 options    = @([ordered]@{ id = 'optExist001'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osPathogn01' } })
             }
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osPathogn01' -UidSidecarPath $sidecar -ExistingPackage $existing
-                (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'osPathogn01'   # from -OptionSetUid (source)
-                (@($frag['optionSets'])[0]['sharing']) | Should -Not -BeNullOrEmpty    # from the export
-                (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly 'optExist001'   # from the sidecar
-                # A code absent from the sidecar still mints deterministically off the source set UID.
-                (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id']) |
-                    Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osPathogn01|12')
-            }
-            finally { Remove-Item -LiteralPath $sidecar -Force }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osPathogn01' -UidSidecarPath $sidecar -ExistingPackage $existing
+            (@($frag['optionSets'])[0]['id']) | Should -BeExactly 'osPathogn01'   # from -OptionSetUid (source)
+            (@($frag['optionSets'])[0]['sharing']) | Should -Not -BeNullOrEmpty    # from the export
+            (@($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']) | Should -BeExactly 'optExist001'   # from the sidecar
+            (@($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id']) | Should -BeExactly 'optExist012'   # deployed or not
         }
         It 'identity is SOURCE, not the export: when the sidecar/-OptionSetUid disagree with the export, source wins' {
             # The export carries DIFFERENT well-formed UIDs for the same deployed code 11 — they must be ignored for
-            # identity (the export is read only for sharing + the no-silent-drop validation). Pins the commit's guarantee
-            # against a future export-by-code identity fallback (which would otherwise pass every other test).
-            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,srcUID00011"
+            # identity (the export is read only for sharing + the no-silent-drop validation). No other test fails were
+            # identity taken from the export by code.
+            $sidecar = Join-Path $TestDrive 'uids-source.csv'
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n0,srcUID00000`n10,srcUID00010`n11,srcUID00011`n12,srcUID00012"
             $existing = @{
                 optionSets = @([ordered]@{ id = 'osExport001'; code = 'NEOIPC_PATHOGENS'; name = 'old' })
                 options    = @([ordered]@{ id = 'expUID00011'; code = '11'; name = 'old'; optionSet = [ordered]@{ id = 'osExport001' } })
             }
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSource001' -UidSidecarPath $sidecar -ExistingPackage $existing
-                $os = @($frag['optionSets'])[0]
-                $os['id'] | Should -BeExactly 'osSource001'      # from -OptionSetUid (source)
-                $os['id'] | Should -Not -Be 'osExport001'        # NOT the export's option-set id
-                $o11 = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]
-                $o11['id'] | Should -BeExactly 'srcUID00011'     # from the sidecar (source)
-                $o11['id'] | Should -Not -Be 'expUID00011'       # NOT the export's option id, even though code 11 matches
-                # A code with no sidecar entry mints off the SOURCE set UID — never the export.
-                $o12 = @($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]
-                $o12['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osSource001|12')
-            }
-            finally { Remove-Item -LiteralPath $sidecar -Force }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSource001' -UidSidecarPath $sidecar -ExistingPackage $existing
+            $os = @($frag['optionSets'])[0]
+            $os['id'] | Should -BeExactly 'osSource001'      # from -OptionSetUid (source)
+            $os['id'] | Should -Not -Be 'osExport001'        # NOT the export's option-set id
+            $o11 = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]
+            $o11['id'] | Should -BeExactly 'srcUID00011'     # from the sidecar (source)
+            $o11['id'] | Should -Not -Be 'expUID00011'       # NOT the export's option id, even though code 11 matches
+            $o12 = @($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]
+            $o12['id'] | Should -BeExactly 'srcUID00012'
         }
         It 'fails loud when the export carries a deployed code absent from the ontology (no silent drop)' {
             $existing = @{
@@ -3015,7 +3027,10 @@ Hierarchies:
             { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -ExistingPackage $existing } | Should -Throw '*9999*'
         }
         It 'fails loud on a duplicate Id in the ontology' {
-            $dupYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-dup-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            # In a directory of its own, so that no sidecar lies beside it for the generator to read first.
+            $dupDirectory = Join-Path $TestDrive 'onto-duplicate'
+            $null = New-Item -ItemType Directory -Path $dupDirectory -Force
+            $dupYaml = Join-Path $dupDirectory 'NeoIPC-Infectious-Agents.yaml'
             Set-TestFileContent -LiteralPath $dupYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: A
@@ -3023,31 +3038,28 @@ Hierarchies:
 - Name: B
   Id: 5
 '@
-            try { { New-NeoIPCPathogenOptionSet -Path $dupYaml } | Should -Throw '*Duplicate option code 5*' }
-            finally { Remove-Item -LiteralPath $dupYaml -Force }
+            { New-NeoIPCPathogenOptionSet -Path $dupYaml } | Should -Throw '*Duplicate option code 5*'
         }
-        It 're-mints deterministically when the source option-set / option UID is structurally invalid' {
-            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,short"   # 'short' is not a valid UID -> mint
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'BAD!' -UidSidecarPath $sidecar
-                $osUid = @($frag['optionSets'])[0]['id']
-                (Test-NeoIPCMetadataUid -Id $osUid) | Should -BeTrue
-                $osUid | Should -BeExactly (New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey 'NEOIPC_PATHOGENS')
-                $opt = @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id']
-                (Test-NeoIPCMetadataUid -Id $opt) | Should -BeTrue
-                $opt | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, '11'))
-            }
-            finally { Remove-Item -LiteralPath $sidecar -Force }
+        It 'refuses an option-set UID that is no DHIS2 UID, deriving none' {
+            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'BAD!' } | Should -Throw "*'BAD!' is not a DHIS2 UID*"
+        }
+        It 'refuses option codes whose sidecar UID is missing or malformed, naming each with its own remedy, and derives none' {
+            $sidecar = Join-Path $TestDrive 'uids-lacking.csv'
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n0,optNotLst00`n10,short`n11,`n"   # 10 and 11 malformed, 12 absent
+            $message = { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -UidSidecarPath $sidecar } | Should -Throw -PassThru | ForEach-Object { $_.Exception.Message }
+            $message | Should -BeLike '1 option code(s) have no UID in the sidecar*: 12. Add-NeoIPCInfectiousAgentUid draws a random one for each Id without one. *'
+            $message | Should -BeLike '* 2 option code(s) have a malformed UID in the sidecar*: 10, 11. Restore each from the sidecar''s history*'
+            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -UidSidecarPath (Join-Path $TestDrive 'no-such-sidecar.csv') } | Should -Throw '*4 option code(s) have no UID in the sidecar*: 0, 10, 11, 12.*'
         }
         It 'fails loud when two option codes in the sidecar share a UID' {
-            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,dupSharedAA`n12,dupSharedAA"   # valid UID shape, shared
-            try { { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -UidSidecarPath $sidecar } | Should -Throw '*UID collision*' }
-            finally { Remove-Item -LiteralPath $sidecar -Force }
+            $sidecar = Join-Path $TestDrive 'uids-shared.csv'
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n0,optNotLst00`n10,optEscher10`n11,dupSharedAA`n12,dupSharedAA"   # valid UID shape, shared
+            { New-NeoIPCPathogenOptionSet -Path $script:GenYaml -UidSidecarPath $sidecar } | Should -Throw '*UID collision*'
         }
         It 'fails loud when the ontology has no Id-bearing concepts (would orphan the bindings)' {
-            $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-onto-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
+            $emptyDirectory = Join-Path $TestDrive 'onto-empty'
+            $null = New-Item -ItemType Directory -Path $emptyDirectory -Force
+            $emptyYaml = Join-Path $emptyDirectory 'NeoIPC-Infectious-Agents.yaml'
             Set-TestFileContent -LiteralPath $emptyYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Bacteria
@@ -3056,8 +3068,7 @@ Hierarchies:
   - Name: Escherichia
     ConceptType: Genus
 '@
-            try { { New-NeoIPCPathogenOptionSet -Path $emptyYaml } | Should -Throw '*No Id-bearing concepts*' }
-            finally { Remove-Item -LiteralPath $emptyYaml -Force }
+            { New-NeoIPCPathogenOptionSet -Path $emptyYaml } | Should -Throw '*No Id-bearing concepts*'
         }
         It 'fails loud when -ExistingPackage is supplied but lacks the target option set' {
             $existing = @{ optionSets = @([ordered]@{ id = 'osPathogn01'; code = 'SOME_OTHER_SET' }); options = @() }
@@ -3099,20 +3110,17 @@ Hierarchies:
             Set-TestFileContent -LiteralPath $blank -Encoding utf8 -Value "id,uid`n,xUID00abcde"
             { Get-NeoIPCPathogenUidMap -Path $blank } | Should -Throw '*blank id*'
         }
-        It 'generates from source alone (no -ExistingPackage): set UID from -OptionSetUid, options from the sidecar else minted' {
-            $sidecar = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-uids-{0}.csv' -f ([guid]::NewGuid().ToString('N')))
-            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n11,optSrc00011"
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSrcOnly01' -UidSidecarPath $sidecar
-                @($frag['optionSets'])[0]['id'] | Should -BeExactly 'osSrcOnly01'
-                @($frag['optionSets'])[0].Contains('sharing') | Should -BeFalse
-                @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id'] | Should -BeExactly 'optSrc00011'
-                @($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id'] | Should -BeExactly (New-NeoIPCMetadataUid -Type 'options' -NaturalKey 'osSrcOnly01|12')
-            }
-            finally { Remove-Item -LiteralPath $sidecar -Force }
+        It 'generates from source alone (no -ExistingPackage): set UID from -OptionSetUid, options from the sidecar' {
+            $sidecar = Join-Path $TestDrive 'uids-source-alone.csv'
+            Set-TestFileContent -LiteralPath $sidecar -Encoding utf8 -Value "id,uid`n0,optSrc00000`n10,optSrc00010`n11,optSrc00011`n12,optSrc00012"
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -OptionSetUid 'osSrcOnly01' -UidSidecarPath $sidecar
+            @($frag['optionSets'])[0]['id'] | Should -BeExactly 'osSrcOnly01'
+            @($frag['optionSets'])[0].Contains('sharing') | Should -BeFalse
+            @($frag['options'] | Where-Object { $_['code'] -eq '11' })[0]['id'] | Should -BeExactly 'optSrc00011'
+            @($frag['options'] | Where-Object { $_['code'] -eq '12' })[0]['id'] | Should -BeExactly 'optSrc00012'
         }
         It 'Get-NeoIPCPoTranslationMap reads a po4a YAML .po: skips header/untranslated/identical/obsolete, joins wrapped' {
-            $po = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-po-{0}.po' -f ([guid]::NewGuid().ToString('N')))
+            $po = Join-Path $TestDrive 'map.po'
             Set-TestFileContent -LiteralPath $po -Encoding utf8 -Value @'
 msgid ""
 msgstr ""
@@ -3143,24 +3151,21 @@ msgstr ""
 "Wra"
 "pped-DE"
 '@
-            try {
-                $map = Get-NeoIPCPoTranslationMap -Path $po
-                $map['Species'] | Should -BeExactly 'Art'
-                $map['Wrapped'] | Should -BeExactly 'Wrapped-DE'
-                $map.Contains('Untranslated') | Should -BeFalse
-                $map.Contains('Identical') | Should -BeFalse
-                $map.Contains('obsolete-key') | Should -BeFalse
-                $map.Contains('synonym') | Should -BeFalse    # fuzzy msgmerge guess — skipped, like gettext
-                $map.Count | Should -Be 2
-            }
-            finally { Remove-Item -LiteralPath $po -Force }
+            $map = Get-NeoIPCPoTranslationMap -Path $po
+            $map['Species'] | Should -BeExactly 'Art'
+            $map['Wrapped'] | Should -BeExactly 'Wrapped-DE'
+            $map.Contains('Untranslated') | Should -BeFalse
+            $map.Contains('Identical') | Should -BeFalse
+            $map.Contains('obsolete-key') | Should -BeFalse
+            $map.Contains('synonym') | Should -BeFalse    # fuzzy msgmerge guess — skipped, like gettext
+            $map.Count | Should -Be 2
         }
         It 'Get-NeoIPCPoTranslationMap returns an empty map for an absent catalogue' {
-            $map = Get-NeoIPCPoTranslationMap -Path (Join-Path ([System.IO.Path]::GetTempPath()) ('no-such-{0}.po' -f ([guid]::NewGuid().ToString('N'))))
+            $map = Get-NeoIPCPoTranslationMap -Path (Join-Path $TestDrive 'no-such.po')
             $map.Count | Should -Be 0
         }
         It 'composes per-locale option labels from a .po: localized name + rank/synonym word, English fallback, no tag for Unknown' {
-            $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
+            $dir = Join-Path $TestDrive 'po-composed'
             New-Item -ItemType Directory -Path $dir | Out-Null
             Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
 msgid ""
@@ -3182,24 +3187,21 @@ msgstr "Nicht aufgeführt"
 msgid "Escherichia coli"
 msgstr "Escherichia coli"
 '@
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
-                $byCode = @{}; foreach ($o in @($frag['options'])) { $byCode[[string]$o['code']] = $o }
-                # English source names are unchanged.
-                $byCode['10']['name'] | Should -BeExactly 'Escherichia [genus]'
-                $byCode['11']['name'] | Should -BeExactly 'Escherichia coli [species]'
-                # Each option carries exactly the composed German label: localized rank (verbatim casing), the
-                # synonym word, the localized name where translated, English fallback otherwise, no tag for Unknown.
-                (@($byCode['0']['translations']) | Where-Object { $_.locale -eq 'de' }).value  | Should -BeExactly 'Nicht aufgeführt'
-                (@($byCode['10']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia [Gattung]'
-                (@($byCode['11']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia coli [Art]'
-                (@($byCode['12']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Bacillus coli [Synonym]'
-                @($byCode['11']['translations'])[0].property | Should -BeExactly 'NAME'   # DHIS2 ObjectTranslation token (uppercase, case-sensitive)
-            }
-            finally { Remove-Item -LiteralPath $dir -Recurse -Force }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
+            $byCode = @{}; foreach ($o in @($frag['options'])) { $byCode[[string]$o['code']] = $o }
+            # English source names are unchanged.
+            $byCode['10']['name'] | Should -BeExactly 'Escherichia [genus]'
+            $byCode['11']['name'] | Should -BeExactly 'Escherichia coli [species]'
+            # Each option carries exactly the composed German label: localized rank (verbatim casing), the
+            # synonym word, the localized name where translated, English fallback otherwise, no tag for Unknown.
+            (@($byCode['0']['translations']) | Where-Object { $_.locale -eq 'de' }).value  | Should -BeExactly 'Nicht aufgeführt'
+            (@($byCode['10']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia [Gattung]'
+            (@($byCode['11']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia coli [Art]'
+            (@($byCode['12']['translations']) | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Bacillus coli [Synonym]'
+            @($byCode['11']['translations'])[0].property | Should -BeExactly 'NAME'   # DHIS2 ObjectTranslation token (uppercase, case-sensitive)
         }
         It 'omits a translations[] entry where the locale leaves the label identical to the English source' {
-            $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
+            $dir = Join-Path $TestDrive 'po-identical'
             New-Item -ItemType Directory -Path $dir | Out-Null
             # Only the genus rank is translated, so only the genus option's label differs; the rest stay English.
             Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.it.po') -Encoding utf8 -Value @'
@@ -3210,18 +3212,15 @@ msgstr ""
 msgid "Genus"
 msgstr "Genere"
 '@
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
-                $byCode = @{}; foreach ($o in @($frag['options'])) { $byCode[[string]$o['code']] = $o }
-                (@($byCode['10']['translations']) | Where-Object { $_.locale -eq 'it' }).value | Should -BeExactly 'Escherichia [Genere]'
-                $byCode['0']['translations']  | Should -BeNullOrEmpty
-                $byCode['11']['translations'] | Should -BeNullOrEmpty
-                $byCode['12']['translations'] | Should -BeNullOrEmpty
-            }
-            finally { Remove-Item -LiteralPath $dir -Recurse -Force }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
+            $byCode = @{}; foreach ($o in @($frag['options'])) { $byCode[[string]$o['code']] = $o }
+            (@($byCode['10']['translations']) | Where-Object { $_.locale -eq 'it' }).value | Should -BeExactly 'Escherichia [Genere]'
+            $byCode['0']['translations']  | Should -BeNullOrEmpty
+            $byCode['11']['translations'] | Should -BeNullOrEmpty
+            $byCode['12']['translations'] | Should -BeNullOrEmpty
         }
         It 'emits one translations[] entry per translated locale, in deterministic (filename-sorted) locale order' {
-            $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-podir-{0}' -f ([guid]::NewGuid().ToString('N')))
+            $dir = Join-Path $TestDrive 'po-locales'
             New-Item -ItemType Directory -Path $dir | Out-Null
             Set-TestFileContent -LiteralPath (Join-Path $dir 'infectious_agents.de.po') -Encoding utf8 -Value @'
 msgid ""
@@ -3239,17 +3238,14 @@ msgstr ""
 msgid "Genus"
 msgstr "Género"
 '@
-            try {
-                $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
-                $genus = @($frag['options'] | Where-Object { [string]$_['code'] -eq '10' })[0]
-                $t = @($genus['translations'])
-                $t.Count | Should -Be 2
-                @($t | ForEach-Object { $_.locale }) | Should -Be @('de', 'es')   # filename-sorted, deterministic
-                @($t | ForEach-Object { $_.property }) | Should -Be @('NAME', 'NAME')
-                ($t | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia [Gattung]'
-                ($t | Where-Object { $_.locale -eq 'es' }).value | Should -BeExactly 'Escherichia [Género]'
-            }
-            finally { Remove-Item -LiteralPath $dir -Recurse -Force }
+            $frag = New-NeoIPCPathogenOptionSet -Path $script:GenYaml -PoDirectory $dir
+            $genus = @($frag['options'] | Where-Object { [string]$_['code'] -eq '10' })[0]
+            $t = @($genus['translations'])
+            $t.Count | Should -Be 2
+            @($t | ForEach-Object { $_.locale }) | Should -Be @('de', 'es')   # filename-sorted, deterministic
+            @($t | ForEach-Object { $_.property }) | Should -Be @('NAME', 'NAME')
+            ($t | Where-Object { $_.locale -eq 'de' }).value | Should -BeExactly 'Escherichia [Gattung]'
+            ($t | Where-Object { $_.locale -eq 'es' }).value | Should -BeExactly 'Escherichia [Género]'
         }
     }
 

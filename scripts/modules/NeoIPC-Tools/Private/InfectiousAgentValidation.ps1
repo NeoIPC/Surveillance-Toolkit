@@ -356,9 +356,9 @@ function Get-NeoIPCInfectiousAgentLabelFinding {
 }
 
 function Get-NeoIPCInfectiousAgentUidFinding {
-    # Checks the UID sidecar (NeoIPC-Infectious-Agents.uids.csv, the deployed option UIDs) against the ontology: every
-    # id is an Id of the list and appears once, and every uid is a well-formed DHIS2 UID, used once. A list Id the
-    # sidecar lacks is no finding: its option was never deployed, and the generator mints its UID.
+    # Checks the UID sidecar (NeoIPC-Infectious-Agents.uids.csv, the UID of every option) against the ontology: every
+    # Id of the list has a row, since no option UID is derived; every id is an Id of the list and appears once; and
+    # every uid is a well-formed DHIS2 UID, used once and not the option set's own.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
@@ -389,12 +389,18 @@ function Get-NeoIPCInfectiousAgentUidFinding {
         if ($uid -cnotmatch '\A[A-Za-z][A-Za-z0-9]{10}\z') {
             New-NeoIPCCheckFinding -Rule 'uid-format' -Location "id $id" -Message "The uid '$uid' is not a DHIS2 UID (a letter, then ten letters or digits)."
         }
+        elseif ($uid -ceq $script:NeoIPCPathogenOptionSetUid) {
+            New-NeoIPCCheckFinding -Rule 'uid-duplicate' -Location "id $id" -Message "The uid '$uid' is that of the option set itself."
+        }
         elseif ($seenUids.ContainsKey($uid)) {
             New-NeoIPCCheckFinding -Rule 'uid-duplicate' -Location "id $id" -Message "The uid '$uid' is also that of id $($seenUids[$uid])."
         }
         else {
             $seenUids[$uid] = $id
         }
+    }
+    foreach ($id in @($ids | Where-Object { -not $seenIds.Contains($_) } | Sort-Object { [long]$_ })) {
+        New-NeoIPCCheckFinding -Rule 'uid-missing' -Location "Id $id" -Message 'The sidecar lacks the Id, so its option has no UID; Add-NeoIPCInfectiousAgentUid draws one at random.'
     }
 }
 
@@ -536,9 +542,9 @@ function Test-NeoIPCChangelogUnreleasedEntry {
 }
 
 function Get-NeoIPCInfectiousAgentReleaseFinding {
-    # Holds the list append-only against every release: an Id once released keeps its Name, a deployed option keeps
-    # its UID, an Id new since the releases exceeds every released Id, so that a recycled code can never carry two
-    # meanings in collected records, and a released Id never disappears, nor does its UID. Only a branch that
+    # Holds the list append-only against every release: an Id once released keeps its Name and the UID a release's
+    # sidecar gave it, an Id new since the releases exceeds every released Id, so that a recycled code can never carry
+    # two meanings in collected records, and a released Id never disappears, nor does its UID. Only a branch that
     # maintains an earlier line may lack Ids: those of a release outside the history of HEAD whose line, its
     # MAJOR.MINOR as the release job's monotonic guard reads it, is later than that of the version the list's VERSION
     # file names. It fails closed: with no release at all, or without the tag of a release the list's CHANGELOG

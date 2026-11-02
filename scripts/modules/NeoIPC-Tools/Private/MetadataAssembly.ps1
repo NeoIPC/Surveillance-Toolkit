@@ -205,8 +205,8 @@ function Add-NeoIPCGeneratedMetadata {
         object is dropped iff a generated object shares its key — option-set / data-element CODE, program-rule /
         variable NAME, or (for options) membership in the generated NEOIPC_PATHOGENS set — then the generated
         objects are appended. Because each generator preserves the deployed UID where the key matches, a regenerated
-        object replaces its deployed counterpart in place (same id); newly minted objects (new option codes, grown
-        slots, the SSI-secondary-slot-2 reveal the deployed program omits) are simply added.
+        object replaces its deployed counterpart in place (same id); objects new to the deployment (new option codes,
+        grown slots, the SSI-secondary-slot-2 reveal the deployed program omits) are simply added.
         Two deliberate exceptions keep the assembled package import-complete:
           - the stale aggregate rule 'NeoIPC HAP - set pathogen attribute variables' (+ its actions), which the
             per-slot resistance rules supersede, is dropped WITHOUT a generated replacement (the other five HAP

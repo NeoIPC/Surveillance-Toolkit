@@ -21,6 +21,14 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ### Changed
 
+- The 113 infectious-agent options that production has not deployed take new, random UIDs in place of the ones
+  earlier packages derived from their codes, and every option now takes its UID from the infectious-agent list's
+  UID sidecar, deriving none. An instance that imported an earlier package holds those options under their old
+  UIDs, and DHIS2 refuses an option whose code or name another option of its set holds (error E4028), so
+  `Deploy-NeoIPCMetadata` stops there before writing anything until the old options are gone from the
+  `NEOIPC_PATHOGENS` option set. The Maintenance app's option-set editor deletes each of them; through the API,
+  each is removed from the set's `options` before its own `DELETE`, which DHIS2 2.40.12 refuses while the set
+  lists it.
 - `NEOIPC_SURVEILLANCE_END_INV_DAYS` and `NEOIPC_SURVEILLANCE_END_NIV_DAYS` describe a day of the
   respective ventilation as more than 12 hours of it, where they said at least 12 hours, following
   the protocol's corrected definitions: at exactly 12 hours of each, a day counted as both, so the

@@ -13,15 +13,16 @@ $script:NeoIPCSubstanceSlotCount = 9
 
 # The NEOIPC_PATHOGENS option set's own UID — a fixed-code singleton (the code is a contract), captured once from the
 # deployment. The per-option UIDs live in the Id->uid sidecar beside the ontology YAML (Get-NeoIPCPathogenUidMap),
-# so an infectious-agent option's identity comes from SOURCE, not the export. The sidecar holds the deployed options'
-# UIDs, captured once, and nothing writes it; an option not yet deployed has its UID minted on generation.
+# so an infectious-agent option's identity comes from SOURCE, not the export. The sidecar holds a UID for every Id:
+# the deployed options' as captured from the deployment, and every other one drawn at random once, by
+# Add-NeoIPCInfectiousAgentUid, and kept from then on. No option UID is derived.
 $script:NeoIPCPathogenOptionSetUid = 'KHMPRkX5a4r'
 
 function Get-NeoIPCPathogenUidMap {
     # Read the pathogen Id->uid sidecar (NeoIPC-Infectious-Agents.uids.csv: columns id,uid) into a case-sensitive
-    # code(string)->uid map. The sidecar records the DEPLOYED option UIDs; a not-yet-deployed ontology Id is simply
-    # absent, and New-NeoIPCPathogenOptionSet then mints it deterministically. Returns an empty map when the file is
-    # absent (every option mints). Fails loud on a blank or duplicate id (the map key must be a unique option code).
+    # code(string)->uid map. Returns an empty map when the file is absent, which New-NeoIPCPathogenOptionSet then
+    # refuses for every code and Add-NeoIPCInfectiousAgentUid fills. Fails loud on a blank or duplicate id (the map
+    # key must be a unique option code).
     [CmdletBinding()]
     [OutputType([System.Collections.IDictionary])]
     param([Parameter(Mandatory)][string]$Path)

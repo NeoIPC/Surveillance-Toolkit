@@ -73,6 +73,7 @@
         'Remove-NeoIPCPatient'
         # InfectiousAgents
         'Find-NextFreeInfectiousAgentId'
+        'Add-NeoIPCInfectiousAgentUid'
         # Metadata pipeline
         'ConvertFrom-NeoIPCMetadataJson'
         'ConvertTo-NeoIPCMetadataJson'

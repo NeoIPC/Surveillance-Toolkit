@@ -20,11 +20,11 @@ function New-NeoIPCPathogenOptionSet {
         label). Output order is a deterministic depth-first walk of the ontology (node, then
         Hierarchies/Synonyms/Children) with a 1-based sortOrder, so diffs are stable.
 
-        UIDs come from the sources, never from a DHIS2 export: the option set's UID is -OptionSetUid (the captured constant)
-        and each option's UID is the Id->uid sidecar beside the YAML (-UidSidecarPath, default
-        NeoIPC-Infectious-Agents.uids.csv); a code absent from the sidecar (a not-yet-deployed ontology Id) is minted
-        deterministically from "<optionSetUid>|<code>" — the same seed the converter uses, so a generated directory
-        round-trips with zero id churn.
+        UIDs come from the sources, never from a DHIS2 export, and none is derived: the option set's UID is
+        -OptionSetUid (the captured constant), and each option's UID is the Id->uid sidecar beside the YAML
+        (-UidSidecarPath, default NeoIPC-Infectious-Agents.uids.csv), which holds one for every Id, the deployed
+        options' as captured and every other one drawn at random once, by Add-NeoIPCInfectiousAgentUid, and kept
+        from then on. An invalid -OptionSetUid, or a code without a valid UID in the sidecar, fails the generation.
 
         Fail-loud guarantee (no silent drop): when -ExistingPackage is supplied, every deployed option code MUST
         resolve to an ontology node; any deployed code absent from the YAML throws (restore it to the YAML as a
@@ -50,10 +50,11 @@ function New-NeoIPCPathogenOptionSet {
     .PARAMETER OptionSetCode
         The option set's code. Default: NEOIPC_PATHOGENS.
     .PARAMETER OptionSetUid
-        The option set's DHIS2 UID (source identity). Default: the captured constant. Minted from the code if invalid.
+        The option set's DHIS2 UID (source identity). Default: the captured constant. An invalid one fails the
+        generation.
     .PARAMETER UidSidecarPath
-        Path to the Id->uid sidecar (default: NeoIPC-Infectious-Agents.uids.csv beside the YAML). Supplies each
-        option's deployed UID by code; a code absent from it is minted. An absent file means every option mints.
+        Path to the Id->uid sidecar (default: NeoIPC-Infectious-Agents.uids.csv beside the YAML), which must give
+        every option code a valid UID.
     .PARAMETER OptionSetName
         The option set's name. Default: 'NeoIPC Pathogen options'.
     .PARAMETER ValueType
@@ -89,7 +90,7 @@ function New-NeoIPCPathogenOptionSet {
     $concepts = @(Get-NeoIPCInfectiousAgentConcept -Node $tree)
     if ($concepts.Count -eq 0) { throw "No Id-bearing concepts found in '$resolved'." }
 
-    # Per-option identity from the Id->uid sidecar beside the YAML (source, not the export). An absent file -> all mint.
+    # Per-option identity from the Id->uid sidecar beside the YAML (source, not the export).
     if (-not $UidSidecarPath) { $UidSidecarPath = Join-Path (Split-Path -Parent $resolved) 'NeoIPC-Infectious-Agents.uids.csv' }
     $uidByCode = Get-NeoIPCPathogenUidMap -Path $UidSidecarPath
 
@@ -144,8 +145,23 @@ function New-NeoIPCPathogenOptionSet {
                 $OptionSetCode, $concepts.Count, $existingCodes.Count, $added.Count)
     }
 
-    $osUid = if (Test-NeoIPCMetadataUid -Id $OptionSetUid) { $OptionSetUid }
-    else { New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey $OptionSetCode }
+    if (-not (Test-NeoIPCMetadataUid -Id $OptionSetUid)) { throw "The option set UID '$OptionSetUid' is not a DHIS2 UID." }
+    $osUid = $OptionSetUid
+    # Every option takes its UID from the sidecar, and none is derived. A code without a row needs a UID drawn, but a
+    # row whose uid is malformed needs its own restored: Add-NeoIPCInfectiousAgentUid leaves every row as it is, and
+    # a drawn UID would give the option another identity wherever a package carrying it was imported.
+    $absent = @($byCode.Keys | Where-Object { -not $uidByCode.ContainsKey($_) } | Sort-Object { [long]$_ })
+    $malformed = @($byCode.Keys | Where-Object { $uidByCode.ContainsKey($_) -and -not (Test-NeoIPCMetadataUid -Id $uidByCode[$_]) } | Sort-Object { [long]$_ })
+    $show = { param([string[]]$Code) (@($Code | Select-Object -First 20) -join ', ') + $(if ($Code.Count -gt 20) { ', and more' } else { '' }) }
+    $problems = @(
+        if ($absent.Count -gt 0) {
+            "$($absent.Count) option code(s) have no UID in the sidecar '$UidSidecarPath': $(& $show $absent). Add-NeoIPCInfectiousAgentUid draws a random one for each Id without one."
+        }
+        if ($malformed.Count -gt 0) {
+            "$($malformed.Count) option code(s) have a malformed UID in the sidecar '$UidSidecarPath': $(& $show $malformed). Restore each from the sidecar's history, since an option keeps its UID once a package has carried it; only a row that never held a valid UID may go, for Add-NeoIPCInfectiousAgentUid to draw one."
+        }
+    )
+    if ($problems.Count -gt 0) { throw ($problems -join ' ') }
 
     # Optional localization: load each locale's english->localized map from the po4a-generated catalogues
     # ($PoBaseName.<locale>.po under $PoDirectory). The infectious-agent options are excluded from the metadata
@@ -174,12 +190,7 @@ function New-NeoIPCPathogenOptionSet {
     $sortOrder = 1
     foreach ($c in $concepts) {
         $code = [string]$c['Id']
-        $uid = if ($uidByCode.ContainsKey($code) -and (Test-NeoIPCMetadataUid -Id $uidByCode[$code])) {
-            $uidByCode[$code]
-        }
-        else {
-            New-NeoIPCMetadataUid -Type 'options' -NaturalKey ('{0}|{1}' -f $osUid, $code)
-        }
+        $uid = $uidByCode[$code]
         if (-not $seen.Add($uid)) { throw "UID collision for option code '$code' (uid '$uid')." }
         $cName = [string]$c['Name']; $cType = [string]$c['ConceptType']; $cSyn = [bool]$c['IsSynonym']
         $enLabel = Get-NeoIPCPathogenOptionLabel -Name $cName -ConceptType $cType -IsSynonym $cSyn

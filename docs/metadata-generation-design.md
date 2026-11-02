@@ -280,14 +280,15 @@ definition gating to the business-rule layer).
 ## What the Generator Produces, and How It's Validated
 
 The nine cmdlets emit, from the ontology + capability matrix + counts: the `NEOIPC_PATHOGENS` option
-set + options (code = `Id`, names per the authority policy; a deployed option's UID comes from the
-`NeoIPC-Infectious-Agents.uids.csv` sidecar, not `options.csv`, and an option not yet deployed has its UID
-derived from the option set's UID and its code, stored nowhere); the per-slot pathogen DEs; the
-`<slot> value` + `may be <CAT>` + `is recognized pathogen` PRVs; the resistance triple and the
-field-gating rules per slot; and the substance cluster. The stale HAP aggregate is never emitted. UID
-handling, the per-expression file layout for the long `set <CAT>` expressions, the deterministic
-output ordering, and the report-only reconcile behaviour for generated content all follow the pipeline
-decisions in [`metadata-pipeline-design.md`](metadata-pipeline-design.md) (§1, §2, §4, §8).
+set + options (code = `Id`, names per the authority policy; every option's UID comes from the
+`NeoIPC-Infectious-Agents.uids.csv` sidecar, not `options.csv`: a deployed option's as captured, any
+other one's drawn at random once, by `Add-NeoIPCInfectiousAgentUid`, and kept from then on); the
+per-slot pathogen DEs; the `<slot> value` + `may be <CAT>` + `is recognized pathogen` PRVs; the
+resistance triple and the field-gating rules per slot; and the substance cluster. The stale HAP
+aggregate is never emitted. UID handling, the per-expression file layout for the long `set <CAT>`
+expressions, the deterministic output ordering, and the report-only reconcile behaviour for generated
+content all follow the pipeline decisions in [`metadata-pipeline-design.md`](metadata-pipeline-design.md)
+(§1, §2, §4, §8).
 
 The deployed program is a **baseline to diff against, not a target to match**, so the gate is not
 pass/fail equality but **correctness-by-construction plus a two-directional classified diff**:

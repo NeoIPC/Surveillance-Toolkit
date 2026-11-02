@@ -92,7 +92,7 @@ replaces the former name sanitiser + collision check; the `.dhis2` files are LF 
 
 ## Generated families — do not hand-edit; edit the source and regenerate
 
-Most rows here are hand-authored, but several **families are GENERATED** and materialised into the per-type CSVs
+Most rows here are hand-authored, but several **families are GENERATED** and materialized into the per-type CSVs
 (+ `expressions/`) for review, reconciliation and comprehension — **not** as the place to change them:
 
 - **per-slot pathogen / substance data elements** — codes `NEOIPC_<STAGE>_PATHOGEN_<N>[_…]`,
@@ -107,7 +107,7 @@ and the infectious-agent ontology `infectious-agents/NeoIPC-Infectious-Agents.ya
 edit to a generated row or its `expressions/` file is **silently overwritten the next time the family is refreshed**.
 To change a generated object, edit the source (the matrix / the YAML) and regenerate.
 
-The **option-domain** stays generated and is therefore **not** materialised here at all — the `NEOIPC_PATHOGENS`
+The **option-domain** stays generated and is therefore **not** materialized here at all — the `NEOIPC_PATHOGENS`
 options (from the YAML + `infectious-agents/NeoIPC-Infectious-Agents.uids.csv`) and the
 `NEOIPC_ANTIMICROBIAL_SUBSTANCES` option set / options / ATC + AWaRe option groups / group-sets (from
 `antibiotics/`). Those are emitted into the importable package at build time; edit their source files, never expect

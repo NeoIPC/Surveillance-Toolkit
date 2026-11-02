@@ -164,7 +164,7 @@ InModuleScope 'NeoIPC-Tools' {
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
         }
 
-        It 'lists only Ids of the list in its UID sidecar, with well-formed UIDs, each once' {
+        It 'gives every Id of the list, and nothing else, a well-formed UID of its own in the UID sidecar' {
             $findings = @(Get-NeoIPCInfectiousAgentUidFinding -Tree $script:ListTree -UidRow $script:UidRows)
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
         }
