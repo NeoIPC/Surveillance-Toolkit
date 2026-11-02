@@ -1,4 +1,4 @@
-# Metadata pipeline — design rationale
+# Metadata Pipeline — Design Rationale
 
 The **what-it-is-and-why** of the DHIS2 metadata pipeline implemented in the
 `scripts/modules/NeoIPC-Tools` PowerShell module. The module README documents the
@@ -11,7 +11,7 @@ Everything here is **pure file processing — no DHIS2 API calls.** The pipeline
 out-of-band, PII-cleaned `metadata.json` export from disk and writes files; it never talks
 to a server. That is what makes it fully buildable and testable offline.
 
-## 1. The `metadata/` directory is the canonical source of truth
+## 1. The `metadata/` Directory Is the Canonical Source of Truth
 
 The reviewable, diffable, translatable source of NeoIPC's DHIS2 metadata is the
 **`metadata/` directory**, not the importable JSON. The importable package is *generated*
@@ -37,7 +37,7 @@ Format follows data shape (most-suitable format per object, not CSV-for-everythi
   dedicated file gives the author editor support a CSV cell cannot. The CSV cell holds a
   relative file reference.
 
-## 2. UIDs are opaque — real DHIS2 UIDs, stored verbatim, never derived
+## 2. UIDs Are Opaque — Real DHIS2 UIDs, Stored Verbatim, Never Derived
 
 Every deployed object's production UID lives verbatim in its directory row's `id` column,
 and the package imports with `idScheme=UID`. This is forced by verified DHIS2 behaviour
@@ -53,17 +53,18 @@ codes — UID stays the portable identity at import time, and the code is the po
 moved onto the shared identifiable base), which is what makes the code their stable msgctxt key,
 but that does not change the import scheme.
 
-A fresh UID is minted (deterministically, `f(natural key)`) **only** for a genuinely new
-authored object that has no production UID yet — the synthetic play accounts and the
-eurostat-only org units — and is then stored verbatim like the rest. A country added to the
+A fresh UID is minted (deterministically, `f(natural key)`) **only** for an object that has no
+production UID yet: a generated one, such as a new infectious-agent option, minted from its option
+set's UID and its code, and a genuinely new authored one — the synthetic play accounts and the
+eurostat-only org units — which is then stored verbatim like the rest. A country added to the
 scaffold later (`Add-NeoIPCMetadataCountry`) gets a random UID instead, drawn once and stored
 verbatim, which an onboarding gives the country it creates in DHIS2, so that production takes
 the scaffold's UID rather than the scaffold capturing production's. `-RegenerateUids`
 re-mints all UIDs consistently, rewriting every inbound reference (structured **and**
 expression-embedded).
 
-Sidecars are the narrow exception: the 3382-option pathogen UID sidecar
-(`NeoIPC-Infectious-Agents.uids.csv`) keeps generated option UIDs out of `options.csv`; the
+Sidecars are the narrow exception: the infectious-agent UID sidecar (`NeoIPC-Infectious-Agents.uids.csv`),
+which holds the UIDs of the deployed options only, keeps generated option UIDs out of `options.csv`; the
 antibiotic option/group/group-set families carry their UIDs in their richer curation CSVs.
 
 Org units and users are **not** real config in the export (it carries only anonymized
@@ -71,7 +72,7 @@ instances), so their package content is *authored*: org units reuse the real pro
 captured from the export's de-anonymized scaffold for the units that exist live, and mint for
 the rest, or draw a random UID for a country added later; users mint `f(username)`.
 
-## 3. Two variants from one directory — `production` (default) and `play`
+## 3. Two Variants From One Directory — `production` (Default) and `play`
 
 `New-NeoIPCMetadataPackage` emits two variants from the directory **alone**:
 
@@ -85,7 +86,7 @@ the rest, or draw a random UID for a country added later; users mint `f(username
 There is no `-Variant` string and no "testing" variant. The synthetic play password is an
 assembly parameter, never committed.
 
-## 4. Reverse path — export → prune → normalize → reconcile
+## 4. Reverse Path — Export → Prune → Normalize → Reconcile
 
 1. **Prune** to the transitive closure seeded at `NEOIPC_CORE`, **client-side**, because
    DHIS2's own dependency export is broken: it follows structured getters but never parses
@@ -103,7 +104,7 @@ assembly parameter, never committed.
    types are **report-only** (the developer edits the source). An unexpected change surfaces
    as `Unclassified` for investigation.
 
-## 5. Expression handling is Node-free
+## 5. Expression Handling Is Node-Free
 
 The closure needs no expression parser: NeoIPC's rule expressions reference variables and
 attributes **by name** (`#{name}`, `A{name}`), which resolve to program-rule variables /
@@ -124,7 +125,7 @@ same rewrite the legacy Tracker Capture client's own `avoidReplacementFunctions`
 verified correct for all NeoIPC variable names. This is a deliberate, reviewable *source*
 transform, distinct from the faithful round-trip.
 
-## 6. Templating — declarative templates + a per-stage capability matrix
+## 6. Templating — Declarative Templates + a Per-Stage Capability Matrix
 
 Repeated clusters (pathogen slots, antimicrobial-substance slots) are expanded for
 `N = 1..count` (`count` is config: 3 pathogens, 9 substances). Template/ontology-generated
@@ -150,7 +151,7 @@ program-rule execution model that constrains their shape, the effective-flag mod
 sets, and the correctness gate are documented in
 [`metadata-generation-design.md`](metadata-generation-design.md).
 
-## 7. Translations — gettext PO, managed in Weblate
+## 7. Translations — gettext PO, Managed in Weblate
 
 Object i18n lives in a translator-facing gettext PO component (`po/metadata.pot` +
 `po/metadata.<lang>.po`), separate from the structural CSV directory. The full design of the
@@ -162,7 +163,7 @@ generated code-less families, UID only as the last-resort fallback. A volatile c
 (e.g. keying a generated rule on its minted UID) orphans the translation in Weblate the moment
 the generator is tweaked.
 
-## 8. Diffability is a design goal, not a nicety
+## 8. Diffability Is a Design Goal, Not a Nicety
 
 A version-controlled metadata source is only useful if a change shows up as a small, readable
 diff — otherwise review (human and adversarial) is blind. Two properties are required, and
@@ -196,7 +197,7 @@ keyed structural diff. When adding any new emitter, sort it the same way, key it
 content, and add the shuffle-input regression test — do not let a reshuffle pass as "just
 determinism".
 
-## 9. Verification gates
+## 9. Verification Gates
 
 - **Diffability (every emitter):** re-emitting from unchanged input is byte-identical
   (idempotent), and output order is independent of input order (the shuffle test).
@@ -216,7 +217,7 @@ determinism".
   ([`metadata-deployment.md`](metadata-deployment.md)); the app's department picker populates;
   synthetic test users authenticate.
 
-## 10. A note on the package manifest (alpha)
+## 10. A Note on the Package Manifest (Alpha)
 
 The two rendered packages (install base + play) carry a **minimal** top-level `package`
 manifest and are marked **alpha**: they import as-is (DHIS2's importer tree-walks top-level keys

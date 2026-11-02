@@ -2,7 +2,7 @@
 
 This file documents the Surveillance-Toolkit repository. If this repository is checked out as a submodule of the `neoipc-workspace`, the workspace-level `CLAUDE.md` adds the workspace's own guardrails to the ones below.
 
-Path-scoped rules files hold what is tied to particular files, each loaded when a matching file is read: [R](.claude/rules/r-code.md), [PowerShell](.claude/rules/powershell.md), the [infectious-agent catalogue](.claude/rules/infectious-agents.md), the [reports](.claude/rules/reports.md) and their [string resources](.claude/rules/string-resources.md), [localization](.claude/rules/localization.md), and the [report wrappers](.claude/rules/wrappers.md).
+Path-scoped rules files hold what is tied to particular files, each loaded when a matching file is read: [R](.claude/rules/r-code.md), [PowerShell](.claude/rules/powershell.md), [YAML](.claude/rules/yaml.md), the [infectious-agent catalogue](.claude/rules/infectious-agents.md), the [reports](.claude/rules/reports.md) and their [string resources](.claude/rules/string-resources.md), [localization](.claude/rules/localization.md), and the [report wrappers](.claude/rules/wrappers.md).
 
 ---
 

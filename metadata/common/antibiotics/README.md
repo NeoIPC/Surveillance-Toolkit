@@ -49,23 +49,33 @@ them, and none had been translated. Regenerate the catalogue with `./scripts/Inv
 (or as part of `-Config all`). The previous `NeoIPC-Antibiotics.<lang>.csv` / `ListElements.<lang>.csv` translation
 sidecars and the standalone `WHO-AWaRe-Classification-2021.csv` are **retired** (folded into the files above + the PO).
 
-### This catalogue is not on Weblate, and cannot be
+### This Catalogue Is Not on Weblate, and Cannot Be
 
 Most NeoIPC catalogues are hosted on [Hosted Weblate](https://hosted.weblate.org/projects/neoipc/) for community
-translation — reports, protocol documentation, infectious agents and DHIS2 metadata, with the controlled
-vocabulary being added. This one is not, and unlike the PowerShell message strings, which are simply not registered
-yet, it cannot be. Hosted Weblate's free plan requires every component to carry a **free (libre) licence**,
-and a **NonCommercial** term is not one — so the component was rejected as *"does not meet the Libre hosting
-conditions"* and has been removed.
+translation — reports, protocol documentation, infectious agents, DHIS2 metadata, and the glossary. This one is not,
+and unlike the PowerShell message strings, which are simply not registered yet, it cannot be. Hosted Weblate's free
+plan requires every component to carry a **free (libre) licence**, and a **NonCommercial** term is not one — so the
+component was rejected as *"does not meet the Libre hosting conditions"* and has been removed.
 
 The sibling infectious-agent catalogue **was** relicensed from CC BY-NC-ND to CC BY 4.0, on the reasoning that po4a
-extracts only taxonomic names, synonyms and rank labels from it — none of the upstream material the licence exists to
-protect, and names are not copyrightable in any case. That argument does not simply transfer here. Dropping the ATC
+extracts only taxonomic names and synonyms, rank labels, controlled values and list labels, and the standalone list's
+header and footer from it, NeoIPC's introduction and the sources' citations and notices — none of the upstream
+material the licence exists to protect, and names are not copyrightable in any case — and the same reasoning puts
+that list's factual extracts, such as the Core Protocol's list of infectious agents, outside its directory's terms.
+Neither argument simply transfers here. Dropping the ATC
 group descriptions removed the clearest block of reproduced prose, but two things still carry upstream expression: the
 **AWaRe group and group-set descriptions**, which define the three categories and are retained because they are
 clinically meaningful to anyone reading a report; and, less obviously but more substantially, the **classification
 itself** — which substance sits in which ATC group and which AWaRe category is WHO's editorial work, and a selection
 and arrangement of that kind is what a database right protects even where the individual names are not copyrightable.
+The infectious-agent list's lineage, which its factual extracts carry, is a classification too: apart from NeoIPC's own
+nodes (its infectious-agent groups and the top-level `Viruses` and `Eukaryota`), it is each name's place in the
+classification its source publishes, for prokaryotes the arrangement LPSN chooses among those the taxonomic literature
+publishes, for fungi MycoBank's, and for viruses the taxonomy ICTV ratifies. That list's terms rest on what such a
+classification records, how the infectious agents are related, whereas an ATC group and an AWaRe category sort
+substances by schemes made for a purpose: the ATC, developed in Norway from the European Pharmaceutical Market Research
+Association's classification and recommended by WHO since 1981 for drug-utilization studies, and AWaRe, which WHO
+devised for antibiotic stewardship.
 
 So the licence question is a legal judgement, not a mechanical one, and it has not been settled — the CC BY-NC-SA
 3.0 IGO declaration stands until it is. Anyone tempted to relicense this catalogue on the strength of the
@@ -97,4 +107,4 @@ both consequences above reversed.
 
 ## Licensing
 
-The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective license is **CC BY-NC-SA 3.0 IGO**; the ATC codes, substance names and group names it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted (the ATC group *descriptions* are no longer carried at all — see [Translations](#translations)). See [`LICENSE.md`](LICENSE.md) for the full reasoning.
+The repository as a whole is MIT-licensed, but this directory is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO). ShareAlike requires the derivative to keep the same licence, so the effective licence is **CC BY-NC-SA 3.0 IGO**; the ATC codes and group names it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted, and its substance names are display forms of International Nonproprietary Names (the ATC group *descriptions* are no longer carried at all — see [Translations](#translations)). See [`LICENSE.md`](LICENSE.md) for the full reasoning.

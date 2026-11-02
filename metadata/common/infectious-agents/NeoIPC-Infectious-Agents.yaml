@@ -5,8 +5,8 @@ Metadata:
     MycoBank: https://www.mycobank.org/page/Name%20details%20page/{0}
     NeoIPC: 'TODO: Create URIs for NeoIPC-owned pathogen concepts'
   ListTerms:
-    Yes:
-      Value: Yes
+    'Yes':
+      Value: 'Yes'
     MRSA:
       Value:  MRSA
     VRE:

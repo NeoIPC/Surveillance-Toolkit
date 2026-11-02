@@ -1,4 +1,4 @@
-# Changelog — NeoIPC infectious-agents list
+# Changelog — NeoIPC Infectious Agent List
 
 Notable changes to the infectious-agent ontology described in [README.md](README.md).
 
@@ -10,6 +10,32 @@ The release workflow reads the section matching the released version out of this
 it as the GitHub Release body, so a release cannot be cut for a version this file does not describe.
 
 ## [Unreleased]
+
+### Added
+
+- CI checks of the list: its keys and structure; every node's `Id`, `Name`, rank, source, and record number, and the
+  form each typed value takes in the file; the option labels generated from it; its UID sidecar; the two frozen
+  CSVs; and that it stays append-only against every released version, so that a released `Id` keeps its name, a
+  deployed option keeps its UID, a new `Id` exceeds every released one, and a released `Id` never disappears, except
+  from a branch that maintains an earlier line, which need not carry a later line's `Id`s.
+- CI checks that the list keeps to YAML 1.2.2's portable subset, which YAML 1.1, YAML 1.2.2, and the YAML readers
+  the toolkit meets read alike, and that those readers read it alike.
+
+### Changed
+
+- `LICENSE.md`: factual extracts of the list, outputs that carry nothing but `Id`s, names and synonyms, ranks and
+  lineage, source records, and the statuses NeoIPC assigns, such as the Core Protocol's list of infectious agents,
+  neoipcr's tables, and the reports' infectious-agent tables, fall outside the directory's CC BY-NC-ND 4.0 terms.
+- `README.md`: which files are frozen and who reads them, what CI checks, and how the ontology is reconciled with
+  its sources.
+- In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
+  rather than as a Boolean. The per-locale overlays, which po4a writes, have it plain.
+
+### Deprecated
+
+- `NeoIPC-Pathogen-Concepts.csv` and `NeoIPC-Pathogen-Synonyms.csv` are frozen: kept byte for byte for the readers
+  outside this repository that download them, a legacy reporting service and neoipcr's data-preparation script, and
+  to be removed once neither does and the Core Protocol's list of infectious agents is built from the ontology.
 
 ## [0.1.0-alpha] - 2026-09-07
 

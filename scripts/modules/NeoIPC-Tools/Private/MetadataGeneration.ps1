@@ -13,7 +13,8 @@ $script:NeoIPCSubstanceSlotCount = 9
 
 # The NEOIPC_PATHOGENS option set's own UID — a fixed-code singleton (the code is a contract), captured once from the
 # deployment. The per-option UIDs live in the Id->uid sidecar beside the ontology YAML (Get-NeoIPCPathogenUidMap),
-# so pathogen option identity comes from SOURCE, not the export. See the infectious-agents README for re-capture.
+# so an infectious-agent option's identity comes from SOURCE, not the export. The sidecar holds the deployed options'
+# UIDs, captured once, and nothing writes it; an option not yet deployed has its UID minted on generation.
 $script:NeoIPCPathogenOptionSetUid = 'KHMPRkX5a4r'
 
 function Get-NeoIPCPathogenUidMap {
@@ -828,30 +829,31 @@ function Get-NeoIPCCommonCommensalCodeSet {
 }
 
 function Get-NeoIPCVirusCodeSet {
-    # The ascending set of organism Ids classified as VIRUSES in the ontology — every Id-bearing node (concept AND
-    # synonym) under the top-level `Viruses` realm of NeoIPC-Infectious-Agents.yaml. This is the set the HAP `set virus`
-    # rule tests each pathogen slot against (a HAP pathogen `is virus` iff its slot holds a value in this set).
-    # "Virus" is STRUCTURAL, not a per-concept flag: the ontology carries no kingdom attribute on a concept, so a
-    # concept is a virus iff it descends from the Viruses realm (the ICTV branch — mirrors how bacteria live under
-    # `Bacteria` and eukaryotes under `Eukaryota`). Synonyms are Id-bearing selectable options too, so a value entered
-    # against a virus synonym must also classify as a virus — hence the full-subtree walk (Get-NeoIPCInfectiousAgentConcept
-    # descends Hierarchies/Synonyms/Children). Ids ascending so the generated ASSIGN expression — and its git diff — is
-    # stable. Pure (no package); the single source the `set virus` rule generator and its tests both expand from. Fails
-    # loud if the Viruses realm is absent, so a malformed ontology can never silently yield an empty (always-false) rule.
+    # The ascending set of infectious-agent Ids classified as VIRUSES in the ontology — every Id-bearing node (concept
+    # AND synonym) under the top-level `Viruses` node of NeoIPC-Infectious-Agents.yaml, NeoIPC's own node above ICTV's
+    # realms. This is the set the HAP `set virus` rule tests each pathogen slot against (a HAP pathogen `is virus` if
+    # and only if its slot holds a value in this set). "Virus" is STRUCTURAL, not a per-concept flag: the ontology
+    # carries no kingdom attribute on a concept, so a concept is a virus if and only if it descends from `Viruses`
+    # (mirroring how bacteria live under `Bacteria` and eukaryotes under `Eukaryota`). Synonyms are Id-bearing
+    # selectable options too, so a value entered against a virus synonym must also classify as a virus — hence the
+    # full-subtree walk (Get-NeoIPCInfectiousAgentConcept descends Hierarchies/Synonyms/Children). Ids ascending so the
+    # generated ASSIGN expression — and its git diff — is stable. Pure (no package); the single source the `set virus`
+    # rule generator and its tests both expand from. Fails loud if `Viruses` is absent, so a malformed ontology can
+    # never silently yield an empty (always-false) rule.
     [CmdletBinding()]
     [OutputType([int[]])]
     param([Parameter(Mandatory)][AllowNull()]$Node)
 
     # The ontology root is a mapping { Metadata; Hierarchies }; a subtree may be passed directly. Accept either.
     $tops = if ($Node -is [System.Collections.IDictionary] -and $Node.Contains('Hierarchies')) { $Node['Hierarchies'] } else { $Node }
-    $virusRealm = $null
+    $viruses = $null
     foreach ($top in @($tops)) {
-        if ($top -is [System.Collections.IDictionary] -and [string]$top['Name'] -eq 'Viruses') { $virusRealm = $top; break }
+        if ($top -is [System.Collections.IDictionary] -and [string]$top['Name'] -eq 'Viruses') { $viruses = $top; break }
     }
-    if (-not $virusRealm) { throw "The infectious-agent ontology has no top-level 'Viruses' realm — cannot derive the virus code set." }
+    if (-not $viruses) { throw "The infectious-agent ontology has no top-level 'Viruses' node — cannot derive the virus code set." }
 
     $ids = [System.Collections.Generic.List[int]]::new()
-    foreach ($c in @(Get-NeoIPCInfectiousAgentConcept -Node $virusRealm)) { $ids.Add([int]$c['Id']) }
+    foreach ($c in @(Get-NeoIPCInfectiousAgentConcept -Node $viruses)) { $ids.Add([int]$c['Id']) }
     @($ids | Sort-Object -Unique)
 }
 

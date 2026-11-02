@@ -391,6 +391,19 @@ InModuleScope 'NeoIPC-Tools' {
                 Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue
             }
         }
+        It 'refuses to write sharing.yaml outside the portable subset of YAML 1.2.2' -Skip:(-not (Get-Module -ListAvailable powershell-yaml)) {
+            # powershell-yaml writes the profile key 1:20 plain, which YAML 1.1 readers take for the number 80.
+            $source = Join-Path $TestDrive 'sharing-unportable-source.yaml'
+            $tmp = Join-Path $TestDrive 'sharing-unportable.yaml'
+            $saved = $script:NeoIPCSharingProfiles
+            try {
+                @("'1:20':", '  public: "rw------"') | Set-TestFileContent -LiteralPath $source -Encoding utf8
+                Import-NeoIPCSharingProfile -Path $source
+                { Export-NeoIPCSharingProfile -Path $tmp } | Should -Throw '*portable subset*1:20*'
+                Test-Path -LiteralPath $tmp | Should -BeFalse
+            }
+            finally { $script:NeoIPCSharingProfiles = $saved }
+        }
     }
 
     Describe 'List-order preservation (regression for form-layout scramble)' {
@@ -4095,14 +4108,13 @@ Hierarchies:
     Describe 'Virus classification generation (ontology-driven set-virus rule)' {
         BeforeAll {
             Import-Module powershell-yaml -ErrorAction Stop
-            # Ontology with a Viruses realm (a genus + a species + a synonym under it = 3 virus Ids: 10, 11, 12) and a
-            # non-virus Bacteria branch (200) that must be excluded. Small virus set so the ASSIGN chain stays compact
-            # (<= BlockSize) and is exactly assertable.
+            # Ontology with a top-level Viruses node (a genus + a species + a synonym under it = 3 virus Ids: 10, 11, 12)
+            # and a non-virus Bacteria branch (200) that must be excluded. Small virus set so the ASSIGN chain stays
+            # compact (<= BlockSize) and is exactly assertable.
             $script:VirusYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-virus-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
             Set-TestFileContent -LiteralPath $script:VirusYaml -Encoding utf8 -Value @'
 Hierarchies:
 - Name: Viruses
-  ConceptType: Realm
   Children:
   - Name: Simplexvirus
     Id: 12
@@ -4144,7 +4156,7 @@ Hierarchies:
         }
 
         # ---- code-set walker ---------------------------------------------------------------------------------------
-        It 'code set: the ascending Ids under the Viruses realm (concepts + synonyms), excluding non-viruses' {
+        It 'code set: the ascending Ids under the Viruses node (concepts + synonyms), excluding non-viruses' {
             @(Get-NeoIPCVirusCodeSet -Node $script:VirusTree) | Should -Be @(10, 11, 12)
         }
         It 'code set: accepts a subtree root directly and sorts numerically, not lexically' {
@@ -4155,7 +4167,7 @@ Hierarchies:
                 ) }
             @(Get-NeoIPCVirusCodeSet -Node $tree) | Should -Be @(9, 21, 100)
         }
-        It 'code set: fails loud when the ontology carries no Viruses realm' {
+        It 'code set: fails loud when the ontology carries no Viruses node' {
             $tree = [ordered]@{ Hierarchies = @([ordered]@{ Name = 'Bacteria'; Children = @([ordered]@{ Name = 'E. coli'; Id = 1 }) }) }
             { Get-NeoIPCVirusCodeSet -Node $tree } | Should -Throw '*Viruses*'
         }
@@ -4216,7 +4228,7 @@ Hierarchies:
         }
         It 'rule generator: fails loud on an empty virus set' {
             $emptyYaml = Join-Path ([System.IO.Path]::GetTempPath()) ('neoipc-virus-empty-{0}.yaml' -f ([guid]::NewGuid().ToString('N')))
-            Set-TestFileContent -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Viruses`n  ConceptType: Realm`n"
+            Set-TestFileContent -LiteralPath $emptyYaml -Encoding utf8 -Value "Hierarchies:`n- Name: Viruses`n"
             try { { New-NeoIPCPathogenVirusRule -Path $emptyYaml -ExistingPackage $script:VirusPkg } | Should -Throw '*virus code set is empty*' }
             finally { Remove-Item -LiteralPath $emptyYaml -Force }
         }

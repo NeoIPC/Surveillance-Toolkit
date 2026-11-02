@@ -20,7 +20,7 @@ function New-NeoIPCPathogenOptionSet {
         label). Output order is a deterministic depth-first walk of the ontology (node, then
         Hierarchies/Synonyms/Children) with a 1-based sortOrder, so diffs are stable.
 
-        UID = SOURCE identity (no longer the export): the option set's UID is -OptionSetUid (the captured constant)
+        UIDs come from the sources, never from a DHIS2 export: the option set's UID is -OptionSetUid (the captured constant)
         and each option's UID is the Id->uid sidecar beside the YAML (-UidSidecarPath, default
         NeoIPC-Infectious-Agents.uids.csv); a code absent from the sidecar (a not-yet-deployed ontology Id) is minted
         deterministically from "<optionSetUid>|<code>" — the same seed the converter uses, so a generated directory
@@ -33,9 +33,9 @@ function New-NeoIPCPathogenOptionSet {
         for identity; omit it to generate from source alone.
 
         With -PoDirectory, each option also gets a translations[] entry per locale whose label differs from the
-        English source: the localized label is composed from the po4a-translated Name + rank/synonym word (same
-        translation that drives the PDF list), since the pathogen options are excluded from the metadata gettext-PO
-        path. Without -PoDirectory the options are English-only.
+        English source: the localized label is composed from the po4a-translated Name + rank/synonym word, since
+        the infectious-agent options are excluded from the metadata gettext-PO path. Without -PoDirectory the
+        options are English-only.
 
         Pure file/object processing — no DHIS2 API calls. Returns a package fragment { optionSets; options }
         ready to splice into an assembly (see New-NeoIPCMetadataPackage).
@@ -43,8 +43,10 @@ function New-NeoIPCPathogenOptionSet {
         Path to the ontology YAML. Defaults to the canonical file in the repository.
     .PARAMETER ExistingPackage
         Optional already-parsed DHIS2 package/export (a hashtable, e.g. from ConvertFrom-NeoIPCMetadataJson's
-        internal parse) whose NEOIPC_PATHOGENS option set + options supply UIDs to preserve and the deployed code
-        set to validate against. Omit to mint all UIDs deterministically and skip the deployed cross-check.
+        internal parse) whose NEOIPC_PATHOGENS option set + options give the deployed codes, every one of which
+        must resolve to an ontology node, and the deployed sharing, which the generated option set keeps. It is
+        never consulted for identity: the UIDs come from -OptionSetUid and the sidecar either way. Omit it to skip
+        the deployed cross-check.
     .PARAMETER OptionSetCode
         The option set's code. Default: NEOIPC_PATHOGENS.
     .PARAMETER OptionSetUid
@@ -146,9 +148,9 @@ function New-NeoIPCPathogenOptionSet {
     else { New-NeoIPCMetadataUid -Type 'optionSets' -NaturalKey $OptionSetCode }
 
     # Optional localization: load each locale's english->localized map from the po4a-generated catalogues
-    # ($PoBaseName.<locale>.po under $PoDirectory). The pathogen options are excluded from the metadata gettext-PO
-    # path (authored from this ontology, not translated there), so the per-locale label is composed here instead —
-    # localized Name + localized rank/synonym word — from the same po4a translation that drives the PDF list. Skip
+    # ($PoBaseName.<locale>.po under $PoDirectory). The infectious-agent options are excluded from the metadata
+    # gettext-PO path (authored from this ontology, not translated there), so the per-locale label is composed here
+    # instead — localized Name + localized rank/synonym word — from the po4a translation of the ontology. Skip
     # locales whose catalogue carries no real translation (the map is empty) so they add no translations[].
     $localeMaps = [System.Collections.Generic.List[object]]::new()
     if ($PoDirectory) {
@@ -917,7 +919,7 @@ function New-NeoIPCPathogenVirusRule {
         The single HAP rule `NeoIPC HAP - set virus` (condition `true`, priority 0) with one ASSIGN action per HAP primary
         pathogen slot that sets the slot's `is virus` boolean to "the slot has a value and that value is a virus" —
         `d2:hasValue(#{<slot> value}) && (#{<slot> value}==c1 || …)`, the virus code set from Get-NeoIPCVirusCodeSet over
-        the canonical ontology (organism Ids under the `Viruses` realm). It is the twin of the recognized-pathogen
+        the canonical ontology (the infectious-agent Ids under `Viruses`). It is the twin of the recognized-pathogen
         field-gating ASSIGN, but POSITIVE membership (a virus) rather than the NEGATED common-commensal set, and a single
         multi-action rule (the deployed shape) rather than one rule per slot. The membership chain is built by
         Join-NeoIPCBalancedBooleanChain, so it is balanced + pretty-printed — the DHIS2 2.41 expression-parser evaluates

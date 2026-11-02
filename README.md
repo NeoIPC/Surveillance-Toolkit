@@ -17,13 +17,13 @@ network. This repository is the **normative source** for that surveillance: when
 changes here, the change propagates to the data-collection forms, the analysis code and the reports.
 Where code and the definitions in this repository disagree, the definitions win.
 
-## What's in here
+## What's in Here
 
 | Path | Contents |
 |------|----------|
 | [`doc/protocol/`](doc/protocol/) | The **NeoIPC Core Surveillance Protocol** in AsciiDoc, including the eight normative case definitions under [`definitions/`](doc/protocol/definitions/) — clinical sepsis, the two laboratory-confirmed bloodstream-infection variants, the three surgical-site-infection depths, necrotizing enterocolitis and pneumonia. |
 | [`metadata/`](metadata/) | The **canonical DHIS2 configuration** for the `NEOIPC_CORE` tracker program — data elements, option sets, program rules, tracked-entity attributes and the organisation-unit scaffold — authored as reviewable per-type CSVs plus externalized expression files rather than one opaque JSON blob. See [`metadata/common/README.md`](metadata/common/README.md). |
-| [`metadata/common/infectious-agents/`](metadata/common/infectious-agents/) | The **NeoIPC Infectious Agent List** — a pragmatic ontology of organisms with their synonyms and phenotypic resistance categories, named from LPSN, MycoBank and ICTV. Licensed separately; see below. |
+| [`metadata/common/infectious-agents/`](metadata/common/infectious-agents/) | The **NeoIPC Infectious Agent List** — a pragmatic ontology of infectious agents with their synonyms and phenotypic resistance categories, named from LPSN, MycoBank, and ICTV. Licensed separately; see below. |
 | [`metadata/common/antibiotics/`](metadata/common/antibiotics/) | The **NeoIPC Antibiotics List** — substances, groups and WHO AWaRe categories. Licensed separately; see below. |
 | [`reports/`](reports/) | Five **Quarto reports**, drawing their data from the [neoipcr](https://github.com/NeoIPC/neoipcr) R package: the Partner Report a department receives, the network-wide Reference Report, a Validation Report that flags data-quality problems, a Partner Certificate, and a Patient Data Report answering data-subject access requests. |
 | [`po/`](po/) | The **gettext catalogues** behind every localized artifact, managed with [po4a](https://po4a.org/) and translated on Weblate. |
@@ -31,7 +31,7 @@ Where code and the definitions in this repository disagree, the definitions win.
 | [`scripts/`](scripts/) | PowerShell entry points — `Build-*.ps1` render an artifact, `Test-*.ps1` check an invariant, `Invoke-Localization.ps1` drives the translation pipeline. Shared logic lives in the [`NeoIPC-Tools`](scripts/modules/NeoIPC-Tools/README.md) module. |
 | [`docs/`](docs/) | Design references for the pieces whose reasoning does not fit in a source comment — the metadata pipeline and its deployment to DHIS2, the infectious-agent ontology, the Weblate component contract. |
 
-## Products and releases
+## Products and Releases
 
 The repository publishes **five independently versioned products** from one shared history, each with
 its own version file, tag stream and releases:
@@ -70,7 +70,7 @@ and repeated over an existing instance it fails from 2.42 on.
 [`docs/metadata-deployment.md`](docs/metadata-deployment.md) explains why and describes a production
 deployment.
 
-## Working with the toolkit
+## Working With the Toolkit
 
 The tooling is PowerShell 7.6 or newer plus, depending on what you are building, R and Quarto (reports),
 Asciidoctor PDF and Pandoc (protocol), or po4a (translations). Every script carries comment-based
@@ -88,7 +88,7 @@ submodule, and the localization pipeline needs it.
 to install them on Windows and Ubuntu. On Windows, po4a runs under the Windows Subsystem for Linux —
 it does not run natively.
 
-## Part of the NeoIPC surveillance system
+## Part of the NeoIPC Surveillance System
 
 | Repository | Role |
 |------------|------|
@@ -129,16 +129,18 @@ Except where noted below, this repository is licensed under the [MIT License](LI
 Two kinds of exception follow: data directories whose upstream terms are stricter than MIT, and the logos
 and marks, which are nobody's to license here at all.
 
-Two data directories compile content from upstream sources whose terms are stricter than MIT. The effective license of each is dictated by what its sources permit — not a restriction NeoIPC chose to impose — and each carries its own `LICENSE.md` with the reasoning and full attribution:
+Two data directories compile content from upstream sources whose terms are stricter than MIT. The effective licence of each is dictated by what its sources permit — not a restriction NeoIPC chose to impose — and each carries its own `LICENSE.md` with the reasoning and full attribution:
 
-| Directory | Effective license | Upstream sources |
+| Directory | Effective licence | Upstream sources |
 |-----------|-------------------|------------------|
 | [`metadata/common/infectious-agents/`](metadata/common/infectious-agents/LICENSE.md) | CC BY-NC-ND 4.0 (plus CDC agency-material terms) | NHSN, LPSN, MycoBank, ICTV |
 | [`metadata/common/antibiotics/`](metadata/common/antibiotics/LICENSE.md) | CC BY-NC-SA 3.0 IGO | WHO AWaRe classification / ATC/DDD index |
 
-The two directories land on different Creative Commons terms because their upstream licences differ. The infectious-agent list is **no-derivatives** — its MycoBank source is CC BY-NC-ND, incorporated with permission. The antibiotic list is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO); ShareAlike requires a derivative to keep the same licence, so it is CC BY-NC-SA 3.0 IGO (the ATC codes, substance names and group descriptions it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted). We apply the licence the upstream terms require, no stricter.
+The two directories land on different Creative Commons terms because their upstream licences differ. The infectious-agent list is **no-derivatives** — its MycoBank source is CC BY-NC-ND, incorporated with permission. The antibiotic list is a **derivative** of the WHO AWaRe classification (CC BY-NC-SA 3.0 IGO); ShareAlike requires a derivative to keep the same licence, so it is CC BY-NC-SA 3.0 IGO (the ATC codes and group names it also carries are reproduced unchanged from the WHOCC ATC/DDD index, not adapted, and its substance names are display forms of International Nonproprietary Names). We apply the licence the upstream terms require, no stricter.
 
-### Logos and marks
+Factual extracts of the infectious-agent list fall outside its directory's terms: outputs that carry nothing but its `Id`s, names and synonyms, ranks and lineage, source records, and the statuses NeoIPC assigns, such as the Core Protocol's list of infectious agents and neoipcr's tables. Those NeoIPC publishes must attribute the list's sources. Its [`LICENSE.md`](metadata/common/infectious-agents/LICENSE.md) § *Scope* says why.
+
+### Logos and Marks
 
 **The NeoIPC logo is owned by Fondazione Penta ETS and is not covered by the MIT licence.** It is
 included here because this repository's own documents and reports display it; that is not a grant to
@@ -157,7 +159,7 @@ A mark is not content. Every entry here is present so that a NeoIPC document can
 credit a funder, and none of them is offered for reuse — which is why they are listed as rights holders
 rather than as licences.
 
-*Fondazione Penta ETS* is the organisation's current legal name and the form to use. **Not** *Fondazione
+*Fondazione Penta ETS* is the organization's current legal name and the form to use. **Not** *Fondazione
 Penta ONLUS*, which is the pre-2023 designation and still appears in older material.
 
 **The notice travels with each file, not only with this table** — and each names *its own* rights holder,
@@ -168,7 +170,7 @@ e-mail, lifted from a rendered PDF — and at that moment the README is not trav
 file is ever replaced, **re-apply the notice**: the chunk is spliced in after `IHDR` without re-encoding
 the image, so it can be added to a new file without touching a pixel of it.
 
-The gettext translation catalogues under [`po/`](po/) declare their licence in their own headers, and all of them declare CC BY 4.0, matching their templates. Two once did not — the translated `reports` catalogues carried MIT and the `infectious_agents` ones CC BY-NC-ND 4.0 — and the templates were the side that had it right: a catalogue of extracted strings is not automatically bound by the licence of the directory it was extracted from, and a no-derivatives term cannot govern a translation, which *is* a derivative work. Because the translated files are written by the translation platform rather than by this repository, that correction was applied there rather than here, and the same route applies should they ever diverge again.
+The gettext translation catalogues under [`po/`](po/) declare their licence in their own headers, matching their templates: all of them CC BY 4.0, except the antibiotic catalogues (`po/antibiotics.*`), which carry their directory's CC BY-NC-SA 3.0 IGO for the reasons [its README](metadata/common/antibiotics/README.md) gives. A catalogue of extracted strings is not automatically bound by the licence of the directory it was extracted from, and a no-derivatives term cannot govern a translation, which *is* a derivative work. The translated files are written by the translation platform rather than by this repository, so a header that departs from its template is corrected there.
 
 ## Funding
 
