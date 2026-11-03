@@ -345,6 +345,13 @@ function Export-NeoIPCSharingProfile {
         $doc[$key] = ConvertTo-NeoIPCSharingProfileSpec -Sharing $script:NeoIPCSharingProfiles.ByKey[$key] -IdToKey $IdToKey
     }
     $yaml = (ConvertTo-Yaml $doc) -replace "`r`n", "`n"
+    # Every key and value written here is a string, but powershell-yaml quotes by its own rules, which leave 1:20, 0x1A,
+    # NaN, or a bare date plain, where other readers read a number or a timestamp. So the output is checked before it
+    # reaches the file, and every plain scalar in it must read as a string under every reader the toolkit meets.
+    $findings = @(Get-NeoIPCYamlPortabilityFinding -Text $yaml -StringsOnly)
+    if ($findings.Count -gt 0) {
+        throw "The sharing profiles would be written outside the portable subset of YAML 1.2.2: $(($findings | ForEach-Object { "$($_.Location): $($_.Message)" }) -join ' ')"
+    }
     [System.IO.File]::WriteAllText($Path, $yaml, [System.Text.UTF8Encoding]::new($false))
 }
 

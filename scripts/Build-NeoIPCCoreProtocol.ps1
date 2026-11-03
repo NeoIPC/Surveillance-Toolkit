@@ -10,7 +10,8 @@
     Each generated input is produced only when its own sources are newer than the output, so a rebuild
     after editing one list does not regenerate everything:
 
-    - the antibiotics list and the infectious-agents list, both localized from their gettext catalogues;
+    - the antibiotics list, localized from its gettext catalogue, and the infectious-agents list, localized
+      from the CSV translations beside its frozen CSVs;
     - the collection sheets, derived from the canonical metadata;
     - the drawn figures, whose hand-maintained skeletons are localized by measurement.
 
@@ -303,7 +304,20 @@ foreach ($targetCulture in $targetCultures)
         [System.IO.File]::WriteAllText($antibioticsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
     }
     $infectiousAgentsListFile = Get-LocalisedPath $protocolDir $infectiousAgentsFileName $targetCulture -Subdirectory
-    Build-Target $infectiousAgentsListFile (Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Concepts.csv' $targetCulture -All -Existing),(Get-LocalisedPath $infectiousAgentsDir 'NeoIPC-Pathogen-Synonyms.csv' $targetCulture -All -Existing) {
+    # New-PathogenList reads the two frozen CSVs, the list elements, and the NeoIPC-owned concepts, the first three
+    # with the culture's translation sidecar where there is one, which Get-LocalisedPath -All yields for a named
+    # culture (for the invariant one, it yields the base file again, which only repeats an input); and it assembles
+    # the list by code, so the module is an input too, as for the antibiotics list above.
+    $infectiousAgentsListInputs = @(
+        (Join-Path $infectiousAgentsDir 'NeoIPC-Pathogen-Concepts.csv')
+        (Join-Path $infectiousAgentsDir 'NeoIPC-Pathogen-Synonyms.csv')
+        (Join-Path $infectiousAgentsDir 'ListElements.csv')
+        (Join-Path $infectiousAgentsDir 'NeoIPC-Owned-Pathogen-Concepts.csv')
+        (Join-Path -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-BuildTools', 'NeoIPC-BuildTools.psm1')
+    ) + @(foreach ($name in 'NeoIPC-Pathogen-Concepts.csv', 'NeoIPC-Pathogen-Synonyms.csv', 'ListElements.csv') {
+            Get-LocalisedPath $infectiousAgentsDir $name $targetCulture -All -Existing
+        })
+    Build-Target $infectiousAgentsListFile $infectiousAgentsListInputs {
         Write-Verbose "Generating list of infectious agents"
         $lines = New-PathogenList -TargetCulture $targetCulture -MetadataPath $metadataFolder -AsciiDoc
         [System.IO.File]::WriteAllText($infectiousAgentsListFile, (($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))

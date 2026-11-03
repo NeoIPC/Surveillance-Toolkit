@@ -1,6 +1,7 @@
 name: Build
 
-on:
+# Quoted: a YAML 1.1 reader takes a plain on for the Boolean true.
+"on":
   push:
     branches:
       - main
@@ -346,6 +347,104 @@ jobs:
               # construction rather than by anyone recalling that a gate which inspects nothing has already
               # bitten this repository twice.
               run: python -m pytest scripts/ -v
+
+    yaml-reader-agreement:
+        # The toolkit's YAML is YAML 1.2.2. Its reference reader is yaml12 in R, built on saphyr, a parser that passes
+        # the YAML test suite, and the toolkit's own code reads it with R's yaml package in the reports, powershell-yaml
+        # in the PowerShell tooling, and ruamel.yaml in the Python tooling. A scalar two of them type differently (0x1A
+        # is the number 26 to yaml12 and a string to powershell-yaml) makes one file mean two things, so this job reads
+        # every committed YAML file with all of them and fails on a difference. It also holds the YAML portability
+        # check's models of yaml12 and ruamel.yaml to those readers, which build-metadata does not install. Its own
+        # job, like python-tests: it needs none of the toolchain the build jobs assemble. Its time limit fails a run
+        # that hangs in minutes rather than at GitHub's default of six hours.
+        runs-on: ubuntu-26.04
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                submodules: false
+
+            - uses: actions/setup-python@v6
+              with:
+                python-version: '3.13'
+
+            - name: Install the readers
+              shell: bash
+              # yaml12 is not packaged for Ubuntu, so CRAN's source package is built here, as the runner user, with
+              # the Rust toolchain the runner image keeps in that user's home: under sudo, HOME and PATH would lead its
+              # build to no toolchain. It goes into the user library, which R puts on its library path once it exists,
+              # and warn = 2 fails the step on a failed build, which install.packages() reports only as a warning.
+              # jsonlite carries each reading out of R. yaml12, ruamel.yaml, and powershell-yaml are pinned to the
+              # versions whose typing the portability check models; CRAN serves yaml12's current release at one
+              # address and an earlier one in its archive, so both are tried, and yaml12 imports no R package.
+              run: |
+                python -m pip install 'ruamel.yaml==0.19.1'
+                sudo apt-get update -qq
+                sudo apt-get install -qq --no-install-recommends r-base-dev r-cran-jsonlite r-cran-yaml
+                mkdir -p "$(Rscript -e 'cat(path.expand(Sys.getenv("R_LIBS_USER")))')"
+                Rscript - <<'EOF'
+                options(warn = 2)
+                lib <- path.expand(Sys.getenv("R_LIBS_USER"))
+                sources <- sprintf(c("https://cloud.r-project.org/src/contrib/yaml12_%s.tar.gz",
+                                     "https://cloud.r-project.org/src/contrib/Archive/yaml12/yaml12_%s.tar.gz"), "0.2.0")
+                for (source in sources) {
+                  # install.packages() reports a download that fails, as at the address a release has left, and carries on.
+                  try(install.packages(source, lib = lib, repos = NULL, type = "source"))
+                  if (file.exists(file.path(lib, "yaml12", "DESCRIPTION"))) break
+                }
+                stopifnot(identical(format(packageVersion("yaml12", lib.loc = lib)), "0.2.0"))
+                EOF
+                Rscript -e 'for (p in c("yaml12", "yaml", "jsonlite")) cat(p, format(packageVersion(p)), "\n")'
+                pwsh -NoProfile -Command 'Install-Module -Name powershell-yaml -RequiredVersion 0.4.12 -Force -Scope CurrentUser -SkipPublisherCheck; Install-Module -Name Pester -MinimumVersion 6.0 -MaximumVersion 6.999 -Force -Scope CurrentUser -SkipPublisherCheck'
+
+            - name: Hold the portability check's models of yaml12 and ruamel.yaml to their readers
+              shell: pwsh
+              run: Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/YamlPortability.Tests.ps1 -TagFilter yaml12, ruamel -CI
+
+            - name: Show that the agreement check reports a disagreement
+              # A file the readers read apart must fail the check, and for that difference, so that neither a check
+              # that finds nothing nor one that fails for another reason, such as a parameter it cannot bind, can pass
+              # for agreement: 0x1A is the number 26 to yaml12 and a string to powershell-yaml.
+              shell: bash
+              run: |
+                fixture="$RUNNER_TEMP/disagreement.yaml"
+                printf 'a: 0x1A\n' > "$fixture"
+                status=0
+                output=$(pwsh -NoProfile -File scripts/Test-YamlReaderAgreement.ps1 -Path "$fixture" 2>&1) || status=$?
+                printf '%s\n' "$output"
+                if [ "$status" -ne 1 ]; then
+                  echo "::error::The agreement check exited $status on a file the readers read apart, not 1."
+                  exit 1
+                fi
+                if ! grep -qF "(powershell-yaml)/'a': yaml12 reads the integer 26, this reader the string '0x1A'" <<< "$output"; then
+                  echo "::error::The agreement check failed on a file the readers read apart, but not for their difference."
+                  exit 1
+                fi
+
+            - name: Show that the agreement check stops a reader that does not finish
+              # A reader that does not finish must be stopped at its deadline and named, not waited on: a plain
+              # 1e999999999 holds powershell-yaml's BigInteger.TryParse far longer than any check can wait. The step's
+              # own time limit fails it well before the job's, should the check wait on such a reader.
+              shell: bash
+              timeout-minutes: 5
+              run: |
+                fixture="$RUNNER_TEMP/endless.yaml"
+                printf 'a: 1e999999999\n' > "$fixture"
+                status=0
+                output=$(pwsh -NoProfile -File scripts/Test-YamlReaderAgreement.ps1 -Path "$fixture" -TimeoutSeconds 20 2>&1) || status=$?
+                printf '%s\n' "$output"
+                if [ "$status" -ne 1 ]; then
+                  echo "::error::The agreement check exited $status on a file a reader cannot finish, not 1."
+                  exit 1
+                fi
+                if ! grep -qF "powershell-yaml cannot read it: its PowerShell process did not finish within 20 seconds" <<< "$output"; then
+                  echo "::error::The agreement check failed on a file a reader cannot finish, but not for its deadline."
+                  exit 1
+                fi
+
+            - name: Check that the readers agree
+              shell: pwsh
+              run: ./scripts/Test-YamlReaderAgreement.ps1
 
     build-docs:
         # Pinned to an explicit image for reproducibility; 26.04 provides the PowerShell 7.6 runtime the
@@ -786,6 +885,10 @@ jobs:
             - uses: actions/checkout@v7
               with:
                 submodules: true
+                # Full history + tags: MetadataContent.Tests.ps1 holds the infectious-agent list append-only against
+                # every infectious-agents-v* tag, those in HEAD's history most strictly, and fails rather than passes
+                # without the tags.
+                fetch-depth: 0
 
             - name: Set up .NET 10 (for the data-dictionary .xlsx writer)
               uses: actions/setup-dotnet@v5
@@ -830,8 +933,9 @@ jobs:
                 Install-Module -Name Pester -MinimumVersion 6.0 -MaximumVersion 6.999 -Force -Scope CurrentUser -SkipPublisherCheck
                 # powershell-yaml: the metadata assembler reads the infectious-agents / sharing YAML when
                 # building the package the data dictionary flattens, and ReportInterpolationHygiene reads
-                # the reports' string resources with it.
-                Install-Module -Name powershell-yaml -MinimumVersion 0.4.2 -Force -Scope CurrentUser -SkipPublisherCheck
+                # the reports' string resources with it. Pinned to the version whose typing the YAML
+                # portability check models, which YamlPortability.Tests.ps1 holds to it.
+                Install-Module -Name powershell-yaml -RequiredVersion 0.4.12 -Force -Scope CurrentUser -SkipPublisherCheck
                 # PSScriptAnalyzer backs two gates: the approved-verb *function* check (PSUseApprovedVerbs)
                 # in ScriptVerbHygiene.Tests.ps1 — whose file-name half is a custom Pester check — and
                 # PSAvoidAssignmentToAutomaticVariable in AutomaticVariableHygiene.Tests.ps1. Both Describe
@@ -844,8 +948,10 @@ jobs:
                 # to every infectious-agents catalogue whenever those translations are touched, and a
                 # translation pull request is exactly where no human is reading the diff.
                 #
-                # The directory, not a list of its files, so that a new test file cannot be left out of the run.
-                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests -CI
+                # The directory, not a list of its files, so that a new test file cannot be left out of the run. The
+                # tests tagged yaml12 and ruamel need yaml12 built from source and ruamel.yaml at the version
+                # modelled, which the yaml-reader-agreement job installs, and runs them there.
+                Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests -CI -ExcludeTagFilter yaml12, ruamel
 
             - name: Generate data dictionary
               shell: pwsh

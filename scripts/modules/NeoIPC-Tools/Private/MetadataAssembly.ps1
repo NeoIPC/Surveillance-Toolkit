@@ -199,7 +199,8 @@ function Add-NeoIPCGeneratedMetadata {
           - the per-slot pathogen + antimicrobial-substance data elements,
           - the resistance, field-gating, virus and substance program-rule variables,
           - the resistance, field-gating, virus and substance program rules + actions (the HAP `set virus` rule
-            classifies each slot's organism against the ontology's `Viruses` realm — see New-NeoIPCPathogenVirusRule).
+            classifies each slot's infectious agent against the ontology's `Viruses` subtree — see
+            New-NeoIPCPathogenVirusRule).
         Replacement is by NATURAL KEY, read from the generator outputs themselves (no pattern matching): a deployed
         object is dropped iff a generated object shares its key — option-set / data-element CODE, program-rule /
         variable NAME, or (for options) membership in the generated NEOIPC_PATHOGENS set — then the generated

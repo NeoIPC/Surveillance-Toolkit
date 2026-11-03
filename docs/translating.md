@@ -6,12 +6,13 @@ short answer is in [`../CONTRIBUTING.md`](../CONTRIBUTING.md); this is the longe
 material itself.
 
 **Read the project's own translation instructions in Weblate before you start.** They are shown on the
-project page and cover terminology, placeholder integrity and the policy on scientific organism names.
+project page and cover terminology, placeholder integrity, and the policy on the scientific names of
+infectious agents.
 They are not repeated here, deliberately — a second copy is the one that goes stale. The same applies to
 the contributor agreement Weblate shows you before your first contribution: it explains what becomes a
 permanent part of the public git history, and it is worth reading rather than clicking through.
 
-## What each catalogue is, and who reads it
+## What Each Catalogue Is, and Who Reads It
 
 They do not resemble each other, and the right instinct in one is the wrong instinct in another.
 
@@ -64,12 +65,13 @@ layout. Terse is correct here.
 **App** — the web interface for requesting reports. Ordinary interface language: buttons, headings,
 messages.
 
-**Infectious agents** — several thousand scientific organism names, their synonyms, and rank labels such
-as *Species* and *Genus*. Read the project instructions about this one before touching it; the short
-version is that if your language uses these names unchanged, do not confirm thousands of entries by hand
-— tell us and we will fill them in for your language in one batch.
+**Infectious agents** — the names of several thousand infectious agents, scientific and vernacular (*Group A
+streptococcus*, *SARS-CoV-2*), their synonyms, rank labels such as *Species* and *Genus*, and the introduction and
+source notices of the standalone list of infectious agents. Read the project instructions about this one before touching it; the
+short version is that if your language uses these names unchanged, do not confirm thousands of entries by
+hand — tell us and we will fill them in for your language in one batch.
 
-## The markup you will meet, and what must survive
+## The Markup You Will Meet, and What Must Survive
 
 Every catalogue is extracted from a source document, and some of that document's syntax comes with it.
 Anything in the list below is machinery: it must appear in your translation exactly as it does in the
@@ -107,7 +109,7 @@ an awkward sentence — it stops the rule from finding the field at all.
 
 **In the glossary** — nothing. Plain terms.
 
-## The checks, and what they are telling you
+## The Checks, and What They Are Telling You
 
 Weblate will flag some translations as *failing checks*. They are advisory — nothing stops you saving —
 but each one exists because the corresponding mistake has shipped here at least once.
@@ -166,7 +168,7 @@ while *С Р А О Е Т* sit under your fingers and are pixel-identical to *C P
 a screen reader reads it in the wrong language. If an abbreviation stays in Latin, type it in Latin.
 `scripts/check-mixed-script.py` catches this, but it is much easier not to do.
 
-## Long words, and how to tell us where they may break
+## Long Words, and How to Tell Us Where They May Break
 
 Some of what you translate is not prose on a page: field labels and option names from the **DHIS2
 metadata** catalogue are printed onto the data collection sheets — the paper forms filled in at a cot
@@ -217,7 +219,7 @@ more useful than a confident one without.
 &lt;Language&gt;* team on the project page is who that is. For anything not about a particular string,
 **NeoIPC-Support@charite.de** reaches the maintainers.
 
-### If you review
+### If You Review
 
 **Do not approve your own translation.** Saving it is your contribution; approving it is a second
 person's judgement, and one person cannot be both. Weblate will let you — no permission expresses "not
@@ -247,11 +249,11 @@ Judge the wording; the marks are the translator's answer to a layout question, n
 They come from an earlier bulk import and mean nothing has been decided for that string yet. Treat them
 as untranslated.
 
-## What your translation is published under
+## What Your Translation Is Published Under
 
 **Everything you translate in this project's Weblate components is published under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — the protocol, the reports, the glossary, the
-DHIS2 metadata and the infectious agents alike. Weblate shows you the contributor agreement before your
+DHIS2 metadata, and the infectious agents alike. Weblate shows you the contributor agreement before your
 first contribution; please read it rather than clicking through, because it says plainly that the name and
 e-mail address on your Weblate account become a permanent part of the public git history.
 
@@ -259,13 +261,15 @@ Two things that look like exceptions and are worth understanding, because they s
 this project thinks:
 
 - **The infectious-agents catalogue is CC BY 4.0 even though the directory it comes from is not.** That
-  directory is CC BY-NC-ND 4.0, because it compiles content from LPSN, MycoBank, ICTV and NHSN under their
+  directory is CC BY-NC-ND 4.0, because it compiles content from LPSN, MycoBank, ICTV, and NHSN under their
   terms. The catalogue is not, and the reason is what the catalogue actually contains: the extraction is
-  limited to organism names, rank labels such as *Species* and *Genus*, and controlled values such as
-  *Unknown*. None of the upstream descriptions, authorities or references — the material those licences
-  exist to protect — is carried across, and names and short phrases are not subject to copyright in any
-  case. (A NoDerivatives term could not have governed it regardless: a translation *is* a derivative work,
-  so such a catalogue could not lawfully be translated at all, which is its only purpose.)
+  limited to the names of infectious agents, rank labels such as *Species* and *Genus*, controlled values
+  such as *Unknown*, and the standalone list's header and footer, NeoIPC's own introduction and the
+  citations and notices that attribute the sources. None of the upstream descriptions, authorities, or
+  per-name references — the material those licences exist to protect — is carried across, and names and
+  short phrases are not subject to copyright in any case. (A NoDerivatives term could not have governed it
+  regardless: a translation *is* a derivative work, so such a catalogue could not lawfully be translated at
+  all, which is its only purpose.)
 - **The App catalogue is MIT**, not CC BY 4.0, because it is part of a software interface and is licensed
   with the code it ships in rather than with the surveillance content. It belongs to a different
   repository; the component is in the same Weblate project, so you may well meet it.
@@ -275,7 +279,7 @@ One catalogue in this repository is **not** on Weblate at all and is not covered
 and which Weblate's free hosting does not accept, so it stays here and is translated through a pull
 request instead. `CONTRIBUTING.md` says how.
 
-## When something is wrong in the English
+## When Something Is Wrong in the English
 
 Say so — comment on the string, or write to **NeoIPC-Support@charite.de**. Source strings here have been
 ambiguous, have contained typos, and in a few cases have been impossible to translate well because they

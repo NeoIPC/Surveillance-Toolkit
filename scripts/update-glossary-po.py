@@ -68,6 +68,7 @@ from pathlib import Path
 
 try:
     from ruamel.yaml import YAML
+    from ruamel.yaml.representer import RoundTripRepresenter
 except ImportError:
     sys.exit("Error: ruamel.yaml is required. Install with: pip install ruamel.yaml")
 
@@ -252,6 +253,23 @@ def yaml_to_pot(glossary_path, pot_path):
     return pot
 
 
+class QuotedStringRepresenter(RoundTripRepresenter):
+    """Writes every string, key or value, quoted, which every YAML reader reads as a string.
+
+    A plain scalar is not so safe. ruamel.yaml quotes only what its own resolver would type, so it writes No, Y,
+    and . plain, which YAML 1.1 readers, R's yaml package among them, read as false, true, and a missing value.
+    The reports read the generated glossaries through handlers that keep No and Y as text, but other readers have
+    none. Single quotes are asked for, and ruamel.yaml's emitter falls back to double quotes for a string that
+    single quotes cannot hold, such as one with a non-printable character. A subclass rather than a registration
+    on RoundTripRepresenter itself, so that no other YAML instance in the process writes this way.
+    """
+
+
+QuotedStringRepresenter.add_representer(
+    str, lambda representer, value: representer.represent_scalar("tag:yaml.org,2002:str", value, style="'")
+)
+
+
 def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     """Generate glossary.<lang>.yaml from translated PO files.
 
@@ -259,6 +277,7 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
     mixed-language output (same behaviour as po4a's default 80% cutoff).
     """
     yaml = YAML()
+    yaml.Representer = QuotedStringRepresenter
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
 
@@ -316,8 +335,8 @@ def generate_yaml(po_dir, glossary_path, languages, threshold=80):
 
         # newline="\n" for the same reason as the .pot above: open()'s default translates "\n" to
         # os.linesep, so this generated YAML would be CRLF on Windows and LF in CI. It is read by
-        # the reports' R string-resource cascade and committed, so the bytes must not depend on
-        # which machine ran the pipeline.
+        # the reports' R string-resource cascade, so the bytes must not depend on which machine ran
+        # the pipeline.
         out_path = glossary_path.parent / f"glossary.{lang}.yaml"
         with open(out_path, "w", encoding="utf-8", newline="\n") as f:
             yaml.dump(sorted_translations, f)

@@ -2,7 +2,7 @@
 
 This file documents the Surveillance-Toolkit repository. If this repository is checked out as a submodule of the `neoipc-workspace`, the workspace-level `.github/copilot-instructions.md` adds the workspace's own guardrails to the ones below.
 
-Path-scoped rules files hold what is tied to particular files, each loaded when a matching file is read: [R](instructions/r-code.instructions.md), [PowerShell](instructions/powershell.instructions.md), the [infectious-agent catalogue](instructions/infectious-agents.instructions.md), the [reports](instructions/reports.instructions.md) and their [string resources](instructions/string-resources.instructions.md), [localization](instructions/localization.instructions.md), and the [report wrappers](instructions/wrappers.instructions.md).
+Path-scoped rules files hold what is tied to particular files, each loaded when a matching file is read: [R](instructions/r-code.instructions.md), [PowerShell](instructions/powershell.instructions.md), [YAML](instructions/yaml.instructions.md), the [infectious-agent catalogue](instructions/infectious-agents.instructions.md), the [reports](instructions/reports.instructions.md) and their [string resources](instructions/string-resources.instructions.md), [localization](instructions/localization.instructions.md), and the [report wrappers](instructions/wrappers.instructions.md).
 
 ---
 

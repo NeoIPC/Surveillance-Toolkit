@@ -1,4 +1,4 @@
-# Metadata generation — design reference
+# Metadata Generation — Design Reference
 
 The **generation subsystem** of the DHIS2 metadata pipeline: how the repeated, declaratively
 sourced machinery of the `NEOIPC_CORE` program — the pathogen option set, the per-slot pathogen
@@ -22,7 +22,7 @@ read-only against the on-disk, PII-cleaned `metadata.json` export (the round-tri
 UID-preservation source) and the canonical ontology
 `metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`.
 
-## Posture: generate for correctness, don't reproduce the deployed rules
+## Posture: Generate for Correctness, Don't Reproduce the Deployed Rules
 
 The deployed program rules are a **flawed human baseline**, not a gold standard: built under time
 pressure with steadily-growing DHIS2 knowledge, they are inconsistent, partially buggy, overlapping,
@@ -43,7 +43,7 @@ This sets a boundary between what generation may fix unilaterally and what needs
   are surfaced by a separate audit and **proposed**, never changed by the generator. Per the
   repository guardrail, when a rule conflicts with a definition, fix the rule, not the definition.
 
-### The corrected ontology intentionally diverges from the deployed rules and the protocol
+### The Corrected Ontology Intentionally Diverges From the Deployed Rules and the Protocol
 
 The ontology's resistance flags have been deliberately corrected (e.g. *Vibrionaceae* → 3GCR +
 carbapenem on, colistin off; *Stutzerimonas* → all three on; *Stenotrophomonas* confirmed unflagged).
@@ -53,7 +53,7 @@ the protocol are **regenerated / re-rendered from it**, never the reverse. A dif
 deployed `metadata.json` is expected, not a regression. (The flag normalization — nearest-wins
 inheritance with `false` overrides — is its own workstream; see the *Generation model* section.)
 
-## The capability matrix the generators expand over
+## The Capability Matrix the Generators Expand Over
 
 Generation is count-driven over the per-stage pathogen/substance capability matrix (canonical copy in
 [`metadata-pipeline-design.md`](metadata-pipeline-design.md) §6). In summary: primary pathogen slots
@@ -73,11 +73,11 @@ mis-ordering where `substance 10` sorts before `substance 2`); pathogens do not.
 event-data reader parses these codes — the substance index is read as a full two-digit group
 (`_(\d\d)`), the pathogen index as a multi-digit group (`PATHOGEN_(\d+)`).
 
-## Verified deployed structure (the generation target)
+## Verified Deployed Structure (the Generation Target)
 
 Read from the export; the exact object shapes the generators emit.
 
-### Option set and the value variable
+### Option Set and the Value Variable
 
 - **Option set `NEOIPC_PATHOGENS`** (name "NeoIPC Pathogen options") — one option per `Id`-bearing
   ontology node; each option's **code is the integer `Id`**. The per-slot organism DE
@@ -86,7 +86,7 @@ Read from the export; the exact object shapes the generators emit.
   organism DE with `useCodeForOptionSet = true`, so its value is the **option code** (integer). All
   resistance logic compares against these codes.
 
-### Resistance-category gating — the three-rule producer/consumer triple
+### Resistance-Category Gating — the Three-Rule Producer/Consumer Triple
 
 Per slot, per resistance category (3GCR / carbapenem-resistant / colistin-resistant / MRSA / VRE),
 three rules — **270 rules / 270 actions** at the deployed 18 slots × 5 categories:
@@ -118,7 +118,7 @@ it preserves the UID of its owning deployed rule's same-type action, else mints 
 `<rule name>|<actionType>`. Every resolution is **fail-loud**: a missing program / stage / resistance
 DE, an empty category code set, or a duplicate minted UID throws.
 
-### Field-gating — five per-slot kinds
+### Field-Gating — Five Per-Slot Kinds
 
 The non-resistance per-slot gating, all on the slot's own stage:
 
@@ -155,7 +155,7 @@ downstream-field set (when-empty). Coverage is **domain-correct, not uniform**: 
 pathogen` / `when set` are BSI-primary by design (the recognized-pathogen / no-positive-culture logic
 is BSI-specific); `when empty` covers only the slots that actually have downstream fields to hide.
 
-### Antimicrobial-substance cluster
+### Antimicrobial-Substance Cluster
 
 On the Surveillance-End stage, read from the export. Unlike the resistance triple, the substance
 rules have **no ASSIGN / calculated-variable indirection** — they read the slot's
@@ -181,7 +181,7 @@ deployed 9 have no deployed DE/UID, so the substance DE generator **mints** them
 categoryCombo + optionSet + commentOptionSet from the slot-1 sibling) rather than failing loud — this
 is the "grow the program" capability, distinct from the pathogen DE generator's reuse-or-fail.
 
-## Program-rule execution model (the constraints on rule shape)
+## Program-Rule Execution Model (the Constraints on Rule Shape)
 
 Verified against the **two** engines that matter: the vendored AngularJS Tracker-Capture engine the
 2.40 deployment runs in the browser (the `d2-tracker/dhis2.angular.services.js` engine bundled in
@@ -223,7 +223,7 @@ Rationale: it keeps the inspectable `may be <CAT>` boolean, the enumeration appe
 gate). The H1 saving is real but not worth losing the named boolean handle and the minimal-diff
 property. Explicit priorities are emitted either way.
 
-## Generation model — effective flags drive the code sets
+## Generation Model — Effective Flags Drive the Code Sets
 
 A category's organism code set = **every `Id`-bearing ontology node whose *effective* flag is true.**
 The effective flag is the **nearest explicit value on the node→root path** (the node itself, else its
@@ -257,7 +257,7 @@ questions rather than data-loss ones is codified in this repository's `.claude/r
 bacteria, MycoBank for fungi, ICTV for viruses, NHSN for common-commensal status; a renamed organism's
 `Id` follows the name as it becomes a synonym).
 
-## Full program-rule machinery census
+## Full Program-Rule Machinery Census
 
 A complete classification of all **497** `NEOIPC_CORE` program rules / **778** actions (reconciles
 exactly, 0 unaccounted) — the scoping that precedes the build. Four classes:
@@ -277,11 +277,12 @@ pathogen-slot rules also bundle resistance SET/HIDE actions into the same rule a
 gating; generation disentangles them (emit the resistance triple as its own rules, leave the
 definition gating to the business-rule layer).
 
-## What the generator produces, and how it's validated
+## What the Generator Produces, and How It's Validated
 
 The nine cmdlets emit, from the ontology + capability matrix + counts: the `NEOIPC_PATHOGENS` option
-set + options (code = `Id`, names per the authority policy, with the generated option UIDs kept in the
-`NeoIPC-Infectious-Agents.uids.csv` sidecar, not `options.csv`); the per-slot pathogen DEs; the
+set + options (code = `Id`, names per the authority policy; a deployed option's UID comes from the
+`NeoIPC-Infectious-Agents.uids.csv` sidecar, not `options.csv`, and an option not yet deployed has its UID
+derived from the option set's UID and its code, stored nowhere); the per-slot pathogen DEs; the
 `<slot> value` + `may be <CAT>` + `is recognized pathogen` PRVs; the resistance triple and the
 field-gating rules per slot; and the substance cluster. The stale HAP aggregate is never emitted. UID
 handling, the per-expression file layout for the long `set <CAT>` expressions, the deterministic
@@ -302,7 +303,7 @@ pass/fail equality but **correctness-by-construction plus a two-directional clas
   **unclassified** delta in either direction is the failure. A large, fully-classified diff is the
   healthy outcome.
 
-## Authored codes on the generated families
+## Authored Codes on the Generated Families
 
 Every generated program rule and variable carries an authored `code` (program-rule *actions* stay
 code-less by decision — see the workspace `docs/dhis2-code-on-first-class-types.md`). One function mints
@@ -332,7 +333,7 @@ Program stages carry a `NEOIPC_STG_<token>` code, so each rule generator resolve
 code (`Get-NeoIPCStageIdByToken`) rather than by which stage owns a slot-1 resistance / AB-days data
 element.
 
-## Defect catalog (what generation drops or fixes)
+## Defect Catalogue (What Generation Drops or Fixes)
 
 Generated-class defects fixed **by construction**:
 

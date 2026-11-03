@@ -189,15 +189,6 @@ $potPaths = @(
 # po/metadata.pot is deliberately absent: it is written by Export-NeoIPCMetadataTranslation in the
 # metadata pipeline, which this script never invokes, so nothing here can churn it.
 
-# Each product po4a config derives its --package-version from that product's VERSION file (the single
-# source of truth), passed to po4a on the command line so the version lives in exactly one place. scripts/
-# is not an independently-versioned product and has no entry (it keeps whatever its .cfg declares).
-$versionFileMap = @{
-    reports            = 'reports/VERSION'
-    documentation      = 'doc/protocol/VERSION'
-    infectious_agents  = 'metadata/common/infectious-agents/VERSION'
-}
-
 # po4a cannot be told a custom file header, so after it runs we rewrite the .pot header comment block into
 # the NeoIPC house style (matching po/glossary.pot).
 #
@@ -262,10 +253,6 @@ function Invoke-Po4a {
         [Parameter(Mandatory)]
         [string]$ConfigPath,
 
-        # --package-version to pass to po4a, from the product's VERSION file (the single source of truth).
-        # Empty for configs without a product VERSION (e.g. scripts), which keep whatever their .cfg declares.
-        [string]$PackageVersion,
-
         # Pass po4a's --no-update: "Do not change the POT and PO files, only the translation may be
         # updated." Renders the localized artifacts from the catalogues exactly as committed.
         [switch]$NoUpdate
@@ -274,7 +261,6 @@ function Invoke-Po4a {
     Test-Po4aSubmodule
 
     $keepArg = if ($Force) { ' --keep 0' } else { '' }
-    $pkgVerArg = if ($PackageVersion) { " --package-version $PackageVersion" } else { '' }
     $noUpdateArg = if ($NoUpdate) { ' --no-update' } else { '' }
 
     if ($IsWindows) {
@@ -297,7 +283,7 @@ function Invoke-Po4a {
             $wslRoot = (wsl wslpath -a .).Trim()
             # PERL_UNICODE=SDA: decode @ARGV + default open() layers as UTF-8 so po4a reads the .cfg's
             # non-ASCII --copyright-holder correctly (otherwise it double-encodes it into the .pot header).
-            $cmd = "cd '$wslRoot' && PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a $ConfigPath$pkgVerArg$keepArg$noUpdateArg"
+            $cmd = "cd '$wslRoot' && PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a $ConfigPath$keepArg$noUpdateArg"
 
             if ($DryRun) {
                 Write-Host "[DryRun] wsl -e bash -c `"$cmd`""
@@ -318,7 +304,6 @@ function Invoke-Po4a {
 
         # Build the argument vector once so the -DryRun echo cannot drift from what is actually run.
         $po4aArgs = @($fullConfigPath)
-        if ($PackageVersion) { $po4aArgs += '--package-version'; $po4aArgs += $PackageVersion }
         if ($Force)          { $po4aArgs += '--keep'; $po4aArgs += '0' }
         if ($NoUpdate)       { $po4aArgs += '--no-update' }
 
@@ -520,11 +505,12 @@ function Repair-Po4aTemplateHeader {
     # it for the one writer that cannot call into it, because po4a produces the file and we only get to correct
     # it afterwards. Keep the two in step — Tests/PoHeader.Tests.ps1 asserts they agree.
     #
-    # Three fields are DELETED rather than normalised. Project-Id-Version froze at a version the products left
-    # behind; Last-Translator is frozen by po_set_last_translator=false, so it would name a translator who can
-    # never change; X-Generator is a Weblate version string that rewrote every catalogue on each upgrade. Note
-    # the deletion of Last-Translator is exactly what po4a will undo if anyone runs it directly instead of
-    # through this script — it re-emits "FULL NAME <EMAIL@ADDRESS>" (tools/po4a/lib/Locale/Po4a/Po.pm).
+    # Three fields are DELETED rather than normalized. Project-Id-Version holds only po4a's placeholder, the package
+    # name and "VERSION" (Locale/Po4a/Po.pm), since no version is passed: a stamped one would go stale as soon as a
+    # product's version moves. Last-Translator is frozen by po_set_last_translator=false, so it would name a
+    # translator who can never change; X-Generator is a Weblate version string that rewrote every catalogue on each
+    # upgrade. Note the deletion of Last-Translator is exactly what po4a will undo if anyone runs it directly instead
+    # of through this script — it re-emits "FULL NAME <EMAIL@ADDRESS>" (tools/po4a/lib/Locale/Po4a/Po.pm).
     param(
         [Parameter(Mandatory)][string]$ConfigPath,
         [Parameter(Mandatory)][string]$Package,
@@ -811,11 +797,8 @@ if ($Update) {
                 Assert-CleanWeblatePo -RelativePath $ownedPo
             }
             Invoke-UpdateYamlKeys -ConfigPath $cfgPath
-            $pkgVer = if ($versionFileMap.ContainsKey($target)) {
-                (Get-Content -LiteralPath (Join-Path $repoRoot $versionFileMap[$target]) -Raw).Trim()
-            } else { $null }
             try {
-                Invoke-Po4a -ConfigPath $cfgPath -PackageVersion $pkgVer
+                Invoke-Po4a -ConfigPath $cfgPath
             } finally {
                 if ($ownedPo -and -not $DryRun -and $enforceCatalogueOwnership) {
                     Restore-WeblateOwnedPo -RelativePath $ownedPo
@@ -866,10 +849,7 @@ elseif ($Render) {
 
     $targets = if ($Config -eq 'all') { $po4aConfigs } else { @($Config) }
     foreach ($target in $targets) {
-        $pkgVer = if ($versionFileMap.ContainsKey($target)) {
-            (Get-Content -LiteralPath (Join-Path $repoRoot $versionFileMap[$target]) -Raw).Trim()
-        } else { $null }
-        Invoke-Po4a -ConfigPath $configMap[$target] -PackageVersion $pkgVer -NoUpdate
+        Invoke-Po4a -ConfigPath $configMap[$target] -NoUpdate
     }
 
     Write-Host "`nLocalized artifacts rendered; catalogues untouched."

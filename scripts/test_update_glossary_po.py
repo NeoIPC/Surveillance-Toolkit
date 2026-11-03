@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regression test for update-glossary-po.py: it runs the script and checks what it wrote.
 
-Four invariants are covered, and three of them need a technique beyond "run it and look": one cannot be
+Five invariants are covered, and three of them need a technique beyond "run it and look": one cannot be
 observed from the output on every platform, one is invisible unless the fixture is shaped to reveal it,
 and one is about the committed files rather than about behaviour at all.
 
@@ -26,11 +26,11 @@ the pipeline actually invokes. An earlier version asserted the bare run alone; a
 planted inside generate_yaml passed the entire suite green. Assert both, or the assertion covers the
 path where the mistake is least likely.
 
-**Byte hygiene.** Both artifacts the script produces -- po/glossary.pot and glossary.<lang>.yaml --
-are committed and read by other tools (Weblate's msgmerge add-on, the reports' R string-resource
-cascade). Python's io.open() default translates every "\\n" to os.linesep, so without an explicit
-newline="\\n" the same script emits CRLF on Windows and LF on Linux. The end-to-end run below asserts
-the bytes of every artifact.
+**Byte hygiene.** Both artifacts the script produces are read by other tools: po/glossary.pot, which
+is committed, by Weblate's msgmerge add-on, and glossary.<lang>.yaml, which a build generates, by the
+reports' R string-resource cascade. Python's io.open() default translates every "\\n" to os.linesep, so
+without an explicit newline="\\n" the same script emits CRLF on Windows and LF on Linux. The end-to-end
+run below asserts the bytes of every artifact.
 
 **That assertion cannot catch a revert on Linux**, where os.linesep is already "\\n": deleting every
 newline="\\n" changes nothing observable. So the pinning is *also* asserted against the source, which
@@ -42,6 +42,10 @@ it asserted that polib and ruamel work, and would have passed with the fix rever
 translator note while the file's header block does not, and that YAML keys become msgctxt. Those are
 checked too, since a silent regression there loses every translator note without touching a byte of
 line-ending hygiene.
+
+**Quoting.** Every string a generated glossary holds, key or value, is quoted, so that no YAML
+reader types a translation such as No or 012. test_generated_glossary_quotes_every_string runs the
+script's own generate_yaml() on translations a reader would type and checks every scalar it writes.
 
 This ran on a developer's machine and nowhere else until the python-tests job began running it, which
 is why its checks are written as functions accumulating into a shared list rather than as pytest cases:
@@ -457,6 +461,53 @@ def test_update_glossary_po():
     test functions is worth doing on their own merits, not as part of wiring CI.
     """
     assert main() == 0, "see the printed FAIL lines above for the individual checks"
+
+
+def test_generated_glossary_quotes_every_string(tmp_path):
+    """generate_yaml() writes every string of a glossary quoted, keys included, so that no reader types one.
+
+    The keys and translations are ones that a reader would type if they were written plain: No, Y, and true are
+    Booleans to R's yaml package, 012 is the number 10 to it, and . is its NA. They go through the script's own
+    generate_yaml(), loaded from its file, whose name is no module name, and every scalar node of what it writes
+    is asserted quoted, single or double as ruamel.yaml's emitter chooses, rather than the text compared, which
+    ruamel.yaml may lay out differently from one release to the next.
+    """
+    import importlib.util
+
+    from ruamel.yaml import YAML
+
+    spec = importlib.util.spec_from_file_location("update_glossary_po", SCRIPT)
+    script = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(script)
+
+    translations = {"no": "No", "y": "Y", "flag": "true", "code": "012", "dot": ".", "term": "Übersetzung"}
+    po_dir = tmp_path / "po"
+    po_dir.mkdir()
+    catalogue = polib.POFile()
+    catalogue.metadata = {"Language": "de", "Content-Type": "text/plain; charset=UTF-8"}
+    for key, value in translations.items():
+        catalogue.append(polib.POEntry(msgctxt=key, msgid=key, msgstr=value))
+    catalogue.save(str(po_dir / "glossary.de.po"), newline="\n")
+
+    script.generate_yaml(po_dir, tmp_path / "glossary.yaml", ["de"], threshold=0)
+    text = (tmp_path / "glossary.de.yaml").read_text(encoding="utf-8")
+
+    def scalars(node):
+        """Every scalar node beneath a composed node, keys included."""
+        if node.id == "scalar":
+            yield node
+        elif node.id == "mapping":
+            for key, value in node.value:
+                yield from scalars(key)
+                yield from scalars(value)
+        else:
+            for item in node.value:
+                yield from scalars(item)
+
+    reader = YAML(typ="safe", pure=True)
+    plain = [node.value for node in scalars(reader.compose(text)) if node.style not in ("'", '"')]
+    assert not plain, f"written without quotes: {plain}\n{text}"
+    assert reader.load(text) == translations
 
 
 if __name__ == "__main__":

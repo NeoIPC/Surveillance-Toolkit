@@ -39,7 +39,9 @@ format:
       - right=25mm
       - heightrounded
     include-in-header:
-      text: |
+      # Strip chomping: a block scalar that ends the file loses its final line break to R's yaml alone, and Pandoc's
+      # template sets each header include on a line of its own.
+      text: |-
         \usepackage{microtype}
         \usepackage[absolute]{textpos}
         \usepackage{float}

@@ -8,15 +8,15 @@ has its own version file, its own tag stream, and its own GitHub Release stream:
 | NeoIPC Core Surveillance Protocol | `protocol-v*` | `doc/protocol/VERSION` | `NeoIPC-Core-Protocol*.pdf`, `*.docx`, `NeoIPC-Core-Collection-Forms*.zip`, `compatibility.yml` |
 | NeoIPC DHIS2 Metadata Package | `metadata-v*` | `metadata/VERSION` | `metadata-package/*.json`, data-dictionary CSV/XLSX, `compatibility.yml` |
 | NeoIPC Surveillance Reports | `reports-v*` | `reports/VERSION` | `compatibility.yml` (render-ready sources ship in the tag's source archive) |
-| NeoIPC Infectious Agent List | `infectious-agents-v*` | `metadata/common/infectious-agents/VERSION` | `NeoIPC-Infectious-Agents-<ver>.tar.gz` (canonical YAML + po4a-localized YAMLs + UID map) |
-| NeoIPC Antibiotics List | `antibiotics-v*` | `metadata/common/antibiotics/VERSION` | `NeoIPC-Antibiotics-<ver>.tar.gz` (substance/group/AWaRe/list-element CSVs + gettext translation catalogue) |
+| NeoIPC Infectious Agent List | `infectious-agents-v*` | `metadata/common/infectious-agents/VERSION` | `NeoIPC-Infectious-Agents-<ver>.tar.gz` (canonical YAML + po4a-localized YAMLs + UID map + `LICENSE.md` and `README.md`) |
+| NeoIPC Antibiotics List | `antibiotics-v*` | `metadata/common/antibiotics/VERSION` | `NeoIPC-Antibiotics-<ver>.tar.gz` (substance/group/AWaRe/list-element CSVs + gettext translation catalogue + `LICENSE.md` and `README.md`) |
 
 A release tag is `<product>-vMAJOR.MINOR.PATCH[-prerelease]`, where `-prerelease` is a standard semver
 pre-release identifier (dot-separated alphanumerics), e.g. `reports-v0.0.1-alpha`, `protocol-v1.3.0-preview1`,
 `metadata-v1.2.0`, `infectious-agents-v1.0.0-rc.1`. Because the products are independent you can cut a
 release for any one without touching the others — subject to the incorporation rule below.
 
-## Shared inputs and the incorporation rule
+## Shared Inputs and the Incorporation Rule
 
 The **infectious agent list** and the **antibiotics list** are shared inputs: the **protocol** compiles
 them into its documents and the **metadata package** embeds them as option sets. Both are their own
@@ -48,7 +48,7 @@ protocol/metadata release would be too strict.
 released first (there is no `<list>-v*` tag until you cut it). Order: **release the lists →
 then protocol/metadata**.
 
-## Reports compatibility (neoipcr / neoipc-app)
+## Reports Compatibility (neoipcr / neoipc-app)
 
 The reports are rendered by the `neoipcr` R package and drive the `neoipc-app` frontend's report
 forms, so a reports release records the neoipcr + neoipc-app versions it was validated against in
@@ -61,7 +61,7 @@ The check is tag-existence. So a reports release can never claim compatibility w
 neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports** (and update
 `reports/compatibility.yml` to the versions you validated against).
 
-## How a release works
+## How a Release Works
 
 1. **Bump the product's version file and describe the version** on `main` (via a PR): edit the relevant
    `VERSION` file to the version you intend to release, and add a non-empty `## [<version>] - <date>`
@@ -69,9 +69,14 @@ neoipcr/neoipc-app. Order: **release neoipcr + neoipc-app → then the reports**
    that section is missing, and the release publishes it as the Release body. For a reports release,
    also update `reports/compatibility.yml` (the
    neoipcr / neoipc-app versions the reports were validated against). For a protocol/metadata release,
-   make sure `compatibility.yml`'s incorporated list versions point at current list releases.
+   make sure `compatibility.yml`'s incorporated list versions point at current list releases. For an
+   infectious-agent list release, move the entries out of `[Unreleased]` into the new section, leaving
+   `[Unreleased]` empty: the list's append-only check lets the version `VERSION` names go untagged only
+   while `[Unreleased]` lists no change.
 2. **Push the release tag** `<product>-v<that-version>`. That single push triggers the release — there
-   is no separate "publish a Release" step; CI creates the GitHub Release itself.
+   is no separate "publish a Release" step; CI creates the GitHub Release itself. For the infectious-agent
+   list, push it before the next change to the list merges, since until then no clone can tell the release
+   from its preparation.
 3. CI (`.github/workflows/build.yml`) then, on the `<product>-v*` tag push:
    - validates the tag shape and that its version equals the released product's `VERSION` file;
    - rejects a moved / retagged tag and enforces the monotonic-version guard;
@@ -89,13 +94,10 @@ and metadata products for validation but publishes nothing.
 - The **"Latest release"** badge on the repository tracks whichever tag is newest by date across all
   streams; the tag prefix identifies the product. Pass `--latest=false` when publishing an off-stream
   release if you do not want it to claim the badge.
-- Each product's version is independent; they do **not** have to move together. The `--package-version`
-  stamped into each `.pot` header is derived from that product's `VERSION` file at localization time
-  (documentation → protocol, reports → reports, infectious_agents → infectious-agents), so the template
-  tracks the version automatically and cannot drift — there is nothing to hand-edit. The `.po` headers
-  are **not** written here: Weblate owns those catalogues, and the version reaches them when its
-  *msgmerge* add-on next brings them up to the pushed `.pot`. So a `.po` header can legitimately lag its
-  `.pot` between a version bump and that merge.
+- Each product's version is independent; they do **not** have to move together. No catalogue header
+  carries a version: `scripts/Invoke-Localization.ps1` deletes `Project-Id-Version` from every template it
+  writes, since a stamped version goes stale as soon as a product's version moves, so a release has no
+  catalogue header to bring into step.
 - The **metadata** packages are **generated build artifacts**, never committed (see
   `metadata/dist/README.md`); they exist only as Release assets and CI build artifacts. The **reports**
   product has **no** generated package: its render-ready sources ship in the tag's auto source archive

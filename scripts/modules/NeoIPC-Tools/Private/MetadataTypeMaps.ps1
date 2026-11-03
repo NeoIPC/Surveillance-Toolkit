@@ -48,8 +48,8 @@ $script:NeoIPCMetadataExcludedTypes = @(
 
 # Option SETS whose member options are domain-authored elsewhere — generated from a richer canonical source, not
 # hand-maintained in the per-type CSV directory: NEOIPC_PATHOGENS from infectious-agents/NeoIPC-Infectious-Agents.yaml
-# (3269 options) and NEOIPC_ANTIMICROBIAL_SUBSTANCES from antibiotics/NeoIPC-Antibiotics.csv (242) — together
-# 3511/3557 of all options. The set definitions AND their member options are dropped from the materialized
+# (an option per Id-bearing node) and NEOIPC_ANTIMICROBIAL_SUBSTANCES from antibiotics/NeoIPC-Antibiotics.csv —
+# most of the package's options. The set definitions AND their member options are dropped from the materialized
 # directory (ConvertFrom-NeoIPCMetadataPackage) and ignored by the comparator (Compare-NeoIPCMetadataCore), so the
 # round-trip gate does not flag their absence. They are NOT dropped from the closure: New-NeoIPCMetadataPackage
 # builds the importable package from the export's closure, which carries them, so the import stays complete — the
