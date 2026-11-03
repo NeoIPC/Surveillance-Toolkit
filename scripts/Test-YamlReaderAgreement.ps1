@@ -12,18 +12,25 @@
     read their string resources; powershell-yaml; and ruamel.yaml in its safe and its round-trip mode. It compares each
     reading with yaml12's.
 
-    Every reading takes one typed form, which R and Python write as JSON and powershell-yaml's is built in: a mapping
-    as {"map": [[key, value], ...]}, a sequence as {"seq": [...]}, and a scalar as [type, text], so that the
-    comparison sees a reader's types: a string (compared ordinally, code point by code point), an integer (compared by
-    value), a float (compared by value, NaN equal to NaN), a Boolean, null, R's NA, and any other type a reader makes,
-    such as a date. Mapping keys are compared with their types, so an integer key and a string key differ. R's yaml
-    reads a sequence of scalars into a vector, which cannot tell a one-item sequence from its item, or an empty
-    mapping from an empty sequence, so against it those read alike.
+    Each file is read in three processes of its own, one each for R, Python, and PowerShell, and each writes its
+    readings as JSON in one typed form: a mapping as {"map": [[key, value], ...]}, a sequence as {"seq": [...]}, and a
+    scalar as [type, text], so that the comparison sees a reader's types: a string (compared ordinally, code point by
+    code point), an integer (compared by value), a float (compared by value, NaN equal to NaN), a Boolean, null, R's
+    NA, and any other type a reader makes, such as a date. Mapping keys are compared with their types, so an integer
+    key and a string key differ. R's yaml reads a sequence of scalars into a vector, which cannot tell a one-item
+    sequence from its item, or an empty mapping from an empty sequence, so against it those read alike.
 
     A difference means that a file reads one way in one tool and another way in the next, as 0x1A does: yaml12 reads
     the number 26, powershell-yaml the string "0x1A". Each one is named with its file and its place in the file.
     Before reading any file, the script checks its comparison on pairs that differ and pairs that agree, so that a
     comparison that finds nothing cannot pass for agreement.
+
+    A file's three processes run side by side, and each has TimeoutSeconds to finish. One that does not is stopped,
+    its own child processes with it, and each of its readers that has not written its reading by then counts as unable
+    to read the file, so that a reader that does not finish is named rather than waited on: a plain 1e999999999 holds
+    powershell-yaml's BigInteger.TryParse far longer than any check can wait. A reading is renamed into place once
+    complete, so a stopped process leaves none half-written. Where yaml12 cannot read a file, there is nothing to
+    compare the other readings with, and their processes are stopped at once.
 
     Exit codes: 0 when every reader agrees with yaml12 on every file; 1 when one does not, when a reader cannot read a
     file, or when the comparison fails its own check; 2 when an interpreter or a reader is missing, or there is no
@@ -36,7 +43,11 @@
     Files to read instead of every committed YAML file, relative to the repository root or absolute.
 
 .PARAMETER Python
-    The Python interpreter, 3.11 or later, that has ruamel.yaml. Defaults to python.
+    The Python interpreter, 3.11 or later, that has ruamel.yaml, as the name or path of a program: an alias or a
+    function is not followed. Defaults to python.
+
+.PARAMETER TimeoutSeconds
+    How long each of a file's three reading processes may take before it is stopped. Defaults to 120.
 
 .EXAMPLE
     ./scripts/Test-YamlReaderAgreement.ps1
@@ -48,7 +59,8 @@
 param(
     [string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot),
     [string[]]$Path,
-    [string]$Python = 'python'
+    [string]$Python = 'python',
+    [ValidateRange(1, 86400)][int]$TimeoutSeconds = 120
 )
 
 $ErrorActionPreference = 'Stop'
@@ -101,10 +113,14 @@ canonical_r_yaml <- function(x) {
   list(seq = lapply(seq_along(x), function(i) scalar(x[i])))
 }
 
+# Written under another name and renamed once complete, so that a reading cut short by its process being stopped
+# leaves no file to be taken for a reading.
 write_text <- function(path, text) {
-  con <- file(path, open = "wb")
+  partial <- paste0(path, ".partial")
+  con <- file(partial, open = "wb")
   writeLines(enc2utf8(text), con, sep = "\n", useBytes = TRUE)
   close(con)
+  if (!file.rename(partial, path)) stop("cannot rename ", partial, " to ", path)
 }
 
 # The JSON is made within the tryCatch too, since toJSON fails on a reading nested a few hundred levels deep: a file
@@ -160,6 +176,14 @@ def canonical(value):
     return [type(value).__name__, str(value)]  # a date, a timestamp, or another type of ruamel.yaml's own
 
 
+def write_text(path: Path, text: str) -> None:
+    """Writes under another name and renames once complete, so that a reading cut short by its process being stopped
+    leaves no file to be taken for a reading."""
+    partial = path.with_name(path.name + ".partial")
+    partial.write_text(text, encoding="utf-8", errors="backslashreplace", newline="\n")
+    partial.replace(path)
+
+
 def main(list_file: str, out_dir: str) -> None:
     # Split on line feeds alone: str.splitlines() also splits on U+0085, U+2028, and U+2029, which a path may hold.
     files = [line for line in Path(list_file).read_text(encoding="utf-8").split("\n") if line]
@@ -172,28 +196,25 @@ def main(list_file: str, out_dir: str) -> None:
                 # ensure_ascii escapes every character beyond ASCII, a lone surrogate among them, which UTF-8 cannot
                 # encode, and ConvertFrom-Json reads the escapes back.
                 text = json.dumps(canonical(value), ensure_ascii=True)
-                target.with_suffix(".json").write_text(text + "\n", encoding="utf-8", newline="\n")
+                write_text(target.with_suffix(".json"), text + "\n")
             except Exception as error:  # a file one reader cannot read is a difference, not the end of the run
-                target.with_suffix(".error").write_text(
-                    f"{type(error).__name__}: {error}\n", encoding="utf-8", errors="backslashreplace", newline="\n"
-                )
+                write_text(target.with_suffix(".error"), f"{type(error).__name__}: {error}\n")
 
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
 '@
 
-function ConvertFrom-TypedJson {
-    # A reading's typed JSON parsed back, with every string left a string: ConvertFrom-Json would otherwise turn a
-    # date-like string into a DateTime. Its default limit of 1,024 levels stands: the typed form takes three levels per
-    # mapping, so the ontology, some 25 mappings deep, already needs 74.
-    param([Parameter(Mandatory)][string]$Json)
-    ConvertFrom-Json -InputObject $Json -AsHashtable -NoEnumerate -DateKind String
-}
+# Reads one file with powershell-yaml and writes <Target>.json, or <Target>.error with the reason. It runs in a process
+# of its own, as the R and Python readings do, so that a reading that does not finish can be stopped.
+$powershellYamlScript = @'
+param([Parameter(Mandatory)][string]$Source, [Parameter(Mandatory)][string]$Target)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
 
 function ConvertTo-TypedNode {
-    # powershell-yaml's reading in the typed form that the other readers' JSON is read back into, built in memory, so
-    # that ConvertTo-Json, which goes no deeper than 100 levels, never stands between a deep file and its comparison.
+    # powershell-yaml's reading in the typed form every reader writes.
     param([AllowNull()]$Value)
     $invariant = [System.Globalization.CultureInfo]::InvariantCulture
     if ($null -eq $Value) { return , @('null', '') }
@@ -218,6 +239,75 @@ function ConvertTo-TypedNode {
     if ($Value -is [datetime]) { return , @('datetime', $Value.ToString('o', $invariant)) }
     if ($Value -is [string]) { return , @('str', $Value) }
     , @($Value.GetType().Name, [string]$Value)
+}
+
+# What a JSON string escapes, and how, made once: a script-block literal inside a function is a new script block on
+# every call, and PowerShell compiles a new delegate for each, which costs far more than the replacement.
+$escaped = [regex]::new('[^\x20\x21\x23-\x5B\x5D-\x7E]')
+$escape = [System.Text.RegularExpressions.MatchEvaluator] { param($character) '\u{0:x4}' -f [int]$character.Value[0] }
+
+function ConvertTo-JsonText {
+    # A string as a JSON string in ASCII alone, as the Python reading writes its own: the quotation mark, the backslash,
+    # and every character outside printable ASCII as \uXXXX, by UTF-16 code unit, so that no encoding between this
+    # process and the comparison can change a character.
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+    '"' + $script:escaped.Replace($Text, $script:escape) + '"'
+}
+
+function Add-TypedJson {
+    # A typed node appended to a JSON text, written by hand, since ConvertTo-Json goes no deeper than 100 levels, and
+    # the typed form takes three for each mapping and two for each sequence.
+    param([AllowNull()]$Node, [Parameter(Mandatory)][System.Text.StringBuilder]$Json)
+    if ($Node -is [System.Collections.IDictionary]) {
+        $isMapping = $Node.Contains('map')
+        # Indexed, not taken from an if statement, whose output would unroll a list of one pair into the pair.
+        $items = $Node[$(if ($isMapping) { 'map' } else { 'seq' })]
+        [void]$Json.Append($(if ($isMapping) { '{"map":[' } else { '{"seq":[' }))
+        for ($index = 0; $index -lt $items.Count; $index++) {
+            if ($index -gt 0) { [void]$Json.Append(',') }
+            if ($isMapping) {
+                [void]$Json.Append('[')
+                Add-TypedJson -Node $items[$index][0] -Json $Json
+                [void]$Json.Append(',')
+                Add-TypedJson -Node $items[$index][1] -Json $Json
+                [void]$Json.Append(']')
+            }
+            else {
+                Add-TypedJson -Node $items[$index] -Json $Json
+            }
+        }
+        [void]$Json.Append(']}')
+        return
+    }
+    [void]$Json.Append('[').Append((ConvertTo-JsonText $Node[0])).Append(',').Append((ConvertTo-JsonText $Node[1])).Append(']')
+}
+
+function Write-Reading {
+    # A reading written under another name and renamed once complete, so that one cut short by this process being
+    # stopped leaves no file to be taken for a reading.
+    param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+    [System.IO.File]::WriteAllText("$Path.partial", $Text, [System.Text.UTF8Encoding]::new($false))
+    [System.IO.File]::Move("$Path.partial", $Path)
+}
+
+try {
+    Import-Module powershell-yaml
+    $json = [System.Text.StringBuilder]::new()
+    Add-TypedJson -Node (ConvertTo-TypedNode ([System.IO.File]::ReadAllText($Source) | ConvertFrom-Yaml -Ordered)) -Json $json
+    Write-Reading -Path "$Target.json" -Text ($json.ToString() + "`n")
+}
+catch {
+    # A file one reader cannot read is a difference, not the end of the run.
+    Write-Reading -Path "$Target.error" -Text ($_.Exception.Message + "`n")
+}
+'@
+
+function ConvertFrom-TypedJson {
+    # A reading's typed JSON parsed back, with every string left a string: ConvertFrom-Json would otherwise turn a
+    # date-like string into a DateTime. Its default limit of 1,024 levels stands: the typed form takes three levels for
+    # each mapping and two for each sequence, so the ontology, 15 mappings and 14 sequences deep, already needs 74.
+    param([Parameter(Mandatory)][string]$Json)
+    ConvertFrom-Json -InputObject $Json -AsHashtable -NoEnumerate -DateKind String
 }
 
 function Get-NodeKind {
@@ -389,15 +479,79 @@ function Compare-YamlReading {
 }
 
 function Read-ReaderOutput {
-    # A reader's output for one file: its typed JSON parsed back, or the reason it could not read the file.
-    param([Parameter(Mandatory)][string]$Directory, [Parameter(Mandatory)][string]$Stem)
+    # A reader's output for one file: its typed JSON parsed back, or the reason it could not read the file: its own,
+    # or, where it wrote neither, its process's failure. A reader renames each file into place once complete, so a
+    # reading its process wrote before it was stopped stands.
+    param([Parameter(Mandatory)][string]$Directory, [Parameter(Mandatory)][string]$Stem, [string]$Failure)
     $json = Join-Path $Directory "$Stem.json"
     if (Test-Path -LiteralPath $json) {
         return @{ Value = ConvertFrom-TypedJson -Json ([System.IO.File]::ReadAllText($json)); Error = $null }
     }
     $errorFile = Join-Path $Directory "$Stem.error"
-    $reason = if (Test-Path -LiteralPath $errorFile) { [System.IO.File]::ReadAllText($errorFile).Trim() } else { 'it wrote nothing' }
+    $reason = if (Test-Path -LiteralPath $errorFile) { [System.IO.File]::ReadAllText($errorFile).Trim() } elseif ($Failure) { $Failure } else { 'it wrote nothing' }
     @{ Value = $null; Error = $reason }
+}
+
+function Start-Reader {
+    # Starts a reading process, its script given on standard input where it has one, and its temporary files kept in
+    # TemporaryDirectory, so that a process stopped before it can remove them, such as R with its session directory,
+    # leaves them where this run removes them.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'The process it starts reads one file and writes its readings and its temporary files only to this run''s temporary directory.')]
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string[]]$ArgumentList,
+        [Parameter(Mandatory)][string]$TemporaryDirectory,
+        [string]$InputText
+    )
+    $start = [System.Diagnostics.ProcessStartInfo]::new($FilePath)
+    foreach ($item in $ArgumentList) { $start.ArgumentList.Add($item) }
+    foreach ($variable in 'TMPDIR', 'TMP', 'TEMP') { $start.Environment[$variable] = $TemporaryDirectory }
+    $start.RedirectStandardInput = $PSBoundParameters.ContainsKey('InputText')
+    if ($start.RedirectStandardInput) { $start.StandardInputEncoding = [System.Text.UTF8Encoding]::new($false) }
+    $process = [System.Diagnostics.Process]::Start($start)
+    if ($start.RedirectStandardInput) {
+        $process.StandardInput.Write($InputText)
+        $process.StandardInput.Close()
+    }
+    $process
+}
+
+function Wait-Reader {
+    # Waits for a reading process until TimeoutSeconds have passed on Clock, which started with the file's processes,
+    # and stops it, its own child processes with it, once they have. Returns why the process failed, or nothing when it
+    # finished cleanly. Clock is a stopwatch, which no step of the system clock moves. The wait goes in slices of a
+    # fifth of a second, since a stop of the script, as by Ctrl+C, takes effect only once a .NET call returns.
+    param(
+        [Parameter(Mandatory)][System.Diagnostics.Process]$Process,
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][System.Diagnostics.Stopwatch]$Clock,
+        [Parameter(Mandatory)][int]$TimeoutSeconds
+    )
+    $limit = $TimeoutSeconds * 1000L
+    while (-not $Process.WaitForExit([int][Math]::Min(200, [Math]::Max(0, $limit - $Clock.ElapsedMilliseconds)))) {
+        if ($Clock.ElapsedMilliseconds -ge $limit) {
+            $Process.Kill($true)
+            $Process.WaitForExit()
+            return "its $Name process did not finish within $TimeoutSeconds $(if ($TimeoutSeconds -eq 1) { 'second' } else { 'seconds' })"
+        }
+    }
+    if ($Process.ExitCode -ne 0) { return "its $Name process exited $($Process.ExitCode)" }
+}
+
+function Stop-Reader {
+    # Stops a reading process that is still running, its own child processes with it, and releases it: whether its
+    # reading is no longer wanted or an error or an interrupt ends the file's work early.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'It stops only a reading process this run started.')]
+    param([Parameter(Mandatory)][System.Diagnostics.Process]$Process)
+    try {
+        if (-not $Process.HasExited) {
+            $Process.Kill($true)
+            $Process.WaitForExit()
+        }
+    }
+    finally { $Process.Dispose() }
 }
 
 function Get-CommittedYamlFile {
@@ -476,18 +630,23 @@ if ($files.Count -eq 0) {
 
 $missing = [System.Collections.Generic.List[string]]::new()
 try { Import-Module powershell-yaml -ErrorAction Stop } catch { $missing.Add('powershell-yaml (Install-Module powershell-yaml)') }
-if (-not (Get-Command Rscript -CommandType Application -ErrorAction SilentlyContinue)) {
+# Each interpreter is resolved once, as PowerShell finds a program, and its check here and its readings start the
+# program found: a process started by a name alone finds no alias, no function, no path relative to PowerShell's
+# location, and on Windows nothing but an .exe.
+$rscriptPath = Get-Command Rscript -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
+if (-not $rscriptPath) {
     $missing.Add('R (Rscript)')
 }
 else {
-    & Rscript -e 'quit(status = if (all(vapply(c("yaml12", "yaml", "jsonlite"), requireNamespace, logical(1), quietly = TRUE))) 0 else 1)' 2>$null
+    & $rscriptPath -e 'quit(status = if (all(vapply(c("yaml12", "yaml", "jsonlite"), requireNamespace, logical(1), quietly = TRUE))) 0 else 1)' 2>$null
     if ($LASTEXITCODE -ne 0) { $missing.Add('yaml12, yaml, and jsonlite in R (install.packages(c("yaml12", "yaml", "jsonlite")))') }
 }
-if (-not (Get-Command $Python -ErrorAction SilentlyContinue)) {
+$pythonPath = Get-Command $Python -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
+if (-not $pythonPath) {
     $missing.Add("Python ($Python)")
 }
 else {
-    & $Python -P -c 'import ruamel.yaml' 2>$null
+    & $pythonPath -P -c 'import ruamel.yaml' 2>$null
     if ($LASTEXITCODE -ne 0) { $missing.Add("ruamel.yaml for $Python, 3.11 or later (pip install ruamel.yaml)") }
 }
 if ($missing.Count -gt 0) {
@@ -498,45 +657,61 @@ if ($missing.Count -gt 0) {
 $work = Join-Path ([System.IO.Path]::GetTempPath()) "yaml-reader-agreement-$([guid]::NewGuid().ToString('N'))"
 $null = New-Item -ItemType Directory -Path $work
 try {
-    $listFile = Join-Path $work 'files.txt'
-    [System.IO.File]::WriteAllText($listFile, ($files -join "`n") + "`n", [System.Text.UTF8Encoding]::new($false))
-
-    $rScript | & Rscript - $listFile $work
-    if ($LASTEXITCODE -ne 0) { throw "The R readings failed (Rscript exited $LASTEXITCODE)." }
-    # -P keeps the current directory off Python's module path, so that no file there shadows ruamel.yaml.
-    $pythonScript | & $Python -P - $listFile $work
-    if ($LASTEXITCODE -ne 0) { throw "ruamel.yaml's reading failed ($Python exited $LASTEXITCODE)." }
+    $utf8 = [System.Text.UTF8Encoding]::new($false)
+    $powershellYamlFile = Join-Path $work 'Read-PowerShellYaml.ps1'
+    [System.IO.File]::WriteAllText($powershellYamlFile, $powershellYamlScript, $utf8)
+    # The pwsh that runs this script runs its powershell-yaml readings too.
+    $pwsh = (Get-Process -Id $PID).Path
 
     $differences = [System.Collections.Generic.List[string]]::new()
     for ($n = 1; $n -le $files.Count; $n++) {
         $file = $files[$n - 1]
         $relative = [System.IO.Path]::GetRelativePath($root, $file).Replace('\', '/')
-        $reference = Read-ReaderOutput -Directory $work -Stem "yaml12-$n"
-        if ($null -ne $reference.Error) {
-            $differences.Add("${relative}: yaml12 cannot read it: $($reference.Error)")
-            continue
-        }
+        # Each file's readings go to a directory of their own, as the readings of a list of one file: yaml12-1 and
+        # r-yaml-1 from R, ruamel-safe-1 and ruamel-rt-1 from Python, and powershell-yaml-1.
+        $directory = Join-Path $work $n
+        $null = New-Item -ItemType Directory -Path $directory
+        $listFile = Join-Path $directory 'files.txt'
+        [System.IO.File]::WriteAllText($listFile, "$file`n", $utf8)
+        $clock = [System.Diagnostics.Stopwatch]::StartNew()
+        # Each process joins the dictionary as it starts, so that the finally stops every one already started, whether
+        # its reading is not wanted, a later start fails, or an error or an interrupt ends the file's work.
+        $processes = [ordered]@{}
+        try {
+            $processes['R'] = Start-Reader -FilePath $rscriptPath -ArgumentList '-', $listFile, $directory -TemporaryDirectory $directory -InputText $rScript
+            # -P keeps the current directory off Python's module path, so that no file there shadows ruamel.yaml.
+            $processes['Python'] = Start-Reader -FilePath $pythonPath -ArgumentList '-P', '-', $listFile, $directory -TemporaryDirectory $directory -InputText $pythonScript
+            $processes['PowerShell'] = Start-Reader -FilePath $pwsh -ArgumentList '-NoProfile', '-NonInteractive', '-File', $powershellYamlFile, '-Source', $file, '-Target', (Join-Path $directory 'powershell-yaml-1') -TemporaryDirectory $directory
+            $failures = @{ R = Wait-Reader -Process $processes['R'] -Name 'R' -Clock $clock -TimeoutSeconds $TimeoutSeconds }
 
-        $readings = [ordered]@{
-            'powershell-yaml'          = $(
-                try {
-                    @{ Value = ConvertTo-TypedNode ([System.IO.File]::ReadAllText($file) | ConvertFrom-Yaml -Ordered); Error = $null }
-                }
-                catch { @{ Value = $null; Error = $_.Exception.Message } }
-            )
-            "R's yaml"                 = Read-ReaderOutput -Directory $work -Stem "r-yaml-$n"
-            'ruamel.yaml (safe)'       = Read-ReaderOutput -Directory $work -Stem "ruamel-safe-$n"
-            'ruamel.yaml (round-trip)' = Read-ReaderOutput -Directory $work -Stem "ruamel-rt-$n"
-        }
-        foreach ($reader in $readings.Keys) {
-            $reading = $readings[$reader]
-            if ($null -ne $reading.Error) {
-                $differences.Add("${relative}: $reader cannot read it: $($reading.Error)")
+            $reference = Read-ReaderOutput -Directory $directory -Stem 'yaml12-1' -Failure $failures['R']
+            if ($null -ne $reference.Error) {
+                $differences.Add("${relative}: yaml12 cannot read it: $($reference.Error)")
                 continue
             }
-            $found = @(Compare-YamlReading -Reference $reference.Value -Other $reading.Value -Place '' -Lenient:($reader -ceq "R's yaml"))
-            foreach ($line in ($found | Select-Object -First 10)) { $differences.Add("${relative} ($reader)$line") }
-            if ($found.Count -gt 10) { $differences.Add("${relative} ($reader): and $($found.Count - 10) more differences") }
+            foreach ($name in 'Python', 'PowerShell') {
+                $failures[$name] = Wait-Reader -Process $processes[$name] -Name $name -Clock $clock -TimeoutSeconds $TimeoutSeconds
+            }
+
+            $readings = [ordered]@{
+                'powershell-yaml'          = Read-ReaderOutput -Directory $directory -Stem 'powershell-yaml-1' -Failure $failures['PowerShell']
+                "R's yaml"                 = Read-ReaderOutput -Directory $directory -Stem 'r-yaml-1' -Failure $failures['R']
+                'ruamel.yaml (safe)'       = Read-ReaderOutput -Directory $directory -Stem 'ruamel-safe-1' -Failure $failures['Python']
+                'ruamel.yaml (round-trip)' = Read-ReaderOutput -Directory $directory -Stem 'ruamel-rt-1' -Failure $failures['Python']
+            }
+            foreach ($reader in $readings.Keys) {
+                $reading = $readings[$reader]
+                if ($null -ne $reading.Error) {
+                    $differences.Add("${relative}: $reader cannot read it: $($reading.Error)")
+                    continue
+                }
+                $found = @(Compare-YamlReading -Reference $reference.Value -Other $reading.Value -Place '' -Lenient:($reader -ceq "R's yaml"))
+                foreach ($line in ($found | Select-Object -First 10)) { $differences.Add("${relative} ($reader)$line") }
+                if ($found.Count -gt 10) { $differences.Add("${relative} ($reader): and $($found.Count - 10) more differences") }
+            }
+        }
+        finally {
+            foreach ($process in $processes.Values) { Stop-Reader -Process $process }
         }
     }
 }

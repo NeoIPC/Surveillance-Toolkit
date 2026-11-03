@@ -355,8 +355,10 @@ jobs:
         # is the number 26 to yaml12 and a string to powershell-yaml) makes one file mean two things, so this job reads
         # every committed YAML file with all of them and fails on a difference. It also holds the YAML portability
         # check's models of yaml12 and ruamel.yaml to those readers, which build-metadata does not install. Its own
-        # job, like python-tests: it needs none of the toolchain the build jobs assemble.
+        # job, like python-tests: it needs none of the toolchain the build jobs assemble. Its time limit fails a run
+        # that hangs in minutes rather than at GitHub's default of six hours.
         runs-on: ubuntu-26.04
+        timeout-minutes: 30
         steps:
             - uses: actions/checkout@v7
               with:
@@ -416,6 +418,27 @@ jobs:
                 fi
                 if ! grep -qF "(powershell-yaml)/'a': yaml12 reads the integer 26, this reader the string '0x1A'" <<< "$output"; then
                   echo "::error::The agreement check failed on a file the readers read apart, but not for their difference."
+                  exit 1
+                fi
+
+            - name: Show that the agreement check stops a reader that does not finish
+              # A reader that does not finish must be stopped at its deadline and named, not waited on: a plain
+              # 1e999999999 holds powershell-yaml's BigInteger.TryParse far longer than any check can wait. The step's
+              # own time limit fails it well before the job's, should the check wait on such a reader.
+              shell: bash
+              timeout-minutes: 5
+              run: |
+                fixture="$RUNNER_TEMP/endless.yaml"
+                printf 'a: 1e999999999\n' > "$fixture"
+                status=0
+                output=$(pwsh -NoProfile -File scripts/Test-YamlReaderAgreement.ps1 -Path "$fixture" -TimeoutSeconds 20 2>&1) || status=$?
+                printf '%s\n' "$output"
+                if [ "$status" -ne 1 ]; then
+                  echo "::error::The agreement check exited $status on a file a reader cannot finish, not 1."
+                  exit 1
+                fi
+                if ! grep -qF "powershell-yaml cannot read it: its PowerShell process did not finish within 20 seconds" <<< "$output"; then
+                  echo "::error::The agreement check failed on a file a reader cannot finish, but not for its deadline."
                   exit 1
                 fi
 
