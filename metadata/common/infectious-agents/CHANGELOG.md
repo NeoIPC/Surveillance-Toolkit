@@ -26,6 +26,7 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - `LICENSE.md`: factual extracts of the list, outputs that carry nothing but `Id`s, names and synonyms, ranks and
   lineage, source records, and the statuses NeoIPC assigns, such as the Core Protocol's list of infectious agents,
   neoipcr's tables, and the reports' infectious-agent tables, fall outside the directory's CC BY-NC-ND 4.0 terms.
+  The file also says what MycoBank's curators approved in January 2023.
 - `README.md`: which files are frozen and who reads them, what CI checks, and how the ontology is reconciled with
   its sources.
 - In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
