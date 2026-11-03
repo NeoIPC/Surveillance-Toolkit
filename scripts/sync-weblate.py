@@ -482,11 +482,6 @@ def branch_tip(branch: str, repo: str) -> str | None:
 
 
 COPILOT_REVIEWER = "copilot-pull-request-reviewer[bot]"
-# Copilot silently declines to review a pull request past either of these, and no exclusion mechanism
-# reduces the count -- not .gitattributes, not linguist-generated, not the documented exclusion list.
-# A translation drain routinely exceeds both, so the request is skipped rather than spent.
-COPILOT_MAX_FILES = 300
-COPILOT_MAX_LINES = 20_000
 
 
 NON_HUMAN_IDENTITIES = "po/non-human-identities.yaml"
@@ -552,26 +547,14 @@ def copilot_was_requested(response: object) -> bool:
 
 
 def request_copilot_review(number: int, repo: str) -> None:
-    """Ask Copilot to review, unless the diff is past what it will look at.
+    """Ask Copilot to review.
 
     Asking is all this does. A request is accepted even when the quota that would answer it is spent,
     and the failure then arrives later as a review saying only that it encountered an error -- so this
     reports what it asked for rather than what will happen, and nothing downstream waits on the answer.
     The forge's review decision tracks approving reviews, and a Copilot review is a comment, so an
     absent one never holds a drain up.
-
-    Skipping for size is reported rather than silent. A pull request nobody mentioned was too large to
-    review reads exactly like one that was reviewed and found clean, and these are the pull requests
-    least likely to get a human reading instead.
     """
-    size = gh_json(["pr", "view", str(number), "--repo", repo,
-                    "--json", "additions,deletions,changedFiles"]) or {}
-    files = int(size.get("changedFiles", 0))
-    lines = int(size.get("additions", 0)) + int(size.get("deletions", 0))
-    if files >= COPILOT_MAX_FILES or lines >= COPILOT_MAX_LINES:
-        print(f"  no Copilot review requested: {files} files / {lines} lines is past its limit of "
-              f"{COPILOT_MAX_FILES} / {COPILOT_MAX_LINES}, so it would decline")
-        return
     try:
         response = gh_json(["api", "-X", "POST",
                             f"repos/{repo}/pulls/{number}/requested_reviewers",

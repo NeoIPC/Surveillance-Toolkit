@@ -67,7 +67,7 @@ standalone and so holds its own checkout, and each push branch carries its own c
 so nothing committed elsewhere is in this branch or in this component's export. Locking them as well
 would freeze every translator in the project for the length of somebody else's drain.
 
-```
+```text
 for each component, one at a time:
     lock it                     # removes trigger 1; the unlock must be guaranteed, including on abort
     force-update weblate-<catalogue> to Weblate's current tip
@@ -95,8 +95,7 @@ normally. The tool prints which identity it is acting as before it writes anythi
 
 One consequence of that account has to be handled by hand: it holds no Copilot entitlement, so a review
 request is accepted and then silently dropped. The tool detects that and says so instead of claiming it
-asked — when it does, request the review yourself. It also declines to ask at all for a pull request past
-Copilot's limits of 300 files or 20,000 lines, which most translation drains exceed.
+asked — when it does, request the review yourself.
 
 Weblate's own tip is readable without fetching objects, which matters because fetching its export into a
 clone that holds the superseded commits fails object negotiation:
