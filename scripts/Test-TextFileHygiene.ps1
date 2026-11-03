@@ -3,12 +3,13 @@
 
 <#
 .SYNOPSIS
-    Fail if any committed text file has the wrong line endings or encoding, or if a PowerShell file's
-    header is malformed.
+    Fail if any committed text file has the wrong line endings or encoding, or if a PowerShell file has a
+    malformed header, a ConvertTo-Json call without -Depth, or a variable whose name takes in a ?.
 
 .DESCRIPTION
-    The mechanical half of the text-file contract: LF line endings, UTF-8 without a BOM, and a canonical
-    PowerShell header. Runs over this repository.
+    The mechanical half of the text-file contract (LF line endings, UTF-8 without a BOM, a canonical
+    PowerShell header), and two defects in PowerShell code that a run need not show (ConvertTo-Json without
+    -Depth, and a variable whose name takes in a ?). Runs over this repository.
 
     This repository's only submodule is the pinned po4a tool, which is third-party upstream and not ours
     to hold to this contract — it is excluded automatically, because SubmodulePrefix defaults to 'repos/'
@@ -19,7 +20,7 @@
     outside itself for the script. Only the help text differs between copies — keep the logic in step when
     changing any of it.
 
-    Three checks, each of which caught a real defect in this repository:
+    Five checks, each of which caught a real defect:
 
     1. LINE ENDINGS, from the WORKING-TREE column of `git ls-files --eol`, not the index column. This
         distinction is the whole point. With `* text=auto` declared, git normalizes on commit, so a tool
@@ -39,6 +40,13 @@
         that block actually resolving. That last one is not cosmetic: three separate layout mistakes
         silently discard comment-based help while `Get-Help` still prints a synthesized syntax line, so
         the script looks documented when it is not. Sixteen files were in that state.
+
+    4. CONVERTTO-JSON WITHOUT -DEPTH, by parsing each PowerShell file: its default of 2 drops everything
+        deeper while the output still looks like JSON.
+
+    5. A QUESTION MARK AFTER A VARIABLE, by parsing each PowerShell file: PowerShell takes the ?, and any
+        name characters after it, into the variable's name, so "$uri?" reads a variable nothing sets, and the
+        value drops out without a word.
 
     Exit code is 0 when clean, 1 when any check fails. Nothing is modified.
 
@@ -215,7 +223,7 @@ function Test-Encoding {
         if ($binary.Contains($file)) { $script:skippedBinary++; continue }
         $full = Join-Path $Repo $file
         # Tracked but not on disk: deleted from the working tree, excluded by a sparse checkout, or an
-        # uninitialised submodule — a directory rather than a Leaf either way.
+        # uninitialized submodule — a directory rather than a Leaf either way.
         if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { $script:skippedAbsent++; continue }
 
         # Absolute path: [System.IO.File] resolves a relative path against the PROCESS working
@@ -383,6 +391,46 @@ function Test-ConvertToJsonDepth {
     }
 }
 
+function Test-QuestionMarkVariable {
+    param([string]$Repo, [string]$Label)
+
+    # PowerShell 7 takes a ? after a variable's name into the name, with any name characters that follow it, which
+    # is why its null-conditional operators are written ${x}?.y: "$uri?" reads a variable uri?, and "$base?a=1" a
+    # variable base?a, where their writers meant $uri and $base. Nothing sets such a variable: without strict mode
+    # its value drops out without a word, as four DHIS2 confirmation questions asked about no address; under it the
+    # read fails, as the pointer bump's search for an open merge request did on the one path that runs only after an
+    # interrupted run, where no test met it. Matched on the AST, where a variable inside an expandable string is a
+    # node of its own, so a comment quoting the pattern is no finding; a name in braces, ${x?}, is taken as meant.
+    foreach ($file in (& git -C $Repo ls-files '*.ps1' '*.psm1')) {
+        if (-not $file) { continue }
+        $full = Join-Path $Repo $file
+        if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { continue }
+
+        $tokens = $null; $errors = $null
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($full, [ref]$tokens, [ref]$errors)
+        # A file that does not parse is already reported by the header check; saying so twice is noise.
+        if ($errors.Count) { continue }
+
+        # $? itself, the automatic variable, is a name of the ? alone.
+        $variables = $ast.FindAll({
+                param($node)
+                $node -is [System.Management.Automation.Language.VariableExpressionAst] -and
+                $node.VariablePath.UserPath -ne '?' -and
+                $node.VariablePath.UserPath.Contains('?') -and
+                -not $node.Extent.Text.StartsWith('${')
+            }, $true)
+
+        foreach ($variable in $variables) {
+            $name = $variable.VariablePath.UserPath
+            # Formatted rather than expanded, so that the message cannot write the pattern it reports.
+            $message = ('{0}: {1} line {2} reads ${3}, a variable whose name takes in a ?: write ${{{4}}}? where ' +
+                'the ? follows the variable') -f $Label, $file, $variable.Extent.StartLineNumber, $name,
+                $name.Substring(0, $name.IndexOf('?'))
+            $failures.Add($message)
+        }
+    }
+}
+
 # Everything in scope is swept in full or the run fails; the scope never quietly shrinks. Passing over a root
 # is indistinguishable in the output from having checked it, and that is not hypothetical: two uninitialized
 # submodules took a superproject sweep from eight repositories to six and it still printed OK, and a source
@@ -468,6 +516,7 @@ foreach ($repo in $repoList) {
     Test-Encoding        -Repo $repo -Label $label
     Test-PowerShellHeader -Repo $repo -Label $label
     Test-ConvertToJsonDepth -Repo $repo -Label $label
+    Test-QuestionMarkVariable -Repo $repo -Label $label
     if ($checkedFiles -eq $filesBefore) {
         $inspectedNothing.Add([pscustomobject]@{
             Repo   = $repo
@@ -494,7 +543,7 @@ foreach ($repo in $repoList) {
 # check whose .DESCRIPTION promises the whole declared scope was inspected has to be able to keep it.
 #
 # It is NOT the only way a root empties, which is why the cause is reported rather than assumed. A tracked
-# path that is absent from the working tree — deleted, excluded by a sparse checkout, or an uninitialised
+# path that is absent from the working tree — deleted, excluded by a sparse checkout, or an uninitialized
 # submodule — is skipped by the same counter. Naming `.gitattributes` there would point at the one file that
 # is fine and steer the reader away from the checkout, which is the actual fault: a message that
 # under-specifies costs a minute, one that misdirects costs however long it takes to stop believing it.
@@ -524,8 +573,9 @@ if ($failures.Count) {
     Write-Host ("Text-file hygiene: {0} problem(s) across {1} repository/ies." -f $failures.Count, $checkedRepos) -ForegroundColor Red
     $failures | Sort-Object | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
     Write-Host ''
-    Write-Host 'Expected: LF line endings, UTF-8 without a BOM, and the canonical PowerShell header' -ForegroundColor DarkGray
-    Write-Host "(#!/usr/bin/env pwsh where run directly, #Requires -Version $floor, blank line, help block)." -ForegroundColor DarkGray
+    Write-Host 'Expected: LF line endings, UTF-8 without a BOM, the canonical PowerShell header' -ForegroundColor DarkGray
+    Write-Host "(#!/usr/bin/env pwsh where run directly, #Requires -Version $floor, blank line, help block), -Depth on" -ForegroundColor DarkGray
+    Write-Host 'every ConvertTo-Json call, and no variable whose name takes in a ?.' -ForegroundColor DarkGray
 }
 
 # Both conditions are terminal, and the exit is deliberately here rather than inside either block: a root that
