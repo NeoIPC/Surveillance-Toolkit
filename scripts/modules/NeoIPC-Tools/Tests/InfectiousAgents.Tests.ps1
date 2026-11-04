@@ -465,6 +465,41 @@ Hierarchies:
         Get-TestFileHash -Path $path | Should -BeExactly $before
     }
 
+    It 'refuses an output that holds the list''s very bytes, leaving the list as it is: <Case>' -ForEach @(
+        @{ Case = 'a hard link to the list'; Name = 'alias-hard'; Kind = 'HardLink' }
+        @{ Case = 'a symbolic link to the list'; Name = 'alias-symbolic'; Kind = 'SymbolicLink' }
+        @{ Case = 'the list reached through a linked directory'; Name = 'alias-directory'; Kind = 'Directory' }
+        @{ Case = 'an identical copy of the list'; Name = 'alias-copy'; Kind = 'Copy' }
+    ) {
+        $path = New-TestCodeSetList -Name $Name
+        $directory = Split-Path -Parent $path
+        $before = Get-TestFileHash -Path $path
+        $output = switch ($Kind) {
+            'Directory' {
+                # A junction needs no privilege on Windows, where a symbolic link may.
+                $link = Join-Path $TestDrive "$Name-link"
+                $null = New-Item -ItemType $(if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }) -Path $link -Target $directory
+                Join-Path $link 'NeoIPC-Infectious-Agents.yaml'
+            }
+            'Copy' {
+                $copy = Join-Path $directory 'copy.yaml'
+                Copy-Item -LiteralPath $path -Destination $copy
+                $copy
+            }
+            default {
+                $alias = Join-Path $directory 'alias.json'
+                try { $null = New-Item -ItemType $Kind -Path $alias -Target $path -ErrorAction Stop }
+                catch {
+                    Set-ItResult -Skipped -Because "this account cannot create $Case here: $($_.Exception.Message)"
+                    return
+                }
+                $alias
+            }
+        }
+        { Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath $output } | Should -Throw -ExpectedMessage '*holds the very bytes of the list*'
+        Get-TestFileHash -Path $path | Should -BeExactly $before
+    }
+
     It 'refuses to write over the list it reads, named in another letter case, where the file system ignores case' -Skip:$IsLinux {
         $path = New-TestCodeSetList -Name 'over-list-case'
         $before = Get-TestFileHash -Path $path

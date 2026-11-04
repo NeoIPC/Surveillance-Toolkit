@@ -227,13 +227,15 @@ Write the infectious-agent list's option codes and code sets, with the SHA-256 o
 Writes what Get-NeoIPCInfectiousAgentCodeSet returns as JSON, in UTF-8 without a byte order mark, with LF line endings
 and a final line break, for consumers outside PowerShell, such as a test that holds another language's reading of the
 list to the sets the generated DHIS2 metadata takes. Its Sha256 names the revision of the list the file was written
-from. The output is named by -OutputPath alone, and the cmdlet refuses to write over the list it reads.
+from. The output is named by -OutputPath alone, and the cmdlet refuses to write over the list it reads, whether the
+output path names the list or reaches it through a link: since no comparison of paths tells a link from another file,
+it refuses any existing file that holds the list's very bytes, an identical copy of the list among them.
 
 .PARAMETER Path
 Path to the ontology YAML. Defaults to the canonical file in the repository.
 
 .PARAMETER OutputPath
-The JSON file to write. An existing file is replaced, unless it is the list.
+The JSON file to write. An existing file is replaced, unless it is the list or holds the list's bytes.
 
 .EXAMPLE
 PS> Export-NeoIPCInfectiousAgentCodeSet -OutputPath infectious-agent-code-sets.json
@@ -256,7 +258,14 @@ function Export-NeoIPCInfectiousAgentCodeSet {
     if ([string]::Equals($listPath, $target, $comparison)) {
         throw "The output path '$OutputPath' is the list the code sets are read from; name another file."
     }
-    $json = (Get-NeoIPCInfectiousAgentCodeSet -Path $Path | ConvertTo-Json -Depth 100) + "`n"
+    $sets = Get-NeoIPCInfectiousAgentCodeSet -Path $Path
+    # A link to the list, or a path through a linked directory, names the list by another path, which no comparison
+    # of paths tells from another file; what it holds does, since every such alias reads back the list's very bytes.
+    if ([System.IO.File]::Exists($target) -and
+        [System.Convert]::ToHexStringLower([System.Security.Cryptography.SHA256]::HashData([System.IO.File]::ReadAllBytes($target))) -ceq $sets.Sha256) {
+        throw "The output path '$OutputPath' holds the very bytes of the list the code sets are read from, as a link to the list does; name another file."
+    }
+    $json = ($sets | ConvertTo-Json -Depth 100) + "`n"
     if ($PSCmdlet.ShouldProcess($OutputPath, 'Write the infectious-agent code sets')) {
         Write-NeoIPCTextFile -Path $OutputPath -Text $json
     }
