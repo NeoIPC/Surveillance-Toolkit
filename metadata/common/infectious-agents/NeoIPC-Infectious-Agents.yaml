@@ -69,50 +69,50 @@ Hierarchies:
   Children:
   - Name: Duplodnaviria
     ConceptType: Realm
-    ConceptId: 202407117
+    ConceptId: 202507117
     ConceptSource: ICTV
     IctvId: 201907117
     Children:
     - Name: Heunggongvirae
       ConceptType: Kingdom
-      ConceptId: 202407118
+      ConceptId: 202507118
       ConceptSource: ICTV
       IctvId: 201907118
       Children:
       - Name: Peploviricota
         ConceptType: Phylum
-        ConceptId: 202407121
+        ConceptId: 202507121
         ConceptSource: ICTV
         IctvId: 201907121
         Children:
         - Name: Herviviricetes
           ConceptType: Class
-          ConceptId: 202407122
+          ConceptId: 202507122
           ConceptSource: ICTV
           IctvId: 201907122
           Children:
           - Name: Herpesvirales
             ConceptType: Order
-            ConceptId: 202401392
+            ConceptId: 202501392
             ConceptSource: ICTV
             IctvId: 20080002
             Children:
             - Name: Orthoherpesviridae
               ConceptType: Family
-              ConceptId: 202401411
+              ConceptId: 202501411
               ConceptSource: ICTV
               Id: 3504
               IctvId: 19750007
               Children:
               - Name: Alphaherpesvirinae
                 ConceptType: Subfamily
-                ConceptId: 202401412
+                ConceptId: 202501412
                 ConceptSource: ICTV
                 IctvId: 19780034
                 Children:
                 - Name: Simplexvirus
                   ConceptType: Genus
-                  ConceptId: 202401424
+                  ConceptId: 202501424
                   ConceptSource: ICTV
                   IctvId: 19790066
                   Children:
@@ -124,7 +124,7 @@ Hierarchies:
                     Children:
                     - Name: Simplexvirus humanalpha1
                       ConceptType: Species
-                      ConceptId: 202401428
+                      ConceptId: 202501428
                       ConceptSource: ICTV
                       Id: 3505
                       IctvId: 19710176
@@ -140,7 +140,7 @@ Hierarchies:
                         IctvId: 19710176
                     - Name: Simplexvirus humanalpha2
                       ConceptType: Species
-                      ConceptId: 202401429
+                      ConceptId: 202501429
                       ConceptSource: ICTV
                       Id: 3506
                       IctvId: 19760237
@@ -156,14 +156,14 @@ Hierarchies:
                         IctvId: 19760237
                 - Name: Varicellovirus
                   ConceptType: Genus
-                  ConceptId: 202401439
+                  ConceptId: 202501439
                   ConceptSource: ICTV
                   Id: 31
                   IctvId: 19790067
                   Children:
                   - Name: Varicellovirus humanalpha3
                     ConceptType: Species
-                    ConceptId: 202401454
+                    ConceptId: 202501454
                     ConceptSource: ICTV
                     Id: 3507
                     IctvId: 19840518
@@ -179,19 +179,19 @@ Hierarchies:
                       Id: 876
               - Name: Betaherpesvirinae
                 ConceptType: Subfamily
-                ConceptId: 202401457
+                ConceptId: 202501457
                 ConceptSource: ICTV
                 IctvId: 19790035
                 Children:
                 - Name: Cytomegalovirus
                   ConceptType: Genus
-                  ConceptId: 202401458
+                  ConceptId: 202501458
                   ConceptSource: ICTV
                   IctvId: 19790068
                   Children:
                   - Name: Cytomegalovirus humanbeta5
                     ConceptType: Species
-                    ConceptId: 202401462
+                    ConceptId: 202501462
                     ConceptSource: ICTV
                     Id: 3508
                     IctvId: 19790333
@@ -205,9 +205,14 @@ Hierarchies:
                       ConceptId: 5
                       ConceptSource: NeoIPC
                       Id: 2605
+                    - Name: Human herpesvirus 5
+                      ConceptId: 20140625
+                      ConceptSource: ICTV
+                      Id: 3619
+                      IctvId: 19790333
                 - Name: Roseolovirus
                   ConceptType: Genus
-                  ConceptId: 202401473
+                  ConceptId: 202501473
                   ConceptSource: ICTV
                   IctvId: 19930156
                   Children:
@@ -219,7 +224,7 @@ Hierarchies:
                     Children:
                     - Name: Roseolovirus humanbeta6a
                       ConceptType: Species
-                      ConceptId: 202401475
+                      ConceptId: 202501475
                       ConceptSource: ICTV
                       Id: 3509
                       IctvId: 20115682
@@ -236,7 +241,7 @@ Hierarchies:
                         IctvId: 20115682
                     - Name: Roseolovirus humanbeta6b
                       ConceptType: Species
-                      ConceptId: 202401476
+                      ConceptId: 202501476
                       ConceptSource: ICTV
                       Id: 3510
                       IctvId: 20115683
@@ -253,19 +258,19 @@ Hierarchies:
                         IctvId: 20115683
               - Name: Gammaherpesvirinae
                 ConceptType: Subfamily
-                ConceptId: 202401481
+                ConceptId: 202501481
                 ConceptSource: ICTV
                 IctvId: 19780035
                 Children:
                 - Name: Lymphocryptovirus
                   ConceptType: Genus
-                  ConceptId: 202401482
+                  ConceptId: 202501482
                   ConceptSource: ICTV
                   IctvId: 19790070
                   Children:
                   - Name: Lymphocryptovirus humangamma4
                     ConceptType: Species
-                    ConceptId: 202401486
+                    ConceptId: 202501486
                     ConceptSource: ICTV
                     Id: 3511
                     IctvId: 19710173
@@ -280,15 +285,20 @@ Hierarchies:
                       ConceptSource: ICTV
                       Id: 3344
                       IctvId: 19710173
+                    - Name: Human herpesvirus 4
+                      ConceptId: 20140649
+                      ConceptSource: ICTV
+                      Id: 3618
+                      IctvId: 19710173
                 - Name: Rhadinovirus
                   ConceptType: Genus
-                  ConceptId: 202401505
+                  ConceptId: 202501505
                   ConceptSource: ICTV
                   IctvId: 19840098
                   Children:
                   - Name: Rhadinovirus humangamma8
                     ConceptType: Species
-                    ConceptId: 202401510
+                    ConceptId: 202501510
                     ConceptSource: ICTV
                     Id: 3512
                     IctvId: 19991019
@@ -313,52 +323,52 @@ Hierarchies:
                 ConceptSource: ICTV
                 Id: 473
                 IctvId: 19750007
-  - Name: Monodnaviria
+  - Name: Floreoviria
     ConceptType: Realm
-    ConceptId: 202407161
+    ConceptId: 202507161
     ConceptSource: ICTV
     IctvId: 201907161
     Children:
     - Name: Shotokuvirae
       ConceptType: Kingdom
-      ConceptId: 202407170
+      ConceptId: 202507170
       ConceptSource: ICTV
       IctvId: 201907170
       Children:
       - Name: Cossaviricota
         ConceptType: Phylum
-        ConceptId: 202407171
+        ConceptId: 202507171
         ConceptSource: ICTV
         IctvId: 201907171
         Children:
         - Name: Papovaviricetes
           ConceptType: Class
-          ConceptId: 202407178
+          ConceptId: 202507178
           ConceptSource: ICTV
           IctvId: 201907178
           Children:
           - Name: Sepolyvirales
             ConceptType: Order
-            ConceptId: 202407179
+            ConceptId: 202507179
             ConceptSource: ICTV
             IctvId: 201907179
             Children:
             - Name: Polyomaviridae
               ConceptType: Family
-              ConceptId: 202404409
+              ConceptId: 202504409
               ConceptSource: ICTV
               Id: 2644
               IctvId: 19990055
               Children:
               - Name: Betapolyomavirus
                 ConceptType: Genus
-                ConceptId: 202404449
+                ConceptId: 202504449
                 ConceptSource: ICTV
                 IctvId: 20153677
                 Children:
                 - Name: Betapolyomavirus hominis
                   ConceptType: Species
-                  ConceptId: 202404459
+                  ConceptId: 202504459
                   ConceptSource: ICTV
                   Id: 2642
                   IctvId: 19760276
@@ -375,7 +385,7 @@ Hierarchies:
                     IctvId: 19760276
                 - Name: Betapolyomavirus macacae
                   ConceptType: Species
-                  ConceptId: 202404464
+                  ConceptId: 202504464
                   ConceptSource: ICTV
                   Id: 3335
                   IctvId: 19710060
@@ -387,7 +397,7 @@ Hierarchies:
                     IctvId: 19710060
                 - Name: Betapolyomavirus secuhominis
                   ConceptType: Species
-                  ConceptId: 202404460
+                  ConceptId: 202504460
                   ConceptSource: ICTV
                   Id: 2682
                   IctvId: 19760277
@@ -409,19 +419,19 @@ Hierarchies:
                     IctvId: 19760277
           - Name: Zurhausenvirales
             ConceptType: Order
-            ConceptId: 202407180
+            ConceptId: 202507180
             ConceptSource: ICTV
             IctvId: 201907180
             Children:
             - Name: Papillomaviridae
               ConceptType: Family
-              ConceptId: 202403971
+              ConceptId: 202503971
               ConceptSource: ICTV
               IctvId: 19990048
               Children:
               - Name: Firstpapillomavirinae
                 ConceptType: Subfamily
-                ConceptId: 202405883
+                ConceptId: 202505883
                 ConceptSource: ICTV
                 IctvId: 20175883
                 Children:
@@ -430,33 +440,38 @@ Hierarchies:
                   ConceptId: 9
                   ConceptSource: NeoIPC
                   Id: 2611
+                  Comments:
+                    Background: >-
+                      Human papillomaviruses are types of species in five genera of the subfamily Firstpapillomavirinae:
+                      Alphapapillomavirus, Betapapillomavirus, Gammapapillomavirus, Mupapillomavirus, and
+                      Nupapillomavirus. The group holds none of the species.
         - Name: Quintoviricetes
           ConceptType: Class
-          ConceptId: 202407172
+          ConceptId: 202507172
           ConceptSource: ICTV
           IctvId: 201907172
           Children:
           - Name: Piccovirales
             ConceptType: Order
-            ConceptId: 202407173
+            ConceptId: 202507173
             ConceptSource: ICTV
             IctvId: 201907173
             Children:
             - Name: Parvoviridae
               ConceptType: Family
-              ConceptId: 202404206
+              ConceptId: 202504206
               ConceptSource: ICTV
               IctvId: 19750012
               Children:
               - Name: Parvovirinae
                 ConceptType: Subfamily
-                ConceptId: 202404235
+                ConceptId: 202504235
                 ConceptSource: ICTV
                 IctvId: 19930089
                 Children:
                 - Name: Bocaparvovirus
                   ConceptType: Genus
-                  ConceptId: 202404241
+                  ConceptId: 202504241
                   ConceptSource: ICTV
                   Id: 2690
                   IctvId: 20040344
@@ -466,6 +481,19 @@ Hierarchies:
                     ConceptId: 16
                     ConceptSource: NeoIPC
                     Id: 2626
+                    Children:
+                    - Name: Bocaparvovirus primate1
+                      ConceptType: Species
+                      ConceptId: 202504247
+                      ConceptSource: ICTV
+                      Id: 3592
+                      IctvId: 20132563
+                    - Name: Bocaparvovirus primate2
+                      ConceptType: Species
+                      ConceptId: 202504248
+                      ConceptSource: ICTV
+                      Id: 3593
+                      IctvId: 20132564
                   Synonyms:
                   - Name: Bocavirus
                     ConceptId: 20040344
@@ -474,13 +502,13 @@ Hierarchies:
                     IctvId: 20040344
                 - Name: Erythroparvovirus
                   ConceptType: Genus
-                  ConceptId: 202404265
+                  ConceptId: 202504265
                   ConceptSource: ICTV
                   IctvId: 19930188
                   Children:
                   - Name: Erythroparvovirus primate1
                     ConceptType: Species
-                    ConceptId: 202404266
+                    ConceptId: 202504266
                     ConceptSource: ICTV
                     Id: 3538
                     IctvId: 20132595
@@ -494,79 +522,79 @@ Hierarchies:
                       ConceptId: 11
                       ConceptSource: NeoIPC
                       Id: 2615
-                    - Name: Primate erythroparvovirus 1
-                      ConceptId: 202104266
-                      ConceptSource: ICTV
-                      Id: 2612
-                      IctvId: 20132595
                     - Name: Human parvovirus B19
                       ConceptId: 20124287
                       ConceptSource: ICTV
                       Id: 2613
                       IctvId: 20132595
+                    - Name: Primate erythroparvovirus 1
+                      ConceptId: 202104266
+                      ConceptSource: ICTV
+                      Id: 2612
+                      IctvId: 20132595
   - Name: Riboviria
     ConceptType: Realm
-    ConceptId: 202407095
+    ConceptId: 202507095
     ConceptSource: ICTV
     IctvId: 201857095
     Children:
     - Name: Orthornavirae
       ConceptType: Kingdom
-      ConceptId: 202407198
+      ConceptId: 202507198
       ConceptSource: ICTV
       IctvId: 201907198
       Children:
       - Name: Duplornaviricota
         ConceptType: Phylum
-        ConceptId: 202407229
+        ConceptId: 202507229
         ConceptSource: ICTV
         IctvId: 201907229
         Children:
         - Name: Resentoviricetes
           ConceptType: Class
-          ConceptId: 202407234
+          ConceptId: 202507234
           ConceptSource: ICTV
           IctvId: 201907234
           Children:
           - Name: Reovirales
             ConceptType: Order
-            ConceptId: 202407235
+            ConceptId: 202507235
             ConceptSource: ICTV
             IctvId: 201907235
             Children:
             - Name: Sedoreoviridae
               ConceptType: Family
-              ConceptId: 202404872
+              ConceptId: 202504872
               ConceptSource: ICTV
               IctvId: 20090683
               Children:
               - Name: Orbivirus
                 ConceptType: Genus
-                ConceptId: 202404877
+                ConceptId: 202504877
                 ConceptSource: ICTV
                 Id: 198
                 IctvId: 19740026
               - Name: Rotavirus
                 ConceptType: Genus
-                ConceptId: 202404904
+                ConceptId: 202504904
                 ConceptSource: ICTV
                 Id: 2155
                 IctvId: 19780099
             - Name: Spinareoviridae
               ConceptType: Family
-              ConceptId: 202404918
+              ConceptId: 202504918
               ConceptSource: ICTV
               IctvId: 20090684
               Children:
               - Name: Coltivirus
                 ConceptType: Genus
-                ConceptId: 202404927
+                ConceptId: 202504927
                 ConceptSource: ICTV
                 IctvId: 20071237
                 Children:
                 - Name: Coltivirus dermacentoris
                   ConceptType: Species
-                  ConceptId: 202404928
+                  ConceptId: 202504928
                   ConceptSource: ICTV
                   Id: 3489
                   IctvId: 19991541
@@ -583,49 +611,49 @@ Hierarchies:
                     IctvId: 19991541
               - Name: Orthoreovirus
                 ConceptType: Genus
-                ConceptId: 202404969
+                ConceptId: 202504969
                 ConceptSource: ICTV
                 Id: 793
                 IctvId: 19710041
       - Name: Kitrinoviricota
         ConceptType: Phylum
-        ConceptId: 202407217
+        ConceptId: 202507217
         ConceptSource: ICTV
         IctvId: 201907217
         Children:
         - Name: Alsuviricetes
           ConceptType: Class
-          ConceptId: 202407225
+          ConceptId: 202507225
           ConceptSource: ICTV
           IctvId: 201907225
           Children:
           - Name: Hepelivirales
             ConceptType: Order
-            ConceptId: 202407228
+            ConceptId: 202507228
             ConceptSource: ICTV
             IctvId: 201907228
             Children:
             - Name: Hepeviridae
               ConceptType: Family
-              ConceptId: 202403662
+              ConceptId: 202503662
               ConceptSource: ICTV
               IctvId: 20090337
               Children:
               - Name: Orthohepevirinae
                 ConceptType: Subfamily
-                ConceptId: 202413883
+                ConceptId: 202513883
                 ConceptSource: ICTV
                 IctvId: 202113883
                 Children:
                 - Name: Paslahepevirus
                   ConceptType: Genus
-                  ConceptId: 202413884
+                  ConceptId: 202513884
                   ConceptSource: ICTV
                   IctvId: 202113884
                   Children:
                   - Name: Paslahepevirus balayani
                     ConceptType: Species
-                    ConceptId: 202403665
+                    ConceptId: 202503665
                     ConceptSource: ICTV
                     Id: 2649
                     IctvId: 19950816
@@ -637,20 +665,20 @@ Hierarchies:
                       IctvId: 19950816
             - Name: Matonaviridae
               ConceptType: Family
-              ConceptId: 202406488
+              ConceptId: 202506488
               ConceptSource: ICTV
               IctvId: 201856488
               Children:
               - Name: Rubivirus
                 ConceptType: Genus
-                ConceptId: 202405114
+                ConceptId: 202505114
                 ConceptSource: ICTV
                 Id: 778
                 IctvId: 19750076
                 Children:
                 - Name: Rubivirus rubellae
                   ConceptType: Species
-                  ConceptId: 202405115
+                  ConceptId: 202505115
                   ConceptSource: ICTV
                   Id: 3342
                   IctvId: 19750326
@@ -662,26 +690,26 @@ Hierarchies:
                     IctvId: 19750326
           - Name: Martellivirales
             ConceptType: Order
-            ConceptId: 202407226
+            ConceptId: 202507226
             ConceptSource: ICTV
             IctvId: 201907226
             Children:
             - Name: Togaviridae
               ConceptType: Family
-              ConceptId: 202405080
+              ConceptId: 202505080
               ConceptSource: ICTV
               Id: 1563
               IctvId: 19740006
               Children:
               - Name: Alphavirus
                 ConceptType: Genus
-                ConceptId: 202405082
+                ConceptId: 202505082
                 ConceptSource: ICTV
                 IctvId: 19710015
                 Children:
                 - Name: Alphavirus chikungunya
                   ConceptType: Species
-                  ConceptId: 202405087
+                  ConceptId: 202505087
                   ConceptSource: ICTV
                   Id: 3485
                   IctvId: 19710074
@@ -693,7 +721,7 @@ Hierarchies:
                     IctvId: 19710074
                 - Name: Alphavirus eastern
                   ConceptType: Species
-                  ConceptId: 202405088
+                  ConceptId: 202505088
                   ConceptSource: ICTV
                   Id: 3494
                   IctvId: 19710075
@@ -709,7 +737,7 @@ Hierarchies:
                     Id: 2646
                 - Name: Alphavirus madariaga
                   ConceptType: Species
-                  ConceptId: 202405094
+                  ConceptId: 202505094
                   ConceptSource: ICTV
                   Id: 3525
                   IctvId: 20125921
@@ -725,7 +753,7 @@ Hierarchies:
                     Id: 2648
                 - Name: Alphavirus venezuelan
                   ConceptType: Species
-                  ConceptId: 202405111
+                  ConceptId: 202505111
                   ConceptSource: ICTV
                   Id: 3556
                   IctvId: 19710086
@@ -737,7 +765,7 @@ Hierarchies:
                     IctvId: 19710086
                 - Name: Alphavirus western
                   ConceptType: Species
-                  ConceptId: 202405112
+                  ConceptId: 202505112
                   ConceptSource: ICTV
                   Id: 3559
                   IctvId: 19710087
@@ -749,33 +777,159 @@ Hierarchies:
                     IctvId: 19710087
         - Name: Flasuviricetes
           ConceptType: Class
-          ConceptId: 202407218
+          ConceptId: 202507218
           ConceptSource: ICTV
           IctvId: 201907218
           Children:
           - Name: Amarillovirales
             ConceptType: Order
-            ConceptId: 202407219
+            ConceptId: 202507219
             ConceptSource: ICTV
             IctvId: 201907219
             Children:
             - Name: Flaviviridae
               ConceptType: Family
-              ConceptId: 202403068
+              ConceptId: 202503068
               ConceptSource: ICTV
               IctvId: 19840011
               Children:
-              - Name: Hepacivirus
+              - Name: Orthoflavivirus
                 ConceptType: Genus
-                ConceptId: 202403124
+                ConceptId: 202503070
+                ConceptSource: ICTV
+                Id: 3499
+                IctvId: 19710016
+                Children:
+                - Name: Euflavivirus
+                  ConceptType: Subgenus
+                  ConceptId: 202521971
+                  ConceptSource: ICTV
+                  IctvId: 202521971
+                  Children:
+                  - Name: Tick-borne encephalitis virus
+                    ConceptType: Group
+                    ConceptId: 104
+                    ConceptSource: NeoIPC
+                    Id: 2389
+                    Comments:
+                      Background: >-
+                        ICTV's Master Species List 2025 (MSL41) splits the species Orthoflavivirus encephalitidis,
+                        formerly named Tick-borne encephalitis virus, into Orthoflavivirus neudoerflense and
+                        Orthoflavivirus zilberi. The group holds both, so a value recorded against this name or against
+                        the former species keeps its meaning.
+                    Children:
+                    - Name: Orthoflavivirus neudoerflense
+                      ConceptType: Species
+                      ConceptId: 202523329
+                      ConceptSource: ICTV
+                      Id: 3590
+                      IctvId: 202523329
+                    - Name: Orthoflavivirus zilberi
+                      ConceptType: Species
+                      ConceptId: 202523328
+                      ConceptSource: ICTV
+                      Id: 3591
+                      IctvId: 202523328
+                    Synonyms:
+                    - Name: Orthoflavivirus encephalitidis
+                      ConceptId: 202403114
+                      ConceptSource: ICTV
+                      Id: 3553
+                      IctvId: 19790934
+                  - Name: Orthoflavivirus denguei
+                    ConceptType: Species
+                    ConceptId: 202503081
+                    ConceptSource: ICTV
+                    Id: 3492
+                    IctvId: 19990820
+                    Synonyms:
+                    - Name: Dengue virus
+                      ConceptId: 202103081
+                      ConceptSource: ICTV
+                      Id: 1791
+                      IctvId: 19990820
+                  - Name: Orthoflavivirus flavi
+                    ConceptType: Species
+                    ConceptId: 202503121
+                    ConceptSource: ICTV
+                    Id: 3560
+                    IctvId: 19710125
+                    Synonyms:
+                    - Name: Yellow fever virus
+                      ConceptId: 202103121
+                      ConceptSource: ICTV
+                      Id: 1757
+                      IctvId: 19710125
+                  - Name: Orthoflavivirus louisense
+                    ConceptType: Species
+                    ConceptId: 202503112
+                    ConceptSource: ICTV
+                    Id: 3546
+                    IctvId: 19710117
+                    Synonyms:
+                    - Name: Saint Louis encephalitis virus
+                      ConceptId: 202103112
+                      ConceptSource: ICTV
+                      Id: 2686
+                      IctvId: 19710117
+                    - Name: St. Louis encephalitis virus
+                      ConceptId: 19710117
+                      ConceptSource: ICTV
+                      Id: 2687
+                      IctvId: 19710117
+                  - Name: Orthoflavivirus mediterranense
+                    ConceptType: Species
+                    ConceptId: 202523330
+                    ConceptSource: ICTV
+                    Id: 3589
+                    IctvId: 202523330
+                  - Name: Orthoflavivirus nilense
+                    ConceptType: Species
+                    ConceptId: 202503119
+                    ConceptSource: ICTV
+                    Id: 3558
+                    IctvId: 19990858
+                    Synonyms:
+                    - Name: West Nile virus
+                      ConceptId: 202103119
+                      ConceptSource: ICTV
+                      Id: 1143
+                      IctvId: 19990858
+                  - Name: Orthoflavivirus zikaense
+                    ConceptType: Species
+                    ConceptId: 202503123
+                    ConceptSource: ICTV
+                    Id: 3415
+                    IctvId: 19990862
+                    Synonyms:
+                    - Name: Zika virus
+                      ConceptId: 202103123
+                      ConceptSource: ICTV
+                      Id: 1140
+                      IctvId: 19990862
+                Synonyms:
+                - Name: Flavivirus
+                  ConceptId: 202103070
+                  ConceptSource: ICTV
+                  Id: 1194
+                  IctvId: 19710016
+            - Name: Hepaciviridae
+              ConceptType: Family
+              ConceptId: 202521528
+              ConceptSource: ICTV
+              IctvId: 202521528
+              Children:
+              - Name: Orthohepacivirus
+                ConceptType: Genus
+                ConceptId: 202503124
                 ConceptSource: ICTV
                 IctvId: 19910116
                 Children:
-                - Name: Hepacivirus hominis
+                - Name: Orthohepacivirus hominis
                   ConceptType: Species
-                  ConceptId: 202403127
+                  ConceptId: 202503127
                   ConceptSource: ICTV
-                  Id: 3501
+                  Id: 3588
                   IctvId: 19910774
                   Synonyms:
                   - Name: Hepacivirus C
@@ -783,104 +937,19 @@ Hierarchies:
                     ConceptSource: ICTV
                     Id: 2640
                     IctvId: 19910774
+                  - Name: Hepacivirus hominis
+                    ConceptId: 202403127
+                    ConceptSource: ICTV
+                    Id: 3501
+                    IctvId: 19910774
                   - Name: Hepatitis C virus
                     ConceptId: 19950941
                     ConceptSource: ICTV
                     Id: 2641
                     IctvId: 19910774
-              - Name: Orthoflavivirus
-                ConceptType: Genus
-                ConceptId: 202403070
-                ConceptSource: ICTV
-                IctvId: 19710016
-                Children:
-                - Name: Orthoflavivirus denguei
-                  ConceptType: Species
-                  ConceptId: 202403081
-                  ConceptSource: ICTV
-                  Id: 3492
-                  IctvId: 19990820
-                  Synonyms:
-                  - Name: Dengue virus
-                    ConceptId: 202103081
-                    ConceptSource: ICTV
-                    Id: 1791
-                    IctvId: 19990820
-                - Name: Orthoflavivirus encephalitidis
-                  ConceptType: Species
-                  ConceptId: 202403114
-                  ConceptSource: ICTV
-                  Id: 3553
-                  IctvId: 19790934
-                  Synonyms:
-                  - Name: Tick-borne encephalitis virus
-                    ConceptId: 202103114
-                    ConceptSource: ICTV
-                    Id: 2389
-                    IctvId: 19790934
-                - Name: Orthoflavivirus flavi
-                  ConceptType: Species
-                  ConceptId: 202403121
-                  ConceptSource: ICTV
-                  Id: 3560
-                  IctvId: 19710125
-                  Synonyms:
-                  - Name: Yellow fever virus
-                    ConceptId: 202103121
-                    ConceptSource: ICTV
-                    Id: 1757
-                    IctvId: 19710125
-                - Name: Orthoflavivirus louisense
-                  ConceptType: Species
-                  ConceptId: 202403112
-                  ConceptSource: ICTV
-                  Id: 3546
-                  IctvId: 19710117
-                  Synonyms:
-                  - Name: Saint Louis encephalitis virus
-                    ConceptId: 202103112
-                    ConceptSource: ICTV
-                    Id: 2686
-                    IctvId: 19710117
-                  - Name: St. Louis encephalitis virus
-                    ConceptId: 19710117
-                    ConceptSource: ICTV
-                    Id: 2687
-                    IctvId: 19710117
-                - Name: Orthoflavivirus nilense
-                  ConceptType: Species
-                  ConceptId: 202403119
-                  ConceptSource: ICTV
-                  Id: 3558
-                  IctvId: 19990858
-                  Synonyms:
-                  - Name: West Nile virus
-                    ConceptId: 202103119
-                    ConceptSource: ICTV
-                    Id: 1143
-                    IctvId: 19990858
-                - Name: Orthoflavivirus zikaense
-                  ConceptType: Species
-                  ConceptId: 202403123
-                  ConceptSource: ICTV
-                  Id: 3415
-                  IctvId: 19990862
-                  Synonyms:
-                  - Name: Zika virus
-                    ConceptId: 202103123
-                    ConceptSource: ICTV
-                    Id: 1140
-                    IctvId: 19990862
-                Id: 3499
-                Synonyms:
-                - Name: Flavivirus
-                  ConceptId: 202103070
-                  ConceptSource: ICTV
-                  Id: 1194
-                  IctvId: 19710016
               - Name: Pegivirus
                 ConceptType: Genus
-                ConceptId: 202403139
+                ConceptId: 202503139
                 ConceptSource: ICTV
                 IctvId: 20125923
                 Children:
@@ -889,55 +958,62 @@ Hierarchies:
                   ConceptId: 96
                   ConceptSource: NeoIPC
                   Id: 2652
-                - Name: Pegivirus hominis
-                  ConceptType: Species
-                  ConceptId: 202403142
-                  ConceptSource: ICTV
-                  Id: 3536
-                  IctvId: 20165296
-                  Synonyms:
-                  - Name: Hepatitis G virus
-                    ConceptId: 21
-                    ConceptSource: NeoIPC
-                    Id: 2653
-                  - Name: Pegivirus C
-                    ConceptId: 202103142
+                  Children:
+                  - Name: Pegivirus columbiaense
+                    ConceptType: Species
+                    ConceptId: 202503147
                     ConceptSource: ICTV
-                    Id: 2651
+                    Id: 3594
+                    IctvId: 20165301
+                  - Name: Pegivirus hominis
+                    ConceptType: Species
+                    ConceptId: 202503142
+                    ConceptSource: ICTV
+                    Id: 3536
                     IctvId: 20165296
+                    Synonyms:
+                    - Name: Hepatitis G virus
+                      ConceptId: 21
+                      ConceptSource: NeoIPC
+                      Id: 2653
+                    - Name: Pegivirus C
+                      ConceptId: 202103142
+                      ConceptSource: ICTV
+                      Id: 2651
+                      IctvId: 20165296
       - Name: Negarnaviricota
         ConceptType: Phylum
-        ConceptId: 202406016
+        ConceptId: 202506016
         ConceptSource: ICTV
         IctvId: 20186016
         Children:
         - Name: Haploviricotina
           ConceptType: Subphylum
-          ConceptId: 202406019
+          ConceptId: 202506019
           ConceptSource: ICTV
           IctvId: 20186019
           Children:
           - Name: Monjiviricetes
             ConceptType: Class
-            ConceptId: 202406020
+            ConceptId: 202506020
             ConceptSource: ICTV
             IctvId: 20186020
             Children:
             - Name: Mononegavirales
               ConceptType: Order
-              ConceptId: 202401548
+              ConceptId: 202501548
               ConceptSource: ICTV
               IctvId: 19900001
               Children:
               - Name: Filoviridae
                 ConceptType: Family
-                ConceptId: 202401560
+                ConceptId: 202501560
                 ConceptSource: ICTV
                 IctvId: 19870011
                 Children:
                 - Name: Orthoebolavirus
                   ConceptType: Genus
-                  ConceptId: 202401564
+                  ConceptId: 202501564
                   ConceptSource: ICTV
                   Id: 3495
                   IctvId: 19980158
@@ -949,7 +1025,7 @@ Hierarchies:
                     IctvId: 19980158
                 - Name: Orthomarburgvirus
                   ConceptType: Genus
-                  ConceptId: 202401570
+                  ConceptId: 202501570
                   ConceptSource: ICTV
                   Id: 3527
                   IctvId: 19980159
@@ -961,7 +1037,7 @@ Hierarchies:
                     IctvId: 19980159
               - Name: Paramyxoviridae
                 ConceptType: Family
-                ConceptId: 202401586
+                ConceptId: 202501586
                 ConceptSource: ICTV
                 IctvId: 19750011
                 Children:
@@ -970,22 +1046,28 @@ Hierarchies:
                   ConceptId: 23
                   ConceptSource: NeoIPC
                   Id: 2660
+                  Comments:
+                    Background: >-
+                      Human parainfluenza viruses 1 and 3, of the species Respirovirus laryngotracheitidis and
+                      Respirovirus pneumoniae, and 2 and 4, of Orthorubulavirus laryngotracheitidis and Orthorubulavirus
+                      hominis. The species belong to two subfamilies, so the group holds none of them; each virus's own
+                      name is a synonym of its species.
                 - Name: Feraresvirinae
                   ConceptType: Subfamily
-                  ConceptId: 202415191
+                  ConceptId: 202515191
                   ConceptSource: ICTV
                   IctvId: 202315191
                   Children:
                   - Name: Respirovirus
                     ConceptType: Genus
-                    ConceptId: 202401620
+                    ConceptId: 202501620
                     ConceptSource: ICTV
                     Id: 536
                     IctvId: 19710034
                     Children:
                     - Name: Respirovirus laryngotracheitidis
                       ConceptType: Species
-                      ConceptId: 202401622
+                      ConceptId: 202501622
                       ConceptSource: ICTV
                       Id: 3519
                       IctvId: 19710229
@@ -1002,7 +1084,7 @@ Hierarchies:
                         IctvId: 19710229
                     - Name: Respirovirus pneumoniae
                       ConceptType: Species
-                      ConceptId: 202401623
+                      ConceptId: 202501623
                       ConceptSource: ICTV
                       Id: 3520
                       IctvId: 19710231
@@ -1019,20 +1101,20 @@ Hierarchies:
                         IctvId: 19710231
                 - Name: Orthoparamyxovirinae
                   ConceptType: Subfamily
-                  ConceptId: 202406451
+                  ConceptId: 202506451
                   ConceptSource: ICTV
                   IctvId: 201856451
                   Children:
                   - Name: Morbillivirus
                     ConceptType: Genus
-                    ConceptId: 202401612
+                    ConceptId: 202501612
                     ConceptSource: ICTV
                     Id: 2369
                     IctvId: 19750049
                     Children:
                     - Name: Morbillivirus hominis
                       ConceptType: Species
-                      ConceptId: 202401616
+                      ConceptId: 202501616
                       ConceptSource: ICTV
                       Id: 3529
                       IctvId: 19750163
@@ -1049,19 +1131,19 @@ Hierarchies:
                         IctvId: 19750163
                 - Name: Rubulavirinae
                   ConceptType: Subfamily
-                  ConceptId: 202406467
+                  ConceptId: 202506467
                   ConceptSource: ICTV
                   IctvId: 201856467
                   Children:
                   - Name: Orthorubulavirus
                     ConceptType: Genus
-                    ConceptId: 202406468
+                    ConceptId: 202506468
                     ConceptSource: ICTV
                     IctvId: 201856468
                     Children:
                     - Name: Orthorubulavirus hominis
                       ConceptType: Species
-                      ConceptId: 202401631
+                      ConceptId: 202501631
                       ConceptSource: ICTV
                       Id: 3518
                       IctvId: 19990434
@@ -1078,7 +1160,7 @@ Hierarchies:
                         IctvId: 19990434
                     - Name: Orthorubulavirus laryngotracheitidis
                       ConceptType: Species
-                      ConceptId: 202401630
+                      ConceptId: 202501630
                       ConceptSource: ICTV
                       Id: 3517
                       IctvId: 19950309
@@ -1095,7 +1177,7 @@ Hierarchies:
                         IctvId: 19950309
                     - Name: Orthorubulavirus parotitidis
                       ConceptType: Species
-                      ConceptId: 202401635
+                      ConceptId: 202501635
                       ConceptSource: ICTV
                       Id: 3533
                       IctvId: 19710227
@@ -1112,19 +1194,19 @@ Hierarchies:
                         IctvId: 19710227
               - Name: Pneumoviridae
                 ConceptType: Family
-                ConceptId: 202401644
+                ConceptId: 202501644
                 ConceptSource: ICTV
                 IctvId: 19900046
                 Children:
                 - Name: Metapneumovirus
                   ConceptType: Genus
-                  ConceptId: 202401646
+                  ConceptId: 202501646
                   ConceptSource: ICTV
                   IctvId: 19960123
                   Children:
                   - Name: Metapneumovirus hominis
                     ConceptType: Species
-                    ConceptId: 202401648
+                    ConceptId: 202501648
                     ConceptSource: ICTV
                     Id: 3515
                     IctvId: 20073072
@@ -1136,13 +1218,13 @@ Hierarchies:
                       IctvId: 20073072
                 - Name: Orthopneumovirus
                   ConceptType: Genus
-                  ConceptId: 202401649
+                  ConceptId: 202501649
                   ConceptSource: ICTV
                   IctvId: 19750051
                   Children:
                   - Name: Orthopneumovirus hominis
                     ConceptType: Species
-                    ConceptId: 202401651
+                    ConceptId: 202501651
                     ConceptSource: ICTV
                     Id: 3516
                     IctvId: 19750170
@@ -1159,26 +1241,26 @@ Hierarchies:
                       IctvId: 19750170
               - Name: Rhabdoviridae
                 ConceptType: Family
-                ConceptId: 202401653
+                ConceptId: 202501653
                 ConceptSource: ICTV
                 Id: 2689
                 IctvId: 19750017
                 Children:
                 - Name: Alpharhabdovirinae
                   ConceptType: Subfamily
-                  ConceptId: 202408748
+                  ConceptId: 202508748
                   ConceptSource: ICTV
                   IctvId: 202008748
                   Children:
                   - Name: Lyssavirus
                     ConceptType: Genus
-                    ConceptId: 202401721
+                    ConceptId: 202501721
                     ConceptSource: ICTV
                     IctvId: 19750071
                     Children:
                     - Name: Lyssavirus rabies
                       ConceptType: Species
-                      ConceptId: 202401733
+                      ConceptId: 202501733
                       ConceptSource: ICTV
                       Id: 3336
                       IctvId: 19710311
@@ -1190,37 +1272,37 @@ Hierarchies:
                         IctvId: 19710311
         - Name: Polyploviricotina
           ConceptType: Subphylum
-          ConceptId: 202406017
+          ConceptId: 202506017
           ConceptSource: ICTV
           IctvId: 20186017
           Children:
           - Name: Bunyaviricetes
             ConceptType: Class
-            ConceptId: 202406018
+            ConceptId: 202506018
             ConceptSource: ICTV
             IctvId: 20186018
             Children:
             - Name: Elliovirales
               ConceptType: Order
-              ConceptId: 202400001
+              ConceptId: 202500001
               ConceptSource: ICTV
               IctvId: 20164603
               Children:
               - Name: Peribunyaviridae
                 ConceptType: Family
-                ConceptId: 202400081
+                ConceptId: 202500081
                 ConceptSource: ICTV
                 IctvId: 19750005
                 Children:
                 - Name: Orthobunyavirus
                   ConceptType: Genus
-                  ConceptId: 202400088
+                  ConceptId: 202500088
                   ConceptSource: ICTV
                   IctvId: 19750042
                   Children:
                   - Name: Orthobunyavirus encephalitidis
                     ConceptType: Species
-                    ConceptId: 202400103
+                    ConceptId: 202500103
                     ConceptSource: ICTV
                     Id: 3483
                     IctvId: 19990625
@@ -1237,25 +1319,25 @@ Hierarchies:
                       IctvId: 19990625
             - Name: Hareavirales
               ConceptType: Order
-              ConceptId: 202415134
+              ConceptId: 202515134
               ConceptSource: ICTV
               IctvId: 202315134
               Children:
               - Name: Arenaviridae
                 ConceptType: Family
-                ConceptId: 202402567
+                ConceptId: 202502567
                 ConceptSource: ICTV
                 IctvId: 19750003
                 Children:
                 - Name: Mammarenavirus
                   ConceptType: Genus
-                  ConceptId: 202402569
+                  ConceptId: 202502569
                   ConceptSource: ICTV
                   IctvId: 19710017
                   Children:
                   - Name: Mammarenavirus choriomeningitidis
                     ConceptType: Species
-                    ConceptId: 202402586
+                    ConceptId: 202502586
                     ConceptSource: ICTV
                     Id: 3524
                     IctvId: 19710131
@@ -1272,7 +1354,7 @@ Hierarchies:
                       IctvId: 19710131
                   - Name: Mammarenavirus lassaense
                     ConceptType: Species
-                    ConceptId: 202402580
+                    ConceptId: 202502580
                     ConceptSource: ICTV
                     Id: 3521
                     IctvId: 19790162
@@ -1289,19 +1371,19 @@ Hierarchies:
                       IctvId: 19790162
               - Name: Nairoviridae
                 ConceptType: Family
-                ConceptId: 202400066
+                ConceptId: 202500066
                 ConceptSource: ICTV
                 IctvId: 20164609
                 Children:
                 - Name: Orthonairovirus
                   ConceptType: Genus
-                  ConceptId: 202400068
+                  ConceptId: 202500068
                   ConceptSource: ICTV
                   IctvId: 19810072
                   Children:
                   - Name: Orthonairovirus haemorrhagiae
                     ConceptType: Species
-                    ConceptId: 202400070
+                    ConceptId: 202500070
                     ConceptSource: ICTV
                     Id: 3490
                     IctvId: 19990680
@@ -1318,19 +1400,19 @@ Hierarchies:
                       IctvId: 19990680
               - Name: Phenuiviridae
                 ConceptType: Family
-                ConceptId: 202400146
+                ConceptId: 202500146
                 ConceptSource: ICTV
                 IctvId: 20164611
                 Children:
                 - Name: Phlebovirus
                   ConceptType: Genus
-                  ConceptId: 202400157
+                  ConceptId: 202500157
                   ConceptSource: ICTV
                   IctvId: 19910109
                   Children:
                   - Name: Phlebovirus riftense
                     ConceptType: Species
-                    ConceptId: 202400163
+                    ConceptId: 202500163
                     ConceptSource: ICTV
                     Id: 3544
                     IctvId: 19990693
@@ -1347,19 +1429,19 @@ Hierarchies:
                       IctvId: 19990693
           - Name: Insthoviricetes
             ConceptType: Class
-            ConceptId: 202406023
+            ConceptId: 202506023
             ConceptSource: ICTV
             IctvId: 20186023
             Children:
             - Name: Articulavirales
               ConceptType: Order
-              ConceptId: 202406024
+              ConceptId: 202506024
               ConceptSource: ICTV
               IctvId: 20186024
               Children:
               - Name: Orthomyxoviridae
                 ConceptType: Family
-                ConceptId: 202403953
+                ConceptId: 202503953
                 ConceptSource: ICTV
                 IctvId: 19750009
                 Children:
@@ -1371,13 +1453,13 @@ Hierarchies:
                   Children:
                   - Name: Alphainfluenzavirus
                     ConceptType: Genus
-                    ConceptId: 202403955
+                    ConceptId: 202503955
                     ConceptSource: ICTV
                     IctvId: 19960203
                     Children:
                     - Name: Alphainfluenzavirus influenzae
                       ConceptType: Species
-                      ConceptId: 202403956
+                      ConceptId: 202503956
                       ConceptSource: ICTV
                       Id: 2654
                       IctvId: 19710226
@@ -1389,13 +1471,13 @@ Hierarchies:
                         IctvId: 19710226
                   - Name: Betainfluenzavirus
                     ConceptType: Genus
-                    ConceptId: 202403957
+                    ConceptId: 202503957
                     ConceptSource: ICTV
                     IctvId: 19960204
                     Children:
                     - Name: Betainfluenzavirus influenzae
                       ConceptType: Species
-                      ConceptId: 202403958
+                      ConceptId: 202503958
                       ConceptSource: ICTV
                       Id: 2655
                       IctvId: 19710224
@@ -1407,13 +1489,13 @@ Hierarchies:
                         IctvId: 19710224
                   - Name: Gammainfluenzavirus
                     ConceptType: Genus
-                    ConceptId: 202403959
+                    ConceptId: 202503959
                     ConceptSource: ICTV
                     IctvId: 19870116
                     Children:
                     - Name: Gammainfluenzavirus influenzae
                       ConceptType: Species
-                      ConceptId: 202403960
+                      ConceptId: 202503960
                       ConceptSource: ICTV
                       Id: 2658
                       IctvId: 19870699
@@ -1425,13 +1507,13 @@ Hierarchies:
                         IctvId: 19870699
                   - Name: Deltainfluenzavirus
                     ConceptType: Genus
-                    ConceptId: 202403961
+                    ConceptId: 202503961
                     ConceptSource: ICTV
                     IctvId: 20164753
                     Children:
                     - Name: Deltainfluenzavirus influenzae
                       ConceptType: Species
-                      ConceptId: 202403962
+                      ConceptId: 202503962
                       ConceptSource: ICTV
                       Id: 2656
                       IctvId: 20165406
@@ -1443,37 +1525,37 @@ Hierarchies:
                         IctvId: 20165406
       - Name: Pisuviricota
         ConceptType: Phylum
-        ConceptId: 202407209
+        ConceptId: 202507209
         ConceptSource: ICTV
         IctvId: 201907209
         Children:
         - Name: Pisoniviricetes
           ConceptType: Class
-          ConceptId: 202407210
+          ConceptId: 202507210
           ConceptSource: ICTV
           IctvId: 201907210
           Children:
           - Name: Nidovirales
             ConceptType: Order
-            ConceptId: 202401821
+            ConceptId: 202501821
             ConceptSource: ICTV
             IctvId: 19960002
             Children:
             - Name: Cornidovirineae
               ConceptType: Suborder
-              ConceptId: 202406105
+              ConceptId: 202506105
               ConceptSource: ICTV
               IctvId: 20186105
               Children:
               - Name: Coronaviridae
                 ConceptType: Family
-                ConceptId: 202401846
+                ConceptId: 202501846
                 ConceptSource: ICTV
                 IctvId: 19750006
                 Children:
                 - Name: Orthocoronavirinae
                   ConceptType: Subfamily
-                  ConceptId: 202401847
+                  ConceptId: 202501847
                   ConceptSource: ICTV
                   IctvId: 20090624
                   Children:
@@ -1482,22 +1564,78 @@ Hierarchies:
                     ConceptId: 7
                     ConceptSource: NeoIPC
                     Id: 2609
+                    Comments:
+                      Background: >-
+                        The group covers the four seasonal human coronaviruses (HCoV): HCoV-229E and HCoV-NL63, of the
+                        species Alphacoronavirus chicagoense and Alphacoronavirus amsterdamense, and HCoV-OC43 and
+                        HCoV-HKU1, of Betacoronavirus gravedinis and Betacoronavirus hongkongense. The species belong
+                        to two genera, so they sit under their genera and the group holds none of them; SARS-CoV-2 has
+                        a node of its own.
+                  - Name: Alphacoronavirus
+                    ConceptType: Genus
+                    ConceptId: 202501848
+                    ConceptSource: ICTV
+                    IctvId: 20091081
+                    Children:
+                    - Name: Duvinacovirus
+                      ConceptType: Subgenus
+                      ConceptId: 202506110
+                      ConceptSource: ICTV
+                      IctvId: 20186110
+                      Children:
+                      - Name: Alphacoronavirus chicagoense
+                        ConceptType: Species
+                        ConceptId: 202501852
+                        ConceptSource: ICTV
+                        Id: 3606
+                        IctvId: 19950874
+                    - Name: Setracovirus
+                      ConceptType: Subgenus
+                      ConceptId: 202506111
+                      ConceptSource: ICTV
+                      IctvId: 20186111
+                      Children:
+                      - Name: Alphacoronavirus amsterdamense
+                        ConceptType: Species
+                        ConceptId: 202501853
+                        ConceptSource: ICTV
+                        Id: 3605
+                        IctvId: 20083207
                   - Name: Betacoronavirus
                     ConceptType: Genus
-                    ConceptId: 202401860
+                    ConceptId: 202501860
                     ConceptSource: ICTV
                     IctvId: 20091082
                     Children:
+                    - Name: Embecovirus
+                      ConceptType: Subgenus
+                      ConceptId: 202506123
+                      ConceptSource: ICTV
+                      IctvId: 20186123
+                      Children:
+                      - Name: Betacoronavirus gravedinis
+                        ConceptType: Species
+                        ConceptId: 202501861
+                        ConceptSource: ICTV
+                        Id: 3607
+                        IctvId: 20093523
+                      - Name: Betacoronavirus hongkongense
+                        ConceptType: Species
+                        ConceptId: 202501863
+                        ConceptSource: ICTV
+                        Id: 3608
+                        IctvId: 20083206
                     - Name: Sarbecovirus
                       ConceptType: Subgenus
-                      ConceptId: 202406129
+                      ConceptId: 202506129
                       ConceptSource: ICTV
                       IctvId: 20186129
                       Children:
                       - Name: Betacoronavirus pandemicum
                         ConceptType: Species
-                        ConceptId: 202401868
+                        ConceptId: 202501868
                         ConceptSource: ICTV
+                        Id: 3549
                         IctvId: 20040588
                         Children:
                         - Name: Severe acute respiratory syndrome coronavirus 2
@@ -1510,7 +1648,6 @@ Hierarchies:
                             ConceptId: 6
                             ConceptSource: NeoIPC
                             Id: 2608
-                        Id: 3549
                         Synonyms:
                         - Name: Severe acute respiratory syndrome-related coronavirus
                           ConceptId: 202101868
@@ -1519,27 +1656,27 @@ Hierarchies:
                           IctvId: 20040588
           - Name: Picornavirales
             ConceptType: Order
-            ConceptId: 202401910
+            ConceptId: 202501910
             ConceptSource: ICTV
             IctvId: 20080005
             Children:
             - Name: Caliciviridae
               ConceptType: Family
-              ConceptId: 202402798
+              ConceptId: 202502798
               ConceptSource: ICTV
               Id: 2680
               IctvId: 19810006
               Children:
               - Name: Norovirus
                 ConceptType: Genus
-                ConceptId: 202402805
+                ConceptId: 202502805
                 ConceptSource: ICTV
                 Id: 578
                 IctvId: 19980200
                 Children:
                 - Name: Norovirus norwalkense
                   ConceptType: Species
-                  ConceptId: 202402806
+                  ConceptId: 202502806
                   ConceptSource: ICTV
                   Id: 3534
                   IctvId: 19950817
@@ -1551,25 +1688,20 @@ Hierarchies:
                     IctvId: 19950817
             - Name: Picornaviridae
               ConceptType: Family
-              ConceptId: 202401953
+              ConceptId: 202501953
               ConceptSource: ICTV
               Id: 2627
               IctvId: 19710003
               Children:
-              - Name: Echovirus
-                ConceptType: Group
-                ConceptId: 27
-                ConceptSource: NeoIPC
-                Id: 2681
               - Name: Ensavirinae
                 ConceptType: Subfamily
-                ConceptId: 202412925
+                ConceptId: 202512925
                 ConceptSource: ICTV
                 IctvId: 202112925
                 Children:
                 - Name: Enterovirus
                   ConceptType: Genus
-                  ConceptId: 202401982
+                  ConceptId: 202501982
                   ConceptSource: ICTV
                   Id: 502
                   IctvId: 20081066
@@ -1579,27 +1711,78 @@ Hierarchies:
                     ConceptId: 13
                     ConceptSource: NeoIPC
                     Id: 2623
-                  - Name: Human coxsackievirus A
-                    ConceptType: Group
-                    ConceptId: 14
-                    ConceptSource: NeoIPC
-                    Id: 2624
-                  - Name: Human coxsackievirus B
-                    ConceptType: Group
-                    ConceptId: 15
-                    ConceptSource: NeoIPC
-                    Id: 2625
+                    Children:
+                    - Name: Human coxsackievirus A
+                      ConceptType: Group
+                      ConceptId: 14
+                      ConceptSource: NeoIPC
+                      Id: 2624
+                      Comments:
+                        Background: >-
+                          The coxsackie A viruses are types of three species of the genus Enterovirus: Enterovirus
+                          alphacoxsackie, Enterovirus betacoxsackie, which holds coxsackievirus A9, and Enterovirus
+                          coxsackiepol. Each of the three also holds other types, among them enterovirus A71, the
+                          coxsackie B viruses and the echoviruses, and the polioviruses, so the group holds none
+                          of them.
+                    - Name: Human coxsackievirus B
+                      ConceptType: Group
+                      ConceptId: 15
+                      ConceptSource: NeoIPC
+                      Id: 2625
                   - Name: Human rhinovirus
                     ConceptType: Group
                     ConceptId: 8
                     ConceptSource: NeoIPC
                     Id: 2610
+                    Children:
+                    - Name: Enterovirus alpharhino
+                      ConceptType: Species
+                      ConceptId: 202501993
+                      ConceptSource: ICTV
+                      Id: 3595
+                      IctvId: 19991256
+                    - Name: Enterovirus betarhino
+                      ConceptType: Species
+                      ConceptId: 202501994
+                      ConceptSource: ICTV
+                      Id: 3596
+                      IctvId: 19991257
+                    - Name: Enterovirus cerhino
+                      ConceptType: Species
+                      ConceptId: 202501995
+                      ConceptSource: ICTV
+                      Id: 3597
+                      IctvId: 20094354
+                  - Name: Enterovirus alphacoxsackie
+                    ConceptType: Species
+                    ConceptId: 202501983
+                    ConceptSource: ICTV
+                    Id: 3612
+                    IctvId: 19991247
+                    Children:
+                    - Name: Enterovirus A71
+                      ConceptType: Serotype
+                      ConceptId: 105
+                      ConceptSource: NeoIPC
+                      Id: 3614
+                    Synonyms:
+                    - Name: Enterovirus A
+                      ConceptId: 202201983
+                      ConceptSource: ICTV
+                      Id: 3613
+                      IctvId: 19991247
                   - Name: Enterovirus betacoxsackie
                     ConceptType: Species
-                    ConceptId: 202401984
+                    ConceptId: 202501984
                     ConceptSource: ICTV
                     Id: 3496
                     IctvId: 19991248
+                    Children:
+                    - Name: Echovirus
+                      ConceptType: Group
+                      ConceptId: 27
+                      ConceptSource: NeoIPC
+                      Id: 2681
                     Synonyms:
                     - Name: Enterovirus B
                       ConceptId: 202101984
@@ -1608,52 +1791,71 @@ Hierarchies:
                       IctvId: 19991248
                   - Name: Enterovirus coxsackiepol
                     ConceptType: Species
-                    ConceptId: 202401985
+                    ConceptId: 202501985
                     ConceptSource: ICTV
                     Id: 3497
                     IctvId: 20083305
                     Children:
                     - Name: Poliovirus
-                      ConceptType: Serotype
+                      ConceptType: Group
                       ConceptId: 20
                       ConceptSource: NeoIPC
                       Id: 2635
-                    - Name: Poliovirus 1
-                      ConceptType: Serotype
-                      ConceptId: 89
-                      ConceptSource: NeoIPC
-                      Id: 2637
-                    - Name: Poliovirus 2
-                      ConceptType: Serotype
-                      ConceptId: 90
-                      ConceptSource: NeoIPC
-                      Id: 2638
-                    - Name: Poliovirus 3
-                      ConceptType: Serotype
-                      ConceptId: 91
-                      ConceptSource: NeoIPC
-                      Id: 2639
+                      Children:
+                      - Name: Poliovirus 1
+                        ConceptType: Serotype
+                        ConceptId: 89
+                        ConceptSource: NeoIPC
+                        Id: 2637
+                      - Name: Poliovirus 2
+                        ConceptType: Serotype
+                        ConceptId: 90
+                        ConceptSource: NeoIPC
+                        Id: 2638
+                      - Name: Poliovirus 3
+                        ConceptType: Serotype
+                        ConceptId: 91
+                        ConceptSource: NeoIPC
+                        Id: 2639
                     Synonyms:
                     - Name: Enterovirus C
                       ConceptId: 202101985
                       ConceptSource: ICTV
                       Id: 2636
                       IctvId: 20083305
+                  - Name: Enterovirus deconjuncti
+                    ConceptType: Species
+                    ConceptId: 202501986
+                    ConceptSource: ICTV
+                    Id: 3615
+                    IctvId: 19991250
+                    Children:
+                    - Name: Enterovirus D68
+                      ConceptType: Serotype
+                      ConceptId: 106
+                      ConceptSource: NeoIPC
+                      Id: 3617
+                    Synonyms:
+                    - Name: Enterovirus D
+                      ConceptId: 202201986
+                      ConceptSource: ICTV
+                      Id: 3616
+                      IctvId: 19991250
               - Name: Heptrevirinae
                 ConceptType: Subfamily
-                ConceptId: 202412927
+                ConceptId: 202512927
                 ConceptSource: ICTV
                 IctvId: 202112927
                 Children:
                 - Name: Hepatovirus
                   ConceptType: Genus
-                  ConceptId: 202402002
+                  ConceptId: 202502002
                   ConceptSource: ICTV
                   IctvId: 19910153
                   Children:
                   - Name: Hepatovirus ahepa
                     ConceptType: Species
-                    ConceptId: 202402003
+                    ConceptId: 202502003
                     ConceptSource: ICTV
                     Id: 3503
                     IctvId: 19991254
@@ -1668,63 +1870,92 @@ Hierarchies:
                       ConceptSource: ICTV
                       Id: 3338
                       IctvId: 19991254
+              - Name: Paavivirinae
+                ConceptType: Subfamily
+                ConceptId: 202512926
+                ConceptSource: ICTV
+                IctvId: 202112926
+                Children:
+                - Name: Parechovirus
+                  ConceptType: Genus
+                  ConceptId: 202502037
+                  ConceptSource: ICTV
+                  IctvId: 19960226
+                  Children:
+                  - Name: Parechovirus ahumpari
+                    ConceptType: Species
+                    ConceptId: 202502038
+                    ConceptSource: ICTV
+                    Id: 3609
+                    IctvId: 19991255
+                    Synonyms:
+                    - Name: Human parechovirus
+                      ConceptId: 20130662
+                      ConceptSource: ICTV
+                      Id: 3610
+                      IctvId: 19991255
+                    - Name: Parechovirus A
+                      ConceptId: 202202038
+                      ConceptSource: ICTV
+                      Id: 3611
+                      IctvId: 19991255
         - Name: Stelpaviricetes
           ConceptType: Class
-          ConceptId: 202407212
+          ConceptId: 202507212
           ConceptSource: ICTV
           IctvId: 201907212
           Children:
           - Name: Stellavirales
             ConceptType: Order
-            ConceptId: 202407214
+            ConceptId: 202507214
             ConceptSource: ICTV
             IctvId: 201907214
             Children:
             - Name: Astroviridae
               ConceptType: Family
-              ConceptId: 202402619
+              ConceptId: 202502619
               ConceptSource: ICTV
               Id: 539
               IctvId: 19950008
     - Name: Pararnavirae
       ConceptType: Kingdom
-      ConceptId: 202407236
+      ConceptId: 202507236
       ConceptSource: ICTV
       IctvId: 201907236
       Children:
       - Name: Artverviricota
         ConceptType: Phylum
-        ConceptId: 202407237
+        ConceptId: 202507237
         ConceptSource: ICTV
         IctvId: 201907237
         Children:
         - Name: Revtraviricetes
           ConceptType: Class
-          ConceptId: 202407238
+          ConceptId: 202507238
           ConceptSource: ICTV
           IctvId: 201907238
           Children:
           - Name: Blubervirales
             ConceptType: Order
-            ConceptId: 202407239
+            ConceptId: 202507239
             ConceptSource: ICTV
             IctvId: 201907239
             Children:
             - Name: Hepadnaviridae
               ConceptType: Family
-              ConceptId: 202403645
+              ConceptId: 202503645
               ConceptSource: ICTV
               IctvId: 19900016
               Children:
               - Name: Orthohepadnavirus
                 ConceptType: Genus
-                ConceptId: 202403651
+                ConceptId: 202503651
                 ConceptSource: ICTV
                 IctvId: 19910119
                 Children:
                 - Name: Orthohepadnavirus hominoidei
                   ConceptType: Species
-                  ConceptId: 202403653
+                  ConceptId: 202503653
                   ConceptSource: ICTV
                   Id: 3502
                   IctvId: 19910781
@@ -1736,31 +1967,31 @@ Hierarchies:
                     IctvId: 19910781
           - Name: Ortervirales
             ConceptType: Order
-            ConceptId: 202405588
+            ConceptId: 202505588
             ConceptSource: ICTV
             IctvId: 20175588
             Children:
             - Name: Retroviridae
               ConceptType: Family
-              ConceptId: 202404979
+              ConceptId: 202504979
               ConceptSource: ICTV
               IctvId: 19750016
               Children:
               - Name: Orthoretrovirinae
                 ConceptType: Subfamily
-                ConceptId: 202404980
+                ConceptId: 202504980
                 ConceptSource: ICTV
                 IctvId: 20025143
                 Children:
                 - Name: Deltaretrovirus
                   ConceptType: Genus
-                  ConceptId: 202404997
+                  ConceptId: 202504997
                   ConceptSource: ICTV
                   IctvId: 19900174
                   Children:
                   - Name: Deltaretrovirus priTlym1
                     ConceptType: Species
-                    ConceptId: 202404999
+                    ConceptId: 202504999
                     ConceptSource: ICTV
                     Id: 3539
                     IctvId: 19911434
@@ -1777,7 +2008,7 @@ Hierarchies:
                       IctvId: 19911434
                   - Name: Deltaretrovirus priTlym2
                     ConceptType: Species
-                    ConceptId: 202405000
+                    ConceptId: 202505000
                     ConceptSource: ICTV
                     Id: 3540
                     IctvId: 19911435
@@ -1794,7 +2025,7 @@ Hierarchies:
                       IctvId: 19911435
                   - Name: Deltaretrovirus priTlym3
                     ConceptType: Species
-                    ConceptId: 202405001
+                    ConceptId: 202505001
                     ConceptSource: ICTV
                     Id: 3541
                     IctvId: 19991616
@@ -1806,7 +2037,7 @@ Hierarchies:
                       IctvId: 19991616
                 - Name: Lentivirus
                   ConceptType: Genus
-                  ConceptId: 202405025
+                  ConceptId: 202505025
                   ConceptSource: ICTV
                   IctvId: 19900175
                   Children:
@@ -1818,7 +2049,7 @@ Hierarchies:
                     Children:
                     - Name: Lentivirus humimdef1
                       ConceptType: Species
-                      ConceptId: 202405030
+                      ConceptId: 202505030
                       ConceptSource: ICTV
                       Id: 3513
                       IctvId: 19911441
@@ -1830,7 +2061,7 @@ Hierarchies:
                         IctvId: 19911441
                     - Name: Lentivirus humimdef2
                       ConceptType: Species
-                      ConceptId: 202405031
+                      ConceptId: 202505031
                       ConceptSource: ICTV
                       Id: 3514
                       IctvId: 19911442
@@ -1842,19 +2073,19 @@ Hierarchies:
                         IctvId: 19911442
   - Name: Ribozyviria
     ConceptType: Realm
-    ConceptId: 202409292
+    ConceptId: 202509292
     ConceptSource: ICTV
     IctvId: 202009292
     Children:
     - Name: Kolmioviridae
       ConceptType: Family
-      ConceptId: 202409293
+      ConceptId: 202509293
       ConceptSource: ICTV
       IctvId: 202009293
       Children:
       - Name: Deltavirus
         ConceptType: Genus
-        ConceptId: 202405347
+        ConceptId: 202505347
         ConceptSource: ICTV
         Id: 3480
         IctvId: 19930250
@@ -1865,56 +2096,56 @@ Hierarchies:
           Id: 2628
   - Name: Varidnaviria
     ConceptType: Realm
-    ConceptId: 202408702
+    ConceptId: 202508702
     ConceptSource: ICTV
     IctvId: 201908702
     Children:
     - Name: Bamfordvirae
       ConceptType: Kingdom
-      ConceptId: 202408707
+      ConceptId: 202508707
       ConceptSource: ICTV
       IctvId: 201908707
       Children:
       - Name: Nucleocytoviricota
         ConceptType: Phylum
-        ConceptId: 202408716
+        ConceptId: 202508716
         ConceptSource: ICTV
         IctvId: 201908716
         Children:
         - Name: Pokkesviricetes
           ConceptType: Class
-          ConceptId: 202407100
+          ConceptId: 202507100
           ConceptSource: ICTV
           IctvId: 201907100
           Children:
           - Name: Chitovirales
             ConceptType: Order
-            ConceptId: 202407102
+            ConceptId: 202507102
             ConceptSource: ICTV
             IctvId: 201907102
             Children:
             - Name: Poxviridae
               ConceptType: Family
-              ConceptId: 202404737
+              ConceptId: 202504737
               ConceptSource: ICTV
               Id: 480
               IctvId: 19740004
               Children:
               - Name: Chordopoxvirinae
                 ConceptType: Subfamily
-                ConceptId: 202404738
+                ConceptId: 202504738
                 ConceptSource: ICTV
                 IctvId: 19780046
                 Children:
                 - Name: Molluscipoxvirus
                   ConceptType: Genus
-                  ConceptId: 202404765
+                  ConceptId: 202504765
                   ConceptSource: ICTV
                   IctvId: 19900158
                   Children:
                   - Name: Molluscipoxvirus molluscum
                     ConceptType: Species
-                    ConceptId: 202404766
+                    ConceptId: 202504766
                     ConceptSource: ICTV
                     Id: 3531
                     IctvId: 19710278
@@ -1926,13 +2157,13 @@ Hierarchies:
                       IctvId: 19710278
                 - Name: Orthopoxvirus
                   ConceptType: Genus
-                  ConceptId: 202404767
+                  ConceptId: 202504767
                   ConceptSource: ICTV
                   IctvId: 19740023
                   Children:
                   - Name: Orthopoxvirus monkeypox
                     ConceptType: Species
-                    ConceptId: 202404771
+                    ConceptId: 202504771
                     ConceptSource: ICTV
                     Id: 3532
                     IctvId: 19710279
@@ -1944,7 +2175,7 @@ Hierarchies:
                       IctvId: 19710279
                   - Name: Orthopoxvirus vaccinia
                     ConceptType: Species
-                    ConceptId: 202404775
+                    ConceptId: 202504775
                     ConceptSource: ICTV
                     Id: 3554
                     IctvId: 19911346
@@ -1956,7 +2187,7 @@ Hierarchies:
                       IctvId: 19911346
                   - Name: Orthopoxvirus variola
                     ConceptType: Species
-                    ConceptId: 202404776
+                    ConceptId: 202504776
                     ConceptSource: ICTV
                     Id: 3555
                     IctvId: 19710294
@@ -1968,13 +2199,13 @@ Hierarchies:
                       IctvId: 19710294
                 - Name: Parapoxvirus
                   ConceptType: Genus
-                  ConceptId: 202404778
+                  ConceptId: 202504778
                   ConceptSource: ICTV
                   IctvId: 19740024
                   Children:
                   - Name: Parapoxvirus orf
                     ConceptType: Species
-                    ConceptId: 202404780
+                    ConceptId: 202504780
                     ConceptSource: ICTV
                     Id: 3535
                     IctvId: 19710281
@@ -1986,13 +2217,13 @@ Hierarchies:
                       IctvId: 19710281
                 - Name: Yatapoxvirus
                   ConceptType: Genus
-                  ConceptId: 202404788
+                  ConceptId: 202504788
                   ConceptSource: ICTV
                   IctvId: 19900163
                   Children:
                   - Name: Yatapoxvirus tanapox
                     ConceptType: Species
-                    ConceptId: 202404789
+                    ConceptId: 202504789
                     ConceptSource: ICTV
                     Id: 3552
                     IctvId: 19710291
@@ -2004,37 +2235,37 @@ Hierarchies:
                       IctvId: 19710291
       - Name: Preplasmiviricota
         ConceptType: Phylum
-        ConceptId: 202408708
+        ConceptId: 202508708
         ConceptSource: ICTV
         IctvId: 201908708
         Children:
         - Name: Polisuviricotina
           ConceptType: Subphylum
-          ConceptId: 202419582
+          ConceptId: 202519582
           ConceptSource: ICTV
           IctvId: 202419582
           Children:
           - Name: Pharingeaviricetes
             ConceptType: Class
-            ConceptId: 202419586
+            ConceptId: 202519586
             ConceptSource: ICTV
             IctvId: 202419586
             Children:
             - Name: Rowavirales
               ConceptType: Order
-              ConceptId: 202408711
+              ConceptId: 202508711
               ConceptSource: ICTV
               IctvId: 201908711
               Children:
               - Name: Adenoviridae
                 ConceptType: Family
-                ConceptId: 202402387
+                ConceptId: 202502387
                 ConceptSource: ICTV
                 IctvId: 19750002
                 Children:
                 - Name: Mastadenovirus
                   ConceptType: Genus
-                  ConceptId: 202402412
+                  ConceptId: 202502412
                   ConceptSource: ICTV
                   Id: 387
                   IctvId: 19710013
@@ -2044,6 +2275,54 @@ Hierarchies:
                     ConceptId: 28
                     ConceptSource: NeoIPC
                     Id: 2692
+                    Comments:
+                      Background: >-
+                        The seven species hold the human adenovirus types of the former species Human mastadenovirus A
+                        to G, in that order: Mastadenovirus adami, blackbeardi, caesari, dominans, exoticum, faecale,
+                        and russelli. Some of the species also hold adenovirus types of other primates.
+                    Children:
+                    - Name: Mastadenovirus adami
+                      ConceptType: Species
+                      ConceptId: 202502422
+                      ConceptSource: ICTV
+                      Id: 3598
+                      IctvId: 19990514
+                    - Name: Mastadenovirus blackbeardi
+                      ConceptType: Species
+                      ConceptId: 202502423
+                      ConceptSource: ICTV
+                      Id: 3599
+                      IctvId: 19990515
+                    - Name: Mastadenovirus caesari
+                      ConceptType: Species
+                      ConceptId: 202502424
+                      ConceptSource: ICTV
+                      Id: 3600
+                      IctvId: 19990516
+                    - Name: Mastadenovirus dominans
+                      ConceptType: Species
+                      ConceptId: 202502425
+                      ConceptSource: ICTV
+                      Id: 3601
+                      IctvId: 19990517
+                    - Name: Mastadenovirus exoticum
+                      ConceptType: Species
+                      ConceptId: 202502426
+                      ConceptSource: ICTV
+                      Id: 3602
+                      IctvId: 19990518
+                    - Name: Mastadenovirus faecale
+                      ConceptType: Species
+                      ConceptId: 202502427
+                      ConceptSource: ICTV
+                      Id: 3603
+                      IctvId: 19990519
+                    - Name: Mastadenovirus russelli
+                      ConceptType: Species
+                      ConceptId: 202502428
+                      ConceptSource: ICTV
+                      Id: 3604
+                      IctvId: 20093025
 - Name: Bacteria
   ConceptType: Domain
   ConceptId: domain/bacteria
@@ -20624,6 +20903,7 @@ Hierarchies:
                 ConceptType: Species
                 ConceptId: species/photobacterium-damselae
                 ConceptSource: LPSN
+                Id: 3557
                 LpsnRecordNumber: 779528
                 Children:
                 - Name: Photobacterium damselae subsp. damselae
@@ -20632,7 +20912,6 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 1380
                   LpsnRecordNumber: 779529
-                Id: 3557
                 Synonyms:
                 - Name: Vibrio damsela
                   ConceptId: species/vibrio-damsela

@@ -51,6 +51,22 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   changes meaning. Streptococcus massiliensis (2789), now among the viridans
   streptococci, is a common commensal. The 18 new `Id`s, 3570 to 3587, have UIDs in
   `NeoIPC-Infectious-Agents.uids.csv`.
+- The viruses follow ICTV's Master Species List 2025 (MSL41), as ICTV corrected it on 14 October 2026: a virus
+  concept takes the name, rank, and lineage that release gives its taxon, and its node there as the `ConceptId`,
+  while a synonym, a former name, keeps the node of the release whose name it carries. The realm Monodnaviria is now
+  Floreoviria; the new family Hepaciviridae holds Pegivirus and Orthohepacivirus, formerly Hepacivirus, whose species
+  Orthohepacivirus hominis is a new concept over Hepacivirus hominis (3501); and the species of Orthoflavivirus sit
+  in the new subgenus Euflavivirus. The release splits Orthoflavivirus encephalitidis (3553) into two species, so
+  Tick-borne encephalitis virus (2389) is now a NeoIPC group holding them, with 3553 as its synonym, and no collected
+  value changes meaning. NeoIPC's virus groups hold the taxa they cover where those share one parent, as Human
+  adenovirus (2692) holds its seven species and Influenza virus (2659) its four genera; a group of the types of one
+  species sits beneath that species, as Echovirus (2681) does, or beneath the group that holds it, as Human
+  coxsackievirus B (2625) does; and any other group says in `Comments.Background` which species it covers. Poliovirus
+  (2635), which now holds its three serotypes, is a group rather than a serotype, and its DHIS2 option's label says
+  so. New are the species the groups now hold, Orthoflavivirus mediterranense, the parechoviruses, the enteroviruses
+  A and D with Enterovirus A71 and D68, and the species of the four seasonal human coronaviruses, and so are Human
+  herpesvirus 4 and 5 as synonyms. The 32 new `Id`s, 3588 to 3619, have UIDs in
+  `NeoIPC-Infectious-Agents.uids.csv`.
 - `NeoIPC-Infectious-Agents.uids.csv` holds the DHIS2 UID of every `Id`: the 113 `Id`s production has not
   deployed, which had no row, and whose options the metadata packages gave UIDs derived from their codes, have
   random ones, as every new `Id` gets from NeoIPC-Tools' `Add-NeoIPCInfectiousAgentUid`, and CI fails for an `Id`
