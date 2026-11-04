@@ -7,7 +7,7 @@
 .DESCRIPTION
     Each rule is shown firing on a fixture that carries its defect, beside a clean fixture that yields no finding, so
     a check that stops firing fails here. MetadataContent.Tests.ps1 applies the same checks to the committed list,
-    all but the identity and flag checks, which that list fails.
+    all but the flag check, which that list fails.
 
     Internals are reached through InModuleScope; the Import-Module at file top runs during Pester's discovery phase,
     which InModuleScope requires.

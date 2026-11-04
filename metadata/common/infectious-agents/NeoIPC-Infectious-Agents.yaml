@@ -2093,6 +2093,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2930
                 LpsnRecordNumber: 785464
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
             - Name: Actinomyces
               ConceptType: Genus
               ConceptId: genus/actinomyces
@@ -3855,6 +3858,9 @@ Hierarchies:
               ConceptSource: LPSN
               Id: 2958
               LpsnRecordNumber: 517381
+              Comments:
+                Background: >-
+                  The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               Children:
               - Name: Tropheryma whipplei
                 ConceptType: Species
@@ -3862,6 +3868,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2959
                 LpsnRecordNumber: 785128
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
         - Name: Micromonosporales
           ConceptType: Order
           ConceptId: order/micromonosporales
@@ -4122,6 +4131,9 @@ Hierarchies:
                 Id: 2918
                 LpsnRecordNumber: 3414
                 CommonCommensal: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Corynebacterium diphtheriae
                 ConceptType: Species
                 ConceptId: species/corynebacterium-diphtheriae
@@ -4329,6 +4341,9 @@ Hierarchies:
                 Id: 2942
                 LpsnRecordNumber: 25767
                 CommonCommensal: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Corynebacterium minutissimum
                 ConceptType: Species
                 ConceptId: species/corynebacterium-minutissimum
@@ -4461,6 +4476,9 @@ Hierarchies:
                 Id: 2944
                 LpsnRecordNumber: 9373
                 CommonCommensal: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Corynebacterium simulans
                 ConceptType: Species
                 ConceptId: species/corynebacterium-simulans
@@ -4950,6 +4968,9 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 2880
                   LpsnRecordNumber: 801230
+                  Comments:
+                    Background: >-
+                      The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
                 - Name: Mycobacterium tuberculosis
                   ConceptType: Species
                   ConceptId: species/mycobacterium-tuberculosis
@@ -4963,6 +4984,9 @@ Hierarchies:
                     ConceptSource: LPSN
                     Id: 2948
                     LpsnRecordNumber: 801066
+                    Comments:
+                      Background: >-
+                        The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
                     Synonyms:
                     - Name: Mycobacterium canetti
                       ConceptId: species/mycobacterium-canetti
@@ -5134,6 +5158,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2950
                 LpsnRecordNumber: 801063
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Mycobacterium chitae
                 ConceptType: Species
                 ConceptId: species/mycobacterium-chitae
@@ -5410,6 +5437,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2872
                 LpsnRecordNumber: 801064
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Mycobacterium llatzerense
                 ConceptType: Species
                 ConceptId: species/mycobacterium-llatzerense
@@ -5943,12 +5973,34 @@ Hierarchies:
                 Id: 1776
                 LpsnRecordNumber: 780448
                 CommonCommensal: true
+                Comments:
+                  Background: >-
+                    LPSN keeps Rhodococcus hoagii, which Judicial Opinion 106 rejected together with Corynebacterium
+                    hoagii, as a name in need of a replacement, while its notes record that both hoagii names and
+                    Rhodococcus equi denote one species (doi:10.1099/ijs.0.053322-0; doi:10.3389/fmicb.2018.02007).
+                    The list therefore holds the hoagii names, with their Ids, as synonyms of Rhodococcus equi, LPSN's
+                    correct name for the species.
                 Synonyms:
                 - Name: Corynebacterium equi
                   ConceptId: species/corynebacterium-equi
                   ConceptSource: LPSN
                   Id: 1155
                   LpsnRecordNumber: 775181
+                - Name: Corynebacterium hoagii
+                  ConceptId: species/corynebacterium-hoagii
+                  ConceptSource: LPSN
+                  Id: 246
+                  LpsnRecordNumber: 775200
+                - Name: Prescottella equi
+                  ConceptId: species/prescottella-equi
+                  ConceptSource: LPSN
+                  Id: 3587
+                  LpsnRecordNumber: 30170
+                - Name: Rhodococcus hoagii
+                  ConceptId: species/rhodococcus-hoagii
+                  ConceptSource: LPSN
+                  Id: 3115
+                  LpsnRecordNumber: 791654
               - Name: Rhodococcus erythropolis
                 ConceptType: Species
                 ConceptId: species/rhodococcus-erythropolis
@@ -5988,19 +6040,6 @@ Hierarchies:
                 Id: 1076
                 LpsnRecordNumber: 780452
                 CommonCommensal: true
-              - Name: Rhodococcus hoagii
-                ConceptType: Species
-                ConceptId: species/rhodococcus-hoagii
-                ConceptSource: LPSN
-                Id: 3115
-                LpsnRecordNumber: 791654
-                CommonCommensal: true
-                Synonyms:
-                - Name: Corynebacterium hoagii
-                  ConceptId: species/corynebacterium-hoagii
-                  ConceptSource: LPSN
-                  Id: 246
-                  LpsnRecordNumber: 775200
               - Name: Rhodococcus obuensis
                 ConceptType: Species
                 ConceptId: species/rhodococcus-obuensis
@@ -6170,6 +6209,11 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 2062
                   LpsnRecordNumber: 779833
+                - Name: Pseudopropionibacterium propionicum
+                  ConceptId: species/pseudopropionibacterium-propionicum
+                  ConceptSource: LPSN
+                  Id: 3583
+                  LpsnRecordNumber: 794764
             - Name: Cutibacterium
               ConceptType: Genus
               ConceptId: genus/cutibacterium
@@ -6785,19 +6829,6 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 1621
                   LpsnRecordNumber: 783415
-              - Name: Alkalihalobacillus macyae
-                ConceptType: Species
-                ConceptId: species/alkalihalobacillus-macyae
-                ConceptSource: LPSN
-                Id: 3046
-                LpsnRecordNumber: 7372
-                CommonCommensal: true
-                Synonyms:
-                - Name: Bacillus macyae
-                  ConceptId: species/bacillus-macyae
-                  ConceptSource: LPSN
-                  Id: 237
-                  LpsnRecordNumber: 773763
               - Name: Alkalihalobacillus pseudalcaliphilus
                 ConceptType: Species
                 ConceptId: species/alkalihalobacillus-pseudalcaliphilus
@@ -6931,6 +6962,19 @@ Hierarchies:
                   Id: 1796
                   LpsnRecordNumber: 773644
                   CommonCommensal: true
+                - Name: Bacillus inaquosorum
+                  ConceptType: Species
+                  ConceptId: species/bacillus-inaquosorum
+                  ConceptSource: LPSN
+                  Id: 3329
+                  LpsnRecordNumber: 7855
+                  CommonCommensal: true
+                  Synonyms:
+                  - Name: Bacillus subtilis subsp. inaquosorum
+                    ConceptId: subspecies/bacillus-subtilis-inaquosorum
+                    ConceptSource: LPSN
+                    Id: 242
+                    LpsnRecordNumber: 788115
                 - Name: Bacillus mojavensis
                   ConceptType: Species
                   ConceptId: species/bacillus-mojavensis
@@ -6945,6 +6989,19 @@ Hierarchies:
                   Id: 2045
                   LpsnRecordNumber: 773820
                   CommonCommensal: true
+                - Name: Bacillus spizizenii
+                  ConceptType: Species
+                  ConceptId: species/bacillus-spizizenii
+                  ConceptSource: LPSN
+                  Id: 3213
+                  LpsnRecordNumber: 7856
+                  CommonCommensal: true
+                  Synonyms:
+                  - Name: Bacillus subtilis subsp. spizizenii
+                    ConceptId: subspecies/bacillus-subtilis-spizizenii
+                    ConceptSource: LPSN
+                    Id: 2173
+                    LpsnRecordNumber: 773848
                 - Name: Bacillus subtilis
                   ConceptType: Species
                   ConceptId: species/bacillus-subtilis
@@ -6979,6 +7036,9 @@ Hierarchies:
                 Id: 2933
                 LpsnRecordNumber: 773619
                 CommonCommensal: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Bacillus aerius
                 ConceptType: Species
                 ConceptId: species/bacillus-aerius
@@ -6986,6 +7046,9 @@ Hierarchies:
                 Id: 2934
                 LpsnRecordNumber: 783412
                 CommonCommensal: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Bacillus benzoevorans
                 ConceptType: Species
                 ConceptId: species/bacillus-benzoevorans
@@ -7000,32 +7063,6 @@ Hierarchies:
                 Id: 1403
                 LpsnRecordNumber: 773665
                 CommonCommensal: true
-              - Name: Bacillus circulans
-                ConceptType: Species
-                ConceptId: species/bacillus-circulans
-                ConceptSource: LPSN
-                Id: 2034
-                LpsnRecordNumber: 773676
-                CommonCommensal: true
-                Synonyms:
-                - Name: Niallia circulans
-                  ConceptId: species/niallia-circulans
-                  ConceptSource: LPSN
-                  Id: 3288
-                  LpsnRecordNumber: 14716
-              - Name: Bacillus coagulans
-                ConceptType: Species
-                ConceptId: species/bacillus-coagulans
-                ConceptSource: LPSN
-                Id: 2228
-                LpsnRecordNumber: 773679
-                CommonCommensal: true
-                Synonyms:
-                - Name: Weizmannia coagulans
-                  ConceptId: species/weizmannia-coagulans
-                  ConceptSource: LPSN
-                  Id: 3159
-                  LpsnRecordNumber: 14726
               - Name: Bacillus decisifrondis
                 ConceptType: Species
                 ConceptId: species/bacillus-decisifrondis
@@ -7040,19 +7077,6 @@ Hierarchies:
                 Id: 1581
                 LpsnRecordNumber: 773733
                 CommonCommensal: true
-              - Name: Bacillus inaquosorum
-                ConceptType: Species
-                ConceptId: species/bacillus-inaquosorum
-                ConceptSource: LPSN
-                Id: 3329
-                LpsnRecordNumber: 7855
-                CommonCommensal: true
-                Synonyms:
-                - Name: Bacillus subtilis subsp. inaquosorum
-                  ConceptId: subspecies/bacillus-subtilis-inaquosorum
-                  ConceptSource: LPSN
-                  Id: 242
-                  LpsnRecordNumber: 788115
               - Name: Bacillus infantis
                 ConceptType: Species
                 ConceptId: species/bacillus-infantis
@@ -7081,19 +7105,6 @@ Hierarchies:
                 Id: 1038
                 LpsnRecordNumber: 773774
                 CommonCommensal: true
-              - Name: Bacillus nealsonii
-                ConceptType: Species
-                ConceptId: species/bacillus-nealsonii
-                ConceptSource: LPSN
-                Id: 1102
-                LpsnRecordNumber: 773784
-                CommonCommensal: true
-                Synonyms:
-                - Name: Niallia nealsonii
-                  ConceptId: species/niallia-nealsonii
-                  ConceptSource: LPSN
-                  Id: 3131
-                  LpsnRecordNumber: 14773
               - Name: Bacillus smithii
                 ConceptType: Species
                 ConceptId: species/bacillus-smithii
@@ -7108,19 +7119,6 @@ Hierarchies:
                 Id: 2560
                 LpsnRecordNumber: 773839
                 CommonCommensal: true
-              - Name: Bacillus spizizenii
-                ConceptType: Species
-                ConceptId: species/bacillus-spizizenii
-                ConceptSource: LPSN
-                Id: 3213
-                LpsnRecordNumber: 7856
-                CommonCommensal: true
-                Synonyms:
-                - Name: Bacillus subtilis subsp. spizizenii
-                  ConceptId: subspecies/bacillus-subtilis-spizizenii
-                  ConceptSource: LPSN
-                  Id: 2173
-                  LpsnRecordNumber: 773848
               - Name: Bacillus thermoamylovorans
                 ConceptType: Species
                 ConceptId: species/bacillus-thermoamylovorans
@@ -7223,10 +7221,10 @@ Hierarchies:
                 CommonCommensal: true
                 Synonyms:
                 - Name: Bacillus pallidus
-                  ConceptId: species/bacillus-pallidus
+                  ConceptId: species/bacillus-pallidus-1
                   ConceptSource: LPSN
                   Id: 2937
-                  LpsnRecordNumber: 773796
+                  LpsnRecordNumber: 787653
             - Name: Ferdinandcohnia
               ConceptType: Genus
               ConceptId: genus/ferdinandcohnia
@@ -7416,6 +7414,24 @@ Hierarchies:
               ConceptSource: LPSN
               LpsnRecordNumber: 14512
               Children:
+              - Name: Heyndrickxia coagulans
+                ConceptType: Species
+                ConceptId: species/heyndrickxia-coagulans
+                ConceptSource: LPSN
+                Id: 3570
+                LpsnRecordNumber: 39735
+                CommonCommensal: true
+                Synonyms:
+                - Name: Bacillus coagulans
+                  ConceptId: species/bacillus-coagulans
+                  ConceptSource: LPSN
+                  Id: 2228
+                  LpsnRecordNumber: 773679
+                - Name: Weizmannia coagulans
+                  ConceptId: species/weizmannia-coagulans
+                  ConceptSource: LPSN
+                  Id: 3159
+                  LpsnRecordNumber: 14726
               - Name: Heyndrickxia oleronia
                 ConceptType: Species
                 ConceptId: species/heyndrickxia-oleronia
@@ -7716,11 +7732,21 @@ Hierarchies:
                 LpsnRecordNumber: 26621
                 CommonCommensal: true
                 Synonyms:
+                - Name: Alkalihalobacillus macyae
+                  ConceptId: species/alkalihalobacillus-macyae
+                  ConceptSource: LPSN
+                  Id: 3046
+                  LpsnRecordNumber: 7372
                 - Name: Bacillus hwajinpoensis
                   ConceptId: species/bacillus-hwajinpoensis
                   ConceptSource: LPSN
                   Id: 2199
                   LpsnRecordNumber: 773735
+                - Name: Bacillus macyae
+                  ConceptId: species/bacillus-macyae
+                  ConceptSource: LPSN
+                  Id: 237
+                  LpsnRecordNumber: 773763
             - Name: Pseudobacillus
               ConceptType: Genus
               ConceptId: genus/pseudobacillus
@@ -8067,6 +8093,12 @@ Hierarchies:
               ConceptSource: LPSN
               LpsnRecordNumber: 517559
               Children:
+              - Name: Lysinibacillus macroides
+                ConceptType: Species
+                ConceptId: species/lysinibacillus-macroides
+                ConceptSource: LPSN
+                Id: 3581
+                LpsnRecordNumber: 789872
               - Name: Lysinibacillus odysseyi
                 ConceptType: Species
                 ConceptId: species/lysinibacillus-odysseyi
@@ -8373,6 +8405,38 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 1224
                   LpsnRecordNumber: 773907
+            - Name: Niallia
+              ConceptType: Genus
+              ConceptId: genus/niallia
+              ConceptSource: LPSN
+              LpsnRecordNumber: 14519
+              Children:
+              - Name: Niallia circulans
+                ConceptType: Species
+                ConceptId: species/niallia-circulans
+                ConceptSource: LPSN
+                Id: 3288
+                LpsnRecordNumber: 14716
+                CommonCommensal: true
+                Synonyms:
+                - Name: Bacillus circulans
+                  ConceptId: species/bacillus-circulans
+                  ConceptSource: LPSN
+                  Id: 2034
+                  LpsnRecordNumber: 773676
+              - Name: Niallia nealsonii
+                ConceptType: Species
+                ConceptId: species/niallia-nealsonii
+                ConceptSource: LPSN
+                Id: 3131
+                LpsnRecordNumber: 14773
+                CommonCommensal: true
+                Synonyms:
+                - Name: Bacillus nealsonii
+                  ConceptId: species/bacillus-nealsonii
+                  ConceptSource: LPSN
+                  Id: 1102
+                  LpsnRecordNumber: 773784
             - Name: Robertmurraya
               ConceptType: Genus
               ConceptId: genus/robertmurraya
@@ -8639,6 +8703,18 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 671
                   LpsnRecordNumber: 773630
+              - Name: Paenibacillus chitinolyticus
+                ConceptType: Species
+                ConceptId: species/paenibacillus-chitinolyticus
+                ConceptSource: LPSN
+                Id: 3579
+                LpsnRecordNumber: 779057
+                Synonyms:
+                - Name: Bacillus chitinolyticus
+                  ConceptId: species/bacillus-chitinolyticus
+                  ConceptSource: LPSN
+                  Id: 3580
+                  LpsnRecordNumber: 773672
               - Name: Paenibacillus edaphicus
                 ConceptType: Species
                 ConceptId: species/paenibacillus-edaphicus
@@ -8796,6 +8872,11 @@ Hierarchies:
                 LpsnRecordNumber: 779104
                 CommonCommensal: true
                 Synonyms:
+                - Name: Bacillus gordonae
+                  ConceptId: species/bacillus-gordonae
+                  ConceptSource: LPSN
+                  Id: 3582
+                  LpsnRecordNumber: 773721
                 - Name: Bacillus validus
                   ConceptId: species/bacillus-validus
                   ConceptSource: LPSN
@@ -8963,15 +9044,13 @@ Hierarchies:
                   Id: 2223
                   LpsnRecordNumber: 781175
                   CommonCommensal: true
-                  Children:
+                  Synonyms:
                   - Name: Staphylococcus carnosus subsp. carnosus
-                    ConceptType: Subspecies
                     ConceptId: subspecies/staphylococcus-carnosus-carnosus
                     ConceptSource: LPSN
                     Id: 1298
                     LpsnRecordNumber: 781176
                     CommonCommensal: true
-                  Synonyms:
                   - Name: Staphylococcus carnosus subsp. utilis
                     ConceptId: subspecies/staphylococcus-carnosus-utilis
                     ConceptSource: LPSN
@@ -9176,6 +9255,9 @@ Hierarchies:
                   Id: 2782
                   LpsnRecordNumber: 801159
                   CommonCommensal: true
+                  Comments:
+                    Background: >-
+                      The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
                 - Name: Staphylococcus saccharolyticus
                   ConceptType: Species
                   ConceptId: species/staphylococcus-saccharolyticus
@@ -9196,20 +9278,31 @@ Hierarchies:
                   Id: 739
                   LpsnRecordNumber: 781212
                   CommonCommensal: true
-                  Children:
-                  - Name: Staphylococcus saprophyticus subsp. saprophyticus
-                    ConceptType: Subspecies
-                    ConceptId: subspecies/staphylococcus-saprophyticus-saprophyticus
-                    ConceptSource: LPSN
-                    Id: 500
-                    LpsnRecordNumber: 781213
-                    CommonCommensal: true
                   Synonyms:
                   - Name: Staphylococcus saprophyticus subsp. bovis
                     ConceptId: subspecies/staphylococcus-saprophyticus-bovis
                     ConceptSource: LPSN
                     Id: 16
                     LpsnRecordNumber: 784965
+                  - Name: Staphylococcus saprophyticus subsp. saprophyticus
+                    ConceptId: subspecies/staphylococcus-saprophyticus-saprophyticus
+                    ConceptSource: LPSN
+                    Id: 500
+                    LpsnRecordNumber: 781213
+                    CommonCommensal: true
+                - Name: Staphylococcus schleiferi
+                  ConceptType: Species
+                  ConceptId: species/staphylococcus-schleiferi
+                  ConceptSource: LPSN
+                  Id: 741
+                  LpsnRecordNumber: 784966
+                  Synonyms:
+                  - Name: Staphylococcus schleiferi subsp. schleiferi
+                    ConceptId: subspecies/staphylococcus-schleiferi-schleiferi
+                    ConceptSource: LPSN
+                    Id: 1748
+                    LpsnRecordNumber: 781215
+                    CommonCommensal: true
                 - Name: Staphylococcus sciuri
                   ConceptType: Species
                   ConceptId: species/staphylococcus-sciuri
@@ -9217,14 +9310,6 @@ Hierarchies:
                   Id: 1158
                   LpsnRecordNumber: 781216
                   CommonCommensal: true
-                  Children:
-                  - Name: Staphylococcus sciuri subsp. sciuri
-                    ConceptType: Subspecies
-                    ConceptId: subspecies/staphylococcus-sciuri-sciuri
-                    ConceptSource: LPSN
-                    Id: 2775
-                    LpsnRecordNumber: 781220
-                    CommonCommensal: true
                   Synonyms:
                   - Name: Mammaliicoccus sciuri
                     ConceptId: species/mammaliicoccus-sciuri
@@ -9241,6 +9326,12 @@ Hierarchies:
                     ConceptSource: LPSN
                     Id: 260
                     LpsnRecordNumber: 781219
+                  - Name: Staphylococcus sciuri subsp. sciuri
+                    ConceptId: subspecies/staphylococcus-sciuri-sciuri
+                    ConceptSource: LPSN
+                    Id: 2775
+                    LpsnRecordNumber: 781220
+                    CommonCommensal: true
                 - Name: Staphylococcus simulans
                   ConceptType: Species
                   ConceptId: species/staphylococcus-simulans
@@ -9268,12 +9359,21 @@ Hierarchies:
                   Id: 3026
                   LpsnRecordNumber: 14801
                   CommonCommensal: true
+                  Comments:
+                    Background: >-
+                      The concept keeps this name, which LPSN gives as illegitimate and in need of a replacement,
+                      because no replacement name exists, and the List of Recommended Names for bacteria of medical
+                      importance gives it as the name to be applied to this species (doi:10.1099/ijsem.0.006943).
                   Synonyms:
                   - Name: Staphylococcus cohnii subsp. urealyticus
-                    ConceptId: subspecies/staphylococcus-cohnii-urealyticus
+                    ConceptId: subspecies/staphylococcus-cohnii-ureilyticus
                     ConceptSource: LPSN
                     Id: 2125
                     LpsnRecordNumber: 781182
+                    Comments:
+                      Background: >-
+                        LPSN spells the epithet ureilyticus in this record; the list keeps the spelling urealyticus,
+                        which its released versions gave this Id.
                 - Name: Staphylococcus vitulinus
                   ConceptType: Species
                   ConceptId: species/staphylococcus-vitulinus
@@ -9314,7 +9414,7 @@ Hierarchies:
                 Children:
                 - Name: Staphylococcus aureus complex
                   ConceptType: Group
-                  ConceptId: ToDo
+                  ConceptId: 103
                   ConceptSource: NeoIPC
                   MRSA: true
                   Children:
@@ -9332,28 +9432,30 @@ Hierarchies:
                     Id: 934
                     LpsnRecordNumber: 781168
                     MRSA: true
-                    Children:
+                    Synonyms:
                     - Name: Staphylococcus aureus subsp. anaerobius
                       ConceptId: subspecies/staphylococcus-aureus-anaerobius
                       ConceptSource: LPSN
-                      LpsnRecordNumber:   781169
+                      Id: 3578
+                      LpsnRecordNumber: 781169
                       MRSA: true
                     - Name: Staphylococcus aureus subsp. aureus
                       ConceptId: subspecies/staphylococcus-aureus-aureus
                       ConceptSource: LPSN
-                      LpsnRecordNumber:  781170
+                      Id: 3577
+                      LpsnRecordNumber: 781170
                       MRSA: true
-                    Synonyms:
                     - Name: Staphylococcus roterodami
                       ConceptId: species/staphylococcus-roterodami
                       ConceptSource: LPSN
-                      LpsnRecordNumber:  22650
+                      Id: 3584
+                      LpsnRecordNumber: 22650
                       MRSA: true
                   - Name: Staphylococcus schweitzeri
                     ConceptType: Species
                     ConceptId: species/staphylococcus-schweitzeri
                     ConceptSource: LPSN
-                    LpsnRecordNumber:  792443
+                    LpsnRecordNumber: 792443
                     MRSA: true
                 - Name: Staphylococcus coagulans
                   ConceptType: Species
@@ -9397,22 +9499,9 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 2272
                   LpsnRecordNumber: 785516
-                - Name: Staphylococcus schleiferi
-                  ConceptType: Species
-                  ConceptId: species/staphylococcus-schleiferi
-                  ConceptSource: LPSN
-                  Id: 741
-                  LpsnRecordNumber: 784966
-                  Synonyms:
-                  - Name: Staphylococcus schleiferi subsp. schleiferi
-                    ConceptId: subspecies/staphylococcus-schleiferi-schleiferi
-                    ConceptSource: LPSN
-                    Id: 1748
-                    LpsnRecordNumber: 781215
-                    CommonCommensal: true
               - Name: Coagulase-variable staphylococci
                 ConceptType: Group
-                ConceptId: 86
+                ConceptId: 102
                 ConceptSource: NeoIPC
                 Children:
                 - Name: Staphylococcus chromogenes
@@ -10030,6 +10119,18 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 462
                   LpsnRecordNumber: 784066
+              - Name: Lacticaseibacillus rhamnosus
+                ConceptType: Species
+                ConceptId: species/lacticaseibacillus-rhamnosus
+                ConceptSource: LPSN
+                Id: 3277
+                LpsnRecordNumber: 10740
+                Synonyms:
+                - Name: Lactobacillus rhamnosus
+                  ConceptId: species/lactobacillus-rhamnosus
+                  ConceptSource: LPSN
+                  Id: 2221
+                  LpsnRecordNumber: 777383
             - Name: Lactiplantibacillus
               ConceptType: Genus
               ConceptId: genus/lactiplantibacillus
@@ -10114,18 +10215,18 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 1043
                 LpsnRecordNumber: 777329
-              - Name: Lactobacillus rhamnosus
+              - Name: Lactobacillus rogosae
                 ConceptType: Species
-                ConceptId: species/lactobacillus-rhamnosus
+                ConceptId: species/lactobacillus-rogosae
                 ConceptSource: LPSN
-                Id: 2221
-                LpsnRecordNumber: 777383
+                Id: 3574
+                LpsnRecordNumber: 784067
                 Synonyms:
-                - Name: Lacticaseibacillus rhamnosus
-                  ConceptId: species/lacticaseibacillus-rhamnosus
+                - Name: Bacteroides galacturonicus
+                  ConceptId: species/bacteroides-galacturonicus
                   ConceptSource: LPSN
-                  Id: 3277
-                  LpsnRecordNumber: 10740
+                  Id: 2902
+                  LpsnRecordNumber: 773946
               - Name: Lactobacillus ultunensis
                 ConceptType: Species
                 ConceptId: species/lactobacillus-ultunensis
@@ -10481,6 +10582,19 @@ Hierarchies:
                   ConceptSource: NeoIPC
                   Id: 2801
                   Children:
+                  - Name: Streptococcus alactolyticus
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-alactolyticus
+                    ConceptSource: LPSN
+                    Id: 2255
+                    LpsnRecordNumber: 781298
+                    CommonCommensal: true
+                    Synonyms:
+                    - Name: Streptococcus intestinalis
+                      ConceptId: species/streptococcus-intestinalis
+                      ConceptSource: LPSN
+                      Id: 1537
+                      LpsnRecordNumber: 781352
                   - Name: Streptococcus equinus
                     ConceptType: Species
                     ConceptId: species/streptococcus-equinus
@@ -10543,13 +10657,6 @@ Hierarchies:
                     LpsnRecordNumber: 784982
                     CommonCommensal: true
                     Children:
-                    - Name: Streptococcus infantarius subsp. coli
-                      ConceptType: Subspecies
-                      ConceptId: subspecies/streptococcus-infantarius-coli
-                      ConceptSource: LPSN
-                      Id: 2338
-                      LpsnRecordNumber: 784983
-                      CommonCommensal: true
                     - Name: Streptococcus infantarius subsp. infantarius
                       ConceptType: Subspecies
                       ConceptId: subspecies/streptococcus-infantarius-infantarius
@@ -10557,6 +10664,26 @@ Hierarchies:
                       Id: 1514
                       LpsnRecordNumber: 784984
                       CommonCommensal: true
+                  - Name: Streptococcus lutetiensis
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-lutetiensis
+                    ConceptSource: LPSN
+                    Id: 1661
+                    LpsnRecordNumber: 781355
+                    CommonCommensal: true
+                    Comments:
+                      Background: >-
+                        LPSN gives Streptococcus infantarius subsp. coli as a correct name of its own, but its notes
+                        record that the subspecies and Streptococcus lutetiensis belong to one taxon, and that
+                        organisms of that species were previously described as the subspecies
+                        (doi:10.1099/ijs.0.02361-0). The list therefore holds the subspecies name, with its Id, as a
+                        synonym of Streptococcus lutetiensis.
+                    Synonyms:
+                    - Name: Streptococcus infantarius subsp. coli
+                      ConceptId: subspecies/streptococcus-infantarius-coli
+                      ConceptSource: LPSN
+                      Id: 2338
+                      LpsnRecordNumber: 784983
                 - Name: Streptococcus mitis group
                   ConceptType: Group
                   ConceptId: 72
@@ -10582,6 +10709,13 @@ Hierarchies:
                     ConceptSource: LPSN
                     Id: 1470
                     LpsnRecordNumber: 781349
+                    CommonCommensal: true
+                  - Name: Streptococcus lactarius
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-lactarius
+                    ConceptSource: LPSN
+                    Id: 2788
+                    LpsnRecordNumber: 789217
                     CommonCommensal: true
                   - Name: Streptococcus mitis
                     ConceptType: Species
@@ -10638,18 +10772,60 @@ Hierarchies:
                     Id: 261
                     LpsnRecordNumber: 784991
                     CommonCommensal: true
+                  - Name: Streptococcus sinensis
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-sinensis
+                    ConceptSource: LPSN
+                    Id: 1011
+                    LpsnRecordNumber: 781386
+                    CommonCommensal: true
                 - Name: Streptococcus mutans group
                   ConceptType: Group
                   ConceptId: 73
                   ConceptSource: NeoIPC
                   Id: 2803
                   Children:
+                  - Name: Streptococcus criceti
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-criceti
+                    ConceptSource: LPSN
+                    Id: 644
+                    LpsnRecordNumber: 781311
+                    CommonCommensal: true
+                  - Name: Streptococcus devriesei
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-devriesei
+                    ConceptSource: LPSN
+                    Id: 2784
+                    LpsnRecordNumber: 784978
+                    CommonCommensal: true
+                  - Name: Streptococcus downei
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-downei
+                    ConceptSource: LPSN
+                    Id: 289
+                    LpsnRecordNumber: 781319
+                    CommonCommensal: true
+                  - Name: Streptococcus ferus
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-ferus
+                    ConceptSource: LPSN
+                    Id: 1313
+                    LpsnRecordNumber: 781334
+                    CommonCommensal: true
                   - Name: Streptococcus hyovaginalis
                     ConceptType: Species
                     ConceptId: species/streptococcus-hyovaginalis
                     ConceptSource: LPSN
                     Id: 2004
                     LpsnRecordNumber: 781348
+                    CommonCommensal: true
+                  - Name: Streptococcus macacae
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-macacae
+                    ConceptSource: LPSN
+                    Id: 2391
+                    LpsnRecordNumber: 781356
                     CommonCommensal: true
                   - Name: Streptococcus mutans
                     ConceptType: Species
@@ -10685,27 +10861,26 @@ Hierarchies:
                     Id: 1126
                     LpsnRecordNumber: 781383
                     CommonCommensal: true
-                    Children:
+                    Synonyms:
                     - Name: Streptococcus salivarius subsp. salivarius
-                      ConceptType: Subspecies
                       ConceptId: subspecies/streptococcus-salivarius-salivarius
                       ConceptSource: LPSN
                       Id: 1882
                       LpsnRecordNumber: 788218
                       CommonCommensal: true
+                  - Name: Streptococcus thermophilus
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-thermophilus
+                    ConceptSource: LPSN
+                    Id: 2175
+                    LpsnRecordNumber: 781390
+                    CommonCommensal: true
+                    Synonyms:
                     - Name: Streptococcus salivarius subsp. thermophilus
-                      ConceptType: Subspecies
                       ConceptId: subspecies/streptococcus-salivarius-thermophilus
                       ConceptSource: LPSN
                       Id: 2132
                       LpsnRecordNumber: 781384
-                      CommonCommensal: true
-                      Synonyms:
-                      - Name: Streptococcus thermophilus
-                        ConceptId: species/streptococcus-thermophilus
-                        ConceptSource: LPSN
-                        Id: 2175
-                        LpsnRecordNumber: 781390
                   - Name: Streptococcus vestibularis
                     ConceptType: Species
                     ConceptId: species/streptococcus-vestibularis
@@ -10719,6 +10894,13 @@ Hierarchies:
                   ConceptSource: NeoIPC
                   Id: 2805
                   Children:
+                  - Name: Streptococcus australis
+                    ConceptType: Species
+                    ConceptId: species/streptococcus-australis
+                    ConceptSource: LPSN
+                    Id: 2488
+                    LpsnRecordNumber: 781300
+                    CommonCommensal: true
                   - Name: Streptococcus gordonii
                     ConceptType: Species
                     ConceptId: species/streptococcus-gordonii
@@ -10746,6 +10928,12 @@ Hierarchies:
                       ConceptSource: LPSN
                       Id: 2792
                       LpsnRecordNumber: 784993
+                - Name: Streptococcus massiliensis
+                  ConceptType: Species
+                  ConceptId: species/streptococcus-massiliensis
+                  ConceptSource: LPSN
+                  Id: 2789
+                  LpsnRecordNumber: 784987
               - Name: Streptococcus acidominimus
                 ConceptType: Species
                 ConceptId: species/streptococcus-acidominimus
@@ -10763,53 +10951,12 @@ Hierarchies:
                   ConceptId: 4
                   ConceptSource: NeoIPC
                   Id: 2602
-              - Name: Streptococcus alactolyticus
-                ConceptType: Species
-                ConceptId: species/streptococcus-alactolyticus
-                ConceptSource: LPSN
-                Id: 2255
-                LpsnRecordNumber: 781298
-                CommonCommensal: true
-                Synonyms:
-                - Name: Streptococcus intestinalis
-                  ConceptId: species/streptococcus-intestinalis
-                  ConceptSource: LPSN
-                  Id: 1537
-                  LpsnRecordNumber: 781352
-              - Name: Streptococcus australis
-                ConceptType: Species
-                ConceptId: species/streptococcus-australis
-                ConceptSource: LPSN
-                Id: 2488
-                LpsnRecordNumber: 781300
-                CommonCommensal: true
               - Name: Streptococcus canis
                 ConceptType: Species
                 ConceptId: species/streptococcus-canis
                 ConceptSource: LPSN
                 Id: 2405
                 LpsnRecordNumber: 781303
-              - Name: Streptococcus criceti
-                ConceptType: Species
-                ConceptId: species/streptococcus-criceti
-                ConceptSource: LPSN
-                Id: 644
-                LpsnRecordNumber: 781311
-                CommonCommensal: true
-              - Name: Streptococcus devriesei
-                ConceptType: Species
-                ConceptId: species/streptococcus-devriesei
-                ConceptSource: LPSN
-                Id: 2784
-                LpsnRecordNumber: 784978
-                CommonCommensal: true
-              - Name: Streptococcus downei
-                ConceptType: Species
-                ConceptId: species/streptococcus-downei
-                ConceptSource: LPSN
-                Id: 289
-                LpsnRecordNumber: 781319
-                CommonCommensal: true
               - Name: Streptococcus dysgalactiae
                 ConceptType: Species
                 ConceptId: species/streptococcus-dysgalactiae
@@ -10854,13 +11001,6 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 148
                   LpsnRecordNumber: 781327
-              - Name: Streptococcus ferus
-                ConceptType: Species
-                ConceptId: species/streptococcus-ferus
-                ConceptSource: LPSN
-                Id: 1313
-                LpsnRecordNumber: 781334
-                CommonCommensal: true
               - Name: Streptococcus gallinaceus
                 ConceptType: Species
                 ConceptId: species/streptococcus-gallinaceus
@@ -10892,33 +11032,6 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 650
                   LpsnRecordNumber: 784994
-              - Name: Streptococcus lactarius
-                ConceptType: Species
-                ConceptId: species/streptococcus-lactarius
-                ConceptSource: LPSN
-                Id: 2788
-                LpsnRecordNumber: 789217
-                CommonCommensal: true
-              - Name: Streptococcus lutetiensis
-                ConceptType: Species
-                ConceptId: species/streptococcus-lutetiensis
-                ConceptSource: LPSN
-                Id: 1661
-                LpsnRecordNumber: 781355
-                CommonCommensal: true
-              - Name: Streptococcus macacae
-                ConceptType: Species
-                ConceptId: species/streptococcus-macacae
-                ConceptSource: LPSN
-                Id: 2391
-                LpsnRecordNumber: 781356
-                CommonCommensal: true
-              - Name: Streptococcus massiliensis
-                ConceptType: Species
-                ConceptId: species/streptococcus-massiliensis
-                ConceptSource: LPSN
-                Id: 2789
-                LpsnRecordNumber: 784987
               - Name: Streptococcus merionis
                 ConceptType: Species
                 ConceptId: species/streptococcus-merionis
@@ -10979,13 +11092,6 @@ Hierarchies:
                   ConceptId: 3
                   ConceptSource: NeoIPC
                   Id: 2601
-              - Name: Streptococcus sinensis
-                ConceptType: Species
-                ConceptId: species/streptococcus-sinensis
-                ConceptSource: LPSN
-                Id: 1011
-                LpsnRecordNumber: 781386
-                CommonCommensal: true
               - Name: Streptococcus suis
                 ConceptType: Species
                 ConceptId: species/streptococcus-suis
@@ -11029,30 +11135,25 @@ Hierarchies:
             ConceptSource: LPSN
             LpsnRecordNumber: 1935
             Children:
-            - Name: Catabacter
-              ConceptType: Genus
-              ConceptId: genus/catabacter
-              ConceptSource: LPSN
-              LpsnRecordNumber: 517521
-              Children:
-              - Name: Catabacter hongkongensis
-                ConceptType: Species
-                ConceptId: species/catabacter-hongkongensis
-                ConceptSource: LPSN
-                Id: 1823
-                LpsnRecordNumber: 798690
-                Synonyms:
-                - Name: Christensenella hongkongensis
-                  ConceptId: species/christensenella-hongkongensis
-                  ConceptSource: LPSN
-                  Id: 3163
-                  LpsnRecordNumber: 2988
             - Name: Christensenella
               ConceptType: Genus
               ConceptId: genus/christensenella
               ConceptSource: LPSN
               Id: 3020
               LpsnRecordNumber: 518159
+              Children:
+              - Name: Christensenella hongkongensis
+                ConceptType: Species
+                ConceptId: species/christensenella-hongkongensis
+                ConceptSource: LPSN
+                Id: 3163
+                LpsnRecordNumber: 2988
+                Synonyms:
+                - Name: Catabacter hongkongensis
+                  ConceptId: species/catabacter-hongkongensis
+                  ConceptSource: LPSN
+                  Id: 1823
+                  LpsnRecordNumber: 798690
               Synonyms:
               - Name: Catabacter
                 ConceptId: genus/catabacter
@@ -11166,12 +11267,6 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 1857
                   LpsnRecordNumber: 774916
-              - Name: Clostridium cocleatum
-                ConceptType: Species
-                ConceptId: species/clostridium-cocleatum
-                ConceptSource: LPSN
-                Id: 253
-                LpsnRecordNumber: 774860
               - Name: Clostridium combesii
                 ConceptType: Species
                 ConceptId: species/clostridium-combesii
@@ -11274,12 +11369,6 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 999
                 LpsnRecordNumber: 774962
-              - Name: Clostridium ramosum
-                ConceptType: Species
-                ConceptId: species/clostridium-ramosum
-                ConceptSource: LPSN
-                Id: 1091
-                LpsnRecordNumber: 774967
               - Name: Clostridium sardiniense
                 ConceptType: Species
                 ConceptId: species/clostridium-sardiniense
@@ -11298,12 +11387,6 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 1462
                 LpsnRecordNumber: 774981
-              - Name: Clostridium spiroforme
-                ConceptType: Species
-                ConceptId: species/clostridium-spiroforme
-                ConceptSource: LPSN
-                Id: 1966
-                LpsnRecordNumber: 774985
               - Name: Clostridium sporogenes
                 ConceptType: Species
                 ConceptId: species/clostridium-sporogenes
@@ -11596,12 +11679,6 @@ Hierarchies:
               Id: 1685
               LpsnRecordNumber: 517686
               Children:
-              - Name: Blautia coccoides
-                ConceptType: Species
-                ConceptId: species/blautia-coccoides
-                ConceptSource: LPSN
-                Id: 667
-                LpsnRecordNumber: 787479
               - Name: Blautia hansenii
                 ConceptType: Species
                 ConceptId: species/blautia-hansenii
@@ -11626,6 +11703,11 @@ Hierarchies:
                 Id: 631
                 LpsnRecordNumber: 787483
                 Synonyms:
+                - Name: Blautia coccoides
+                  ConceptId: species/blautia-coccoides
+                  ConceptSource: LPSN
+                  Id: 667
+                  LpsnRecordNumber: 787479
                 - Name: Peptostreptococcus productus
                   ConceptId: species/peptostreptococcus-productus
                   ConceptSource: LPSN
@@ -12595,6 +12677,48 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 1353
                   LpsnRecordNumber: 777413
+            - Name: Thomasclavelia
+              ConceptType: Genus
+              ConceptId: genus/thomasclavelia
+              ConceptSource: LPSN
+              LpsnRecordNumber: 36047
+              Children:
+              - Name: Thomasclavelia cocleata
+                ConceptType: Species
+                ConceptId: species/thomasclavelia-cocleata
+                ConceptSource: LPSN
+                Id: 3572
+                LpsnRecordNumber: 36077
+                Synonyms:
+                - Name: Clostridium cocleatum
+                  ConceptId: species/clostridium-cocleatum
+                  ConceptSource: LPSN
+                  Id: 253
+                  LpsnRecordNumber: 774860
+              - Name: Thomasclavelia ramosa
+                ConceptType: Species
+                ConceptId: species/thomasclavelia-ramosa
+                ConceptSource: LPSN
+                Id: 3571
+                LpsnRecordNumber: 36070
+                Synonyms:
+                - Name: Clostridium ramosum
+                  ConceptId: species/clostridium-ramosum
+                  ConceptSource: LPSN
+                  Id: 1091
+                  LpsnRecordNumber: 774967
+              - Name: Thomasclavelia spiroformis
+                ConceptType: Species
+                ConceptId: species/thomasclavelia-spiroformis
+                ConceptSource: LPSN
+                Id: 3573
+                LpsnRecordNumber: 36078
+                Synonyms:
+                - Name: Clostridium spiroforme
+                  ConceptId: species/clostridium-spiroforme
+                  ConceptSource: LPSN
+                  Id: 1966
+                  LpsnRecordNumber: 774985
           - Name: Erysipelotrichaceae
             ConceptType: Family
             ConceptId: family/erysipelotrichaceae
@@ -13361,19 +13485,17 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 1165
                 LpsnRecordNumber: 783880
-                Children:
-                - Name: Fusobacterium necrophorum subsp. necrophorum
-                  ConceptType: Subspecies
-                  ConceptId: subspecies/fusobacterium-necrophorum-necrophorum
-                  ConceptSource: LPSN
-                  Id: 1404
-                  LpsnRecordNumber: 776404
                 Synonyms:
                 - Name: Fusobacterium necrophorum subsp. funduliforme
                   ConceptId: subspecies/fusobacterium-necrophorum-funduliforme
                   ConceptSource: LPSN
                   Id: 2945
                   LpsnRecordNumber: 783881
+                - Name: Fusobacterium necrophorum subsp. necrophorum
+                  ConceptId: subspecies/fusobacterium-necrophorum-necrophorum
+                  ConceptSource: LPSN
+                  Id: 1404
+                  LpsnRecordNumber: 776404
               - Name: Fusobacterium nucleatum
                 ConceptType: Species
                 ConceptId: species/fusobacterium-nucleatum
@@ -13563,6 +13685,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2896
                 LpsnRecordNumber: 19298
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Bacteroides eggerthii
                 ConceptType: Species
                 ConceptId: species/bacteroides-eggerthii
@@ -13587,12 +13712,6 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 1296
                 LpsnRecordNumber: 773945
-              - Name: Bacteroides galacturonicus
-                ConceptType: Species
-                ConceptId: species/bacteroides-galacturonicus
-                ConceptSource: LPSN
-                Id: 2902
-                LpsnRecordNumber: 773946
               - Name: Bacteroides nordii
                 ConceptType: Species
                 ConceptId: species/bacteroides-nordii
@@ -15184,13 +15303,6 @@ Hierarchies:
               LpsnRecordNumber: 517335
               CommonCommensal: true
               Children:
-              - Name: Roseomonas cervicalis
-                ConceptType: Species
-                ConceptId: species/roseomonas-cervicalis
-                ConceptSource: LPSN
-                Id: 283
-                LpsnRecordNumber: 784821
-                CommonCommensal: true
               - Name: Roseomonas gilardii
                 ConceptType: Species
                 ConceptId: species/roseomonas-gilardii
@@ -15205,6 +15317,36 @@ Hierarchies:
                 Id: 1362
                 LpsnRecordNumber: 784827
                 CommonCommensal: true
+            - Name: Teichococcus
+              ConceptType: Genus
+              ConceptId: genus/teichococcus
+              ConceptSource: LPSN
+              LpsnRecordNumber: 516735
+              Children:
+              - Name: Teichococcus cervicalis
+                ConceptType: Species
+                ConceptId: species/teichococcus-cervicalis
+                ConceptSource: LPSN
+                Id: 3585
+                LpsnRecordNumber: 57247
+                CommonCommensal: true
+                Comments:
+                  Background: >-
+                    The List of Recommended Names for bacteria of medical importance gives Teichococcus cervicalis as
+                    the name to be applied to this species (doi:10.1099/ijsem.0.006943), while LPSN notes that the
+                    name should be taxonomically suspended in favour of Roseomonas cervicalis, the name under which
+                    the species was described.
+                Synonyms:
+                - Name: Pseudoroseomonas cervicalis
+                  ConceptId: species/pseudoroseomonas-cervicalis
+                  ConceptSource: LPSN
+                  Id: 3586
+                  LpsnRecordNumber: 26679
+                - Name: Roseomonas cervicalis
+                  ConceptId: species/roseomonas-cervicalis
+                  ConceptSource: LPSN
+                  Id: 283
+                  LpsnRecordNumber: 784821
           - Name: Azospirillaceae
             ConceptType: Family
             ConceptId: family/azospirillaceae
@@ -16853,6 +16995,9 @@ Hierarchies:
               3GCR: true
               Carbapenems: true
               Colistin: true
+              Comments:
+                Background: >-
+                  The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               Children:
               - Name: Averyella dalhousiensis
                 ConceptType: Species
@@ -16863,6 +17008,9 @@ Hierarchies:
                 3GCR: true
                 Carbapenems: true
                 Colistin: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
             - Name: Buttiauxella
               ConceptType: Genus
               ConceptId: genus/buttiauxella
@@ -19130,6 +19278,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2909
                 LpsnRecordNumber: 17534
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Legionella israelensis
                 ConceptType: Species
                 ConceptId: species/legionella-israelensis
@@ -19558,6 +19709,27 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 191
                   LpsnRecordNumber: 795963
+            - Name: Canicola
+              ConceptType: Genus
+              ConceptId: genus/canicola
+              ConceptSource: LPSN
+              LpsnRecordNumber: 1121
+              Children:
+              - Name: Canicola haemoglobinophilus
+                ConceptType: Species
+                ConceptId: species/canicola-haemoglobinophilus
+                ConceptSource: LPSN
+                Id: 3135
+                LpsnRecordNumber: 19905
+                3GCR: true
+                Carbapenems: true
+                Colistin: true
+                Synonyms:
+                - Name: Haemophilus haemoglobinophilus
+                  ConceptId: species/haemophilus-haemoglobinophilus
+                  ConceptSource: LPSN
+                  Id: 1799
+                  LpsnRecordNumber: 783938
             - Name: Haemophilus
               ConceptType: Genus
               ConceptId: genus/haemophilus
@@ -19586,21 +19758,6 @@ Hierarchies:
                 3GCR: true
                 Carbapenems: true
                 Colistin: true
-              - Name: Haemophilus haemoglobinophilus
-                ConceptType: Species
-                ConceptId: species/haemophilus-haemoglobinophilus
-                ConceptSource: LPSN
-                Id: 1799
-                LpsnRecordNumber: 783938
-                3GCR: true
-                Carbapenems: true
-                Colistin: true
-                Synonyms:
-                - Name: Canicola haemoglobinophilus
-                  ConceptId: species/canicola-haemoglobinophilus
-                  ConceptSource: LPSN
-                  Id: 3135
-                  LpsnRecordNumber: 19905
               - Name: Haemophilus haemolyticus
                 ConceptType: Species
                 ConceptId: species/haemophilus-haemolyticus
@@ -19955,14 +20112,6 @@ Hierarchies:
                 LpsnRecordNumber: 792594
                 Carbapenems: true
                 Colistin: true
-              - Name: Acinetobacter septicus
-                ConceptType: Species
-                ConceptId: species/acinetobacter-septicus
-                ConceptSource: LPSN
-                Id: 2815
-                LpsnRecordNumber: 786412
-                Carbapenems: true
-                Colistin: true
               - Name: Acinetobacter ursingii
                 ConceptType: Species
                 ConceptId: species/acinetobacter-ursingii
@@ -19971,6 +20120,12 @@ Hierarchies:
                 LpsnRecordNumber: 772633
                 Carbapenems: true
                 Colistin: true
+                Synonyms:
+                - Name: Acinetobacter septicus
+                  ConceptId: species/acinetobacter-septicus
+                  ConceptSource: LPSN
+                  Id: 2815
+                  LpsnRecordNumber: 786412
               - Name: Acinetobacter variabilis
                 ConceptType: Species
                 ConceptId: species/acinetobacter-variabilis
@@ -20171,6 +20326,9 @@ Hierarchies:
                 3GCR: true
                 Carbapenems: true
                 Colistin: true
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Pseudomonas asiatica
                 ConceptType: Species
                 ConceptId: species/pseudomonas-asiatica
@@ -20374,6 +20532,18 @@ Hierarchies:
               Carbapenems: true
               Colistin: true
               Children:
+              - Name: Stutzerimonas chloritidismutans
+                ConceptType: Species
+                ConceptId: species/stutzerimonas-chloritidismutans
+                ConceptSource: LPSN
+                Id: 3575
+                LpsnRecordNumber: 25699
+                Synonyms:
+                - Name: Pseudomonas chloritidismutans
+                  ConceptId: species/pseudomonas-chloritidismutans
+                  ConceptSource: LPSN
+                  Id: 2394
+                  LpsnRecordNumber: 779990
               - Name: Stutzerimonas nosocomialis
                 ConceptType: Species
                 ConceptId: species/stutzerimonas-nosocomialis
@@ -20386,6 +20556,18 @@ Hierarchies:
                   ConceptSource: LPSN
                   Id: 2837
                   LpsnRecordNumber: 5582
+              - Name: Stutzerimonas perfectomarina
+                ConceptType: Species
+                ConceptId: species/stutzerimonas-perfectomarina
+                ConceptSource: LPSN
+                Id: 3576
+                LpsnRecordNumber: 29673
+                Synonyms:
+                - Name: Pseudomonas perfectomarina
+                  ConceptId: species/pseudomonas-perfectomarina
+                  ConceptSource: LPSN
+                  Id: 1088
+                  LpsnRecordNumber: 784730
               - Name: Stutzerimonas stutzeri
                 ConceptType: Species
                 ConceptId: species/stutzerimonas-stutzeri
@@ -20393,16 +20575,6 @@ Hierarchies:
                 Id: 3543
                 LpsnRecordNumber: 21513
                 Synonyms:
-                - Name: Pseudomonas chloritidismutans
-                  ConceptId: species/pseudomonas-chloritidismutans
-                  ConceptSource: LPSN
-                  Id: 2394
-                  LpsnRecordNumber: 779990
-                - Name: Pseudomonas perfectomarina
-                  ConceptId: species/pseudomonas-perfectomarina
-                  ConceptSource: LPSN
-                  Id: 1088
-                  LpsnRecordNumber: 784730
                 - Name: Pseudomonas stutzeri
                   ConceptId: species/pseudomonas-stutzeri
                   ConceptSource: LPSN
@@ -21059,6 +21231,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2947
                 LpsnRecordNumber: 2573
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Helicobacter rodentium
                 ConceptType: Species
                 ConceptId: species/helicobacter-rodentium
@@ -21346,6 +21521,9 @@ Hierarchies:
                 ConceptSource: LPSN
                 Id: 2957
                 LpsnRecordNumber: 785108
+                Comments:
+                  Background: >-
+                    The name has no standing in prokaryotic nomenclature: LPSN lists it as not validly published.
               - Name: Treponema pallidum
                 ConceptType: Species
                 ConceptId: species/treponema-pallidum

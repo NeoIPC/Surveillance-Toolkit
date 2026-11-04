@@ -42,10 +42,11 @@ A row, once drawn, never changes: every instance that imported a package carryin
 
 1. every key is one the list's vocabulary has at its place, in its spelling, and every `Id`, record number, and flag is written in its plain form: an `Id` as an integer from 0 and a record number as one from 1, both up to 2,147,483,647, and a flag as one of YAML 1.2.2's plain Booleans (`true`, `True`, `TRUE`, `false`, `False`, or `FALSE`);
 2. no two nodes share an `Id`; every node, with or without an `Id`, has a `Name`, a `ConceptSource` that the `UrlTemplates` name, in their spelling, with the source's record number where the source is LPSN, MycoBank, or ICTV, and a `ConceptId`; every selectable concept has a rank from the vocabulary; and the top-level `Id` 0 and `Viruses` exist;
-3. the option labels generated from the list are distinct, as DHIS2's metadata import requires of the options of one option set, and fit the 230 characters DHIS2 stores;
-4. the UID sidecar gives every `Id` of the list, and nothing else, a well-formed DHIS2 UID of its own;
-5. the list is append-only against every released version, the `infectious-agents-v*` tags: a released `Id` keeps its name and the UID a release's sidecar gave it, an `Id` new since the releases exceeds every released one, and a released `Id` never disappears, nor does its UID, except from a branch that maintains an earlier line, which need not carry the `Id`s of a later line's releases outside its history (those of a greater MAJOR.MINOR than its `VERSION` file names). The check reads the tags, so it fails rather than passes in a clone without them, or without the tag of a release the CHANGELOG records; only the release that the `VERSION` file names needs no tag while the CHANGELOG's `[Unreleased]` section lists no change, as while that release is prepared, since its tag names the commit that merges the preparation. Until that tag is pushed, a clone cannot tell the release from its preparation, so the tag is pushed before the next change to the list merges;
-6. the two frozen CSVs are unchanged.
+3. every node can be told from every other: a synonym has an `Id` of its own, since a value collected in DHIS2 may be its `Id`; no two nodes of one source share a `ConceptId`, no two LPSN nodes a record number, and no two concepts an `IctvId`, which repeats only among a concept and the synonyms that are its former names; and a NeoIPC `ConceptId` is an integer from 1;
+4. the option labels generated from the list are distinct, as DHIS2's metadata import requires of the options of one option set, and fit the 230 characters DHIS2 stores;
+5. the UID sidecar gives every `Id` of the list, and nothing else, a well-formed DHIS2 UID of its own;
+6. the list is append-only against every released version, the `infectious-agents-v*` tags: a released `Id` keeps its name and the UID a release's sidecar gave it, an `Id` new since the releases exceeds every released one, and a released `Id` never disappears, nor does its UID, except from a branch that maintains an earlier line, which need not carry the `Id`s of a later line's releases outside its history (those of a greater MAJOR.MINOR than its `VERSION` file names). The check reads the tags, so it fails rather than passes in a clone without them, or without the tag of a release the CHANGELOG records; only the release that the `VERSION` file names needs no tag while the CHANGELOG's `[Unreleased]` section lists no change, as while that release is prepared, since its tag names the commit that merges the preparation. Until that tag is pushed, a clone cannot tell the release from its preparation, so the tag is pushed before the next change to the list merges;
+7. the two frozen CSVs are unchanged.
 
 `YamlPortability.Tests.ps1` holds the file, like every committed YAML file of the toolkit, to YAML 1.2.2's portable subset, and `scripts/Test-YamlReaderAgreement.ps1` holds yaml12, R's yaml, powershell-yaml, and ruamel.yaml to reading it alike.
 
@@ -64,9 +65,9 @@ NeoIPC's own prose about a node sits in its `Comments`, a mapping of texts: unde
 
 ## Reconciling the Ontology With Its Sources
 
-The ontology is reconciled with each source's own bulk download, never with pages scraped from its website: LPSN's export of prokaryotic names, MycoBank's list of fungal names, ICTV's Master Species List, and the NHSN Organism List's workbook.
+The ontology is reconciled with each source's own bulk download, never with pages scraped from its website: LPSN's export of prokaryotic names, MycoBank's list of fungal names, ICTV's Master Species List, and the NHSN Organism List's workbook. What a download does not carry, such as the notes on a name's LPSN page, is read from the source's page for that record, one record at a time.
 
-1. **Names and records.** Each node's name, rank, and record identifier are checked against the download of its source, the one its `ConceptSource` names. A node whose source is NeoIPC is NeoIPC's own, and no download covers it.
+1. **Names and records.** Each node's name, rank, and record identifier are checked against the download of its source, the one its `ConceptSource` names. A node whose source is NeoIPC is NeoIPC's own, and no download covers it. A bacterial concept takes the name that the List of Recommended Names for bacteria of medical importance applies where it gives one, and LPSN's correct name otherwise; the export's "recommended for medical use" misses some names that list applies, so the note on the name's LPSN page decides. A name that gives way stays as a synonym with its `Id`, and a concept whose taxon LPSN gives no correct name, such as a name that is not validly published, keeps its name, with a `Comments.Background` saying why.
 2. **Common commensals.** The NHSN Organism List's rows are matched to the ontology's nodes by name. A node's own name, its synonyms, and its concept's names form one cluster, and the most specific match wins: the cluster first, then the lineage at genus level or below, NeoIPC's groups included, then the genus named in the row, then higher ranks. Where NHSN names exceptions ("except …"), they are combined as a union, and both of the names NHSN gives a row are used, its display name and the SNOMED CT preferred term. A node takes NHSN's status by default; where NHSN is silent, the contamination test below decides.
 
 ## Data Sources
@@ -92,6 +93,12 @@ The `CommonCommensal` flag follows the classification in the NHSN Organism List.
 <https://lpsn.dsmz.de/>
 
 Parte, A.C., Sardà Carbasse, J., Meier-Kolthoff, J.P., Reimer, L.C. and Göker, M. (2020). List of Prokaryotic names with Standing in Nomenclature (LPSN) moves to the DSMZ. International Journal of Systematic and Evolutionary Microbiology, 70, 5607-5612; DOI: [10.1099/ijsem.0.004332](https://doi.org/10.1099/ijsem.0.004332)
+
+### List of Recommended Names for Bacteria of Medical Importance (LoRN)
+
+Göker, M., Christensen, H., Fingerle, V., Kostovski, M., Margos, G., Moore, E.R.B., Oren, A., Patrick, S., Reischl, U. and Vázquez-Boland, J.A. (2025). List of Recommended Names for bacteria of medical importance: report of the Ad Hoc Committee on Mitigating Changes in Prokaryotic Nomenclature. International Journal of Systematic and Evolutionary Microbiology, 75(10); DOI: [10.1099/ijsem.0.006943](https://doi.org/10.1099/ijsem.0.006943)
+
+LPSN carries the list: the page of a name on it says whether the name is the one to be applied to its taxon or a synonym of that name.
 
 ### MycoBank
 

@@ -36,8 +36,8 @@ asciidoc-text
 
 The highest-value check available, because it is the only thing that notices a **translated
 cross-reference anchor**. Coverage: 160 of 686 documentation source strings carry an AsciiDoc token (34
-`name:target[]` macros, 11 `<<xref>>`, 117 `[[anchor]]`, 2 passthrough); 13 of 4107 infectious-agent
-strings, all from `Output-Header.adoc` / `Output-Footer.adoc` — the 4084 taxonomy entries carry none, so
+`name:target[]` macros, 11 `<<xref>>`, 117 `[[anchor]]`, 2 passthrough); 13 infectious-agent
+strings, all from `Output-Header.adoc` / `Output-Footer.adoc` — the taxonomy entries carry none, so
 component scope is safe there.
 
 It finds real, shipping defects — see *Defects this survey found* below.
@@ -191,7 +191,7 @@ check-glossary
 
 Turns *Does not follow glossary* on, which is what makes the terminology decisions recorded in
 `glossary.yaml` enforced rather than merely displayed in the sidebar. Set on reports, the protocol,
-metadata and the app. **Not** on infectious agents: those 4,107 entries are nomenclature, so a
+metadata and the app. **Not** on infectious agents: those entries are nomenclature, so a
 terminology check has nothing there to enforce and any match would be coincidental.
 
 Measured at enablement: **zero findings on all four**, and again once German's glossary was completed the

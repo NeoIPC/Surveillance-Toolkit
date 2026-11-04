@@ -128,10 +128,10 @@ Describe 'First-class code constraints (metadata/common)' {
 
 InModuleScope 'NeoIPC-Tools' {
     Describe 'Infectious-agent list (metadata/common/infectious-agents)' {
-        # The checks of Private/InfectiousAgentValidation.ps1, applied to the committed list. The release check reads
-        # the infectious-agents-v* tags, so it needs a clone with its tags, as a full history has them; it fails rather
-        # than passes in a clone without them, but for the tag of the release the VERSION file names while [Unreleased]
-        # lists no change, a tag pushed once that release's preparation has merged.
+        # The checks of Private/InfectiousAgentValidation.ps1 but the flag check, applied to the committed list. The
+        # release check reads the infectious-agents-v* tags, so it needs a clone with its tags, as a full history has
+        # them; it fails rather than passes in a clone without them, but for the tag of the release the VERSION file
+        # names while [Unreleased] lists no change, a tag pushed once that release's preparation has merged.
         BeforeAll {
             Import-Module powershell-yaml -ErrorAction Stop
             $script:RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..' '..')).Path
@@ -156,6 +156,11 @@ InModuleScope 'NeoIPC-Tools' {
 
         It 'gives every node an integer Id of its own, a Name, a rank, a known source with its record number, and Boolean flags' {
             $findings = @(Get-NeoIPCInfectiousAgentNodeFinding -Tree $script:ListTree)
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+
+        It 'tells every node from every other: a synonym by an Id of its own, a record by one node, an ICTV taxon by one concept, and a NeoIPC concept by an integer ConceptId' {
+            $findings = @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree $script:ListTree)
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
         }
 

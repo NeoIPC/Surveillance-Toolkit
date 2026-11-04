@@ -14,10 +14,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 ### Added
 
 - CI checks of the list: its keys and structure; every node's `Id`, `Name`, rank, source, and record number, and the
-  form each typed value takes in the file; the option labels generated from it; its UID sidecar; the two frozen
-  CSVs; and that it stays append-only against every released version, so that a released `Id` keeps its name and
-  the UID a release's sidecar gave it, a new `Id` exceeds every released one, and a released `Id` never disappears,
-  except from a branch that maintains an earlier line, which need not carry a later line's `Id`s.
+  form each typed value takes in the file; that every node can be told from every other, a synonym by an `Id` of
+  its own, a source's record by one node, an ICTV taxon by one concept, and a NeoIPC concept by an integer
+  `ConceptId`; the option labels generated from it; its UID sidecar; the two frozen CSVs; and that it stays
+  append-only against every released version, so that a released `Id` keeps its name and the UID a release's
+  sidecar gave it, a new `Id` exceeds every released one, and a released `Id` never disappears, except from a branch
+  that maintains an earlier line, which need not carry a later line's `Id`s.
 - CI checks that the list keeps to YAML 1.2.2's portable subset, which YAML 1.1, YAML 1.2.2, and the YAML readers
   the toolkit meets read alike, and that those readers read it alike.
 - NeoIPC-Tools' `Get-NeoIPCInfectiousAgentCodeSet` returns the list's option codes, as its concepts and synonyms, and
@@ -38,6 +40,17 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - In `NeoIPC-Infectious-Agents.yaml`, NeoIPC's own prose about a node sits in its `Comments`: the reason for a flag
   under the flag's key, and anything else under `Background`. `Description` is no longer a node key; the text that
   Unidentifiable (3561) carried there is its `Comments.Background`.
+- A bacterial concept takes the name that the List of Recommended Names for bacteria of medical importance applies
+  where it gives one, and LPSN's correct name otherwise, as LPSN's export of 2026-11-02 and its pages give them. A
+  correct name that was a synonym is the concept now, and one the list lacked is a new concept; concepts that name
+  one taxon are merged; subspecies that LPSN gives as synonyms of their species are synonyms; species sit in the
+  groups that hold them; names the NHSN Organism List (2024) enumerates are added; and some record numbers and
+  `ConceptId`s are corrected. Where the list departs from what LPSN records, as for two merges that LPSN's notes
+  support and for the concepts whose taxon LPSN gives no correct name, among them the names it lists as not validly
+  published, `Comments.Background` says why. A former concept keeps its `Id` as a synonym, so no collected value
+  changes meaning. Streptococcus massiliensis (2789), now among the viridans
+  streptococci, is a common commensal. The 18 new `Id`s, 3570 to 3587, have UIDs in
+  `NeoIPC-Infectious-Agents.uids.csv`.
 - `NeoIPC-Infectious-Agents.uids.csv` holds the DHIS2 UID of every `Id`: the 113 `Id`s production has not
   deployed, which had no row, and whose options the metadata packages gave UIDs derived from their codes, have
   random ones, as every new `Id` gets from NeoIPC-Tools' `Add-NeoIPCInfectiousAgentUid`, and CI fails for an `Id`
