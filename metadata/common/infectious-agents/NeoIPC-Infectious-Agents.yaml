@@ -6322,9 +6322,8 @@ Hierarchies:
                   Background: >-
                     LPSN keeps Rhodococcus hoagii, which Judicial Opinion 106 rejected together with Corynebacterium
                     hoagii, as a name in need of a replacement, while its notes record that both hoagii names and
-                    Rhodococcus equi denote one species (doi:10.1099/ijs.0.053322-0; doi:10.3389/fmicb.2018.02007).
-                    The list therefore holds the hoagii names, with their Ids, as synonyms of Rhodococcus equi, LPSN's
-                    correct name for the species.
+                    Rhodococcus equi denote one species (doi:10.1099/ijs.0.053322-0). The list therefore holds the
+                    hoagii names, with their Ids, as synonyms of Rhodococcus equi, LPSN's correct name for the species.
                 Synonyms:
                 - Name: Corynebacterium equi
                   ConceptId: species/corynebacterium-equi

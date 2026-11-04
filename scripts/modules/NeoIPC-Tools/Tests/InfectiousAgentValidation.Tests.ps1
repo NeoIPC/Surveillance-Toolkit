@@ -392,8 +392,8 @@ Hierarchies:
 '@
 
             function Edit-FlagTree {
-                # The flag fixture with one change applied by the script block, which receives the tree and, by name,
-                # its nodes.
+                # The flag fixture with one change applied by the script block, which receives the tree's nodes by
+                # name.
                 param([Parameter(Mandatory)][scriptblock]$Change)
                 $tree = $script:FlagYaml | ConvertFrom-Yaml
                 $bacteria = $tree.Hierarchies[1]
@@ -403,7 +403,7 @@ Hierarchies:
                     Albus = $bacteria.Children[0].Children[0].Children[0].Synonyms[0]
                     Lugdunensis = $bacteria.Children[0].Children[0].Children[1]; Aureus = $bacteria.Children[0].Children[1]
                 }
-                & $Change $tree $nodes
+                & $Change $nodes
                 $tree
             }
         }
@@ -413,18 +413,18 @@ Hierarchies:
         }
 
         It 'reports <Rule> for <Defect>' -ForEach @(
-            @{ Defect = 'a flag on a synonym'; Rule = 'flag-on-synonym'; Change = { param($t, $n) $n.Albus.CommonCommensal = $true } }
-            @{ Defect = 'a flag that repeats an inherited true'; Rule = 'flag-redundant'; Change = { param($t, $n) $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' } } }
-            @{ Defect = 'a top-level false, the status without any flag'; Rule = 'flag-redundant'; Change = { param($t, $n) $n.NotListed.CommonCommensal = $false; $n.NotListed.Comments = @{ CommonCommensal = 'A reason.' } } }
-            @{ Defect = 'a flag without Comments'; Rule = 'flag-comment-missing'; Change = { param($t, $n) $n.Group.Remove('Comments') } }
-            @{ Defect = "a flag whose Comments lack the flag's key"; Rule = 'flag-comment-missing'; Change = { param($t, $n) $n.Group.Comments = @{ Background = 'Other prose.' } } }
-            @{ Defect = 'the reason for a flag the node lacks, where no warning asks for one'; Rule = 'comment-key'; Change = { param($t, $n) $n.Aureus.Comments = @{ CommonCommensal = 'A reason.' } } }
-            @{ Defect = 'the reason for a resistance flag the node lacks'; Rule = 'comment-key'; Change = { param($t, $n) $n.Aureus.Comments = @{ MRSA = 'A reason.' } } }
-            @{ Defect = 'Comments given as a text'; Rule = 'comment'; Change = { param($t, $n) $n.Aureus.Comments = 'Other prose.' } }
-            @{ Defect = 'Comments given as a list of one mapping'; Rule = 'comment'; Change = { param($t, $n) $n.Aureus.Comments = @(@{ Background = 'Other prose.' }) } }
-            @{ Defect = 'Comments given as an empty list'; Rule = 'comment'; Change = { param($t, $n) $n.Aureus.Comments = @() } }
-            @{ Defect = 'a Comments entry that is a number'; Rule = 'comment'; Change = { param($t, $n) $n.Lugdunensis.Comments.Background = 5 } }
-            @{ Defect = 'an empty Comments entry'; Rule = 'comment'; Change = { param($t, $n) $n.Lugdunensis.Comments.Background = ' ' } }
+            @{ Defect = 'a flag on a synonym'; Rule = 'flag-on-synonym'; Change = { param($n) $n.Albus.CommonCommensal = $true } }
+            @{ Defect = 'a flag that repeats an inherited true'; Rule = 'flag-redundant'; Change = { param($n) $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'a top-level false, the status without any flag'; Rule = 'flag-redundant'; Change = { param($n) $n.NotListed.CommonCommensal = $false; $n.NotListed.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'a flag without Comments'; Rule = 'flag-comment-missing'; Change = { param($n) $n.Group.Remove('Comments') } }
+            @{ Defect = "a flag whose Comments lack the flag's key"; Rule = 'flag-comment-missing'; Change = { param($n) $n.Group.Comments = @{ Background = 'Other prose.' } } }
+            @{ Defect = 'the reason for a flag the node lacks, where no warning asks for one'; Rule = 'comment-key'; Change = { param($n) $n.Aureus.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'the reason for a resistance flag the node lacks'; Rule = 'comment-key'; Change = { param($n) $n.Aureus.Comments = @{ MRSA = 'A reason.' } } }
+            @{ Defect = 'Comments given as a text'; Rule = 'comment'; Change = { param($n) $n.Aureus.Comments = 'Other prose.' } }
+            @{ Defect = 'Comments given as a list of one mapping'; Rule = 'comment'; Change = { param($n) $n.Aureus.Comments = @(@{ Background = 'Other prose.' }) } }
+            @{ Defect = 'Comments given as an empty list'; Rule = 'comment'; Change = { param($n) $n.Aureus.Comments = @() } }
+            @{ Defect = 'a Comments entry that is a number'; Rule = 'comment'; Change = { param($n) $n.Lugdunensis.Comments.Background = 5 } }
+            @{ Defect = 'an empty Comments entry'; Rule = 'comment'; Change = { param($n) $n.Lugdunensis.Comments.Background = ' ' } }
         ) {
             $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change))
             Get-Rule $findings | Should -Be @($Rule)
@@ -432,7 +432,7 @@ Hierarchies:
         }
 
         It 'accepts the reason for a resistance flag the node carries' {
-            $tree = Edit-FlagTree -Change { param($t, $n) $n.Aureus.MRSA = $true; $n.Aureus.Comments = @{ MRSA = 'A reason.' } }
+            $tree = Edit-FlagTree -Change { param($n) $n.Aureus.MRSA = $true; $n.Aureus.Comments = @{ MRSA = 'A reason.' } }
             @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
         }
 
@@ -440,7 +440,7 @@ Hierarchies:
             # Without the exception and the species outside the group, every Id-bearing node of the genus is a
             # common commensal through the group's flag.
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
                 $n.Staphylococcus.Children = @($n.Group)
             }
@@ -452,7 +452,7 @@ Hierarchies:
 
         It 'warns only at the highest such node' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
                 $n.Staphylococcus.Children = @($n.Group)
                 $n.Bacteria.Children = @($n.Staphylococcus)
@@ -462,7 +462,7 @@ Hierarchies:
 
         It 'warns at an Id-bearing node whose own status differs from that of every Id-bearing node beneath it' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Aureus.Children = @(@{ Id = 16; Name = 'Staphylococcus aureus subsp. anaerobius'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
                         ConceptId = 'subspecies/staphylococcus-aureus-anaerobius'; LpsnRecordNumber = 9; CommonCommensal = $true; Comments = @{ CommonCommensal = 'A reason.' }
                     })
@@ -475,7 +475,7 @@ Hierarchies:
 
         It 'takes the reason on the node a warning names as its answer, and names the highest such nodes beneath instead' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
                 $n.Staphylococcus.Children = @($n.Group)
                 $n.Bacteria.Children = @($n.Staphylococcus)
@@ -488,7 +488,7 @@ Hierarchies:
 
         It 'does not warn at a node under which no node has an Id' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Aureus.Children = @(@{ Name = 'Staphylococcus aureus subsp. aureus'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
                         ConceptId = 'subspecies/staphylococcus-aureus-aureus'; LpsnRecordNumber = 9
                     })
@@ -500,7 +500,7 @@ Hierarchies:
             # A synonym without an Id, an identity defect, whose concept child is the exception: the one status
             # beneath the synonym is not the synonym's to carry. A second species keeps its concept's subtree mixed.
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Albus.Remove('Id')
                 $n.Albus.Children = @(@{ Id = 17; Name = 'Staphylococcus albus var. nobilis'; ConceptType = 'Variety'; ConceptSource = 'LPSN'
                         ConceptId = 'variety/staphylococcus-albus-nobilis'; LpsnRecordNumber = 10; CommonCommensal = $false; Comments = @{ CommonCommensal = 'A reason.' }
@@ -516,7 +516,7 @@ Hierarchies:
             # Read as true, the group's flag makes the same flag on its species repeat the status the species
             # inherits; a flag the check could not read would leave that status unknown.
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Group.CommonCommensal = 'true'
                 $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' }
             }
@@ -527,13 +527,13 @@ Hierarchies:
 
         It 'leaves a flag that is no Boolean to the node check, and judges no flag beneath it against the status it would set' {
             # Read as no flag, the group would leave the exception beneath it repeating the genus's status.
-            $tree = Edit-FlagTree -Change { param($t, $n) $n.Group.CommonCommensal = 'maybe' }
+            $tree = Edit-FlagTree -Change { param($n) $n.Group.CommonCommensal = 'maybe' }
             @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
         }
 
         It 'does not warn where the status beneath is unknown' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Group.CommonCommensal = 'maybe'
                 $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
                 $n.Staphylococcus.Children = @($n.Group)
@@ -543,7 +543,7 @@ Hierarchies:
 
         It 'judges the flags beneath again once a flag it can read sets the status' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Group.CommonCommensal = 'maybe'
                 $n.Lugdunensis.Children = @(@{ Id = 19; Name = 'Staphylococcus lugdunensis subsp. lugdunensis'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
                         ConceptId = 'subspecies/staphylococcus-lugdunensis-lugdunensis'; LpsnRecordNumber = 12; CommonCommensal = $false; Comments = @{ CommonCommensal = 'A reason.' }
@@ -556,7 +556,7 @@ Hierarchies:
 
         It 'reads the nodes of a list within a list, as the walkers do' {
             $tree = Edit-FlagTree -Change {
-                param($t, $n)
+                param($n)
                 $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' }
                 $inner = [System.Collections.Generic.List[object]]::new()
                 $inner.Add($n.Epidermidis); $inner.Add($n.Lugdunensis)

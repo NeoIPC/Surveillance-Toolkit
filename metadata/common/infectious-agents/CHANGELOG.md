@@ -36,8 +36,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   lineage, source records, and the statuses NeoIPC assigns, such as the Core Protocol's list of infectious agents,
   neoipcr's tables, and the reports' infectious-agent tables, fall outside the directory's CC BY-NC-ND 4.0 terms.
   The file also says what MycoBank's curators approved in January 2023.
-- `README.md`: which files are frozen and who reads them, what CI checks, and how the ontology is reconciled with
-  its sources.
+- `README.md`: which files are frozen and who reads them, what CI checks, how the ontology is reconciled with its
+  sources, when its common-commensal status departs from NHSN's, and what evidence its `Comments` cite.
 - In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
   rather than as a Boolean. The per-locale overlays, which po4a writes, have it plain.
 - In `NeoIPC-Infectious-Agents.yaml`, NeoIPC's own prose about a node sits in its `Comments`: the reason for a flag
@@ -50,10 +50,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   groups that hold them; names the NHSN Organism List (2024) enumerates are added; and some record numbers and
   `ConceptId`s are corrected. Where the list departs from what LPSN records, as for two merges that LPSN's notes
   support and for the concepts whose taxon LPSN gives no correct name, among them the names it lists as not validly
-  published, `Comments.Background` says why. A former concept keeps its `Id` as a synonym, so no collected value
-  changes meaning. Streptococcus massiliensis (2789), now among the viridans
-  streptococci, is a common commensal. The 18 new `Id`s, 3570 to 3587, have UIDs in
-  `NeoIPC-Infectious-Agents.uids.csv`.
+  published, `Comments.Background` says why. A former concept keeps its `Id` as a synonym, so no collected value changes
+  meaning. Streptococcus massiliensis (2789), now among the viridans streptococci, is a common commensal. The 18 new
+  `Id`s, 3570 to 3587, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
 - The viruses follow ICTV's Master Species List 2025 (MSL41), as ICTV corrected it on 14 October 2026: a virus
   concept takes the name, rank, and lineage that release gives its taxon, and its node there as the `ConceptId`,
   while a synonym, a former name, keeps the node of the release whose name it carries. The realm Monodnaviria is now
@@ -76,18 +75,18 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   taxon cites the legitimate record of its name where one exists; where MycoBank's records disagree, a node's
   `Comments.Background` says where the list places it and why, as for Hormodendrum (300), which sits in
   Cladosporiaceae, and Azymocandida mycoderma (3349), which sits in Candida. A name that gives way stays as a synonym
-  with its `Id`, so no collected value changes meaning. The three species of the group Candida parapsilosis complex (2701), which keeps
-  its name and now sits in Lodderomyces, are Lodderomyces metapsilosis, orthopsilosis, and parapsilosis; Candida sake
-  and Candida zeylanoides are Fermentozyma sake and Dujonia zeylanoides; Cyberlindnera (3566) is Petasospora, and
-  Cyberlindnera fabianii is Petasospora fabianii, while Cyberlindnera jadinii, with Candida utilis among its synonyms,
-  is Williopsis jadinii; Pichia inconspicua, now an invalid name, gives way to Candida inconspicua; and Trichomonascus
-  ciferrii is Blastobotrys ciferrii, Amesia atrobrunnea Amesomyces atrobrunneus, Phialophora americana Capronia
-  americana, Sporotrichum pruinosum Phanerochaete chrysosporium, and Ochroconis humicola Scolecobasidium humicola.
-  Penicillium aurantiogriseum is the concept over its type variety, and Candida pintolopesii var. pintolopesii over
-  its species; Aspergillus oryzae, Fusarium sporotrichioides, Microsporum brachytomum, and the genus Schwanniomyces
-  (2254) are concepts, and Alternaria tenuissima is a synonym of Alternaria alternata. Plasmodium (401) and
-  Sarcocystis (88), apicomplexan protozoa that MycoBank files under Fungi, sit under Protozoa. The 13 new `Id`s, 3620
-  to 3632, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
+  with its `Id`, so no collected value changes meaning. The three species of the group Candida parapsilosis complex
+  (2701), which keeps its name and now sits in Lodderomyces, are Lodderomyces metapsilosis, orthopsilosis, and
+  parapsilosis; Candida sake and Candida zeylanoides are Fermentozyma sake and Dujonia zeylanoides; Cyberlindnera (3566)
+  is Petasospora, and Cyberlindnera fabianii is Petasospora fabianii, while Cyberlindnera jadinii, with Candida utilis
+  among its synonyms, is Williopsis jadinii; Pichia inconspicua, now an invalid name, gives way to Candida inconspicua;
+  and Trichomonascus ciferrii is Blastobotrys ciferrii, Amesia atrobrunnea Amesomyces atrobrunneus, Phialophora
+  americana Capronia americana, Sporotrichum pruinosum Phanerochaete chrysosporium, and Ochroconis humicola
+  Scolecobasidium humicola. Penicillium aurantiogriseum is the concept over its type variety, and Candida pintolopesii
+  var. pintolopesii over its species; Aspergillus oryzae, Fusarium sporotrichioides, Microsporum brachytomum, and the
+  genus Schwanniomyces (2254) are concepts, and Alternaria tenuissima is a synonym of Alternaria alternata. Plasmodium
+  (401) and Sarcocystis (88), apicomplexan protozoa that MycoBank files under Fungi, sit under Protozoa. The 13 new
+  `Id`s, 3620 to 3632, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
 - `UrlTemplates.MycoBank` in `NeoIPC-Infectious-Agents.yaml` is MycoBank's direct link to a name,
   `https://www.mycobank.org/MB/{0}`, which takes a node's `MycoBankNr`, the name's MycoBank number, in place of its
   `ConceptId`, the ID of the name's record in MycoBank's database.

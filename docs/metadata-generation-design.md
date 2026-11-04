@@ -80,10 +80,10 @@ Read from the export; the exact object shapes the generators emit.
 ### Option Set and the Value Variable
 
 - **Option set `NEOIPC_PATHOGENS`** (name "NeoIPC Pathogen options") — one option per `Id`-bearing
-  ontology node; each option's **code is the integer `Id`**. The per-slot organism DE
+  ontology node; each option's **code is the integer `Id`**. The per-slot infectious-agent DE
   (`NEOIPC_<STAGE>_[SEC_BSI_]PATHOGEN_<N>`) binds this option set.
 - **Program-rule variable `NeoIPC <slot> value`** — `DATAELEMENT_CURRENT_EVENT`, reads the slot's
-  organism DE with `useCodeForOptionSet = true`, so its value is the **option code** (integer). All
+  infectious-agent DE with `useCodeForOptionSet = true`, so its value is the **option code** (integer). All
   resistance logic compares against these codes.
 
 ### Resistance-Category Gating — the Three-Rule Producer/Consumer Triple
@@ -93,8 +93,8 @@ three rules — **270 rules / 270 actions** at the deployed 18 slots × 5 catego
 
 - **`<slot> - set <CAT>`** — condition `true`, **priority 0**, one **ASSIGN** action whose `content`
   is the target handle `#{<slot> may be <CAT>}` and whose `data` is the enumerated expression
-  `d2:hasValue(#{<slot> value})&&(#{<slot> value}==c1||…||==cN)` — the category's effective organism
-  code set in **ascending numeric** order, operator-space-free.
+  `d2:hasValue(#{<slot> value})&&(#{<slot> value}==c1||…||==cN)` — the category's effective
+  infectious-agent code set in **ascending numeric** order, operator-space-free.
 - **`<slot> - may be <CAT>`** — condition `#{<slot> may be <CAT>}`, **priority 1**, a
   **SETMANDATORYFIELD** action on the `_<CAT>` resistance DE.
 - **`<slot> - not <CAT>`** — condition `!#{<slot> may be <CAT>}` (the **exact complement**, so a field
@@ -225,12 +225,13 @@ property. Explicit priorities are emitted either way.
 
 ## Generation Model — Effective Flags Drive the Code Sets
 
-A category's organism code set = **every `Id`-bearing ontology node whose *effective* flag is true.**
+A category's infectious-agent code set = **every `Id`-bearing ontology node whose *effective* flag is true.**
 The effective flag is the **nearest explicit value on the node→root path** (the node itself, else its
 closest ancestor): `<CAT>: true` flags it, `<CAT>: false` **overrides** an inherited `true`, and
-absence inherits; the default is false. (This nearest-wins-with-override model — option B — is being
-normalized so flags live at the highest applicable level with `false` exceptions, a separate
-workstream.) The flag→category mapping: `3GCR`→3GCR, `MRSA`→MRSA, `VRE`→VRE,
+absence inherits; the default is false. The `CommonCommensal` flags sit on the highest node where
+their status holds, with overrides beneath only where it differs, as `MetadataContent.Tests.ps1` checks;
+the resistance flags' placement is not checked, and many of them repeat the value their node inherits.
+The flag→category mapping: `3GCR`→3GCR, `MRSA`→MRSA, `VRE`→VRE,
 `Carbapenems`→carbapenem-resistant, `Colistin`→colistin-resistant. The common-commensal set
 (`CommonCommensal` flag) drives the recognized-pathogen gating by the same effective-flag rule.
 Outside the module, `Get-NeoIPCInfectiousAgentCodeSet` returns these sets under the names the project
@@ -238,9 +239,9 @@ gives the categories (`3GCR`, `CARBR`, `COLR`, `MRSA`, `VRE`), with the concepts
 viruses, and the list's SHA-256, and `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON.
 
 A resistance flag means *"ask about **acquired** `<CAT>` resistance"* — intrinsically-resistant
-organisms are deliberately left unflagged (e.g. *Proteus*: 3GCR + carbapenem but not colistin). So a
+infectious agents are deliberately left unflagged (e.g. *Proteus*: 3GCR + carbapenem but not colistin). So a
 generated code set differs from the deployed snapshot only by **signed-off taxonomic
-reclassification**: a prior organism name retained as a synonym under a new genus inherits the new
+reclassification**: a prior name retained as a synonym under a new genus inherits the new
 genus's flags, which may add or remove a category. The three clades that moved, with the surrogate
 breakpoint each implies (a new ontology schema, tracked separately):
 
@@ -255,10 +256,10 @@ The flag edits are placed at the **highest node where relevance is conserved**: 
 markers by inheritance and resolves the *Vibrio*-genus colistin question); *Stutzerimonas* genus → all
 three; *Stenotrophomonas* left unflagged. Because the ontology is the source, the fix for any
 clinically-wrong removal is to set the flag on the genus node in the **YAML**, never to special-case
-the generator. The naming, authority, and never-drop-a-synonym policy that makes these *flag-propagation*
-questions rather than data-loss ones is codified in this repository's `.claude/rules/infectious-agents.md` (LPSN/LoRN for
-bacteria, MycoBank for fungi, ICTV for viruses, NHSN for common-commensal status; a renamed organism's
-`Id` follows the name as it becomes a synonym).
+the generator. The naming, authority, and never-drop-a-synonym policy that makes these *flag-propagation* questions
+rather than data-loss ones is codified in this repository's `.claude/rules/infectious-agents.md` (LPSN/LoRN for
+bacteria, MycoBank for fungi, ICTV for viruses, NHSN for common-commensal status but for recorded departures; a renamed
+infectious agent's `Id` follows the name as it becomes a synonym).
 
 ## Full Program-Rule Machinery Census
 
@@ -367,5 +368,5 @@ catches them):
 - SSI `== -1` sentinel comparison, likely a `!= 1` typo (`sc6VLWeyY4U`, `NegativeSentinelComparison`).
 
 Definition-class hazards (surfaced for the audit, PI-decided — not generator-fixed): the BSI
-`Antibiotic treatment` cross-rule hidden-mandatory hazard (DE `NjFq3pakY2I`); SSI organism-id value
+`Antibiotic treatment` cross-rule hidden-mandatory hazard (DE `NjFq3pakY2I`); SSI infectious-agent value
 semantics (`1`=identified / `-1`=not-cultured / `0`=not-listed).
