@@ -233,6 +233,9 @@ normalized so flags live at the highest applicable level with `false` exceptions
 workstream.) The flag→category mapping: `3GCR`→3GCR, `MRSA`→MRSA, `VRE`→VRE,
 `Carbapenems`→carbapenem-resistant, `Colistin`→colistin-resistant. The common-commensal set
 (`CommonCommensal` flag) drives the recognized-pathogen gating by the same effective-flag rule.
+Outside the module, `Get-NeoIPCInfectiousAgentCodeSet` returns these sets under the names the project
+gives the categories (`3GCR`, `CARBR`, `COLR`, `MRSA`, `VRE`), with the concepts, the synonyms, the
+viruses, and the list's SHA-256, and `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON.
 
 A resistance flag means *"ask about **acquired** `<CAT>` resistance"* — intrinsically-resistant
 organisms are deliberately left unflagged (e.g. *Proteus*: 3GCR + carbapenem but not colistin). So a

@@ -10,10 +10,12 @@
     is replaced in one test only, to force the collisions the retry exists for: a drawn UID meets a taken one with a
     chance of about 1 in 10^16, so no caller can provoke one. A change to the sidecar while a call waits for its
     confirmation comes from the scripted host (ScriptedHost.ps1), which writes or deletes the file when it is asked, as
-    another run, an editor, or git would.
+    another run, an editor, or git would. Get-NeoIPCInfectiousAgentCodeSet and Export-NeoIPCInfectiousAgentCodeSet are
+    called through the module's exports, as their callers call them, on small lists in TestDrive, whose sets differ
+    from category to category, and on the committed list, against the functions the generators expand from.
 
-    Internals are reached through InModuleScope; the Import-Module at file top runs during Pester's discovery phase,
-    which InModuleScope requires.
+    The tests of Add-NeoIPCInfectiousAgentUid reach internals through InModuleScope; the Import-Module at file top runs
+    during Pester's discovery phase, which InModuleScope requires.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/InfectiousAgents.Tests.ps1
@@ -226,5 +228,260 @@ try { $call } catch { `$_.Exception.Message }
             $options = (New-NeoIPCPathogenOptionSet -Path $yaml)['options']
             @($options | ForEach-Object { "$($_['code']),$($_['id'])" } | Sort-Object) | Should -Be @($added | ForEach-Object { "$($_.Id),$($_.Uid)" } | Sort-Object)
         }
+    }
+}
+
+# The code-set cmdlets are called as their callers call them, through the module's exports; the generators' own
+# functions, the reference on the committed list, are reached through the module's scope.
+Describe 'Get-NeoIPCInfectiousAgentCodeSet and Export-NeoIPCInfectiousAgentCodeSet' {
+    BeforeAll {
+        Import-Module powershell-yaml -ErrorAction Stop
+
+        # The not-listed option with every resistance flag, as the canonical list gives it; a genus whose flags flow
+        # down to its species; a genus whose flags flow down to its species, which turns one off and adds another; a
+        # genus whose flags reach its synonym and its species, which turns the common-commensal flag off and adds a
+        # resistance flag; and a virus with a synonym. Each category's set differs from the others', and every set
+        # comes out of the walk out of ascending order, so that the order the sets come in is the code's.
+        $script:CodeSetYaml = @'
+Hierarchies:
+- Id: 0
+  Name: Not listed
+  MRSA: true
+  VRE: true
+  3GCR: true
+  Carbapenems: true
+  Colistin: true
+- Name: Bacteria
+  Children:
+  - Id: 60
+    Name: Enterococcus
+    VRE: true
+    Carbapenems: true
+    Children:
+    - Id: 11
+      Name: Enterococcus faecium
+  - Id: 50
+    Name: Klebsiella
+    3GCR: true
+    Carbapenems: true
+    Children:
+    - Id: 21
+      Name: Klebsiella pneumoniae
+      Carbapenems: false
+      Colistin: true
+  - Id: 30
+    Name: Staphylococcus
+    CommonCommensal: true
+    MRSA: true
+    Synonyms:
+    - Id: 25
+      Name: Micrococcus
+    Children:
+    - Id: 12
+      Name: Staphylococcus aureus
+      CommonCommensal: false
+      Colistin: true
+- Name: Viruses
+  Children:
+  - Id: 41
+    Name: Influenza virus
+    Synonyms:
+    - Id: 15
+      Name: Flu virus
+'@
+        # The sets of that list, in ascending order.
+        $script:ExpectedSets = [ordered]@{ Concepts = @(0, 11, 12, 21, 30, 41, 50, 60); Synonyms = @(15, 25); CommonCommensals = @(25, 30); Viruses = @(15, 41) }
+        $script:ExpectedCategories = [ordered]@{ '3GCR' = @(0, 21, 50); CARBR = @(0, 11, 50, 60); COLR = @(0, 12, 21); MRSA = @(0, 12, 25, 30); VRE = @(0, 11, 60) }
+        $script:CanonicalList = Join-Path (Get-Module NeoIPC-Tools).ModuleBase '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml'
+
+        function New-TestCodeSetList {
+            # A directory in TestDrive holding the list, as UTF-8 without a byte order mark and with LF line endings, or
+            # as the bytes given.
+            param([Parameter(Mandatory)][string]$Name, [string]$Yaml = $script:CodeSetYaml, [byte[]]$Byte)
+            $directory = Join-Path $TestDrive $Name
+            $null = New-Item -ItemType Directory -Path $directory -Force
+            $path = Join-Path $directory 'NeoIPC-Infectious-Agents.yaml'
+            if ($Byte) { [System.IO.File]::WriteAllBytes($path, $Byte) }
+            else { [System.IO.File]::WriteAllText($path, $Yaml.Replace("`r`n", "`n"), [System.Text.UTF8Encoding]::new($false)) }
+            $path
+        }
+
+        function Get-TestFileHash {
+            # A file's SHA-256 in lower-case hexadecimal, the form the cmdlets give it in.
+            param([Parameter(Mandatory)][string]$Path)
+            (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+        }
+
+        function Read-TestJson {
+            # A JSON file the export wrote, as a hashtable.
+            param([Parameter(Mandatory)][string]$Path)
+            [System.IO.File]::ReadAllText($Path) | ConvertFrom-Json -AsHashtable
+        }
+    }
+
+    It 'returns the option codes and each set the rules enumerate, with the flags flowing down the tree and an explicit false overriding' {
+        $sets = Get-NeoIPCInfectiousAgentCodeSet -Path (New-TestCodeSetList -Name 'sets')
+        foreach ($set in $script:ExpectedSets.Keys) { @($sets.$set) | Should -Be $script:ExpectedSets[$set] -Because $set }
+        @($sets.ResistanceCategories.PSObject.Properties.Name) | Should -Be @('3GCR', 'CARBR', 'COLR', 'MRSA', 'VRE')
+        foreach ($category in $script:ExpectedCategories.Keys) {
+            @($sets.ResistanceCategories.$category) | Should -Be $script:ExpectedCategories[$category] -Because $category
+        }
+    }
+
+    It 'gives the SHA-256 of the bytes it read, in lower-case hexadecimal' {
+        $path = New-TestCodeSetList -Name 'hash'
+        (Get-NeoIPCInfectiousAgentCodeSet -Path $path).Sha256 | Should -BeExactly (Get-TestFileHash -Path $path)
+    }
+
+    It 'reads the list a relative path names, against the current location' {
+        # .NET resolves a relative path against the process's directory, which Push-Location leaves where it is.
+        $path = New-TestCodeSetList -Name 'relative'
+        Push-Location -LiteralPath (Split-Path -Parent $path)
+        try { $sets = Get-NeoIPCInfectiousAgentCodeSet -Path './NeoIPC-Infectious-Agents.yaml' }
+        finally { Pop-Location }
+        @($sets.Concepts) | Should -Be $script:ExpectedSets.Concepts
+        $sets.Sha256 | Should -BeExactly (Get-TestFileHash -Path $path)
+    }
+
+    It 'reads a list on a PowerShell drive, and writes beside it' {
+        $path = New-TestCodeSetList -Name 'drive'
+        $null = New-PSDrive -Name NeoIPCTestCodeSet -PSProvider FileSystem -Root (Split-Path -Parent $path) -Scope Global
+        try {
+            $sets = Get-NeoIPCInfectiousAgentCodeSet -Path 'NeoIPCTestCodeSet:\NeoIPC-Infectious-Agents.yaml'
+            Export-NeoIPCInfectiousAgentCodeSet -Path 'NeoIPCTestCodeSet:\NeoIPC-Infectious-Agents.yaml' -OutputPath 'NeoIPCTestCodeSet:\code-sets.json'
+        }
+        finally { Remove-PSDrive -Name NeoIPCTestCodeSet -Scope Global }
+        @($sets.Concepts) | Should -Be $script:ExpectedSets.Concepts
+        $sets.Sha256 | Should -BeExactly (Get-TestFileHash -Path $path)
+        (Read-TestJson -Path (Join-Path (Split-Path -Parent $path) 'code-sets.json'))['Sha256'] | Should -BeExactly $sets.Sha256
+    }
+
+    It 'refuses a list <Case>, naming the file' -ForEach @(
+        @{ Case = 'that begins with a byte order mark'; Name = 'bom'; Prefix = [byte[]](0xEF, 0xBB, 0xBF); Suffix = [byte[]]@(); Message = '*begins with a byte order mark*' }
+        @{ Case = 'that is not valid UTF-8'; Name = 'invalid'; Prefix = [byte[]]@(); Suffix = [byte[]](0x23, 0x20, 0xFF, 0x0A); Message = '*is not valid UTF-8*' }
+    ) {
+        $text = [System.Text.UTF8Encoding]::new($false).GetBytes($script:CodeSetYaml.Replace("`r`n", "`n"))
+        $path = New-TestCodeSetList -Name $Name -Byte ([byte[]]($Prefix + $text + $Suffix))
+        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage $Message
+        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "*'$path'*"
+    }
+
+    It 'refuses a list that gives one Id to two nodes, as the option-set generator does' {
+        $path = New-TestCodeSetList -Name 'duplicate' -Yaml $script:CodeSetYaml.Replace('    - Id: 25', '    - Id: 30')
+        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "*Id 30 is that of two nodes*'Staphylococcus' and 'Micrococcus'*"
+    }
+
+    It 'returns, on the committed list, the sets the generators expand from' {
+        # The generators' own functions are the reference, and CI holds the committed metadata to what they generate.
+        $sets = Get-NeoIPCInfectiousAgentCodeSet
+        $sets.Sha256 | Should -BeExactly (Get-TestFileHash -Path $script:CanonicalList)
+        $reference = & (Get-Module NeoIPC-Tools) {
+            param([string]$Path)
+            $tree = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Yaml
+            $resistance = Get-NeoIPCResistanceCodeSet -Node $tree
+            [ordered]@{
+                Codes            = @(Get-NeoIPCInfectiousAgentConcept -Node $tree | ForEach-Object { [int]$_.Id } | Sort-Object)
+                CommonCommensals = @(Get-NeoIPCCommonCommensalCodeSet -Node $tree)
+                '3GCR'           = @($resistance['3GCR'])
+                CARBR            = @($resistance['carbapenem-resistant'])
+                COLR             = @($resistance['colistin-resistant'])
+                MRSA             = @($resistance['MRSA'])
+                VRE              = @($resistance['VRE'])
+                Viruses          = @(Get-NeoIPCVirusCodeSet -Node $tree)
+            }
+        } $script:CanonicalList
+        @(@($sets.Concepts) + @($sets.Synonyms) | Sort-Object) | Should -Be $reference.Codes
+        @($sets.CommonCommensals) | Should -Be $reference.CommonCommensals
+        foreach ($category in '3GCR', 'CARBR', 'COLR', 'MRSA', 'VRE') {
+            @($sets.ResistanceCategories.$category) | Should -Be $reference[$category] -Because $category
+        }
+        @($sets.Viruses) | Should -Be $reference.Viruses
+    }
+
+    It 'writes the code sets as JSON, in UTF-8 without a BOM, with LF line endings and a final line break' {
+        $path = New-TestCodeSetList -Name 'export'
+        $json = Join-Path (Split-Path -Parent $path) 'code-sets.json'
+        Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath $json
+        $bytes = [System.IO.File]::ReadAllBytes($json)
+        $bytes[0] | Should -Not -Be 0xEF -Because 'the file carries no byte order mark'
+        $text = [System.Text.UTF8Encoding]::new($false).GetString($bytes)
+        $text | Should -Not -Match "`r"
+        $text | Should -BeLike "*}`n" -Because 'the file ends with a line break'
+        $read = $text | ConvertFrom-Json -AsHashtable
+        @($read.Keys | Sort-Object) | Should -Be @('CommonCommensals', 'Concepts', 'ResistanceCategories', 'Sha256', 'Synonyms', 'Viruses')
+        $read['Sha256'] | Should -BeExactly (Get-TestFileHash -Path $path)
+        foreach ($set in $script:ExpectedSets.Keys) { @($read[$set]) | Should -Be $script:ExpectedSets[$set] -Because $set }
+        foreach ($category in $script:ExpectedCategories.Keys) {
+            @($read['ResistanceCategories'][$category]) | Should -Be $script:ExpectedCategories[$category] -Because $category
+        }
+    }
+
+    It 'writes every set as a JSON array, <Case>' -ForEach @(
+        @{ Case = 'each of one Id'; Count = 1; Yaml = "Hierarchies:`n- Name: Bacteria`n  CommonCommensal: true`n  MRSA: true`n  VRE: true`n  3GCR: true`n  Carbapenems: true`n  Colistin: true`n  Synonyms:`n  - Id: 2`n    Name: Bacterium`n- Name: Viruses`n  Children:`n  - Id: 1`n    Name: Influenza virus`n" }
+        @{ Case = 'each empty'; Count = 0; Yaml = "Hierarchies:`n- Name: Viruses`n" }
+    ) {
+        $path = New-TestCodeSetList -Name "shape-$Count" -Yaml $Yaml
+        $json = Join-Path (Split-Path -Parent $path) 'code-sets.json'
+        Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath $json
+        $read = Read-TestJson -Path $json
+        foreach ($set in $script:ExpectedSets.Keys) {
+            , $read[$set] | Should -BeOfType [array] -Because $set
+            $read[$set].Count | Should -Be $Count -Because $set
+        }
+        foreach ($category in $script:ExpectedCategories.Keys) {
+            , $read['ResistanceCategories'][$category] | Should -BeOfType [array] -Because $category
+            $read['ResistanceCategories'][$category].Count | Should -Be $Count -Because $category
+        }
+    }
+
+    It 'writes the committed list''s code sets when no -Path is given' {
+        $json = Join-Path $TestDrive 'committed-code-sets.json'
+        Export-NeoIPCInfectiousAgentCodeSet -OutputPath $json
+        (Read-TestJson -Path $json)['Sha256'] | Should -BeExactly (Get-TestFileHash -Path $script:CanonicalList)
+    }
+
+    It 'takes the list as its first positional argument, as the module''s other cmdlets take their input, and the output by name only' {
+        $parameters = (Get-Command Export-NeoIPCInfectiousAgentCodeSet).Parameters
+        @($parameters['Path'].ParameterSets.Values.Position) | Should -Be @(0)
+        @($parameters['OutputPath'].ParameterSets.Values.Position) | Should -Be @([int]::MinValue)
+        $path = New-TestCodeSetList -Name 'positional'
+        $json = Join-Path (Split-Path -Parent $path) 'code-sets.json'
+        Export-NeoIPCInfectiousAgentCodeSet $path -OutputPath $json
+        (Read-TestJson -Path $json)['Sha256'] | Should -BeExactly (Get-TestFileHash -Path $path)
+    }
+
+    It 'refuses to write over the list it reads, named <Case>' -ForEach @(
+        @{ Case = 'as it is'; Name = 'over-list'; Relative = $false }
+        @{ Case = 'by a relative path'; Name = 'over-list-relative'; Relative = $true }
+    ) {
+        $path = New-TestCodeSetList -Name $Name
+        $before = Get-TestFileHash -Path $path
+        Push-Location -LiteralPath (Split-Path -Parent $path)
+        try {
+            $output = if ($Relative) { './NeoIPC-Infectious-Agents.yaml' } else { $path }
+            { Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath $output } | Should -Throw -ExpectedMessage '*is the list the code sets are read from*'
+        }
+        finally { Pop-Location }
+        Get-TestFileHash -Path $path | Should -BeExactly $before
+    }
+
+    It 'refuses to write over the list it reads, named in another letter case, where the file system ignores case' -Skip:$IsLinux {
+        $path = New-TestCodeSetList -Name 'over-list-case'
+        $before = Get-TestFileHash -Path $path
+        { Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath $path.ToUpperInvariant() } | Should -Throw -ExpectedMessage '*is the list the code sets are read from*'
+        Get-TestFileHash -Path $path | Should -BeExactly $before
+    }
+
+    It 'writes to a relative path against the current location, and nothing with WhatIf' {
+        $path = New-TestCodeSetList -Name 'export-relative'
+        $directory = Split-Path -Parent $path
+        Push-Location -LiteralPath $directory
+        try {
+            Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath './code-sets.json'
+            Export-NeoIPCInfectiousAgentCodeSet -Path $path -OutputPath './not-written.json' -WhatIf
+        }
+        finally { Pop-Location }
+        Test-Path -LiteralPath (Join-Path $directory 'code-sets.json') -PathType Leaf | Should -BeTrue
+        Test-Path -LiteralPath (Join-Path $directory 'not-written.json') | Should -BeFalse
     }
 }

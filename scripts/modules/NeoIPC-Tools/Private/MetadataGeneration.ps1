@@ -406,6 +406,17 @@ $script:NeoIPCResistanceCategoryByFlag = [ordered]@{
     'VRE'         = 'VRE'
 }
 
+# The names the project gives the resistance categories, which the module's public output uses. The rule and variable
+# names keep the tokens above, and the data-element codes their CAR and COR suffixes, since deployed rules and
+# collected data carry them.
+$script:NeoIPCResistanceCategoryName = [ordered]@{
+    '3GCR'                 = '3GCR'
+    'carbapenem-resistant' = 'CARBR'
+    'colistin-resistant'   = 'COLR'
+    'MRSA'                 = 'MRSA'
+    'VRE'                  = 'VRE'
+}
+
 function Get-NeoIPCResistanceFlag {
     # Depth-first walk of a parsed NeoIPC-Infectious-Agents.yaml tree, yielding the EFFECTIVE resistance flags of
     # every Id-bearing node as [ordered]@{ Id = <int>; '3GCR' = <bool>; 'carbapenem-resistant' = <bool>; ... }.

@@ -20,6 +20,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   except from a branch that maintains an earlier line, which need not carry a later line's `Id`s.
 - CI checks that the list keeps to YAML 1.2.2's portable subset, which YAML 1.1, YAML 1.2.2, and the YAML readers
   the toolkit meets read alike, and that those readers read it alike.
+- NeoIPC-Tools' `Get-NeoIPCInfectiousAgentCodeSet` returns the list's option codes, as its concepts and synonyms, and
+  the code sets the generated DHIS2 rules enumerate: the common commensals, the infectious agents each resistance
+  category (3GCR, CARBR, COLR, MRSA, VRE) applies to, and the viruses, with the list's SHA-256.
+  `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON, for consumers in other languages.
 
 ### Changed
 
