@@ -278,7 +278,7 @@ function Invoke-NeoIPCDhis2Get {
 
     if ($PSCmdlet.ShouldProcess(
             "GET $uri",
-            "Fetch DHIS2 data via GET $uri?",
+            "Fetch DHIS2 data via GET ${uri}?",
             'Fetching DHIS2 data')) {
         Write-Debug "GET $uri"
         try { $response = Invoke-WebRequest @invokeParams }
@@ -367,7 +367,7 @@ function Invoke-NeoIPCDhis2Delete {
     # and implement their own higher-level confirmation
     if ($PSCmdlet.ShouldProcess(
             "DELETE $uri",
-            "Delete DHIS2 data via DELETE $uri?",
+            "Delete DHIS2 data via DELETE ${uri}?",
             'Removing DHIS2 data')) {
         Write-Debug "DELETE $uri"
         try { $($response = . { Invoke-WebRequest @invokeParams }) 4>&1 | Write-Debug }
@@ -433,7 +433,7 @@ function Invoke-NeoIPCDhis2Put {
         StatusCodeVariable = 'statusCode'
     }
     Set-NeoIPCDhis2Auth -InvokeParams $invokeParams -Auth $Auth -AllowUnencrypted
-    if ($PSCmdlet.ShouldProcess("PUT $uri", "Replace DHIS2 data via PUT $uri?", 'Replacing DHIS2 data')) {
+    if ($PSCmdlet.ShouldProcess("PUT $uri", "Replace DHIS2 data via PUT ${uri}?", 'Replacing DHIS2 data')) {
         Write-Debug "PUT $uri"
         $result = Invoke-RestMethod @invokeParams
         return [pscustomobject]@{ StatusCode = $statusCode; Body = $result }
@@ -503,7 +503,7 @@ function Invoke-NeoIPCDhis2Post {
 
     if ($PSCmdlet.ShouldProcess(
             "POST $uri",
-            "Send data to DHIS2 via POST $uri?",
+            "Send data to DHIS2 via POST ${uri}?",
             'Sending DHIS2 data')) {
         Write-Debug "POST $uri"
         $result = Invoke-RestMethod @invokeParams

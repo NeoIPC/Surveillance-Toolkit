@@ -7,7 +7,8 @@
 
 .DESCRIPTION
     Covers Resolve-NeoIPCDhis2Hostname, Split-NeoIPCList, Get-NeoIPCCodeLikeValue, Get-NeoIPCDhis2ErrorDetail,
-    New-NeoIPCDhis2HttpError, Invoke-NeoIPCDhis2Get, and Invoke-NeoIPCDhis2Delete (Private/DHIS2Http.ps1),
+    New-NeoIPCDhis2HttpError, Invoke-NeoIPCDhis2Get, Invoke-NeoIPCDhis2Delete, and the question every request helper
+    asks under -Confirm (Private/DHIS2Http.ps1),
     Get-NeoIPCDhis2VersionText (Private/Dhis2Version.ps1), and Resolve-NeoIPCReportHostname (Public/ReportHelpers.ps1);
     and, across the module, how the writers require a host, refuse one of white space, and name it when they ask, and
     how the help of the functions without a built-in host describes it.
@@ -301,6 +302,56 @@ function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
                 $run.Output | Should -Not -Contain 'went on'
                 $run.Errors | Should -HaveCount 1
                 $run.Errors[0].Exception.Message | Should -BeLike "DELETE 'api/apiToken/TokAAAAAA01' failed with HTTP 401*"
+            }
+        }
+
+        Describe 'The request helpers'' confirmation' {
+            # PowerShell 7 takes a ? after a variable's name into the name, so a question written "$uri?" reads a variable
+            # uri? that nothing sets, and asks about no address.
+            BeforeAll {
+                . (Join-Path (Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'Tests') 'ScriptedHost.ps1')
+                $script:ScriptedHost = [NeoIPCTests.ScriptedHost]::new()
+                $script:Runspace = [runspacefactory]::CreateRunspace($script:ScriptedHost)
+                $script:Runspace.Open()
+                $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+                $setup = [powershell]::Create()
+                try {
+                    $setup.Runspace = $script:Runspace
+                    $null = $setup.AddScript(@"
+Import-Module '$($manifest.Replace("'", "''"))' -Force
+function global:Invoke-WebRequest { throw 'A test made an HTTP call.' }
+function global:Invoke-RestMethod { throw 'A test made an HTTP call.' }
+"@)
+                    $null = $setup.Invoke()
+                    if ($setup.Streams.Error.Count -gt 0) { throw "Preparing the confirmation runspace failed: $($setup.Streams.Error[0])" }
+                }
+                finally { $setup.Dispose() }
+            }
+            AfterAll {
+                if ($script:Runspace) { $script:Runspace.Dispose() }
+            }
+            It '<Helper> asks its question naming the address, and sends nothing when the answer is No' -ForEach @(
+                @{ Helper = 'Invoke-NeoIPCDhis2Get'; Arguments = "-Path 'api/me'"
+                   Question = 'Fetch DHIS2 data via GET https://given.example.org/api/me?paging=false?' }
+                @{ Helper = 'Invoke-NeoIPCDhis2Delete'; Arguments = "-Path 'api/apiToken/TokAAAAAA01'"
+                   Question = 'Delete DHIS2 data via DELETE https://given.example.org/api/apiToken/TokAAAAAA01?' }
+                @{ Helper = 'Invoke-NeoIPCDhis2Put'; Arguments = "-Path 'api/organisationUnits/OrgAAAAAA01' -Body '{}'"
+                   Question = 'Replace DHIS2 data via PUT https://given.example.org/api/organisationUnits/OrgAAAAAA01?' }
+                @{ Helper = 'Invoke-NeoIPCDhis2Post'; Arguments = "-Path 'api/metadata' -Body '{}'"
+                   Question = 'Send data to DHIS2 via POST https://given.example.org/api/metadata?' }
+            ) {
+                $ui = $script:ScriptedHost.ScriptedUI
+                $ui.Answers.Clear(); $ui.Prompts.Clear()
+                $ui.Answers.Enqueue('No')
+                $ps = [powershell]::Create()
+                try {
+                    $ps.Runspace = $script:Runspace
+                    $null = $ps.AddScript("& (Get-Module NeoIPC-Tools) { $Helper -Auth @{ AuthType = 'Token'; Token = 'not-a-real-token' } -Hostname 'given.example.org' $Arguments -Confirm }")
+                    $null = $ps.Invoke()
+                    @($ps.Streams.Error) | Should -BeNullOrEmpty
+                }
+                finally { $ps.Dispose() }
+                @($ui.Prompts) | Should -BeExactly @($Question)
             }
         }
 
