@@ -60,6 +60,8 @@ Two classification mechanisms follow from this, and both are relied upon by the 
 
 The canonical implementations are `Get-NeoIPCCommonCommensalFlag` / `Get-NeoIPCCommonCommensalCodeSet`, `Get-NeoIPCResistanceFlag` / `Get-NeoIPCResistanceCodeSet`, and `Get-NeoIPCVirusCodeSet` in the `NeoIPC-Tools` module — the single source both the rule generator and its tests expand from. Outside the module, `Get-NeoIPCInfectiousAgentCodeSet` returns the sets they give, with the concepts, the synonyms, and the SHA-256 of the list, and `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON for a consumer in another language. Compute effective flags/sets through those rather than reading a node's literal `CommonCommensal` value or guessing at kingdom membership.
 
+NeoIPC's own prose about a node sits in its `Comments`, a mapping of texts: under a flag's key, the reason for that flag, on the node that carries it; under `CommonCommensal` on a node without that flag, why none sits there although one would hold for every `Id`-bearing node beneath it; and under `Background`, anything else.
+
 ## Reconciling the Ontology With Its Sources
 
 The ontology is reconciled with each source's own bulk download, never with pages scraped from its website: LPSN's export of prokaryotic names, MycoBank's list of fungal names, ICTV's Master Species List, and the NHSN Organism List's workbook.

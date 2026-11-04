@@ -59,9 +59,10 @@ Hierarchies:
   ConceptId: 101
   ConceptSource: NeoIPC
   Id: 3561
-  Description: >-
-    For a blood culture that tested positive but whose causative infectious agent could not be
-    identified to any taxonomic level with the methods available in the hospital's laboratory.
+  Comments:
+    Background: >-
+      For a blood culture that tested positive but whose causative infectious agent could not be
+      identified to any taxonomic level with the methods available in the hospital's laboratory.
 - Name: Viruses
   ConceptId: 100
   ConceptSource: NeoIPC

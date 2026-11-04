@@ -35,6 +35,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   its sources.
 - In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
   rather than as a Boolean. The per-locale overlays, which po4a writes, have it plain.
+- In `NeoIPC-Infectious-Agents.yaml`, NeoIPC's own prose about a node sits in its `Comments`: the reason for a flag
+  under the flag's key, and anything else under `Background`. `Description` is no longer a node key; the text that
+  Unidentifiable (3561) carried there is its `Comments.Background`.
 - `NeoIPC-Infectious-Agents.uids.csv` holds the DHIS2 UID of every `Id`: the 113 `Id`s production has not
   deployed, which had no row, and whose options the metadata packages gave UIDs derived from their codes, have
   random ones, as every new `Id` gets from NeoIPC-Tools' `Add-NeoIPCInfectiousAgentUid`, and CI fails for an `Id`

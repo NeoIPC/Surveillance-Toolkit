@@ -6,7 +6,8 @@
 
 .DESCRIPTION
     Each rule is shown firing on a fixture that carries its defect, beside a clean fixture that yields no finding, so
-    a check that stops firing fails here. MetadataContent.Tests.ps1 applies the same checks to the committed list.
+    a check that stops firing fails here. MetadataContent.Tests.ps1 applies the same checks to the committed list,
+    all but the identity and flag checks, which that list fails.
 
     Internals are reached through InModuleScope; the Import-Module at file top runs during Pester's discovery phase,
     which InModuleScope requires.
@@ -197,6 +198,23 @@ Hierarchies:
             @(Get-NeoIPCInfectiousAgentKeyFinding -Text ($script:CleanYaml -replace $From, $To)) | Should -BeNullOrEmpty
         }
 
+        It "accepts a node's Comments, with the reason for a flag under its key and other prose under Background" {
+            $text = $script:CleanYaml -replace '(?m)^(    CommonCommensal: true)$', "`$1`n    Comments:`n      CommonCommensal: The genus is a common commensal.`n      Background: >-`n        Other prose."
+            $text | Should -Not -BeExactly $script:CleanYaml
+            @(Get-NeoIPCInfectiousAgentKeyFinding -Text $text) | Should -BeNullOrEmpty
+        }
+
+        It 'reports <Rule> for <Defect>' -ForEach @(
+            @{ Defect = "a key outside the vocabulary of a node's Comments"; Rule = 'unknown-key'; To = "`$1`n    Comments:`n      Remark: none" }
+            @{ Defect = 'Comments given as a text'; Rule = 'structure'; To = "`$1`n    Comments: The genus is a common commensal." }
+            @{ Defect = 'a Comments entry given as a mapping'; Rule = 'structure'; To = "`$1`n    Comments:`n      Background:`n        Text: Other prose." }
+            @{ Defect = 'a Description, which a node does not carry'; Rule = 'unknown-key'; To = "`$1`n    Description: Other prose." }
+        ) {
+            $text = $script:CleanYaml -replace '(?m)^(    CommonCommensal: true)$', $To
+            $text | Should -Not -BeExactly $script:CleanYaml
+            Get-Rule (Get-NeoIPCInfectiousAgentKeyFinding -Text $text) | Should -Be @($Rule)
+        }
+
         It 'reports text that is not YAML instead of throwing' {
             Get-Rule (Get-NeoIPCInfectiousAgentKeyFinding -Text "Hierarchies: [`n") | Should -Be @('yaml-syntax')
         }
@@ -238,6 +256,329 @@ Hierarchies:
 
         It 'reports a list without Metadata.UrlTemplates' {
             Get-Rule (Get-NeoIPCInfectiousAgentNodeFinding -Tree @{ Hierarchies = @() }) | Should -Be @('structure', 'required-node', 'required-node')
+        }
+    }
+
+    Describe 'Get-NeoIPCInfectiousAgentIdentityFinding' {
+        It 'reports nothing for a clean list' {
+            @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree ($script:CleanYaml | ConvertFrom-Yaml)) | Should -BeNullOrEmpty
+        }
+
+        It 'reports <Rule> for <Defect>' -ForEach @(
+            @{ Defect = 'a synonym without an Id'; Rule = 'synonym-id'; Change = { param($t) $t.Hierarchies[1].Children[0].Synonyms[0].Remove('Id') } }
+            @{ Defect = 'a NeoIPC ConceptId that is no number'; Rule = 'concept-id-format'; Change = { param($t) $t.Hierarchies[0].ConceptId = 'ToDo' } }
+            @{ Defect = 'a NeoIPC ConceptId of 0'; Rule = 'concept-id-format'; Change = { param($t) $t.Hierarchies[0].ConceptId = 0 } }
+            @{ Defect = 'a NeoIPC ConceptId quoted as text, as a reader reads it'; Rule = 'concept-id-format'; Change = { param($t) $t.Hierarchies[0].ConceptId = '5' } }
+            @{ Defect = 'two NeoIPC nodes with one ConceptId'; Rule = 'concept-id-duplicate'; Change = { param($t) $t.Hierarchies[2].ConceptId = 1 } }
+            @{ Defect = 'two LPSN nodes with one ConceptId'; Rule = 'concept-id-duplicate'; Change = { param($t) $t.Hierarchies[1].Children[0].Synonyms[0].ConceptId = 'genus/staphylococcus' } }
+            @{ Defect = 'two LPSN nodes with one record number'; Rule = 'record-duplicate'; Change = { param($t) $t.Hierarchies[1].Children[0].Synonyms[0].LpsnRecordNumber = 2 } }
+            @{ Defect = 'two ICTV concepts with one IctvId'; Rule = 'record-duplicate'; Change = {
+                    param($t)
+                    $t.Hierarchies[2].Children = @($t.Hierarchies[2].Children[0], @{ Id = 21; Name = 'Orthohepacivirus'; ConceptType = 'Genus'; ConceptSource = 'ICTV'; ConceptId = 202401235; IctvId = 19990001 })
+                }
+            }
+            @{ Defect = "a synonym that shares another concept's IctvId"; Rule = 'record-duplicate'; Change = {
+                    param($t)
+                    $t.Hierarchies[2].Children = @($t.Hierarchies[2].Children[0], @{ Id = 21; Name = 'Orthohepacivirus'; ConceptType = 'Genus'; ConceptSource = 'ICTV'; ConceptId = 202401235; IctvId = 19990002
+                            Synonyms = @(@{ Id = 22; Name = 'Hepacivirus'; ConceptSource = 'ICTV'; ConceptId = 201901235; IctvId = 19990001 })
+                        })
+                }
+            }
+        ) {
+            Get-Rule (Get-NeoIPCInfectiousAgentIdentityFinding -Tree (Edit-Tree -Change $Change)) | Should -Be @($Rule)
+        }
+
+        It 'leaves a NeoIPC node with <Form> to the node check' -ForEach @(
+            @{ Form = 'no ConceptId'; Change = { param($t) $t.Hierarchies[0].Remove('ConceptId') } }
+            @{ Form = 'a blank ConceptId'; Change = { param($t) $t.Hierarchies[0].ConceptId = ' ' } }
+        ) {
+            @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree (Edit-Tree -Change $Change)) | Should -BeNullOrEmpty
+        }
+
+        It 'accepts one ConceptId in two sources' {
+            $tree = Edit-Tree -Change { param($t) $t.Hierarchies[2].ConceptId = 202401234 }
+            @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'accepts an IctvId that a concept shares with a synonym that is its former name' {
+            $tree = Edit-Tree -Change {
+                param($t)
+                $t.Hierarchies[2].Children[0].Synonyms = @(@{ Id = 21; Name = 'Flavivirus'; ConceptSource = 'ICTV'; ConceptId = 201901234; IctvId = 19990001 })
+            }
+            @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'reports a list without Hierarchies instead of throwing' {
+            Get-Rule (Get-NeoIPCInfectiousAgentIdentityFinding -Tree @{ Metadata = @{} }) | Should -Be @('structure')
+        }
+    }
+
+    Describe 'Get-NeoIPCInfectiousAgentFlagFinding' {
+        BeforeAll {
+            # A list whose CommonCommensal flags sit where the checks want them: a group flagged a common commensal,
+            # with a species that inherits it, the species' synonym, and an exception beneath it, each flag with its
+            # reason; a species of the same genus outside the group, and a second genus, neither flagged.
+            $script:FlagYaml = @'
+Metadata:
+  UrlTemplates:
+    LPSN: https://lpsn.dsmz.de/{0}
+    NeoIPC: https://neoipc.org/infectious-agents/{0}
+Hierarchies:
+- Id: 0
+  Name: Not listed
+  ConceptType: Unknown
+  ConceptSource: NeoIPC
+  ConceptId: 1
+- Name: Bacteria
+  ConceptType: Domain
+  ConceptSource: LPSN
+  ConceptId: domain/bacteria
+  LpsnRecordNumber: 1
+  Children:
+  - Name: Staphylococcus
+    ConceptType: Genus
+    ConceptSource: LPSN
+    ConceptId: genus/staphylococcus
+    LpsnRecordNumber: 2
+    Children:
+    - Id: 10
+      Name: Coagulase-negative staphylococci
+      ConceptType: Group
+      ConceptSource: NeoIPC
+      ConceptId: 2
+      CommonCommensal: true
+      Comments:
+        CommonCommensal: The group is a common commensal.
+      Children:
+      - Id: 11
+        Name: Staphylococcus epidermidis
+        ConceptType: Species
+        ConceptSource: LPSN
+        ConceptId: species/staphylococcus-epidermidis
+        LpsnRecordNumber: 3
+        Synonyms:
+        - Id: 12
+          Name: Staphylococcus albus
+          ConceptSource: LPSN
+          ConceptId: species/staphylococcus-albus
+          LpsnRecordNumber: 4
+      - Id: 13
+        Name: Staphylococcus lugdunensis
+        ConceptType: Species
+        ConceptSource: LPSN
+        ConceptId: species/staphylococcus-lugdunensis
+        LpsnRecordNumber: 5
+        CommonCommensal: false
+        Comments:
+          CommonCommensal: The species is an exception within the group.
+          Background: Other prose.
+    - Id: 14
+      Name: Staphylococcus aureus
+      ConceptType: Species
+      ConceptSource: LPSN
+      ConceptId: species/staphylococcus-aureus
+      LpsnRecordNumber: 6
+  - Name: Escherichia
+    ConceptType: Genus
+    ConceptSource: LPSN
+    ConceptId: genus/escherichia
+    LpsnRecordNumber: 7
+    Children:
+    - Id: 15
+      Name: Escherichia coli
+      ConceptType: Species
+      ConceptSource: LPSN
+      ConceptId: species/escherichia-coli
+      LpsnRecordNumber: 8
+'@
+
+            function Edit-FlagTree {
+                # The flag fixture with one change applied by the script block, which receives the tree and, by name,
+                # its nodes.
+                param([Parameter(Mandatory)][scriptblock]$Change)
+                $tree = $script:FlagYaml | ConvertFrom-Yaml
+                $bacteria = $tree.Hierarchies[1]
+                $nodes = @{
+                    NotListed = $tree.Hierarchies[0]; Bacteria = $bacteria; Staphylococcus = $bacteria.Children[0]
+                    Group = $bacteria.Children[0].Children[0]; Epidermidis = $bacteria.Children[0].Children[0].Children[0]
+                    Albus = $bacteria.Children[0].Children[0].Children[0].Synonyms[0]
+                    Lugdunensis = $bacteria.Children[0].Children[0].Children[1]; Aureus = $bacteria.Children[0].Children[1]
+                }
+                & $Change $tree $nodes
+                $tree
+            }
+        }
+
+        It 'reports nothing for a list whose flags sit where their statuses hold, each with its reason' {
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree ($script:FlagYaml | ConvertFrom-Yaml)) | Should -BeNullOrEmpty
+        }
+
+        It 'reports <Rule> for <Defect>' -ForEach @(
+            @{ Defect = 'a flag on a synonym'; Rule = 'flag-on-synonym'; Change = { param($t, $n) $n.Albus.CommonCommensal = $true } }
+            @{ Defect = 'a flag that repeats an inherited true'; Rule = 'flag-redundant'; Change = { param($t, $n) $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'a top-level false, the status without any flag'; Rule = 'flag-redundant'; Change = { param($t, $n) $n.NotListed.CommonCommensal = $false; $n.NotListed.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'a flag without Comments'; Rule = 'flag-comment-missing'; Change = { param($t, $n) $n.Group.Remove('Comments') } }
+            @{ Defect = "a flag whose Comments lack the flag's key"; Rule = 'flag-comment-missing'; Change = { param($t, $n) $n.Group.Comments = @{ Background = 'Other prose.' } } }
+            @{ Defect = 'the reason for a flag the node lacks, where no warning asks for one'; Rule = 'comment-key'; Change = { param($t, $n) $n.Aureus.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'the reason for a resistance flag the node lacks'; Rule = 'comment-key'; Change = { param($t, $n) $n.Aureus.Comments = @{ MRSA = 'A reason.' } } }
+            @{ Defect = 'Comments given as a text'; Rule = 'comment'; Change = { param($t, $n) $n.Aureus.Comments = 'Other prose.' } }
+            @{ Defect = 'Comments given as a list of one mapping'; Rule = 'comment'; Change = { param($t, $n) $n.Aureus.Comments = @(@{ Background = 'Other prose.' }) } }
+            @{ Defect = 'Comments given as an empty list'; Rule = 'comment'; Change = { param($t, $n) $n.Aureus.Comments = @() } }
+            @{ Defect = 'a Comments entry that is a number'; Rule = 'comment'; Change = { param($t, $n) $n.Lugdunensis.Comments.Background = 5 } }
+            @{ Defect = 'an empty Comments entry'; Rule = 'comment'; Change = { param($t, $n) $n.Lugdunensis.Comments.Background = ' ' } }
+        ) {
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change))
+            Get-Rule $findings | Should -Be @($Rule)
+            $findings.Severity | Should -Be @('Error')
+        }
+
+        It 'accepts the reason for a resistance flag the node carries' {
+            $tree = Edit-FlagTree -Change { param($t, $n) $n.Aureus.MRSA = $true; $n.Aureus.Comments = @{ MRSA = 'A reason.' } }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'warns at a node where one flag would hold for every Id-bearing node beneath it' {
+            # Without the exception and the species outside the group, every Id-bearing node of the genus is a
+            # common commensal through the group's flag.
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
+                $n.Staphylococcus.Children = @($n.Group)
+            }
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)
+            Get-Rule $findings | Should -Be @('flag-hoistable')
+            $findings.Severity | Should -Be @('Warning')
+            $findings.Location | Should -Be @("'Staphylococcus'")
+        }
+
+        It 'warns only at the highest such node' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
+                $n.Staphylococcus.Children = @($n.Group)
+                $n.Bacteria.Children = @($n.Staphylococcus)
+            }
+            (@(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)).Location | Should -Be @("'Bacteria'")
+        }
+
+        It 'warns at an Id-bearing node whose own status differs from that of every Id-bearing node beneath it' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Aureus.Children = @(@{ Id = 16; Name = 'Staphylococcus aureus subsp. anaerobius'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                        ConceptId = 'subspecies/staphylococcus-aureus-anaerobius'; LpsnRecordNumber = 9; CommonCommensal = $true; Comments = @{ CommonCommensal = 'A reason.' }
+                    })
+            }
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)
+            Get-Rule $findings | Should -Be @('flag-hoistable')
+            $findings.Location | Should -Be @('Id 14')
+            $findings.Message | Should -BeLike 'The node is no common commensal, the status it inherits, while *'
+        }
+
+        It 'takes the reason on the node a warning names as its answer, and names the highest such nodes beneath instead' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
+                $n.Staphylococcus.Children = @($n.Group)
+                $n.Bacteria.Children = @($n.Staphylococcus)
+                $n.Bacteria.Comments = @{ CommonCommensal = 'A reason the flags stay beneath the domain.' }
+            }
+            (@(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)).Location | Should -Be @("'Staphylococcus'")
+            $tree.Hierarchies[1].Children[0].Comments = @{ CommonCommensal = 'A reason the flag stays on the group.' }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'does not warn at a node under which no node has an Id' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Aureus.Children = @(@{ Name = 'Staphylococcus aureus subsp. aureus'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                        ConceptId = 'subspecies/staphylococcus-aureus-aureus'; LpsnRecordNumber = 9
+                    })
+            }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'does not warn at a synonym' {
+            # A synonym without an Id, an identity defect, whose concept child is the exception: the one status
+            # beneath the synonym is not the synonym's to carry. A second species keeps its concept's subtree mixed.
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Albus.Remove('Id')
+                $n.Albus.Children = @(@{ Id = 17; Name = 'Staphylococcus albus var. nobilis'; ConceptType = 'Variety'; ConceptSource = 'LPSN'
+                        ConceptId = 'variety/staphylococcus-albus-nobilis'; LpsnRecordNumber = 10; CommonCommensal = $false; Comments = @{ CommonCommensal = 'A reason.' }
+                    })
+                $n.Epidermidis.Children = @(@{ Id = 18; Name = 'Staphylococcus epidermidis subsp. epidermidis'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                        ConceptId = 'subspecies/staphylococcus-epidermidis-epidermidis'; LpsnRecordNumber = 11
+                    })
+            }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'reads a flag written as text that parses as a Boolean, as the walkers do' {
+            # Read as true, the group's flag makes the same flag on its species repeat the status the species
+            # inherits; a flag the check could not read would leave that status unknown.
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Group.CommonCommensal = 'true'
+                $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' }
+            }
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)
+            Get-Rule $findings | Should -Be @('flag-redundant')
+            $findings.Location | Should -Be @('Id 11')
+        }
+
+        It 'leaves a flag that is no Boolean to the node check, and judges no flag beneath it against the status it would set' {
+            # Read as no flag, the group would leave the exception beneath it repeating the genus's status.
+            $tree = Edit-FlagTree -Change { param($t, $n) $n.Group.CommonCommensal = 'maybe' }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'does not warn where the status beneath is unknown' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Group.CommonCommensal = 'maybe'
+                $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments')
+                $n.Staphylococcus.Children = @($n.Group)
+            }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'judges the flags beneath again once a flag it can read sets the status' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Group.CommonCommensal = 'maybe'
+                $n.Lugdunensis.Children = @(@{ Id = 19; Name = 'Staphylococcus lugdunensis subsp. lugdunensis'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                        ConceptId = 'subspecies/staphylococcus-lugdunensis-lugdunensis'; LpsnRecordNumber = 12; CommonCommensal = $false; Comments = @{ CommonCommensal = 'A reason.' }
+                    })
+            }
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)
+            Get-Rule $findings | Should -Be @('flag-redundant')
+            $findings.Location | Should -Be @('Id 19')
+        }
+
+        It 'reads the nodes of a list within a list, as the walkers do' {
+            $tree = Edit-FlagTree -Change {
+                param($t, $n)
+                $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' }
+                $inner = [System.Collections.Generic.List[object]]::new()
+                $inner.Add($n.Epidermidis); $inner.Add($n.Lugdunensis)
+                $outer = [System.Collections.Generic.List[object]]::new()
+                $outer.Add($inner)
+                $n.Group.Children = $outer
+            }
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)
+            Get-Rule $findings | Should -Be @('flag-redundant')
+            $findings.Location | Should -Be @('Id 11')
+        }
+
+        It 'reports a flag it cannot check instead of throwing' {
+            Mock Get-NeoIPCInfectiousAgentNodeLocation { throw 'no location' }
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree ($script:FlagYaml | ConvertFrom-Yaml))
+            Get-Rule $findings | Should -Be @('flag')
+            $findings.Message | Should -BeLike '*no location*'
+        }
+
+        It 'reports a list without Hierarchies instead of throwing' {
+            Get-Rule (Get-NeoIPCInfectiousAgentFlagFinding -Tree @{ Metadata = @{} }) | Should -Be @('structure')
         }
     }
 
