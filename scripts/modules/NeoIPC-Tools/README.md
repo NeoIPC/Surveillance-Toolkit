@@ -111,9 +111,13 @@ noise-strips, then overlays the authored org units / users / memberships read fr
 `metadata/` directory and emits importable JSON. The generators produce the pathogen /
 substance / field-gating objects from the ontology + capability matrix. Each
 infectious-agent option takes its UID from the list's UID sidecar, which holds the
-deployed options' UIDs and a random one for every other option; every other generated
-object keeps its deployed UID where one exists and is minted deterministically
-otherwise, so a regenerated object replaces its deployed counterpart cleanly.
+deployed options' UIDs and a random one for every other option; the antimicrobial
+options and the antibiotic option groups take theirs from their CSVs' `uid` columns,
+and the option sets and option-group sets from captured constants. The generated data
+elements, program-rule variables, rules, and actions keep the UID of their deployed
+counterpart of the same key. Any other object new to the deployment gets a UID minted
+deterministically from its key, and a regenerated object replaces its deployed
+counterpart cleanly.
 
 `Update-NeoIPCMetadataDirectory` is the reverse path: it ingests a fresh export and brings the
 directory into line with it (report-only unless `-Apply`), auto-writing only the CSV-owned config
@@ -142,7 +146,8 @@ trailing whitespace trimmed and one closing newline). Two design points make it 
   deliberately **not** materialized into `common/` (a richer source — the ontology YAML + a UID sidecar +
   the antibiotic CSVs — owns them), yet the generators reconcile every reproduced object against the
   deployed option set. `New-NeoIPCMetadataPackage` assembles exactly that base, so it is the Export; the
-  committed `common/` tree is the Config. Reversing the two would drop the option-set UIDs.
+  committed `common/` tree is the Config. Reversing the two fails the generation, since the
+  option-domain generators refuse an Export without the deployed option sets.
 - **It is idempotent.** The writer rewrites every CSV of `common/` in one canonical form (fixed column
   order, sorted rows and lists, minimal quoting), so a drift-free tree comes out byte-identical and
   running it twice produces the same result. A hand edit in another form is rewritten too.

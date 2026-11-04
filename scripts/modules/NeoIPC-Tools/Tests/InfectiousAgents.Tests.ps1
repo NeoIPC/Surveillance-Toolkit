@@ -8,7 +8,9 @@
     Add-NeoIPCInfectiousAgentUid is driven as its callers drive it, on a list and a UID sidecar in TestDrive, and
     New-NeoIPCPathogenOptionSet is shown taking every option UID it draws. The UID draw itself, New-NeoIPCRandomUid,
     is replaced in one test only, to force the collisions the retry exists for: a drawn UID meets a taken one with a
-    chance of about 1 in 10^16, so no caller can provoke one.
+    chance of about 1 in 10^16, so no caller can provoke one. A change to the sidecar while a call waits for its
+    confirmation comes from the scripted host (ScriptedHost.ps1), which writes or deletes the file when it is asked, as
+    another run, an editor, or git would.
 
     Internals are reached through InModuleScope; the Import-Module at file top runs during Pester's discovery phase,
     which InModuleScope requires.
@@ -50,6 +52,47 @@ Hierarchies:
                     [System.IO.File]::WriteAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv'), $Sidecar, [System.Text.UTF8Encoding]::new($false))
                 }
                 $directory
+            }
+
+            . (Join-Path (Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'Tests') 'ScriptedHost.ps1')
+
+            function Invoke-ConfirmedUidAdd {
+                # Runs Add-NeoIPCInfectiousAgentUid -Confirm on the list in Directory, in a runspace of the scripted
+                # host, which answers Yes after doing what another run, an editor, or git might do while the call
+                # waits: writing Theirs as the sidecar, or deleting it. With Relative, the call names both files by
+                # relative paths from the list's directory, which the process's directory is not. Returns the prompts
+                # and what the call returned or threw.
+                param([Parameter(Mandatory)][string]$Directory, [string]$Theirs, [switch]$Delete, [switch]$Relative)
+                $sidecarPath = Join-Path $Directory 'NeoIPC-Infectious-Agents.uids.csv'
+                $scriptedHost = [NeoIPCTests.ScriptedHost]::new()
+                $scriptedHost.ScriptedUI.Answers.Enqueue('Yes')
+                if ($Delete) { $scriptedHost.ScriptedUI.DeleteOnPromptPath = $sidecarPath }
+                else {
+                    $scriptedHost.ScriptedUI.WriteOnPromptPath = $sidecarPath
+                    $scriptedHost.ScriptedUI.WriteOnPromptText = $Theirs
+                }
+                $runspace = [runspacefactory]::CreateRunspace($scriptedHost)
+                $runspace.Open()
+                $ps = [powershell]::Create()
+                try {
+                    $ps.Runspace = $runspace
+                    $quote = { param([string]$Text) "'$($Text.Replace("'", "''"))'" }
+                    $manifest = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+                    $call = if ($Relative) {
+                        "Set-Location -LiteralPath $(& $quote $Directory); Add-NeoIPCInfectiousAgentUid -Path ./NeoIPC-Infectious-Agents.yaml -UidSidecarPath ./NeoIPC-Infectious-Agents.uids.csv -Confirm"
+                    }
+                    else { "Add-NeoIPCInfectiousAgentUid -Path $(& $quote (Join-Path $Directory 'NeoIPC-Infectious-Agents.yaml')) -Confirm" }
+                    $null = $ps.AddScript(@"
+Import-Module $(& $quote $manifest) -Force
+try { $call } catch { `$_.Exception.Message }
+"@)
+                    $output = @($ps.Invoke())
+                    [pscustomobject]@{ Prompts = @($scriptedHost.ScriptedUI.Prompts); Output = $output }
+                }
+                finally {
+                    $ps.Dispose()
+                    $runspace.Dispose()
+                }
             }
         }
 
@@ -106,6 +149,67 @@ Hierarchies:
             $directory = New-TestList -Name 'odd-id' -Sidecar $sidecar
             { Add-NeoIPCInfectiousAgentUid -Path (Join-Path $directory 'NeoIPC-Infectious-Agents.yaml') } | Should -Throw "*rows whose id is no Id: abc.*"
             [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv')) | Should -BeExactly $sidecar
+        }
+
+        # The sidecar is written back unquoted, so a UID quoted around a line break would come back as a valid one.
+        It 'refuses a sidecar with a row whose UID is no DHIS2 UID, <Case>, and writes nothing' -ForEach @(
+            @{ Case = 'one quoted around a line break'; Directory = 'quoted-line-break'; Row = "10,`"a1234567890`n`"" }
+            @{ Case = 'one too short'; Directory = 'short'; Row = '10,a123456789' }
+            @{ Case = 'one that starts with a digit'; Directory = 'digit-first'; Row = '10,1a234567890' }
+            @{ Case = 'an empty one'; Directory = 'empty'; Row = '10,' }
+        ) {
+            $sidecar = "id,uid`n$Row`n"
+            $directory = New-TestList -Name "malformed-$Directory" -Sidecar $sidecar
+            { Add-NeoIPCInfectiousAgentUid -Path (Join-Path $directory 'NeoIPC-Infectious-Agents.yaml') } |
+                Should -Throw "*rows whose UID is no DHIS2 UID, for the Ids 10: restore each from the sidecar's history*only a row that never held a valid UID may go, for this call to draw one."
+            [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv')) | Should -BeExactly $sidecar
+        }
+
+        It 'writes nothing when the sidecar <Case> while the call waits for its confirmation, and keeps that change' -ForEach @(
+            # Another run adds the row of the Id 0 while this one waits at -Confirm with the sidecar it read.
+            @{ Case = 'changes'; Directory = 'changed'; Sidecar = "id,uid`n10,a1234567890`n"; Theirs = "id,uid`n0,z1234567890`n10,a1234567890`n"; Delete = $false }
+            # Another run creates the sidecar this one found absent.
+            @{ Case = 'appears'; Directory = 'appeared'; Sidecar = $null; Theirs = "id,uid`n0,z1234567890`n"; Delete = $false }
+            # git or a person deletes it.
+            @{ Case = 'disappears'; Directory = 'disappeared'; Sidecar = "id,uid`n10,a1234567890`n"; Theirs = $null; Delete = $true }
+        ) {
+            $directory = if ($null -ne $Sidecar) { New-TestList -Name $Directory -Sidecar $Sidecar } else { New-TestList -Name $Directory }
+            $sidecarPath = Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv'
+            $result = Invoke-ConfirmedUidAdd -Directory $directory -Theirs $Theirs -Delete:$Delete
+            @($result.Prompts).Count | Should -Be 1
+            @($result.Output | Where-Object { "$_" -like '*changed since the call read it, so nothing is written*' }).Count | Should -Be 1
+            $left = if (Test-Path -LiteralPath $sidecarPath) { [System.IO.File]::ReadAllText($sidecarPath) } else { $null }
+            $left | Should -BeExactly $Theirs
+        }
+
+        It 'tells a change to the sidecar a relative path names, against the current location' {
+            # .NET resolves a relative path against the process's directory, which Set-Location leaves where it is, so
+            # a check reading through .NET would read another file there, or none at both reads, and miss the change.
+            $directory = New-TestList -Name 'relative-changed' -Sidecar "id,uid`n10,a1234567890`n"
+            $theirs = "id,uid`n0,z1234567890`n10,a1234567890`n"
+            $result = Invoke-ConfirmedUidAdd -Directory $directory -Theirs $theirs -Relative
+            @($result.Output | Where-Object { "$_" -like '*changed since the call read it, so nothing is written*' }).Count | Should -Be 1
+            [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv')) | Should -BeExactly $theirs
+        }
+
+        It 'reads and writes the sidecar a relative path names, against the current location' {
+            $directory = New-TestList -Name 'relative' -Sidecar "id,uid`n10,a1234567890`n"
+            Push-Location -LiteralPath $directory
+            try { $added = @(Add-NeoIPCInfectiousAgentUid -Path './NeoIPC-Infectious-Agents.yaml' -UidSidecarPath './NeoIPC-Infectious-Agents.uids.csv') }
+            finally { Pop-Location }
+            @($added.Id) | Should -Be @(0, 2, 11)
+            [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv')) |
+                Should -BeExactly "id,uid`n0,$($added[0].Uid)`n2,$($added[1].Uid)`n10,a1234567890`n11,$($added[2].Uid)`n"
+        }
+
+        It 'reads and writes the sidecar beside a list on a PowerShell drive' {
+            $directory = New-TestList -Name 'drive' -Sidecar "id,uid`n10,a1234567890`n"
+            $null = New-PSDrive -Name NeoIPCTestList -PSProvider FileSystem -Root $directory -Scope Global
+            try { $added = @(Add-NeoIPCInfectiousAgentUid -Path 'NeoIPCTestList:\NeoIPC-Infectious-Agents.yaml') }
+            finally { Remove-PSDrive -Name NeoIPCTestList -Scope Global }
+            @($added.Id) | Should -Be @(0, 2, 11)
+            [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv')) |
+                Should -BeExactly "id,uid`n0,$($added[0].Uid)`n2,$($added[1].Uid)`n10,a1234567890`n11,$($added[2].Uid)`n"
         }
 
         It 'writes nothing with WhatIf' {
