@@ -18,15 +18,16 @@ function ConvertFrom-NeoIPCMetadataJsonText {
 }
 
 function Test-NeoIPCMetadataUid {
-    # True when $Id is a valid DHIS2 UID (11 chars, leading letter, then alphanumerics).
-    # -Invert returns the negation ("this id needs minting"). Same shape as the DHIS2 CodeGenerator.
+    # True when $Id is a valid DHIS2 UID (11 chars, leading letter, then alphanumerics), the whole text matched as
+    # DHIS2's CodeGenerator.isValidUid matches it, so a trailing line break fails too.
+    # -Invert returns the negation ("this id needs minting").
     [CmdletBinding()]
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)][AllowEmptyString()][AllowNull()][string]$Id,
         [switch]$Invert
     )
-    $isUid = $Id -cmatch '^[A-Za-z][A-Za-z0-9]{10}$'
+    $isUid = $Id -cmatch '\A[A-Za-z][A-Za-z0-9]{10}\z'
     if ($Invert) { -not $isUid } else { $isUid }
 }
 

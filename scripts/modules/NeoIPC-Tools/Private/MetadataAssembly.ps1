@@ -202,11 +202,17 @@ function Add-NeoIPCGeneratedMetadata {
             classifies each slot's infectious agent against the ontology's `Viruses` subtree — see
             New-NeoIPCPathogenVirusRule).
         Replacement is by NATURAL KEY, read from the generator outputs themselves (no pattern matching): a deployed
-        object is dropped iff a generated object shares its key — option-set / data-element CODE, program-rule /
-        variable NAME, or (for options) membership in the generated NEOIPC_PATHOGENS set — then the generated
-        objects are appended. Because each generator preserves the deployed UID where the key matches, a regenerated
-        object replaces its deployed counterpart in place (same id); newly minted objects (new option codes, grown
-        slots, the SSI-secondary-slot-2 reveal the deployed program omits) are simply added.
+        object is dropped iff a generated object shares its key — option-set CODE; data-element, option-group, and
+        option-group-set CODE or id; program-rule and variable NAME or id; or, for an option, membership in a
+        generated option set — then the generated objects are appended. A regenerated object carries its deployed
+        counterpart's UID, so it replaces that counterpart in place (same id). The option-domain generators take that
+        UID from their sources, which hold the deployed UIDs as captured: the infectious-agent options from the UID
+        sidecar, the antimicrobial options and the option groups from their CSVs' uid columns, and the two option sets
+        and the option-group sets from captured constants. The data-element, variable, and rule generators take it from
+        the deployed object of the same key (for the substance variables and rules, a slot-number-normalized name).
+        Objects new to the deployment are simply added: a new infectious-agent option with the random UID the sidecar
+        holds for it, and anything else with a UID minted from its key (a substance whose row has no uid, grown slots,
+        the SSI-secondary-slot-2 reveal the deployed program omits).
         Two deliberate exceptions keep the assembled package import-complete:
           - the stale aggregate rule 'NeoIPC HAP - set pathogen attribute variables' (+ its actions), which the
             per-slot resistance rules supersede, is dropped WITHOUT a generated replacement (the other five HAP
@@ -220,7 +226,9 @@ function Add-NeoIPCGeneratedMetadata {
     .PARAMETER Config
         The captured config package (ordered dict: type -> object array), noise-stripped — spliced in place.
     .PARAMETER Export
-        The full parsed export — the UID-preservation source the generators reconcile against.
+        The full parsed export: the data-element, variable, and rule generators keep its UIDs by key, while the
+        option-domain generators take its sharing and require each of its option codes to have a source, never its
+        UIDs.
     .PARAMETER OntologyPath
         Path to the infectious-agent YAML (drives the pathogen option set + resistance / common-commensal flags).
         Defaults (in each generator) to the canonical file in the repository.
@@ -247,8 +255,10 @@ function Add-NeoIPCGeneratedMetadata {
     $ontologyArgs = @{}
     if ($OntologyPath) { $ontologyArgs['Path'] = $OntologyPath }
 
-    # Generate against the export so every reproduced object keeps its deployed UID (preserve-by-key). The pathogen
-    # option set is localized from the po4a catalogues (PoDirectory); the other generators carry no translations.
+    # Generate against the export, from which the data-element, variable, and rule generators keep each reproduced
+    # object's deployed UID by its key; the option-domain generators take identity from their sources, never from
+    # the export. The pathogen option set is localized from the po4a catalogues (PoDirectory); the other generators
+    # carry no translations.
     $optionFrag  = New-NeoIPCPathogenOptionSet @ontologyArgs -ExistingPackage $Export -PoDirectory $PoDirectory
     $patDeFrag   = New-NeoIPCPathogenDataElement -ExistingPackage $Export -PathogenCount $PathogenCount
     $subDeFrag   = New-NeoIPCSubstanceDataElement -ExistingPackage $Export -SubstanceCount $SubstanceCount

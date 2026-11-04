@@ -54,17 +54,17 @@ moved onto the shared identifiable base), which is what makes the code their sta
 but that does not change the import scheme.
 
 A fresh UID is minted (deterministically, `f(natural key)`) **only** for an object that has no
-production UID yet: a generated one, such as a new infectious-agent option, minted from its option
-set's UID and its code, and a genuinely new authored one — the synthetic play accounts and the
-eurostat-only org units — which is then stored verbatim like the rest. A country added to the
-scaffold later (`Add-NeoIPCMetadataCountry`) gets a random UID instead, drawn once and stored
-verbatim, which an onboarding gives the country it creates in DHIS2, so that production takes
-the scaffold's UID rather than the scaffold capturing production's. `-RegenerateUids`
-re-mints all UIDs consistently, rewriting every inbound reference (structured **and**
-expression-embedded).
+production UID yet: a generated one other than an infectious-agent option, and a genuinely new
+authored one — the synthetic play accounts and the eurostat-only org units — which is then stored
+verbatim like the rest. Two kinds of object get a random UID instead, drawn once and stored
+verbatim: an infectious-agent option, in the UID sidecar (`Add-NeoIPCInfectiousAgentUid`), and a
+country added to the scaffold later (`Add-NeoIPCMetadataCountry`), which an onboarding gives the
+country it creates in DHIS2, so that production takes the scaffold's UID rather than the scaffold
+capturing production's. `-RegenerateUids` re-mints all UIDs consistently, rewriting every inbound
+reference (structured **and** expression-embedded).
 
 Sidecars are the narrow exception: the infectious-agent UID sidecar (`NeoIPC-Infectious-Agents.uids.csv`),
-which holds the UIDs of the deployed options only, keeps generated option UIDs out of `options.csv`; the
+which holds the UID of every infectious-agent option, keeps them out of `options.csv`; the
 antibiotic option/group/group-set families carry their UIDs in their richer curation CSVs.
 
 Org units and users are **not** real config in the export (it carries only anonymized

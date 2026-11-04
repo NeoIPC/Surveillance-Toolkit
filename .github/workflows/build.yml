@@ -627,7 +627,8 @@ jobs:
                   echo "$list OK: incorporates $declared ($tag); content matches HEAD."
                 }
                 # The two consuming products read DIFFERENT pathogen sources: the metadata package reads the
-                # canonical NeoIPC-Infectious-Agents.yaml, and the protocol compiles the pathogen CSVs
+                # canonical NeoIPC-Infectious-Agents.yaml and its UID sidecar, the source of every option's
+                # UID, and the protocol compiles the pathogen CSVs
                 # (New-PathogenList) — the legacy concept and synonym tables plus the two only the protocol
                 # reads. Both sources are tracked, so a change to EITHER forces a list re-release before
                 # either product ships it. Translations (*.de.csv etc.) stay out of scope.

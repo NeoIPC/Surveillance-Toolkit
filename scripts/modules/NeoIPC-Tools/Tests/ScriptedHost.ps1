@@ -7,8 +7,10 @@
 .DESCRIPTION
     Defines NeoIPCTests.ScriptedHost, once per process: a host whose user interface answers each choice prompt with the
     next answer of a queue, records every prompt, and refuses every request for input. A prompt with no answer left
-    fails, as it fails in a PowerShell that cannot ask. A test file dot-sources this file and runs the command under
-    test in a runspace of the host, [runspacefactory]::CreateRunspace([NeoIPCTests.ScriptedHost]::new()).
+    fails, as it fails in a PowerShell that cannot ask. Where a test sets WriteOnPromptPath or DeleteOnPromptPath, the
+    next prompt writes or deletes that file before it is answered, as another run, an editor, or git might while a call
+    waits for its confirmation. A test file dot-sources this file and runs the command under test in a runspace of the
+    host, [runspacefactory]::CreateRunspace([NeoIPCTests.ScriptedHost]::new()).
 #>
 
 if (-not ('NeoIPCTests.ScriptedHost' -as [type])) {
@@ -36,10 +38,26 @@ namespace NeoIPCTests
         public List<string> Prompts { get; } = new List<string>();
         public List<string> Inputs { get; } = new List<string>();
         public List<string> Warnings { get; } = new List<string>();
+        // The file the next choice prompt writes, as UTF-8 without a byte order mark, before it is answered; cleared once
+        // written.
+        public string WriteOnPromptPath { get; set; }
+        public string WriteOnPromptText { get; set; }
+        // The file the next choice prompt deletes before it is answered; cleared once deleted.
+        public string DeleteOnPromptPath { get; set; }
         public override PSHostRawUserInterface RawUI => null;
         public override int PromptForChoice(string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
         {
             Prompts.Add(message);
+            if (WriteOnPromptPath != null)
+            {
+                System.IO.File.WriteAllText(WriteOnPromptPath, WriteOnPromptText ?? "", new System.Text.UTF8Encoding(false));
+                WriteOnPromptPath = null;
+            }
+            if (DeleteOnPromptPath != null)
+            {
+                System.IO.File.Delete(DeleteOnPromptPath);
+                DeleteOnPromptPath = null;
+            }
             if (Answers.Count == 0) throw new InvalidOperationException("Asked with no answer left: " + message);
             int position = Array.IndexOf(choices.Count == 3 ? YesNoPositions : Positions, Answers.Dequeue());
             if (position < 0 || position >= choices.Count) throw new InvalidOperationException("No such answer to: " + message);

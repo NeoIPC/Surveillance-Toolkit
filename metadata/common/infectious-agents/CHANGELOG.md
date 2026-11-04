@@ -15,9 +15,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 - CI checks of the list: its keys and structure; every node's `Id`, `Name`, rank, source, and record number, and the
   form each typed value takes in the file; the option labels generated from it; its UID sidecar; the two frozen
-  CSVs; and that it stays append-only against every released version, so that a released `Id` keeps its name, a
-  deployed option keeps its UID, a new `Id` exceeds every released one, and a released `Id` never disappears, except
-  from a branch that maintains an earlier line, which need not carry a later line's `Id`s.
+  CSVs; and that it stays append-only against every released version, so that a released `Id` keeps its name and
+  the UID a release's sidecar gave it, a new `Id` exceeds every released one, and a released `Id` never disappears,
+  except from a branch that maintains an earlier line, which need not carry a later line's `Id`s.
 - CI checks that the list keeps to YAML 1.2.2's portable subset, which YAML 1.1, YAML 1.2.2, and the YAML readers
   the toolkit meets read alike, and that those readers read it alike.
 
@@ -31,6 +31,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   its sources.
 - In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
   rather than as a Boolean. The per-locale overlays, which po4a writes, have it plain.
+- `NeoIPC-Infectious-Agents.uids.csv` holds the DHIS2 UID of every `Id`: the 113 `Id`s production has not
+  deployed, which had no row, and whose options the metadata packages gave UIDs derived from their codes, have
+  random ones, as every new `Id` gets from NeoIPC-Tools' `Add-NeoIPCInfectiousAgentUid`, and CI fails for an `Id`
+  the file lacks.
 
 ### Deprecated
 
