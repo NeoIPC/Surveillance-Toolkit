@@ -33,7 +33,7 @@ Metadata:
   UrlTemplates:
     ICTV: https://ictv.global/taxonomy/taxondetails?taxnode_id={0}
     LPSN: https://lpsn.dsmz.de/{0}
-    MycoBank: https://www.mycobank.org/page/Name%20details%20page/{0}
+    MycoBank: https://www.mycobank.org/MB/{0}
     NeoIPC: https://neoipc.org/infectious-agents/{0}
 Hierarchies:
 - Id: 0

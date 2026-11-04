@@ -109,7 +109,7 @@ function AppendChildrenRecursive {
                     break
                 }
                 MycoBank {
-                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.MycoBank -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.MycoBank -f $item.MycoBankNr
                     break
                 }
                 ICTV {
@@ -181,7 +181,7 @@ function AppendSynonyms {
                     break
                 }
                 MycoBank {
-                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.MycoBank -f $item.ConceptId
+                    $newItem[$contentStrings.URL] = $data.Metadata.UrlTemplates.MycoBank -f $item.MycoBankNr
                     break
                 }
                 ICTV {

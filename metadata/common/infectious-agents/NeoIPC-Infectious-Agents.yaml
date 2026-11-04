@@ -2,7 +2,7 @@ Metadata:
   UrlTemplates:
     ICTV: https://ictv.global/taxonomy/taxondetails?taxnode_id={0}
     LPSN: https://lpsn.dsmz.de/{0}
-    MycoBank: https://www.mycobank.org/page/Name%20details%20page/{0}
+    MycoBank: https://www.mycobank.org/MB/{0}
     NeoIPC: 'TODO: Create URIs for NeoIPC-owned pathogen concepts'
   ListTerms:
     'Yes':
@@ -22074,6 +22074,16 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 888
                     MycoBankNr: 119529
+                - Name: Hormodendrum
+                  ConceptType: Genus
+                  ConceptId: 56712
+                  ConceptSource: MycoBank
+                  Id: 300
+                  MycoBankNr: 8558
+                  Comments:
+                    Background: >-
+                      MycoBank's record of the genus still classifies it in Davidiellaceae, whose current name is
+                      Cladosporiaceae, where the list files it.
             - Name: Dothideomycetidae
               ConceptType: Subclass
               ConceptId: 92397
@@ -22086,18 +22096,6 @@ Hierarchies:
                 ConceptSource: MycoBank
                 MycoBankNr: 90464
                 Children:
-                - Name: Davidiellaceae
-                  ConceptType: Family
-                  ConceptId: 440293
-                  ConceptSource: MycoBank
-                  MycoBankNr: 504453
-                  Children:
-                  - Name: Hormodendrum
-                    ConceptType: Genus
-                    ConceptId: 56712
-                    ConceptSource: MycoBank
-                    Id: 300
-                    MycoBankNr: 8558
                 - Name: Piedraiaceae
                   ConceptType: Family
                   ConceptId: 93023
@@ -22338,6 +22336,30 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 2049
                     MycoBankNr: 8495
+                - Name: Neohendersoniaceae
+                  ConceptType: Family
+                  ConceptId: 555701
+                  ConceptSource: MycoBank
+                  MycoBankNr: 818515
+                  Children:
+                  - Name: Medicopsis
+                    ConceptType: Genus
+                    ConceptId: 507290
+                    ConceptSource: MycoBank
+                    MycoBankNr: 564791
+                    Children:
+                    - Name: Medicopsis romeroi
+                      ConceptType: Species
+                      ConceptId: 507291
+                      ConceptSource: MycoBank
+                      Id: 3345
+                      MycoBankNr: 564792
+                      Synonyms:
+                      - Name: Pyrenochaeta romeroi
+                        ConceptId: 23322
+                        ConceptSource: MycoBank
+                        Id: 349
+                        MycoBankNr: 338075
                 - Name: Pleosporaceae
                   ConceptType: Family
                   ConceptId: 93033
@@ -22357,6 +22379,12 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 1869
                       MycoBankNr: 119834
+                      Synonyms:
+                      - Name: Alternaria tenuissima
+                        ConceptId: 1099
+                        ConceptSource: MycoBank
+                        Id: 1749
+                        MycoBankNr: 280005
                     - Name: Alternaria dianthicola
                       ConceptType: Species
                       ConceptId: 982
@@ -22369,12 +22397,6 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 1019
                       MycoBankNr: 103987
-                    - Name: Alternaria tenuissima
-                      ConceptType: Species
-                      ConceptId: 1099
-                      ConceptSource: MycoBank
-                      Id: 1749
-                      MycoBankNr: 280005
                     Synonyms:
                     - Name: Macrosporium
                       ConceptId: 56872
@@ -22550,24 +22572,6 @@ Hierarchies:
                         ConceptSource: MycoBank
                         Id: 1580
                         MycoBankNr: 333276
-                  - Name: Medicopsis
-                    ConceptType: Genus
-                    ConceptId: 507290
-                    ConceptSource: MycoBank
-                    MycoBankNr: 564791
-                    Children:
-                    - Name: Medicopsis romeroi
-                      ConceptType: Species
-                      ConceptId: 507291
-                      ConceptSource: MycoBank
-                      Id: 3345
-                      MycoBankNr: 564792
-                      Synonyms:
-                      - Name: Pyrenochaeta romeroi
-                        ConceptId: 23322
-                        ConceptSource: MycoBank
-                        Id: 349
-                        MycoBankNr: 338075
                   - Name: Trematosphaeria
                     ConceptType: Genus
                     ConceptId: 57535
@@ -22622,25 +22626,24 @@ Hierarchies:
                         ConceptSource: MycoBank
                         Id: 1429
                         MycoBankNr: 318847
+                    - Name: Scolecobasidium humicola
+                      ConceptType: Species
+                      ConceptId: 35599
+                      ConceptSource: MycoBank
+                      Id: 952
+                      MycoBankNr: 338922
+                      Synonyms:
+                      - Name: Ochroconis humicola
+                        ConceptId: 17804
+                        ConceptSource: MycoBank
+                        Id: 861
+                        MycoBankNr: 318849
                     Synonyms:
                     - Name: Ochroconis
                       ConceptId: 57037
                       ConceptSource: MycoBank
                       Id: 2081
                       MycoBankNr: 9136
-                      Children:
-                      - Name: Ochroconis humicola
-                        ConceptType: Species
-                        ConceptId: 17804
-                        ConceptSource: MycoBank
-                        Id: 861
-                        MycoBankNr: 318849
-                        Synonyms:
-                        - Name: Scolecobasidium humicola
-                          ConceptId: 35599
-                          ConceptSource: MycoBank
-                          Id: 952
-                          MycoBankNr: 338922
                   - Name: Verruconis
                     ConceptType: Genus
                     ConceptId: 474623
@@ -22707,6 +22710,24 @@ Hierarchies:
                   ConceptSource: MycoBank
                   MycoBankNr: 80856
                   Children:
+                  - Name: Capronia
+                    ConceptType: Genus
+                    ConceptId: 41606
+                    ConceptSource: MycoBank
+                    MycoBankNr: 815
+                    Children:
+                    - Name: Capronia americana
+                      ConceptType: Species
+                      ConceptId: 625047
+                      ConceptSource: MycoBank
+                      Id: 3622
+                      MycoBankNr: 863243
+                      Synonyms:
+                      - Name: Phialophora americana
+                        ConceptId: 20569
+                        ConceptSource: MycoBank
+                        Id: 167
+                        MycoBankNr: 302837
                   - Name: Cladophialophora
                     ConceptType: Genus
                     ConceptId: 47336
@@ -22858,12 +22879,6 @@ Hierarchies:
                     Id: 2127
                     MycoBankNr: 9342
                     Children:
-                    - Name: Phialophora americana
-                      ConceptType: Species
-                      ConceptId: 20569
-                      ConceptSource: MycoBank
-                      Id: 167
-                      MycoBankNr: 302837
                     - Name: Phialophora verrucosa
                       ConceptType: Species
                       ConceptId: 20729
@@ -22966,19 +22981,6 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 2480
                       MycoBankNr: 209842
-                      Children:
-                      - Name: Aspergillus flavus var. oryzae
-                        ConceptType: Variety
-                        ConceptId: 161670
-                        ConceptSource: MycoBank
-                        Id: 3396
-                        MycoBankNr: 130238
-                        Synonyms:
-                        - Name: Aspergillus oryzae
-                          ConceptId: 46515
-                          ConceptSource: MycoBank
-                          Id: 2355
-                          MycoBankNr: 184394
                     - Name: Aspergillus fumigatus
                       ConceptType: Species
                       ConceptId: 58207
@@ -22987,10 +22989,10 @@ Hierarchies:
                       MycoBankNr: 211776
                     - Name: Aspergillus glaucus
                       ConceptType: Species
-                      ConceptId: 10039
+                      ConceptId: 619857
                       ConceptSource: MycoBank
                       Id: 853
-                      MycoBankNr: 161735
+                      MycoBankNr: 860658
                     - Name: Aspergillus nidulans
                       ConceptType: Species
                       ConceptId: 9412
@@ -23015,6 +23017,18 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 664
                       MycoBankNr: 190223
+                    - Name: Aspergillus oryzae
+                      ConceptType: Species
+                      ConceptId: 46515
+                      ConceptSource: MycoBank
+                      Id: 2355
+                      MycoBankNr: 184394
+                      Synonyms:
+                      - Name: Aspergillus flavus var. oryzae
+                        ConceptId: 161670
+                        ConceptSource: MycoBank
+                        Id: 3396
+                        MycoBankNr: 130238
                     - Name: Aspergillus parasiticus
                       ConceptType: Species
                       ConceptId: 2607
@@ -23068,20 +23082,19 @@ Hierarchies:
                       ConceptType: Species
                       ConceptId: 58272
                       ConceptSource: MycoBank
+                      Id: 3628
                       MycoBankNr: 247956
-                      Children:
+                      Synonyms:
                       - Name: Penicillium aurantiogriseum var. aurantiogriseum
-                        ConceptType: Variety
                         ConceptId: 41785
                         ConceptSource: MycoBank
                         Id: 3399
                         MycoBankNr: 418219
-                        Synonyms:
-                        - Name: Penicillium puberulum
-                          ConceptId: 19189
-                          ConceptSource: MycoBank
-                          Id: 2376
-                          MycoBankNr: 208565
+                      - Name: Penicillium puberulum
+                        ConceptId: 19189
+                        ConceptSource: MycoBank
+                        Id: 2376
+                        MycoBankNr: 208565
                     - Name: Penicillium commune
                       ConceptType: Species
                       ConceptId: 18729
@@ -23234,24 +23247,6 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 1332
                     MycoBankNr: 335
-                  - Name: Microsporon
-                    ConceptType: Genus
-                    ConceptId: 60028
-                    ConceptSource: MycoBank
-                    MycoBankNr: 39188
-                    Children:
-                    - Name: Microsporon brachytomum
-                      ConceptType: Species
-                      ConceptId: 466190
-                      ConceptSource: MycoBank
-                      Id: 3408
-                      MycoBankNr: 528372
-                      Synonyms:
-                      - Name: Microsporum brachytomum
-                        ConceptId: 125267
-                        ConceptSource: MycoBank
-                        Id: 2326
-                        MycoBankNr: 102029
                   - Name: Microsporum
                     ConceptType: Genus
                     ConceptId: 37615
@@ -23259,6 +23254,22 @@ Hierarchies:
                     Id: 410
                     MycoBankNr: 8939
                     Children:
+                    - Name: Microsporum brachytomum
+                      ConceptType: Species
+                      ConceptId: 125267
+                      ConceptSource: MycoBank
+                      Id: 2326
+                      MycoBankNr: 102029
+                      Comments:
+                        Background: >-
+                          MycoBank gives Microsporon brachytomum, an orthographic variant of this name, as the current
+                          name of both records; the list takes the correctly spelled name as the concept.
+                      Synonyms:
+                      - Name: Microsporon brachytomum
+                        ConceptId: 466190
+                        ConceptSource: MycoBank
+                        Id: 3408
+                        MycoBankNr: 528372
                     - Name: Microsporum canis
                       ConceptType: Species
                       ConceptId: 15421
@@ -23325,24 +23336,24 @@ Hierarchies:
                 ConceptSource: MycoBank
                 MycoBankNr: 90476
                 Children:
+                - Name: Myxotrichaceae
+                  ConceptType: Family
+                  ConceptId: 92966
+                  ConceptSource: MycoBank
+                  MycoBankNr: 81054
+                  Children:
+                  - Name: Oidiodendron
+                    ConceptType: Genus
+                    ConceptId: 39757
+                    ConceptSource: MycoBank
+                    Id: 2108
+                    MycoBankNr: 9141
                 - Name: Scytalidium
                   ConceptType: Genus
                   ConceptId: 39013
                   ConceptSource: MycoBank
                   Id: 326
                   MycoBankNr: 9862
-              - Name: Myxotrichaceae
-                ConceptType: Family
-                ConceptId: 92966
-                ConceptSource: MycoBank
-                MycoBankNr: 81054
-                Children:
-                - Name: Oidiodendron
-                  ConceptType: Genus
-                  ConceptId: 39757
-                  ConceptSource: MycoBank
-                  Id: 2108
-                  MycoBankNr: 9141
           - Name: Sordariomycetes
             ConceptType: Class
             ConceptId: 374831
@@ -23617,12 +23628,6 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 931
                       MycoBankNr: 260522
-                      Synonyms:
-                      - Name: Fusarium sporotrichioides
-                        ConceptId: 46575
-                        ConceptSource: MycoBank
-                        Id: 670
-                        MycoBankNr: 145064
                     - Name: Fusarium culmorum
                       ConceptType: Species
                       ConceptId: 10595
@@ -23665,6 +23670,12 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 1631
                       MycoBankNr: 119380
+                    - Name: Fusarium sporotrichioides
+                      ConceptType: Species
+                      ConceptId: 46575
+                      ConceptSource: MycoBank
+                      Id: 670
+                      MycoBankNr: 145064
                     - Name: Fusarium tricinctum
                       ConceptType: Species
                       ConceptId: 11074
@@ -24100,19 +24111,24 @@ Hierarchies:
                   ConceptSource: MycoBank
                   MycoBankNr: 80582
                   Children:
-                  - Name: Amesia
+                  - Name: Amesomyces
                     ConceptType: Genus
-                    ConceptId: 556080
+                    ConceptId: 625376
                     ConceptSource: MycoBank
-                    MycoBankNr: 818829
+                    MycoBankNr: 863490
                     Children:
-                    - Name: Amesia atrobrunnea
+                    - Name: Amesomyces atrobrunneus
                       ConceptType: Species
-                      ConceptId: 556088
+                      ConceptId: 625377
                       ConceptSource: MycoBank
-                      Id: 3383
-                      MycoBankNr: 818832
+                      Id: 3620
+                      MycoBankNr: 863491
                       Synonyms:
+                      - Name: Amesia atrobrunnea
+                        ConceptId: 556088
+                        ConceptSource: MycoBank
+                        Id: 3383
+                        MycoBankNr: 818832
                       - Name: Chaetomium atrobrunneum
                         ConceptId: 4409
                         ConceptSource: MycoBank
@@ -24205,11 +24221,11 @@ Hierarchies:
               ConceptSource: MycoBank
               MycoBankNr: 501509
               Children:
-              - Name: Xylariales
+              - Name: Amphisphaeriales
                 ConceptType: Order
-                ConceptId: 92543
+                ConceptId: 452921
                 ConceptSource: MycoBank
-                MycoBankNr: 90505
+                MycoBankNr: 90458
                 Children:
                 - Name: Apiosporaceae
                   ConceptType: Family
@@ -24310,24 +24326,13 @@ Hierarchies:
                   ConceptSource: MycoBank
                   Id: 3551
                   MycoBankNr: 7384
-                  Synonyms:
-                  - Name: Stephanoascus
-                    ConceptId: 57447
-                    ConceptSource: MycoBank
-                    Id: 364
-                    MycoBankNr: 5209
-                - Name: Trichomonascus
-                  ConceptType: Genus
-                  ConceptId: 98719
-                  ConceptSource: MycoBank
-                  MycoBankNr: 5562
                   Children:
-                  - Name: Trichomonascus ciferrii
+                  - Name: Blastobotrys ciferrii
                     ConceptType: Species
-                    ConceptId: 454883
+                    ConceptId: 620214
                     ConceptSource: MycoBank
-                    Id: 3371
-                    MycoBankNr: 530083
+                    Id: 3621
+                    MycoBankNr: 860911
                     Synonyms:
                     - Name: Candida ciferrii
                       ConceptId: 105098
@@ -24339,6 +24344,17 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 2259
                       MycoBankNr: 324077
+                    - Name: Trichomonascus ciferrii
+                      ConceptId: 454883
+                      ConceptSource: MycoBank
+                      Id: 3371
+                      MycoBankNr: 530083
+                  Synonyms:
+                  - Name: Stephanoascus
+                    ConceptId: 57447
+                    ConceptSource: MycoBank
+                    Id: 364
+                    MycoBankNr: 5209
                 - Name: Wickerhamiella
                   ConceptType: Genus
                   ConceptId: 98948
@@ -24472,23 +24488,6 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 451
                       MycoBankNr: 108744
-                  - Name: Pichia inconspicua
-                    ConceptType: Species
-                    ConceptId: 608193
-                    ConceptSource: MycoBank
-                    Id: 3438
-                    MycoBankNr: 571647
-                    Synonyms:
-                    - Name: Candida inconspicua
-                      ConceptId: 107984
-                      ConceptSource: MycoBank
-                      Id: 1805
-                      MycoBankNr: 310280
-                    - Name: Torulopsis inconspicua
-                      ConceptId: 107985
-                      ConceptSource: MycoBank
-                      Id: 2086
-                      MycoBankNr: 306936
                   - Name: Pichia kudriavzevii
                     ConceptType: Species
                     ConceptId: 105891
@@ -24528,30 +24527,23 @@ Hierarchies:
                   Id: 3422
                   MycoBankNr: 7487
                   Children:
-                  - Name: Candida parapsilosis complex
-                    ConceptType: Group
-                    ConceptId: 30
-                    ConceptSource: NeoIPC
-                    Id: 2701
-                    Children:
-                    - Name: Candida metapsilosis
-                      ConceptType: Species
-                      ConceptId: 414688
+                  - Name: Azymocandida mycoderma
+                    ConceptType: Species
+                    ConceptId: 106773
+                    ConceptSource: MycoBank
+                    Id: 3349
+                    MycoBankNr: 326854
+                    Comments:
+                      Background: >-
+                        MycoBank gives Candida as the current name of the genus Azymocandida, but keeps Azymocandida
+                        mycoderma, an invalid name, as this species' current name, over its obligate synonym Candida
+                        mycoderma, a legitimate combination in Candida; the list files the species under Candida.
+                    Synonyms:
+                    - Name: Candida vini
+                      ConceptId: 108012
                       ConceptSource: MycoBank
-                      Id: 1312
-                      MycoBankNr: 500210
-                    - Name: Candida orthopsilosis
-                      ConceptType: Species
-                      ConceptId: 414687
-                      ConceptSource: MycoBank
-                      Id: 2427
-                      MycoBankNr: 500209
-                    - Name: Candida parapsilosis
-                      ConceptType: Species
-                      ConceptId: 106134
-                      ConceptSource: MycoBank
-                      Id: 1197
-                      MycoBankNr: 253819
+                      Id: 1651
+                      MycoBankNr: 310359
                   - Name: Candida albicans
                     ConceptType: Species
                     ConceptId: 106232
@@ -24576,31 +24568,45 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 2511
                     MycoBankNr: 254786
-                  - Name: Candida pintolopesii
+                  - Name: Candida inconspicua
                     ConceptType: Species
-                    ConceptId: 107989
+                    ConceptId: 107984
                     ConceptSource: MycoBank
-                    Id: 396
-                    MycoBankNr: 310322
-                    Children:
-                    - Name: Candida pintolopesii var. pintolopesii
-                      ConceptType: Variety
-                      ConceptId: 108603
-                      ConceptSource: MycoBank
-                      Id: 3348
-                      MycoBankNr: 417304
+                    Id: 1805
+                    MycoBankNr: 310280
                     Synonyms:
+                    - Name: Pichia inconspicua
+                      ConceptId: 608193
+                      ConceptSource: MycoBank
+                      Id: 3438
+                      MycoBankNr: 571647
+                    - Name: Torulopsis inconspicua
+                      ConceptId: 107985
+                      ConceptSource: MycoBank
+                      Id: 2086
+                      MycoBankNr: 306936
+                  - Name: Candida pintolopesii var. pintolopesii
+                    ConceptType: Variety
+                    ConceptId: 108603
+                    ConceptSource: MycoBank
+                    Id: 3348
+                    MycoBankNr: 417304
+                    Comments:
+                      Background: >-
+                        MycoBank gives the variety as the current name of the species Candida pintolopesii, while its
+                        record still classifies the variety in that species; the list files the variety directly in
+                        Candida.
+                    Synonyms:
+                    - Name: Candida pintolopesii
+                      ConceptId: 107989
+                      ConceptSource: MycoBank
+                      Id: 396
+                      MycoBankNr: 310322
                     - Name: Torulopsis pintolopesii
                       ConceptId: 107990
                       ConceptSource: MycoBank
                       Id: 1284
                       MycoBankNr: 306944
-                  - Name: Candida sake
-                    ConceptType: Species
-                    ConceptId: 105733
-                    ConceptSource: MycoBank
-                    Id: 550
-                    MycoBankNr: 283382
                   - Name: Candida slooffiae
                     ConceptType: Species
                     ConceptId: 438796
@@ -24619,12 +24625,6 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 181
                     MycoBankNr: 280770
-                  - Name: Candida zeylanoides
-                    ConceptType: Species
-                    ConceptId: 108022
-                    ConceptSource: MycoBank
-                    Id: 94
-                    MycoBankNr: 255505
                 - Name: Debaryomyces
                   ConceptType: Genus
                   ConceptId: 94703
@@ -24638,30 +24638,6 @@ Hierarchies:
                     ConceptSource: MycoBank
                     Id: 1232
                     MycoBankNr: 296478
-                  Synonyms:
-                  - Name: Schwanniomyces
-                    ConceptId: 102771
-                    ConceptSource: MycoBank
-                    Id: 2254
-                    MycoBankNr: 4918
-                    Children:
-                    - Name: Schwanniomyces polymorphus
-                      ConceptType: Species
-                      ConceptId: 459852
-                      ConceptSource: MycoBank
-                      Id: 782
-                      MycoBankNr: 513478
-                      Synonyms:
-                      - Name: Debaryomyces polymorphus
-                        ConceptId: 106415
-                        ConceptSource: MycoBank
-                        Id: 2534
-                        MycoBankNr: 312744
-                      - Name: Pichia polymorpha
-                        ConceptId: 106413
-                        ConceptSource: MycoBank
-                        Id: 1475
-                        MycoBankNr: 226743
                 - Name: Diutina
                   ConceptType: Genus
                   ConceptId: 545142
@@ -24697,6 +24673,42 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 2418
                       MycoBankNr: 284780
+                - Name: Dujonia
+                  ConceptType: Genus
+                  ConceptId: 600432
+                  ConceptSource: MycoBank
+                  MycoBankNr: 848190
+                  Children:
+                  - Name: Dujonia zeylanoides
+                    ConceptType: Species
+                    ConceptId: 600439
+                    ConceptSource: MycoBank
+                    Id: 3623
+                    MycoBankNr: 848197
+                    Synonyms:
+                    - Name: Candida zeylanoides
+                      ConceptId: 108022
+                      ConceptSource: MycoBank
+                      Id: 94
+                      MycoBankNr: 255505
+                - Name: Fermentozyma
+                  ConceptType: Genus
+                  ConceptId: 600425
+                  ConceptSource: MycoBank
+                  MycoBankNr: 848183
+                  Children:
+                  - Name: Fermentozyma sake
+                    ConceptType: Species
+                    ConceptId: 600426
+                    ConceptSource: MycoBank
+                    Id: 3624
+                    MycoBankNr: 848184
+                    Synonyms:
+                    - Name: Candida sake
+                      ConceptId: 105733
+                      ConceptSource: MycoBank
+                      Id: 550
+                      MycoBankNr: 283382
                 - Name: Kodamaea
                   ConceptType: Genus
                   ConceptId: 95884
@@ -24733,6 +24745,52 @@ Hierarchies:
                   Id: 1001
                   MycoBankNr: 2916
                   Children:
+                  - Name: Candida parapsilosis complex
+                    ConceptType: Group
+                    ConceptId: 30
+                    ConceptSource: NeoIPC
+                    Id: 2701
+                    Comments:
+                      Background: >-
+                        The group keeps the name laboratories know it by; MycoBank places its three species in
+                        Lodderomyces.
+                    Children:
+                    - Name: Lodderomyces metapsilosis
+                      ConceptType: Species
+                      ConceptId: 615855
+                      ConceptSource: MycoBank
+                      Id: 3625
+                      MycoBankNr: 858098
+                      Synonyms:
+                      - Name: Candida metapsilosis
+                        ConceptId: 414688
+                        ConceptSource: MycoBank
+                        Id: 1312
+                        MycoBankNr: 500210
+                    - Name: Lodderomyces orthopsilosis
+                      ConceptType: Species
+                      ConceptId: 615856
+                      ConceptSource: MycoBank
+                      Id: 3626
+                      MycoBankNr: 858099
+                      Synonyms:
+                      - Name: Candida orthopsilosis
+                        ConceptId: 414687
+                        ConceptSource: MycoBank
+                        Id: 2427
+                        MycoBankNr: 500209
+                    - Name: Lodderomyces parapsilosis
+                      ConceptType: Species
+                      ConceptId: 615858
+                      ConceptSource: MycoBank
+                      Id: 3627
+                      MycoBankNr: 858101
+                      Synonyms:
+                      - Name: Candida parapsilosis
+                        ConceptId: 106134
+                        ConceptSource: MycoBank
+                        Id: 1197
+                        MycoBankNr: 253819
                   - Name: Lodderomyces elongisporus
                     ConceptType: Species
                     ConceptId: 106668
@@ -24781,12 +24839,41 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 456
                       MycoBankNr: 226618
+                - Name: Schwanniomyces
+                  ConceptType: Genus
+                  ConceptId: 102771
+                  ConceptSource: MycoBank
+                  Id: 2254
+                  MycoBankNr: 4918
+                  Comments:
+                    Background: >-
+                      MycoBank's record of the genus gives Debaryomyces as its current name, while MycoBank keeps the
+                      genus's type species, Schwanniomyces occidentalis, and Schwanniomyces polymorphus as current names
+                      in the genus; the list keeps the genus as a concept, holding Schwanniomyces polymorphus.
+                  Children:
+                  - Name: Schwanniomyces polymorphus
+                    ConceptType: Species
+                    ConceptId: 459852
+                    ConceptSource: MycoBank
+                    Id: 782
+                    MycoBankNr: 513478
+                    Synonyms:
+                    - Name: Debaryomyces polymorphus
+                      ConceptId: 106415
+                      ConceptSource: MycoBank
+                      Id: 2534
+                      MycoBankNr: 312744
+                    - Name: Pichia polymorpha
+                      ConceptId: 106413
+                      ConceptSource: MycoBank
+                      Id: 1475
+                      MycoBankNr: 226743
               - Name: Metschnikowiaceae
                 ConceptType: Family
-                ConceptId: 92937
+                ConceptId: 524359
                 ConceptSource: MycoBank
                 Id: 3434
-                MycoBankNr: 80999
+                MycoBankNr: 550284
                 Children:
                 - Name: Metschnikowia
                   ConceptType: Genus
@@ -24915,9 +25002,9 @@ Hierarchies:
                       MycoBankNr: 252746
           - Name: Saccharomycetes
             ConceptType: Class
-            ConceptId: 92387
+            ConceptId: 438230
             ConceptSource: MycoBank
-            MycoBankNr: 90790
+            MycoBankNr: 90791
             Children:
             - Name: Saccharomycodales
               ConceptType: Order
@@ -24955,62 +25042,6 @@ Hierarchies:
                 ConceptSource: MycoBank
                 MycoBankNr: 82097
                 Children:
-                - Name: Cyberlindnera
-                  ConceptType: Genus
-                  ConceptId: 461447
-                  ConceptSource: MycoBank
-                  Id: 3566
-                  MycoBankNr: 534376
-                  Children:
-                  - Name: Cyberlindnera fabianii
-                    ConceptType: Species
-                    ConceptId: 462888
-                    ConceptSource: MycoBank
-                    Id: 1132
-                    MycoBankNr: 534382
-                    Synonyms:
-                    - Name: Candida fabianii
-                      ConceptId: 105131
-                      ConceptSource: MycoBank
-                      Id: 512
-                      MycoBankNr: 327431
-                    - Name: Pichia fabianii
-                      ConceptId: 105823
-                      ConceptSource: MycoBank
-                      Id: 1837
-                      MycoBankNr: 107154
-                    - Name: Hansenula fabianii
-                      ConceptId: 105822
-                      ConceptSource: MycoBank
-                      Id: 1044
-                      MycoBankNr: 331659
-                  - Name: Cyberlindnera jadinii
-                    ConceptType: Species
-                    ConceptId: 462889
-                    ConceptSource: MycoBank
-                    Id: 3356
-                    MycoBankNr: 534383
-                    Synonyms:
-                    - Name: Candida utilis
-                      ConceptId: 107195
-                      ConceptSource: MycoBank
-                      Id: 1238
-                      MycoBankNr: 294053
-                    - Name: Torula utilis
-                      ConceptId: 107197
-                      ConceptSource: MycoBank
-                      Id: 737
-                      MycoBankNr: 456582
-                    - Name: Torulopsis utilis
-                      ConceptId: 107198
-                      ConceptSource: MycoBank
-                      Id: 1574
-                      MycoBankNr: 281224
-                    - Name: Cryptococcus utilis
-                      ConceptId: 107196
-                      ConceptSource: MycoBank
-                      Id: 2460
-                      MycoBankNr: 456262
                 - Name: Starmera
                   ConceptType: Genus
                   ConceptId: 98333
@@ -25036,6 +25067,46 @@ Hierarchies:
                 ConceptSource: MycoBank
                 MycoBankNr: 536878
                 Children:
+                - Name: Petasospora
+                  ConceptType: Genus
+                  ConceptId: 101995
+                  ConceptSource: MycoBank
+                  Id: 3629
+                  MycoBankNr: 3845
+                  Children:
+                  - Name: Petasospora fabianii
+                    ConceptType: Species
+                    ConceptId: 615954
+                    ConceptSource: MycoBank
+                    Id: 3630
+                    MycoBankNr: 858197
+                    Synonyms:
+                    - Name: Candida fabianii
+                      ConceptId: 105131
+                      ConceptSource: MycoBank
+                      Id: 512
+                      MycoBankNr: 327431
+                    - Name: Cyberlindnera fabianii
+                      ConceptId: 462888
+                      ConceptSource: MycoBank
+                      Id: 1132
+                      MycoBankNr: 534382
+                    - Name: Hansenula fabianii
+                      ConceptId: 105822
+                      ConceptSource: MycoBank
+                      Id: 1044
+                      MycoBankNr: 331659
+                    - Name: Pichia fabianii
+                      ConceptId: 105823
+                      ConceptSource: MycoBank
+                      Id: 1837
+                      MycoBankNr: 107154
+                  Synonyms:
+                  - Name: Cyberlindnera
+                    ConceptId: 461447
+                    ConceptSource: MycoBank
+                    Id: 3566
+                    MycoBankNr: 534376
                 - Name: Wickerhamomyces
                   ConceptType: Genus
                   ConceptId: 453229
@@ -25065,117 +25136,131 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 2582
                       MycoBankNr: 253866
-            - Name: Saccharomycetidae
-              ConceptType: Subclass
-              ConceptId: 92409
-              ConceptSource: MycoBank
-              MycoBankNr: 90341
-              Children:
-              - Name: Saccharomycetales
-                ConceptType: Order
-                ConceptId: 92517
-                ConceptSource: MycoBank
-                MycoBankNr: 90510
-                Children:
-                - Name: Saccharomycetaceae
-                  ConceptType: Family
-                  ConceptId: 93075
-                  ConceptSource: MycoBank
-                  MycoBankNr: 81248
-                  Children:
-                  - Name: Nakaseomyces
-                    ConceptType: Genus
-                    ConceptId: 120396
-                    ConceptSource: MycoBank
-                    Id: 3562
-                    MycoBankNr: 28811
-                    Children:
-                    - Name: Nakaseomyces glabratus
-                      ConceptType: Species
-                      ConceptId: 593804
-                      ConceptSource: MycoBank
-                      Id: 3563
-                      MycoBankNr: 843854
-                      Synonyms:
-                      - Name: Candida glabrata
-                        ConceptId: 105396
-                        ConceptSource: MycoBank
-                        Id: 2078
-                        MycoBankNr: 310265
-                    - Name: Nakaseomyces nivariensis
-                      ConceptType: Species
-                      ConceptId: 593805
-                      ConceptSource: MycoBank
-                      Id: 3564
-                      MycoBankNr: 843855
-                      Synonyms:
-                      - Name: Candida nivariensis
-                        ConceptId: 120486
-                        ConceptSource: MycoBank
-                        Id: 1322
-                        MycoBankNr: 357391
-                    - Name: Nakaseomyces bracarensis
-                      ConceptType: Species
-                      ConceptId: 593802
-                      ConceptSource: MycoBank
-                      Id: 3565
-                      MycoBankNr: 843852
-                      Synonyms:
-                      - Name: Candida bracarensis
-                        ConceptId: 415711
-                        ConceptSource: MycoBank
-                        Id: 2037
-                        MycoBankNr: 357201
-                  - Name: Saccharomyces
-                    ConceptType: Genus
-                    ConceptId: 476107
-                    ConceptSource: MycoBank
-                    Id: 2700
-                    MycoBankNr: 542401
-                    Children:
-                    - Name: Saccharomyces cerevisiae
-                      ConceptType: Species
-                      ConceptId: 425703
-                      ConceptSource: MycoBank
-                      Id: 2695
-                      MycoBankNr: 492348
-                  - Name: Kluyveromyces
-                    ConceptType: Genus
-                    ConceptId: 95876
-                    ConceptSource: MycoBank
-                    Id: 1709
-                    MycoBankNr: 2572
-                  - Name: Lachancea
-                    ConceptType: Genus
-                    ConceptId: 120397
-                    ConceptSource: MycoBank
-                    Id: 1075
-                    MycoBankNr: 28810
-                    Children:
-                    - Name: Lachancea fermentati
-                      ConceptType: Species
-                      ConceptId: 120429
-                      ConceptSource: MycoBank
-                      Id: 572
-                      MycoBankNr: 487627
-                - Name: Azymocandida
+                - Name: Williopsis
                   ConceptType: Genus
-                  ConceptId: 99433
+                  ConceptId: 98950
                   ConceptSource: MycoBank
-                  MycoBankNr: 7301
+                  MycoBankNr: 5781
                   Children:
-                  - Name: Azymocandida mycoderma
+                  - Name: Williopsis jadinii
                     ConceptType: Species
-                    ConceptId: 106773
+                    ConceptId: 616014
                     ConceptSource: MycoBank
-                    Id: 3349
-                    MycoBankNr: 326854
+                    Id: 3632
+                    MycoBankNr: 858257
                     Synonyms:
-                    - Name: Candida vini
-                      ConceptId: 108012
+                    - Name: Candida utilis
+                      ConceptId: 107195
                       ConceptSource: MycoBank
-                      Id: 1651
-                      MycoBankNr: 310359
+                      Id: 1238
+                      MycoBankNr: 294053
+                    - Name: Cryptococcus utilis
+                      ConceptId: 107196
+                      ConceptSource: MycoBank
+                      Id: 2460
+                      MycoBankNr: 456262
+                    - Name: Cyberlindnera jadinii
+                      ConceptId: 462889
+                      ConceptSource: MycoBank
+                      Id: 3356
+                      MycoBankNr: 534383
+                    - Name: Torula utilis
+                      ConceptId: 107197
+                      ConceptSource: MycoBank
+                      Id: 737
+                      MycoBankNr: 456582
+                    - Name: Torulopsis utilis
+                      ConceptId: 107198
+                      ConceptSource: MycoBank
+                      Id: 1574
+                      MycoBankNr: 281224
+            - Name: Saccharomycetales
+              ConceptType: Order
+              ConceptId: 551665
+              ConceptSource: MycoBank
+              MycoBankNr: 816369
+              Children:
+              - Name: Saccharomycetaceae
+                ConceptType: Family
+                ConceptId: 551666
+                ConceptSource: MycoBank
+                MycoBankNr: 816370
+                Children:
+                - Name: Nakaseomyces
+                  ConceptType: Genus
+                  ConceptId: 120396
+                  ConceptSource: MycoBank
+                  Id: 3562
+                  MycoBankNr: 28811
+                  Children:
+                  - Name: Nakaseomyces glabratus
+                    ConceptType: Species
+                    ConceptId: 593804
+                    ConceptSource: MycoBank
+                    Id: 3563
+                    MycoBankNr: 843854
+                    Synonyms:
+                    - Name: Candida glabrata
+                      ConceptId: 105396
+                      ConceptSource: MycoBank
+                      Id: 2078
+                      MycoBankNr: 310265
+                  - Name: Nakaseomyces nivariensis
+                    ConceptType: Species
+                    ConceptId: 593805
+                    ConceptSource: MycoBank
+                    Id: 3564
+                    MycoBankNr: 843855
+                    Synonyms:
+                    - Name: Candida nivariensis
+                      ConceptId: 120486
+                      ConceptSource: MycoBank
+                      Id: 1322
+                      MycoBankNr: 357391
+                  - Name: Nakaseomyces bracarensis
+                    ConceptType: Species
+                    ConceptId: 593802
+                    ConceptSource: MycoBank
+                    Id: 3565
+                    MycoBankNr: 843852
+                    Synonyms:
+                    - Name: Candida bracarensis
+                      ConceptId: 415711
+                      ConceptSource: MycoBank
+                      Id: 2037
+                      MycoBankNr: 357201
+                - Name: Saccharomyces
+                  ConceptType: Genus
+                  ConceptId: 476107
+                  ConceptSource: MycoBank
+                  Id: 2700
+                  MycoBankNr: 542401
+                  Children:
+                  - Name: Saccharomyces cerevisiae
+                    ConceptType: Species
+                    ConceptId: 425703
+                    ConceptSource: MycoBank
+                    Id: 2695
+                    MycoBankNr: 492348
+                - Name: Kluyveromyces
+                  ConceptType: Genus
+                  ConceptId: 95876
+                  ConceptSource: MycoBank
+                  Id: 1709
+                  MycoBankNr: 2572
+                - Name: Lachancea
+                  ConceptType: Genus
+                  ConceptId: 120397
+                  ConceptSource: MycoBank
+                  Id: 1075
+                  MycoBankNr: 28810
+                  Children:
+                  - Name: Lachancea fermentati
+                    ConceptType: Species
+                    ConceptId: 120429
+                    ConceptSource: MycoBank
+                    Id: 572
+                    MycoBankNr: 487627
           - Name: Sporopachydermiomycetes
             ConceptType: Class
             ConceptId: 598935
@@ -25303,12 +25388,30 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 797
                       MycoBankNr: 302839
-                  - Name: Sporotrichum pruinosum
+              - Name: Phanerochaetaceae
+                ConceptType: Family
+                ConceptId: 58932
+                ConceptSource: MycoBank
+                MycoBankNr: 80024
+                Children:
+                - Name: Phanerochaete
+                  ConceptType: Genus
+                  ConceptId: 39731
+                  ConceptSource: MycoBank
+                  MycoBankNr: 18245
+                  Children:
+                  - Name: Phanerochaete chrysosporium
                     ConceptType: Species
-                    ConceptId: 26227
+                    ConceptId: 20350
                     ConceptSource: MycoBank
-                    Id: 1379
-                    MycoBankNr: 254123
+                    Id: 3631
+                    MycoBankNr: 319705
+                    Synonyms:
+                    - Name: Sporotrichum pruinosum
+                      ConceptId: 26227
+                      ConceptSource: MycoBank
+                      Id: 1379
+                      MycoBankNr: 254123
           - Name: Tremellomycetes
             ConceptType: Class
             ConceptId: 431010
@@ -25527,9 +25630,14 @@ Hierarchies:
             Children:
             - Name: Sporidiobolales
               ConceptType: Order
-              ConceptId: 431128
+              ConceptId: 452974
               ConceptSource: MycoBank
-              MycoBankNr: 90592
+              MycoBankNr: 90762
+              Comments:
+                Background: >-
+                  MycoBank's legitimate record of the order classifies it only as Fungi incertae sedis, in the subclass
+                  Sporidiobolomycetidae; the list keeps it where MycoBank's other record of the name classifies it, in
+                  Microbotryomycetes.
               Children:
               - Name: Sporidiobolaceae
                 ConceptType: Family
@@ -25588,9 +25696,9 @@ Hierarchies:
                     MycoBankNr: 323852
         - Name: Ustilaginomycotina
           ConceptType: Subphylum
-          ConceptId: 430996
+          ConceptId: 452699
           ConceptSource: MycoBank
-          MycoBankNr: 501473
+          MycoBankNr: 90778
           Children:
           - Name: Exobasidiomycetes
             ConceptType: Class
@@ -25649,9 +25757,13 @@ Hierarchies:
                 MycoBankNr: 303738
           - Name: Malasseziomycetes
             ConceptType: Class
-            ConceptId: 519456
+            ConceptId: 523072
             ConceptSource: MycoBank
-            MycoBankNr: 805514
+            MycoBankNr: 550570
+            Comments:
+              Background: >-
+                MycoBank's legitimate record of the class classifies it only as Fungi incertae sedis; the list keeps it
+                where MycoBank's other record of the name classifies it, in Ustilaginomycotina.
             Children:
             - Name: Malasseziales
               ConceptType: Order
@@ -25772,24 +25884,6 @@ Hierarchies:
                   ConceptSource: MycoBank
                   Id: 2482
                   MycoBankNr: 16391
-    - Name: Incertae sedis
-      ConceptType: Kingdom
-      ConceptId: 507885
-      ConceptSource: MycoBank
-      MycoBankNr: 800381
-      Children:
-      - Name: Plasmodium
-        ConceptType: Genus
-        ConceptId: 525373
-        ConceptSource: MycoBank
-        Id: 401
-        MycoBankNr: 583195
-      - Name: Sarcocystis
-        ConceptType: Genus
-        ConceptId: 525390
-        ConceptSource: MycoBank
-        Id: 88
-        MycoBankNr: 584190
     - Name: Mucoromyceta
       ConceptType: Subkingdom
       ConceptId: 566850
@@ -25876,9 +25970,9 @@ Hierarchies:
               Children:
               - Name: Rhizopodaceae
                 ConceptType: Family
-                ConceptId: 514338
+                ConceptId: 524432
                 ConceptSource: MycoBank
-                MycoBankNr: 550010
+                MycoBankNr: 582937
                 Children:
                 - Name: Rhizopus
                   ConceptType: Genus
@@ -26063,9 +26157,9 @@ Hierarchies:
                     MycoBankNr: 201627
               - Name: Thamnidiaceae
                 ConceptType: Family
-                ConceptId: 93111
+                ConceptId: 551692
                 ConceptSource: MycoBank
-                MycoBankNr: 81852
+                MycoBankNr: 816396
                 Children:
                 - Name: Cokeromyces
                   ConceptType: Genus
@@ -26086,61 +26180,59 @@ Hierarchies:
       ConceptSource: MycoBank
       MycoBankNr: 554008
       Children:
-      - Name: Entomophthoromycota
-        ConceptType: Phylum
-        ConceptId: 482537
+      - Name: Entomophthoromycotina
+        ConceptType: Subphylum
+        ConceptId: 436126
         ConceptSource: MycoBank
-        MycoBankNr: 564375
+        MycoBankNr: 501282
+        Comments:
+          Background: >-
+            MycoBank's record classifies the subphylum in the phylum Entomophthoromycota, whose current name MycoBank
+            gives as Entomophthoromycotina; the list files the subphylum directly in Zoopagomyceta.
         Children:
-        - Name: Entomophthoromycotina
-          ConceptType: Subphylum
-          ConceptId: 436126
+        - Name: Entomophthoromycetes
+          ConceptType: Class
+          ConceptId: 482543
           ConceptSource: MycoBank
-          MycoBankNr: 501282
+          MycoBankNr: 564381
           Children:
-          - Name: Entomophthoromycetes
-            ConceptType: Class
-            ConceptId: 482543
+          - Name: Entomophthorales
+            ConceptType: Order
+            ConceptId: 92449
             ConceptSource: MycoBank
-            MycoBankNr: 564381
+            MycoBankNr: 90424
             Children:
-            - Name: Entomophthorales
-              ConceptType: Order
-              ConceptId: 92449
+            - Name: Conidiobolaceae
+              ConceptType: Family
+              ConceptId: 594448
               ConceptSource: MycoBank
-              MycoBankNr: 90424
+              MycoBankNr: 844347
               Children:
-              - Name: Conidiobolaceae
-                ConceptType: Family
-                ConceptId: 594448
+              - Name: Conidiobolus
+                ConceptType: Genus
+                ConceptId: 56330
                 ConceptSource: MycoBank
-                MycoBankNr: 844347
+                Id: 200
+                MycoBankNr: 20144
                 Children:
-                - Name: Conidiobolus
-                  ConceptType: Genus
-                  ConceptId: 56330
+                - Name: Conidiobolus coronatus
+                  ConceptType: Species
+                  ConceptId: 6175
                   ConceptSource: MycoBank
-                  Id: 200
-                  MycoBankNr: 20144
-                  Children:
-                  - Name: Conidiobolus coronatus
-                    ConceptType: Species
-                    ConceptId: 6175
+                  Id: 2265
+                  MycoBankNr: 283037
+                  Synonyms:
+                  - Name: Entomophthora coronata
+                    ConceptId: 9664
                     ConceptSource: MycoBank
-                    Id: 2265
-                    MycoBankNr: 283037
-                    Synonyms:
-                    - Name: Entomophthora coronata
-                      ConceptId: 9664
-                      ConceptSource: MycoBank
-                      Id: 706
-                      MycoBankNr: 262031
-                  - Name: Conidiobolus incongruus
-                    ConceptType: Species
-                    ConceptId: 6189
-                    ConceptSource: MycoBank
-                    Id: 489
-                    MycoBankNr: 328753
+                    Id: 706
+                    MycoBankNr: 262031
+                - Name: Conidiobolus incongruus
+                  ConceptType: Species
+                  ConceptId: 6189
+                  ConceptSource: MycoBank
+                  Id: 489
+                  MycoBankNr: 328753
   - Name: Protozoa
     ConceptType: Kingdom
     ConceptId: 92339
@@ -26179,9 +26271,9 @@ Hierarchies:
           MycoBankNr: 30525
     - Name: Myxomycota
       ConceptType: Phylum
-      ConceptId: 92366
+      ConceptId: 452648
       ConceptSource: MycoBank
-      MycoBankNr: 90262
+      MycoBankNr: 90263
       Children:
       - Name: Prototheca
         ConceptType: Genus
@@ -26202,10 +26294,30 @@ Hierarchies:
           ConceptSource: MycoBank
           Id: 2411
           MycoBankNr: 169728
+    - Name: Plasmodium
+      ConceptType: Genus
+      ConceptId: 525373
+      ConceptSource: MycoBank
+      Id: 401
+      MycoBankNr: 583195
+      Comments:
+        Background: >-
+          MycoBank files the genus under Fungi incertae sedis, while its species are apicomplexan protozoa; the list
+          files it under Protozoa.
     - Name: Rhinosporidium
       ConceptType: Genus
       ConceptId: 97839
       ConceptSource: MycoBank
       Id: 2061
       MycoBankNr: 4701
+    - Name: Sarcocystis
+      ConceptType: Genus
+      ConceptId: 525390
+      ConceptSource: MycoBank
+      Id: 88
+      MycoBankNr: 584190
+      Comments:
+        Background: >-
+          MycoBank files the genus under Fungi incertae sedis, while its species are apicomplexan protozoa; the list
+          files it under Protozoa.
 

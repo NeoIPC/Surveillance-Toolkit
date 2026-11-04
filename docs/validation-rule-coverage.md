@@ -529,8 +529,8 @@ the protocol authority below), and on the infectious-agent migration.
 The package's pathogen tables are built from the legacy catalogue, while the option codes the forms
 store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
-the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
-concept the catalogue does not carry, where the catalogue files it as a synonym of its own. A
+the catalogue, and *Candida fabianii* resolves in the package to a *Cyberlindnera fabianii* concept,
+where the catalogue files both names as synonyms of *Petasospora fabianii*. A
 comparison through the package's tables would therefore report a mismatch between an organism and
 itself. The rule follows the infectious-agent migration, the same dependency G16 waits on: the package
 reading its pathogen tables from `NeoIPC-Infectious-Agents.yaml`, with production carrying the

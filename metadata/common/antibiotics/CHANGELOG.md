@@ -14,8 +14,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 ### Changed
 
 - `README.md`: the section on why this catalogue is not on Weblate notes the infectious-agent list's factual-extract
-  terms beside its catalogue's, and why neither transfers to this list: apart from NeoIPC's own nodes, that list's
-  lineage is a classification of how the infectious agents are related, as its sources publish it, while an ATC
+  terms beside its catalogue's, and why neither transfers to this list: apart from NeoIPC's own nodes and the few
+  nodes it places otherwise, each with a note, that list's lineage is a classification of how the infectious agents
+  are related, as its sources publish it, while an ATC
   group and an AWaRe category sort substances by schemes made for drug-utilization studies and antibiotic
   stewardship. The substance names are described as display forms of International Nonproprietary Names, not as
   reproduced from the ATC/DDD index.

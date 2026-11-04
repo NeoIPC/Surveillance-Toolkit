@@ -17,6 +17,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   definitions read "at least 12 hours": at exactly 12 hours of each a day counted as both, so the two
   counts could together exceed the patient days. A CVC day and a PVC day keep "at least 12 hours",
   since both lines can be in place on one day.
+- The list of infectious agents links each fungal name to MycoBank's direct address for it,
+  `https://www.mycobank.org/MB/<MycoBank number>`, which reaches the same page as before without a
+  redirect.
 
 ### Fixed
 

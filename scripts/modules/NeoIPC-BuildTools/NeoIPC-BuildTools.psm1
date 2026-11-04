@@ -22,7 +22,7 @@
 $AtcUrlTemplate = 'https://www.whocc.no/atc_ddd_index/?code={0}&showdescription=yes'
 $AWaReUrlTemplate = 'https://aware.essentialmeds.org/list?query=%22{0}%22'
 $LspnUrlTemplate = 'https://lpsn.dsmz.de/{0}'
-$MycoBankUrlTemplate = 'https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/{0}'
+$MycoBankUrlTemplate = 'https://www.mycobank.org/MB/{0}'
 $IctvUrlTemplate = 'https://ictv.global/taxonomy/taxondetails?taxnode_id={0}'
 
 function Export-AsciiDocIds {
