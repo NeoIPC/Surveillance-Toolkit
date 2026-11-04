@@ -437,6 +437,8 @@ d2:hasValue(#{NeoIPC HAP Secondary BSI pathogen 1 value})&&(
           || #{NeoIPC HAP Secondary BSI pathogen 1 value}==3479
           || #{NeoIPC HAP Secondary BSI pathogen 1 value}==3543
           || #{NeoIPC HAP Secondary BSI pathogen 1 value}==3557
+          || #{NeoIPC HAP Secondary BSI pathogen 1 value}==3575
+          || #{NeoIPC HAP Secondary BSI pathogen 1 value}==3576
         )
       )
     )

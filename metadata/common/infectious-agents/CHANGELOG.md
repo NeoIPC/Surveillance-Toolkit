@@ -16,7 +16,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - CI checks of the list: its keys and structure; every node's `Id`, `Name`, rank, source, and record number, and the
   form each typed value takes in the file; that every node can be told from every other, a synonym by an `Id` of
   its own, a source's record by one node, an ICTV taxon by one concept, and a NeoIPC concept by an integer
-  `ConceptId`; the option labels generated from it; its UID sidecar; the two frozen CSVs; and that it stays
+  `ConceptId`; that each common-commensal flag sits on a concept, only where it changes the status its node
+  inherits, with the reason for it in the node's `Comments`, and that a node under which every `Id`-bearing node
+  takes, from flags further down, a status one flag on it would give them all says there why the flags stay beneath
+  it; the option labels generated from it; its UID sidecar; the two frozen CSVs; and that it stays
   append-only against every released version, so that a released `Id` keeps its name and the UID a release's
   sidecar gave it, a new `Id` exceeds every released one, and a released `Id` never disappears, except from a branch
   that maintains an earlier line, which need not carry a later line's `Id`s.
@@ -88,6 +91,22 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - `UrlTemplates.MycoBank` in `NeoIPC-Infectious-Agents.yaml` is MycoBank's direct link to a name,
   `https://www.mycobank.org/MB/{0}`, which takes a node's `MycoBankNr`, the name's MycoBank number, in place of its
   `ConceptId`, the ID of the name's record in MycoBank's database.
+- The common-commensal flags follow the NHSN Organism List (2024), branch by branch: a flag sits on the highest
+  node where its status holds, a NeoIPC group such as Coagulase-negative staphylococci (2776) and Viridans
+  streptococci (2798), or a genus, with an override beneath it only where the status differs, and none on a
+  synonym. Each flag carries its reason in `Comments.CommonCommensal`, and a node whose flags stay beneath it,
+  although one flag on it would hold for all of them, says there why. Coagulase-negative staphylococci (2776), with
+  Staphylococcus schleiferi (741), and Parageobacillus thermoglucosidasius (3174), with its synonyms (2437 and 1997),
+  are common commensals; Streptococcus gallinaceus (2785), Streptococcus minor (2791), and Streptococcus
+  thoraltensis (2793), outside the viridans streptococci, are not. The Streptococcus bovis group (2801),
+  Paenibacillus thiaminolyticus (579), Rhodococcus equi (1776), Corynebacterium ulcerans (2113), Corynebacterium
+  pseudotuberculosis (214), Corynebacterium belfantii (2916), and Corynebacterium rouxii (2926) are recognized
+  pathogens, departing from the NHSN Organism List (2024), each reason saying why. New are the NeoIPC groups
+  Coryneform bacteria, with Diphtheroids as its synonym and Aerobic diphtheroids and Anaerobic diphtheroids beneath
+  it; Alpha-hemolytic streptococci, not Streptococcus pneumoniae, under Alpha-hemolytic streptococci (2795); Group F
+  streptococci, under the Streptococcus anginosus group (2799); and the Bacillus circulans group, all of them common
+  commensals, as NHSN lists them. Not listed (0) and Unidentifiable (3561) say in `Comments.Background` why they are
+  recognized pathogens. The 7 new `Id`s, 3633 to 3639, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
 - `NeoIPC-Infectious-Agents.uids.csv` holds the DHIS2 UID of every `Id`: the 113 `Id`s production has not
   deployed, which had no row, and whose options the metadata packages gave UIDs derived from their codes, have
   random ones, as every new `Id` gets from NeoIPC-Tools' `Add-NeoIPCInfectiousAgentUid`, and CI fails for an `Id`

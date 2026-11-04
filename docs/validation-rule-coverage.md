@@ -598,12 +598,13 @@ The dataset holds the inputs of the three definitions the rules check: the items
 and SSI forms, the antibiotic-treatment flag among them, and the infectious-agent findings. It cannot
 reproduce the definitions of the laboratory-confirmed BSI with a common commensal and of pneumonia
 today. The laboratory-confirmed BSI with a common commensal rests on the client's classification of
-the infectious agents as recognized pathogens or common commensals, an id list embedded in its
-program rules, and the package's legacy classification (`is_cc`) differs from
-that list: it counts the coagulase-negative staphylococci group (code 2776) as a common commensal,
-which the client's list does not. The pneumonia definition rests likewise on the client's list of
-viruses, which the package does not reproduce, and counts the pneumonia form's I/T ratio
-(`NEOIPC_HAP_IT_RATIO`), which the import does not read.
+the infectious agents as recognized pathogens or common commensals, an id list embedded in its program
+rules, and the package's legacy classification (`is_cc`) differs from that list: it counts, among
+others, the *Streptococcus bovis* group (code 2801) as a common commensal, which the client's list
+does not, and *Staphylococcus schleiferi* (code 741) as none, which the client's list counts as one.
+The pneumonia definition rests likewise on the client's list of viruses, which the package does not
+reproduce, and counts the pneumonia form's I/T ratio (`NEOIPC_HAP_IT_RATIO`), which the import does
+not read.
 
 For data entered through the interface a definition fails in only one way: residue. A culture-negative
 sepsis with an organism the hidden section kept, or findings of another depth than the SSI's recorded

@@ -5,7 +5,7 @@
 # [pscustomobject] per finding, with Rule (a stable identifier), Location, Message, and Severity, Error for a defect
 # and Warning for what a curator should look at, which may be intended, and never throws: a malformed input is a
 # finding like any other, so one run reports every defect. MetadataContent.Tests.ps1 applies them to the committed
-# files, all but the flag check, which the committed list fails.
+# files.
 
 # The keys a node may carry, compared ordinally: powershell-yaml reads mappings case-insensitively, so a case variant
 # (`name` beside `Name`) would merge into one key there unseen.

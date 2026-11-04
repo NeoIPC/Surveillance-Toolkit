@@ -29,6 +29,16 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   `NEOIPC_PATHOGENS` option set. The Maintenance app's option-set editor deletes each of them; through the API,
   each is removed from the set's `options` before its own `DELETE`, which DHIS2 2.40.12 refuses while the set
   lists it.
+- The infectious-agent options and the program rules generated from the infectious-agent list follow the list's
+  reconciliation with LPSN, ICTV, MycoBank, and the NHSN Organism List (2024), which the list's CHANGELOG describes. The
+  `NEOIPC_PATHOGENS` option set gains the options of the list's 70 new `Id`s, 3570 to 3639, and an option whose node
+  changes its rank or turns from a concept into a synonym, or back, takes its new label. The BSI form's
+  recognized-pathogen rules enumerate the list's common commensals, among them the coagulase-negative staphylococci
+  group (2776), which earlier packages counted as a recognized pathogen, and no longer the Streptococcus bovis group
+  (2801) and the other infectious agents for which the list departs from NHSN, nor Streptococcus gallinaceus (2785),
+  Streptococcus minor (2791), and Streptococcus thoraltensis (2793), which earlier packages counted as common commensals
+  and the NHSN Organism List (2024) counts as recognized pathogens through its genus row Streptococcus. The resistance
+  rules and the pneumonia form's virus rule enumerate the new `Id`s that their categories apply to.
 - `NEOIPC_SURVEILLANCE_END_INV_DAYS` and `NEOIPC_SURVEILLANCE_END_NIV_DAYS` describe a day of the
   respective ventilation as more than 12 hours of it, where they said at least 12 hours, following
   the protocol's corrected definitions: at exactly 12 hours of each, a day counted as both, so the
