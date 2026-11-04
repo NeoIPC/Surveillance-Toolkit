@@ -74,6 +74,8 @@
         # InfectiousAgents
         'Find-NextFreeInfectiousAgentId'
         'Add-NeoIPCInfectiousAgentUid'
+        'Get-NeoIPCInfectiousAgentCodeSet'
+        'Export-NeoIPCInfectiousAgentCodeSet'
         # Metadata pipeline
         'ConvertFrom-NeoIPCMetadataJson'
         'ConvertTo-NeoIPCMetadataJson'
