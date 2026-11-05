@@ -23596,8 +23596,9 @@ Hierarchies:
                       MycoBankNr: 102029
                       Comments:
                         Background: >-
-                          MycoBank gives Microsporon brachytomum, an orthographic variant of this name, as the current
-                          name of both records; the list takes the correctly spelled name as the concept.
+                          MycoBank gives Microsporon brachytomum, which its records call an orthographic variant of this
+                          name, as the current name of both records; the list takes the name that agrees with the genus
+                          the species sits in.
                       Synonyms:
                       - Name: Microsporon brachytomum
                         ConceptId: 466190
@@ -24861,23 +24862,6 @@ Hierarchies:
                   Id: 3422
                   MycoBankNr: 7487
                   Children:
-                  - Name: Azymocandida mycoderma
-                    ConceptType: Species
-                    ConceptId: 106773
-                    ConceptSource: MycoBank
-                    Id: 3349
-                    MycoBankNr: 326854
-                    Comments:
-                      Background: >-
-                        MycoBank gives Candida as the current name of the genus Azymocandida, but keeps Azymocandida
-                        mycoderma, an invalid name, as this species' current name, over its obligate synonym Candida
-                        mycoderma, a legitimate combination in Candida; the list files the species under Candida.
-                    Synonyms:
-                    - Name: Candida vini
-                      ConceptId: 108012
-                      ConceptSource: MycoBank
-                      Id: 1651
-                      MycoBankNr: 310359
                   - Name: Candida albicans
                     ConceptType: Species
                     ConceptId: 106232
@@ -24919,6 +24903,28 @@ Hierarchies:
                       ConceptSource: MycoBank
                       Id: 2086
                       MycoBankNr: 306936
+                  - Name: Candida mycoderma
+                    ConceptType: Species
+                    ConceptId: 106775
+                    ConceptSource: MycoBank
+                    Id: 3640
+                    MycoBankNr: 294037
+                    Comments:
+                      Background: >-
+                        MycoBank keeps Azymocandida mycoderma, an invalid name, as this species' current name, while it
+                        gives Candida as the current name of the genus Azymocandida and holds this legitimate obligate
+                        synonym in Candida; the list takes the name that agrees with the genus the species sits in.
+                    Synonyms:
+                    - Name: Azymocandida mycoderma
+                      ConceptId: 106773
+                      ConceptSource: MycoBank
+                      Id: 3349
+                      MycoBankNr: 326854
+                    - Name: Candida vini
+                      ConceptId: 108012
+                      ConceptSource: MycoBank
+                      Id: 1651
+                      MycoBankNr: 310359
                   - Name: Candida pintolopesii var. pintolopesii
                     ConceptType: Variety
                     ConceptId: 108603

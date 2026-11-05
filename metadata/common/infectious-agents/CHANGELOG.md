@@ -71,22 +71,22 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   and 5 as synonyms. The 32 new `Id`s, 3588 to 3619, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
 - The fungi follow MycoBank, its list of fungal names of 7 January 2026 and, for the records changed since, its web
   services as of 4 November 2026: a fungal concept takes the name MycoBank gives as current and sits where MycoBank
-  classifies that name's record, a correctly spelled name takes precedence over an orthographic variant, and a higher
-  taxon cites the legitimate record of its name where one exists; where MycoBank's records disagree, a node's
-  `Comments.Background` says where the list places it and why, as for Hormodendrum (300), which sits in
-  Cladosporiaceae, and Azymocandida mycoderma (3349), which sits in Candida. A name that gives way stays as a synonym
-  with its `Id`, so no collected value changes meaning. The three species of the group Candida parapsilosis complex
-  (2701), which keeps its name and now sits in Lodderomyces, are Lodderomyces metapsilosis, orthopsilosis, and
-  parapsilosis; Candida sake and Candida zeylanoides are Fermentozyma sake and Dujonia zeylanoides; Cyberlindnera (3566)
-  is Petasospora, and Cyberlindnera fabianii is Petasospora fabianii, while Cyberlindnera jadinii, with Candida utilis
-  among its synonyms, is Williopsis jadinii; Pichia inconspicua, now an invalid name, gives way to Candida inconspicua;
-  and Trichomonascus ciferrii is Blastobotrys ciferrii, Amesia atrobrunnea Amesomyces atrobrunneus, Phialophora
-  americana Capronia americana, Sporotrichum pruinosum Phanerochaete chrysosporium, and Ochroconis humicola
+  classifies that name's record, a higher taxon cites the legitimate record of its name where one exists, and where
+  MycoBank's records disagree on a name, the concept takes the one that agrees with its genus; a node's
+  `Comments.Background` says where the list departs from MycoBank's records and why, as for Hormodendrum (300), which
+  sits in Cladosporiaceae, and Candida mycoderma, the concept over Azymocandida mycoderma (3349). A name that gives way
+  stays as a synonym with its `Id`, so no collected value changes meaning. The three species of the group Candida
+  parapsilosis complex (2701), which keeps its name and now sits in Lodderomyces, are Lodderomyces metapsilosis,
+  orthopsilosis, and parapsilosis; Candida sake and Candida zeylanoides are Fermentozyma sake and Dujonia zeylanoides;
+  Cyberlindnera (3566) is Petasospora, and Cyberlindnera fabianii is Petasospora fabianii, while Cyberlindnera jadinii,
+  with Candida utilis among its synonyms, is Williopsis jadinii; Pichia inconspicua, now an invalid name, gives way to
+  Candida inconspicua; and Trichomonascus ciferrii is Blastobotrys ciferrii, Amesia atrobrunnea Amesomyces atrobrunneus,
+  Phialophora americana Capronia americana, Sporotrichum pruinosum Phanerochaete chrysosporium, and Ochroconis humicola
   Scolecobasidium humicola. Penicillium aurantiogriseum is the concept over its type variety, and Candida pintolopesii
-  var. pintolopesii over its species; Aspergillus oryzae, Fusarium sporotrichioides, Microsporum brachytomum, and the
-  genus Schwanniomyces (2254) are concepts, and Alternaria tenuissima is a synonym of Alternaria alternata. Plasmodium
-  (401) and Sarcocystis (88), apicomplexan protozoa that MycoBank files under Fungi, sit under Protozoa. The 13 new
-  `Id`s, 3620 to 3632, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
+  var. pintolopesii over its species; Aspergillus oryzae, Fusarium sporotrichioides, Microsporum brachytomum, Candida
+  mycoderma, and the genus Schwanniomyces (2254) are concepts, and Alternaria tenuissima is a synonym of Alternaria
+  alternata. Plasmodium (401) and Sarcocystis (88), apicomplexan protozoa that MycoBank files under Fungi, sit under
+  Protozoa. The 14 new `Id`s, 3620 to 3632 and 3640, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
 - `UrlTemplates.MycoBank` in `NeoIPC-Infectious-Agents.yaml` links to a name's MycoBank page by its MycoBank number,
   `https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/{0}`, which takes a node's `MycoBankNr` in
   place of its `ConceptId`, the ID of the name's record in MycoBank's database.
