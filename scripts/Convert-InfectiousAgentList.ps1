@@ -6,7 +6,7 @@
     Renders the NeoIPC infectious-agent list from its authored YAML into AsciiDoc, CSV and PDF.
 
 .DESCRIPTION
-    Reads the authored infectious-agents YAML — the canonical source for organism concepts, their
+    Reads the authored infectious-agents YAML — the canonical source for infectious-agent concepts, their
     synonyms, common-commensal status and recorded resistance categories — and emits the requested output
     formats, one set per requested translation language.
 
@@ -14,8 +14,10 @@
     generated from the committed catalogues rather than from any hand-edited copy.
 
     Each concept row carries a citation link built from the authority that names it: LPSN for bacteria,
-    MycoBank for fungi and protozoa, ICTV for viruses. Synonyms inherit their accepted concept's
-    commensal and resistance attributes, and cross-reference it.
+    MycoBank for fungi and protozoa, ICTV for viruses. A row's common-commensal mark and recorded
+    resistances are those its Id has in the code sets the DHIS2 rules enumerate
+    (Get-NeoIPCInfectiousAgentCodeSet): a node takes them from the nearest flag on its path, and a synonym
+    from its concept, which it cross-references.
 
 .PARAMETER OutputFormats
     Any of AsciiDoc, CSV, PDF.
@@ -38,6 +40,31 @@ param(
 )
 
 Import-Module powershell-yaml
+Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'modules' -AdditionalChildPath 'NeoIPC-Tools') -Force -Verbose:$false
+
+function New-StatusLookup {
+    # The Ids that are common commensals, and those each resistance category applies to, from the list's code sets.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Returns an in-memory lookup and changes no state.')]
+    [CmdletBinding()]
+    [OutputType([System.Collections.Specialized.OrderedDictionary])]
+    param([Parameter(Mandatory)][pscustomobject]$CodeSet)
+
+    $lookup = [ordered]@{ CommonCommensal = [System.Collections.Generic.HashSet[int]]::new([int[]]$CodeSet.CommonCommensals) }
+    foreach ($category in 'MRSA', 'VRE', '3GCR', 'CARBR', 'COLR') {
+        $lookup[$category] = [System.Collections.Generic.HashSet[int]]::new([int[]]$CodeSet.ResistanceCategories.$category)
+    }
+    $lookup
+}
+
+function Get-RecordedResistance {
+    # The labels of the resistance categories that apply to an Id, joined for the list's column.
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][int]$Id)
+
+    $labels = [ordered]@{ MRSA = $contentStrings.MRSA; VRE = $contentStrings.VRE; '3GCR' = $contentStrings.'3GCR'; CARBR = $contentStrings.Carbapenems; COLR = $contentStrings.Colistin }
+    @($labels.Keys | Where-Object { $statusLookup[$_].Contains($Id) } | ForEach-Object { $labels[$_] }) |
+        Join-String -Separator ', '
+}
 
 function AppendChildrenRecursive {
     [CmdletBinding()]
@@ -81,27 +108,9 @@ function AppendChildrenRecursive {
             $newItem[$contentStrings.Id] = $item.Id
             $newItem[$contentStrings.Name] = $item.Name
             $newItem[$contentStrings.Type] = $Type
-            $newItem[$contentStrings.CommonCommensal] = if($item.CommonCommensal){$contentStrings.Yes}
+            $newItem[$contentStrings.CommonCommensal] = if ($statusLookup.CommonCommensal.Contains([int]$item.Id)) { $contentStrings.Yes }
             $newItem[$contentStrings.ParentId] = ''
-
-            $r = [System.Collections.Generic.List[string]]::new()
-            if ($item.MRSA) {
-                $r.Add($contentStrings.MRSA)
-            }
-            if ($item.VRE) {
-                $r.Add($contentStrings.VRE)
-            }
-            if ($item['3GCR']) {
-                $r.Add($contentStrings.'3GCR')
-            }
-            if ($item.Carbapenems) {
-                $r.Add($contentStrings.Carbapenems)
-            }
-            if ($item.Colistin) {
-                $r.Add($contentStrings.Colistin)
-            }
-            $newItem[$contentStrings.RecordedResistances] = $r |
-                Join-String -Separator ', '
+            $newItem[$contentStrings.RecordedResistances] = Get-RecordedResistance -Id $item.Id
 
             switch ($item.ConceptSource) {
                 LPSN {
@@ -153,27 +162,9 @@ function AppendSynonyms {
             $newItem[$contentStrings.Id] = $item.Id
             $newItem[$contentStrings.Name] = $item.Name
             $newItem[$contentStrings.Type] = $Type
-            $newItem[$contentStrings.CommonCommensal] = if($Parent.CommonCommensal){$contentStrings.Yes}
+            $newItem[$contentStrings.CommonCommensal] = if ($statusLookup.CommonCommensal.Contains([int]$item.Id)) { $contentStrings.Yes }
             $newItem[$contentStrings.ParentId] = $Parent.Id
-
-            $r = [System.Collections.Generic.List[string]]::new()
-            if ($Parent.MRSA) {
-                $r.Add($contentStrings.MRSA)
-            }
-            if ($Parent.VRE) {
-                $r.Add($contentStrings.VRE)
-            }
-            if ($Parent['3GCR']) {
-                $r.Add($contentStrings.'3GCR')
-            }
-            if ($Parent.Carbapenems) {
-                $r.Add($contentStrings.Carbapenems)
-            }
-            if ($Parent.Colistin) {
-                $r.Add($contentStrings.Colistin)
-            }
-            $newItem[$contentStrings.RecordedResistances] = $r |
-                Join-String -Separator ', '
+            $newItem[$contentStrings.RecordedResistances] = Get-RecordedResistance -Id $item.Id
 
             switch ($item.ConceptSource) {
                 LPSN {
@@ -270,6 +261,8 @@ if (-not $OutputFormats) {
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 $OutputDirectory = Resolve-Path -LiteralPath $OutputDirectory
 
+# One lookup serves every language, since a translation changes names, not flags.
+$statusLookup = New-StatusLookup -CodeSet (Get-NeoIPCInfectiousAgentCodeSet -Path (Join-Path $InputDirectory 'NeoIPC-Infectious-Agents.yaml'))
 
 foreach ($iaList in $translationPaths) {
     $culture = [cultureinfo]::GetCultureInfo($iaList.Language)

@@ -17,9 +17,17 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   definitions read "at least 12 hours": at exactly 12 hours of each a day counted as both, so the two
   counts could together exceed the patient days. A CVC day and a PVC day keep "at least 12 hours",
   since both lines can be in place on one day.
-- The list of infectious agents links each fungal name to MycoBank's direct address for it,
-  `https://www.mycobank.org/MB/<MycoBank number>`, which reaches the same page as before without a
-  redirect.
+- The list of infectious agents still prints the common-commensal status recorded in the frozen CSVs it
+  is built from, while the infectious-agent list it incorporates, which the DHIS2 forms follow, now
+  takes that status from the NHSN Organism List (2024), but for NeoIPC's departures from it. Where the
+  two disagree, the infectious-agent list holds:
+  - the forms count as recognized pathogens, where the printed list gives common commensals, the
+    departures (the Streptococcus bovis group with its species and subspecies, Paenibacillus
+    thiaminolyticus, Rhodococcus equi with Rhodococcus hoagii, and Corynebacterium ulcerans,
+    C. pseudotuberculosis, C. belfantii, and C. rouxii) and Streptococcus gallinaceus, S. minor, and
+    S. thoraltensis;
+  - they count as common commensals, where the printed list gives recognized pathogens, Staphylococcus
+    schleiferi, Streptococcus massiliensis, and Parageobacillus thermoglucosidasius.
 
 ### Fixed
 

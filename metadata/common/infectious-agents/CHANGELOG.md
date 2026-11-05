@@ -36,39 +36,39 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   lineage, source records, and the statuses NeoIPC assigns, such as the Core Protocol's list of infectious agents,
   neoipcr's tables, and the reports' infectious-agent tables, fall outside the directory's CC BY-NC-ND 4.0 terms.
   The file also says what MycoBank's curators approved in January 2023.
-- `README.md`: which files are frozen and who reads them, what CI checks, how the ontology is reconciled with its
-  sources, when its common-commensal status departs from NHSN's, and what evidence its `Comments` cite.
+- `README.md`: which files are frozen and who reads them, what CI checks, which sources the ontology is compiled from,
+  in which editions, how it is reconciled with them, when its common-commensal status departs from NHSN's, and what
+  evidence its `Comments` cite.
 - In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
   rather than as a Boolean. The per-locale overlays, which po4a writes, have it plain.
 - In `NeoIPC-Infectious-Agents.yaml`, NeoIPC's own prose about a node sits in its `Comments`: the reason for a flag
   under the flag's key, and anything else under `Background`. `Description` is no longer a node key; the text that
   Unidentifiable (3561) carried there is its `Comments.Background`.
-- A bacterial concept takes the name that the List of Recommended Names for bacteria of medical importance applies
-  where it gives one, and LPSN's correct name otherwise, as LPSN's export of 2026-11-02 and its pages give them. A
-  correct name that was a synonym is the concept now, and one the list lacked is a new concept; concepts that name
-  one taxon are merged; subspecies that LPSN gives as synonyms of their species are synonyms; species sit in the
-  groups that hold them; names the NHSN Organism List (2024) enumerates are added; and some record numbers and
-  `ConceptId`s are corrected. Where the list departs from what LPSN records, as for two merges that LPSN's notes
-  support and for the concepts whose taxon LPSN gives no correct name, among them the names it lists as not validly
-  published, `Comments.Background` says why. A former concept keeps its `Id` as a synonym, so no collected value changes
-  meaning. Streptococcus massiliensis (2789), now among the viridans streptococci, is a common commensal. The 18 new
-  `Id`s, 3570 to 3587, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
-- The viruses follow ICTV's Master Species List 2025 (MSL41), as ICTV corrected it on 14 October 2026: a virus
-  concept takes the name, rank, and lineage that release gives its taxon, and its node there as the `ConceptId`,
-  while a synonym, a former name, keeps the node of the release whose name it carries. The realm Monodnaviria is now
+- A bacterial concept takes the name that the List of Recommended Names for bacteria of medical importance applies where
+  it gives one, and LPSN's correct name otherwise, as LPSN's export of 2 November 2026 and its pages give them. A
+  correct name that was a synonym is the concept now, and one the list lacked is a new concept; concepts that name one
+  taxon are merged; subspecies that LPSN gives as synonyms of their species are synonyms; species sit in the groups that
+  hold them; names the NHSN Organism List (2024) enumerates are added; and some record numbers and `ConceptId`s are
+  corrected. Where the list departs from what LPSN records, as for two merges that LPSN's notes support and for the
+  concepts whose taxon LPSN gives no correct name, among them the names it lists as not validly published,
+  `Comments.Background` says why. A former concept keeps its `Id` as a synonym, so no collected value changes meaning.
+  Streptococcus massiliensis (2789), now among the viridans streptococci, is a common commensal. The 18 new `Id`s, 3570
+  to 3587, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
+- The viruses follow ICTV's Master Species List 2025 (MSL41), as ICTV corrected it on 14 October 2026: a virus concept
+  takes the name, rank, and lineage that release gives its taxon, and its node there as the `ConceptId`, while a
+  synonym, a former name, keeps the node of the release whose name it carries. The realm Monodnaviria is now
   Floreoviria; the new family Hepaciviridae holds Pegivirus and Orthohepacivirus, formerly Hepacivirus, whose species
-  Orthohepacivirus hominis is a new concept over Hepacivirus hominis (3501); and the species of Orthoflavivirus sit
-  in the new subgenus Euflavivirus. The release splits Orthoflavivirus encephalitidis (3553) into two species, so
+  Orthohepacivirus hominis is a new concept over Hepacivirus hominis (3501); and the list's species of Orthoflavivirus
+  sit in the new subgenus Euflavivirus. The release splits Orthoflavivirus encephalitidis (3553) into two species, so
   Tick-borne encephalitis virus (2389) is now a NeoIPC group holding them, with 3553 as its synonym, and no collected
   value changes meaning. NeoIPC's virus groups hold the taxa they cover where those share one parent, as Human
   adenovirus (2692) holds its seven species and Influenza virus (2659) its four genera; a group of the types of one
   species sits beneath that species, as Echovirus (2681) does, or beneath the group that holds it, as Human
   coxsackievirus B (2625) does; and any other group says in `Comments.Background` which species it covers. Poliovirus
-  (2635), which now holds its three serotypes, is a group rather than a serotype, and its DHIS2 option's label says
-  so. New are the species the groups now hold, Orthoflavivirus mediterranense, the parechoviruses, the enteroviruses
-  A and D with Enterovirus A71 and D68, and the species of the four seasonal human coronaviruses, and so are Human
-  herpesvirus 4 and 5 as synonyms. The 32 new `Id`s, 3588 to 3619, have UIDs in
-  `NeoIPC-Infectious-Agents.uids.csv`.
+  (2635), which now holds its three serotypes, is a group rather than a serotype, and its DHIS2 option's label says so.
+  New are the species the groups now hold, Orthoflavivirus mediterranense, the parechoviruses, the enteroviruses A and D
+  with Enterovirus A71 and D68, and the species of the four seasonal human coronaviruses, and so are Human herpesvirus 4
+  and 5 as synonyms. The 32 new `Id`s, 3588 to 3619, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
 - The fungi follow MycoBank, its list of fungal names of 7 January 2026 and, for the records changed since, its web
   services as of 4 November 2026: a fungal concept takes the name MycoBank gives as current and sits where MycoBank
   classifies that name's record, a correctly spelled name takes precedence over an orthographic variant, and a higher
@@ -87,9 +87,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   genus Schwanniomyces (2254) are concepts, and Alternaria tenuissima is a synonym of Alternaria alternata. Plasmodium
   (401) and Sarcocystis (88), apicomplexan protozoa that MycoBank files under Fungi, sit under Protozoa. The 13 new
   `Id`s, 3620 to 3632, have UIDs in `NeoIPC-Infectious-Agents.uids.csv`.
-- `UrlTemplates.MycoBank` in `NeoIPC-Infectious-Agents.yaml` is MycoBank's direct link to a name,
-  `https://www.mycobank.org/MB/{0}`, which takes a node's `MycoBankNr`, the name's MycoBank number, in place of its
-  `ConceptId`, the ID of the name's record in MycoBank's database.
+- `UrlTemplates.MycoBank` in `NeoIPC-Infectious-Agents.yaml` links to a name's MycoBank page by its MycoBank number,
+  `https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/{0}`, which takes a node's `MycoBankNr` in
+  place of its `ConceptId`, the ID of the name's record in MycoBank's database.
 - The common-commensal flags follow the NHSN Organism List (2024), branch by branch: a flag sits on the highest
   node where its status holds, a NeoIPC group such as Coagulase-negative staphylococci (2776) and Viridans
   streptococci (2798), or a genus, with an override beneath it only where the status differs, and none on a

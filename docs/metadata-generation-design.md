@@ -47,11 +47,10 @@ This sets a boundary between what generation may fix unilaterally and what needs
 
 The ontology's resistance flags have been deliberately corrected (e.g. *Vibrionaceae* → 3GCR +
 carbapenem on, colistin off; *Stutzerimonas* → all three on; *Stenotrophomonas* confirmed unflagged).
-The currently-deployed DHIS2 rules **and** the published protocol pathogen list predate these
-corrections and are therefore outdated. The ontology is the source of truth; the deployed rules and
-the protocol are **regenerated / re-rendered from it**, never the reverse. A diff against the
-deployed `metadata.json` is expected, not a regression. (The flag normalization — nearest-wins
-inheritance with `false` overrides — is its own workstream; see the *Generation model* section.)
+The currently-deployed DHIS2 rules **and** the published protocol's list of infectious agents predate
+these corrections and are therefore outdated. The ontology is the source of truth; the deployed rules
+and the protocol are **regenerated / re-rendered from it**, never the reverse. A diff against the
+deployed `metadata.json` is expected, not a regression.
 
 ## The Capability Matrix the Generators Expand Over
 
@@ -247,7 +246,7 @@ breakpoint each implies (a new ontology schema, tracked separately):
 
 | Concept (retained synonyms) | 3GCR | carbapenem | colistin | vs deployed | Surrogate breakpoint |
 |-----------------------------|:----:|:----------:|:--------:|-------------|----------------------|
-| *Stutzerimonas stutzeri* (syn. *P. stutzeri / perfectomarina / chloritidismutans*) | flag | flag | flag | unchanged — removal reverted | CLSI M45 "*Pseudomonas* other than *P. aeruginosa*" |
+| *Stutzerimonas stutzeri*, *S. chloritidismutans*, *S. perfectomarina* (each with its *Pseudomonas* name as synonym) | flag | flag | flag | unchanged — removal reverted | CLSI M45 "*Pseudomonas* other than *P. aeruginosa*" |
 | *Stenotrophomonas beteli* (syn. *P. beteli / betle*) | no | no | no | removal confirmed (intrinsic L1 MBL → uninformative) | CLSI M45 / EUCAST *S. maltophilia* |
 | *Photobacterium damselae* (syn. *Vibrio damsela / damselae*) | flag | flag | no | loses colistin, gains 3GCR + carbapenem | CLSI M45 *Vibrio* |
 
@@ -367,6 +366,7 @@ catches them):
   plausibility warning's `>=310` arm fires unconditionally of the `!=0` guard.
 - SSI `== -1` sentinel comparison, likely a `!= 1` typo (`sc6VLWeyY4U`, `NegativeSentinelComparison`).
 
-Definition-class hazards (surfaced for the audit, PI-decided — not generator-fixed): the BSI
-`Antibiotic treatment` cross-rule hidden-mandatory hazard (DE `NjFq3pakY2I`); SSI infectious-agent value
-semantics (`1`=identified / `-1`=not-cultured / `0`=not-listed).
+Definition-class hazards (surfaced for the audit, decided by NeoIPC's principal investigator — not
+generator-fixed): the BSI `Antibiotic treatment` cross-rule hidden-mandatory hazard (data element
+`NjFq3pakY2I`); SSI infectious-agent value semantics (`1`=identified / `-1`=not-cultured /
+`0`=not-listed).

@@ -531,8 +531,8 @@ store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
 the catalogue, and *Candida fabianii* resolves in the package to a *Cyberlindnera fabianii* concept,
 where the catalogue files both names as synonyms of *Petasospora fabianii*. A
-comparison through the package's tables would therefore report a mismatch between an organism and
-itself. The rule follows the infectious-agent migration, the same dependency G16 waits on: the package
+comparison through the package's tables would therefore report a mismatch between an infectious agent
+and itself. The rule follows the infectious-agent migration, the same dependency G16 waits on: the package
 reading its pathogen tables from `NeoIPC-Infectious-Agents.yaml`, with production carrying the
 canonical metadata.
 
@@ -1428,9 +1428,9 @@ licence statement constrains reuse, not records.
 
 ### B List of Infectious Agents (`sec-agent-list`)
 
-The recordable organisms are those of the list; the "Assumed Pathogenicity" column is what the
+The recordable infectious agents are those of the list; the "Assumed Pathogenicity" column is what the
 recognized-pathogen and common-commensal classification reads (G15), and the "Recorded Resistances"
-column is the applicability the per-slot program rules enforce (G16). The printed list is built from
-the legacy pathogen CSVs (`NeoIPC-Pathogen-Concepts.csv` and its synonyms file), not from the canonical
-`metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`; the two disagree for some
-organisms, as G16 records.
+column is the applicability the per-slot program rules enforce (G16). The printed list is built from the
+frozen CSVs (`NeoIPC-Pathogen-Concepts.csv` and its synonyms file), not from the canonical
+`metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`; the two disagree for some infectious
+agents, as G15 records for the Assumed Pathogenicity column and G16 for the Recorded Resistances column.

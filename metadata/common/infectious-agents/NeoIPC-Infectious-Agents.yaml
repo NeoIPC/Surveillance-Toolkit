@@ -2,7 +2,7 @@ Metadata:
   UrlTemplates:
     ICTV: https://ictv.global/taxonomy/taxondetails?taxnode_id={0}
     LPSN: https://lpsn.dsmz.de/{0}
-    MycoBank: https://www.mycobank.org/MB/{0}
+    MycoBank: https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/{0}
     NeoIPC: 'TODO: Create URIs for NeoIPC-owned pathogen concepts'
   ListTerms:
     'Yes':
@@ -5039,9 +5039,8 @@ Hierarchies:
               Comments:
                 CommonCommensal: >-
                   The NHSN Organism List (2024) lists the genus Gordonia and the Gordonia species it enumerates as
-                  common commensals. Bloodstream infection occurs mainly with long-term central venous catheters,
-                  including in children (PMID 35724915), and the common-commensal criteria capture it through repeated
-                  cultures.
+                  common commensals. A catheter-related bloodstream infection is reported in a child with cancer (PMID
+                  35724915), and the common-commensal criteria capture such an infection through repeated cultures.
               Children:
               - Name: Gordonia bronchialis
                 ConceptType: Species
@@ -6624,8 +6623,9 @@ Hierarchies:
               CommonCommensal: true
               Comments:
                 CommonCommensal: >-
-                  The NHSN Organism List (2024) lists Propionibacterium and the species Propionibacterium australiense,
-                  Propionibacterium cyclohexanicum, and Propionibacterium freudenreichii as common commensals.
+                  The NHSN Organism List (2024) lists as common commensals the genus Propionibacterium and, in it,
+                  Propionibacterium australiense, Propionibacterium cyclohexanicum, Propionibacterium freudenreichii,
+                  and "Propionibacterium prionicus", whose row matches no node of the list.
               Children:
               - Name: Propionibacterium australiense
                 ConceptType: Species
@@ -6906,10 +6906,10 @@ Hierarchies:
                   Id: 2401
                   LpsnRecordNumber: 779391
                 - Name: Streptococcus parvulus
-                  ConceptId: species/streptococcus-parvulus
+                  ConceptId: species/streptococcus-parvulus-1
                   ConceptSource: LPSN
                   Id: 26
-                  LpsnRecordNumber: 4075
+                  LpsnRecordNumber: 781370
               - Name: Lancefieldella rimae
                 ConceptType: Species
                 ConceptId: species/lancefieldella-rimae
@@ -8021,10 +8021,8 @@ Hierarchies:
                 CommonCommensal: >-
                   The NHSN Organism List (2024) lists Bacillus thermantarcticus, a synonym of Parageobacillus
                   thermantarcticus, as a common commensal, and does not enumerate Parageobacillus thermoglucosidasius,
-                  whose synonyms fall under its genus rows Bacillus, a common commensal, and Geobacillus, which is none.
-                  Both species are thermophiles that LPSN records in risk group 1 of Germany's classification of
-                  biological agents, and no human bloodstream infection with either is reported, so their growth in a
-                  blood culture most plausibly reflects contamination.
+                  whose synonyms fall under its genus rows Bacillus, a common commensal, and Geobacillus, which is none;
+                  as for every infectious agent whose rows disagree, the row that counts a common commensal decides.
               Children:
               - Name: Parageobacillus thermantarcticus
                 ConceptType: Species

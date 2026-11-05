@@ -32,7 +32,7 @@ Metadata:
   UrlTemplates:
     ICTV: https://ictv.global/taxonomy/taxondetails?taxnode_id={0}
     LPSN: https://lpsn.dsmz.de/{0}
-    MycoBank: https://www.mycobank.org/MB/{0}
+    MycoBank: https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/{0}
     NeoIPC: https://neoipc.org/infectious-agents/{0}
 Hierarchies:
 - Id: 0
@@ -271,6 +271,16 @@ Hierarchies:
             @{ Defect = 'two NeoIPC nodes with one ConceptId'; Rule = 'concept-id-duplicate'; Change = { param($t) $t.Hierarchies[2].ConceptId = 1 } }
             @{ Defect = 'two LPSN nodes with one ConceptId'; Rule = 'concept-id-duplicate'; Change = { param($t) $t.Hierarchies[1].Children[0].Synonyms[0].ConceptId = 'genus/staphylococcus' } }
             @{ Defect = 'two LPSN nodes with one record number'; Rule = 'record-duplicate'; Change = { param($t) $t.Hierarchies[1].Children[0].Synonyms[0].LpsnRecordNumber = 2 } }
+            @{ Defect = 'two MycoBank nodes with one MycoBank number'; Rule = 'record-duplicate'; Change = {
+                    param($t)
+                    $t.Hierarchies = @($t.Hierarchies[0], $t.Hierarchies[1], $t.Hierarchies[2], @{ Name = 'Fungi'; ConceptType = 'Kingdom'; ConceptSource = 'MycoBank'; ConceptId = 455206; MycoBankNr = 90157
+                            Children = @(
+                                @{ Id = 30; Name = 'Candida albicans'; ConceptType = 'Species'; ConceptSource = 'MycoBank'; ConceptId = 294869; MycoBankNr = 256187 }
+                                @{ Id = 31; Name = 'Candida glabrata'; ConceptType = 'Species'; ConceptSource = 'MycoBank'; ConceptId = 294870; MycoBankNr = 256187 }
+                            )
+                        })
+                }
+            }
             @{ Defect = 'two ICTV concepts with one IctvId'; Rule = 'record-duplicate'; Change = {
                     param($t)
                     $t.Hierarchies[2].Children = @($t.Hierarchies[2].Children[0], @{ Id = 21; Name = 'Orthohepacivirus'; ConceptType = 'Genus'; ConceptSource = 'ICTV'; ConceptId = 202401235; IctvId = 19990001 })
@@ -290,6 +300,34 @@ Hierarchies:
         It 'leaves a NeoIPC node with <Form> to the node check' -ForEach @(
             @{ Form = 'no ConceptId'; Change = { param($t) $t.Hierarchies[0].Remove('ConceptId') } }
             @{ Form = 'a blank ConceptId'; Change = { param($t) $t.Hierarchies[0].ConceptId = ' ' } }
+        ) {
+            @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree (Edit-Tree -Change $Change)) | Should -BeNullOrEmpty
+        }
+
+        It 'leaves two nodes with <Form> to the node check' -ForEach @(
+            @{ Form = 'blank LPSN record numbers'; Change = {
+                    param($t)
+                    $t.Hierarchies[1].Children[0].LpsnRecordNumber = ' '; $t.Hierarchies[1].Children[0].Synonyms[0].LpsnRecordNumber = ' '
+                }
+            }
+            @{ Form = 'LPSN record numbers that are no integers'; Change = {
+                    param($t)
+                    $t.Hierarchies[1].Children[0].LpsnRecordNumber = '2a'; $t.Hierarchies[1].Children[0].Synonyms[0].LpsnRecordNumber = '2a'
+                }
+            }
+            @{ Form = 'empty IctvIds'; Change = {
+                    param($t)
+                    $t.Hierarchies[2].Children[0].IctvId = $null
+                    $t.Hierarchies[2].Children = @($t.Hierarchies[2].Children[0], @{ Id = 21; Name = 'Orthohepacivirus'; ConceptType = 'Genus'; ConceptSource = 'ICTV'; ConceptId = 202401235; IctvId = $null })
+                }
+            }
+            @{ Form = 'blank MycoBank numbers'; Change = {
+                    param($t)
+                    $t.Hierarchies = @($t.Hierarchies[0], $t.Hierarchies[1], $t.Hierarchies[2], @{ Name = 'Fungi'; ConceptType = 'Kingdom'; ConceptSource = 'MycoBank'; ConceptId = 455206; MycoBankNr = ''
+                            Children = @(@{ Id = 30; Name = 'Candida albicans'; ConceptType = 'Species'; ConceptSource = 'MycoBank'; ConceptId = 294869; MycoBankNr = '' })
+                        })
+                }
+            }
         ) {
             @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree (Edit-Tree -Change $Change)) | Should -BeNullOrEmpty
         }
@@ -415,13 +453,25 @@ Hierarchies:
 
         It 'reports <Rule> for <Defect>' -ForEach @(
             @{ Defect = 'a flag on a synonym'; Rule = 'flag-on-synonym'; Change = { param($n) $n.Albus.CommonCommensal = $true } }
+            @{ Defect = 'a flag on a synonym without an Id, which no Id-bearing node takes'; Rule = 'flag-on-synonym'; Change = { param($n) $n.Albus.Remove('Id'); $n.Albus.CommonCommensal = $true } }
             @{ Defect = 'a flag on a node without an Id that every Id-bearing node beneath it overrides'; Rule = 'flag-unused'; Change = { param($n) $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }; $n.Coli.CommonCommensal = $false; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a flag on a node without an Id that has no Id-bearing node beneath it'; Rule = 'flag-unused'; Change = { param($n) $n.Escherichia.Remove('Children'); $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a flag that repeats an inherited true'; Rule = 'flag-redundant'; Change = { param($n) $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a top-level false, the status without any flag'; Rule = 'flag-redundant'; Change = { param($n) $n.NotListed.CommonCommensal = $false; $n.NotListed.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'a flag on a node without an Id that repeats the status it inherits, over nodes that override it'; Rule = 'flag-redundant'; Change = { param($n) $n.Escherichia.CommonCommensal = $false; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }; $n.Coli.CommonCommensal = $true; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a flag without Comments'; Rule = 'flag-comment-missing'; Change = { param($n) $n.Group.Remove('Comments') } }
+            @{ Defect = 'a flag without Comments over Id-bearing nodes that all take its status'; Rule = 'flag-comment-missing'; Change = { param($n) $n.Group.Remove('Comments'); $n.Lugdunensis.Remove('CommonCommensal'); $n.Lugdunensis.Remove('Comments') } }
             @{ Defect = "a flag whose Comments lack the flag's key"; Rule = 'flag-comment-missing'; Change = { param($n) $n.Group.Comments = @{ Background = 'Other prose.' } } }
             @{ Defect = 'the reason for a flag the node lacks, where no warning asks for one'; Rule = 'comment-key'; Change = { param($n) $n.Aureus.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'the reason for a flag the node lacks beneath a flag the check cannot read, with no Id-bearing node beneath the node'; Rule = 'comment-key'; Change = { param($n) $n.Group.CommonCommensal = 'maybe'; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'the reason for a flag the node lacks above a flag the check cannot read, where a node beneath takes the status the node inherits'; Rule = 'comment-key'; Change = {
+                    param($n)
+                    $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Escherichia.Children = @($n.Coli, @{ Id = 16; Name = 'Escherichia albertii'; ConceptType = 'Species'; ConceptSource = 'LPSN'; ConceptId = 'species/escherichia-albertii'
+                            LpsnRecordNumber = 9; CommonCommensal = 'maybe'; Comments = @{ CommonCommensal = 'A reason.' }
+                        })
+                }
+            }
             @{ Defect = 'the reason for a resistance flag the node lacks'; Rule = 'comment-key'; Change = { param($n) $n.Aureus.Comments = @{ MRSA = 'A reason.' } } }
             @{ Defect = 'Comments given as a text'; Rule = 'comment'; Change = { param($n) $n.Aureus.Comments = 'Other prose.' } }
             @{ Defect = 'Comments given as a list of one mapping'; Rule = 'comment'; Change = { param($n) $n.Aureus.Comments = @(@{ Background = 'Other prose.' }) } }
@@ -437,6 +487,58 @@ Hierarchies:
         It 'accepts a flag on a node without an Id that an Id-bearing node beneath it takes' {
             $tree = Edit-FlagTree -Change { param($n) $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' } }
             @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'judges the nodes beneath <Rejected> as it judges them once that flag is removed' -ForEach @(
+            # Removed, the species' flag leaves the species taking the genus's.
+            @{ Rejected = 'a flag that repeats the status its node inherits'; Rule = 'flag-redundant'; Location = 'Id 15'; Change = {
+                    param($n)
+                    $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Coli.CommonCommensal = $true; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' }
+                }
+            }
+            # Removed, the synonym's flag leaves the variety beneath it an exception to the species' status. A second
+            # subspecies keeps the species' subtree mixed.
+            @{ Rejected = 'a flag on a synonym'; Rule = 'flag-on-synonym'; Location = 'Id 12'; Change = {
+                    param($n)
+                    $n.Albus.CommonCommensal = $false
+                    $n.Albus.Children = @(@{ Id = 17; Name = 'Staphylococcus albus var. nobilis'; ConceptType = 'Variety'; ConceptSource = 'LPSN'
+                            ConceptId = 'variety/staphylococcus-albus-nobilis'; LpsnRecordNumber = 10; CommonCommensal = $false; Comments = @{ CommonCommensal = 'A reason.' }
+                        })
+                    $n.Epidermidis.Children = @(@{ Id = 18; Name = 'Staphylococcus epidermidis subsp. epidermidis'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                            ConceptId = 'subspecies/staphylococcus-epidermidis-epidermidis'; LpsnRecordNumber = 11
+                        })
+                }
+            }
+            # Removed, the synonym's flag leaves the synonym taking its concept's.
+            @{ Rejected = 'a flag on a synonym, the only Id-bearing node of a concept without an Id'; Rule = 'flag-on-synonym'; Location = 'Id 16'; Change = {
+                    param($n)
+                    $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Escherichia.Remove('Children')
+                    $n.Escherichia.Synonyms = @(@{ Id = 16; Name = 'Bacterium'; ConceptSource = 'LPSN'; ConceptId = 'genus/bacterium'; LpsnRecordNumber = 9; CommonCommensal = $true })
+                }
+            }
+        ) {
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change))
+            Get-Rule $findings | Should -Be @($Rule)
+            $findings.Location | Should -Be @($Location)
+        }
+
+        It 'does not judge a flag that no Id-bearing node takes where <Unread>' -ForEach @(
+            @{ Unread = 'a flag beneath it that the check cannot read may leave the status to it'; Change = {
+                    param($n)
+                    $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Coli.CommonCommensal = 'maybe'; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' }
+                }
+            }
+            @{ Unread = 'the check cannot read the flag itself'; Change = {
+                    param($n)
+                    $n.Escherichia.CommonCommensal = 'maybe'; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Coli.CommonCommensal = $false; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' }
+                }
+            }
+        ) {
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change)) | Should -BeNullOrEmpty
         }
 
         It 'accepts the reason for a resistance flag the node carries' {
@@ -478,6 +580,37 @@ Hierarchies:
             $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree)
             Get-Rule $findings | Should -Be @('flag-hoistable')
             $findings.Location | Should -Be @('Id 14')
+            $findings.Message | Should -BeLike 'The node is no common commensal, the status it inherits, while *'
+        }
+
+        It 'counts <Counted>' -ForEach @(
+            @{ Counted = 'the synonyms of a node among its own names, not among the nodes beneath it'; Location = 'Id 14'; Change = {
+                    param($n)
+                    $n.Aureus.Synonyms = @(@{ Id = 16; Name = 'Micrococcus aureus'; ConceptSource = 'LPSN'; ConceptId = 'species/micrococcus-aureus'; LpsnRecordNumber = 9 })
+                    $n.Aureus.Children = @(@{ Id = 17; Name = 'Staphylococcus aureus subsp. anaerobius'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                            ConceptId = 'subspecies/staphylococcus-aureus-anaerobius'; LpsnRecordNumber = 10; CommonCommensal = $true; Comments = @{ CommonCommensal = 'A reason.' }
+                        })
+                }
+            }
+            @{ Counted = 'the nodes beneath a synonym among those beneath its concept'; Location = 'Id 14'; Change = {
+                    param($n)
+                    $n.Aureus.Synonyms = @(@{ Id = 16; Name = 'Micrococcus aureus'; ConceptSource = 'LPSN'; ConceptId = 'species/micrococcus-aureus'; LpsnRecordNumber = 9
+                            Children = @(@{ Id = 17; Name = 'Staphylococcus aureus subsp. anaerobius'; ConceptType = 'Subspecies'; ConceptSource = 'LPSN'
+                                    ConceptId = 'subspecies/staphylococcus-aureus-anaerobius'; LpsnRecordNumber = 10; CommonCommensal = $true; Comments = @{ CommonCommensal = 'A reason.' }
+                                })
+                        })
+                }
+            }
+            @{ Counted = 'the synonyms of a node without an Id as its own names'; Location = "'Escherichia'"; Change = {
+                    param($n)
+                    $n.Escherichia.Synonyms = @(@{ Id = 16; Name = 'Bacterium'; ConceptSource = 'LPSN'; ConceptId = 'genus/bacterium'; LpsnRecordNumber = 9 })
+                    $n.Coli.CommonCommensal = $true; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' }
+                }
+            }
+        ) {
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change))
+            Get-Rule $findings | Should -Be @('flag-hoistable')
+            $findings.Location | Should -Be @($Location)
             $findings.Message | Should -BeLike 'The node is no common commensal, the status it inherits, while *'
         }
 
@@ -547,6 +680,41 @@ Hierarchies:
                 $n.Staphylococcus.Children = @($n.Group)
             }
             @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'does not warn where the status the node inherits is unknown' {
+            # Every Id-bearing node beneath the group takes one status, but the group's own is the genus's, which the
+            # check cannot read.
+            $tree = Edit-FlagTree -Change {
+                param($n)
+                $n.Staphylococcus.CommonCommensal = 'maybe'; $n.Staphylococcus.Comments = @{ CommonCommensal = 'A reason.' }
+                $n.Group.Remove('CommonCommensal'); $n.Group.Remove('Comments')
+                $n.Group.Children = @($n.Epidermidis)
+                $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' }
+            }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
+        }
+
+        It 'takes the reason on a node as an answer where some reading of a flag it cannot read, <Where>, would raise the warning' -ForEach @(
+            @{ Where = 'above the node'; Change = {
+                    param($n)
+                    $n.Staphylococcus.CommonCommensal = 'maybe'; $n.Staphylococcus.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Group.Remove('CommonCommensal')
+                    $n.Group.Children = @($n.Epidermidis)
+                    $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' }
+                }
+            }
+            @{ Where = 'beneath the node'; Change = {
+                    param($n)
+                    $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Coli.CommonCommensal = $true; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' }
+                    $n.Escherichia.Children = @($n.Coli, @{ Id = 16; Name = 'Escherichia albertii'; ConceptType = 'Species'; ConceptSource = 'LPSN'; ConceptId = 'species/escherichia-albertii'
+                            LpsnRecordNumber = 9; CommonCommensal = 'maybe'; Comments = @{ CommonCommensal = 'A reason.' }
+                        })
+                }
+            }
+        ) {
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change)) | Should -BeNullOrEmpty
         }
 
         It 'judges the flags beneath again once a flag it can read sets the status' {

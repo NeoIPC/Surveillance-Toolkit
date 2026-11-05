@@ -343,10 +343,11 @@ function Get-NeoIPCInfectiousAgentIdentityFinding {
     # Checks that each node of a parsed ontology tree can be told from every other: a synonym has an Id of its own,
     # since it is a selectable option whose Id collected records hold; no two nodes of one source share a ConceptId,
     # which names the node's record at its source; no two LPSN nodes share a record number, since an LPSN record is
-    # one name, nor two concepts an IctvId, ICTV's id of one taxon, which links the taxon's nodes across renames and so
-    # repeats only among a concept and the synonyms that are its former names, each of which keeps the ConceptId of
-    # the release its name was taken from; and a NeoIPC ConceptId, the number NeoIPC gives a concept of its own, is an
-    # integer from 1. A node without a ConceptId is the node check's to report.
+    # one name, nor two MycoBank nodes a MycoBank number, which a link to a name takes, nor two concepts an IctvId,
+    # ICTV's id of one taxon, which links the taxon's nodes across renames and so repeats only among a concept and the
+    # synonyms that are its former names, each of which keeps the ConceptId of the release its name was taken from;
+    # and a NeoIPC ConceptId, the number NeoIPC gives a concept of its own, is an integer from 1. A node without a
+    # ConceptId, or with a blank one, and a record number that is no integer are the node check's to report.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][AllowNull()]$Tree)
@@ -356,10 +357,13 @@ function Get-NeoIPCInfectiousAgentIdentityFinding {
         return
     }
     # Keyed by source and ConceptId, and by record number, each to the node that first carries it, and, for an IctvId,
-    # to that node and the concept it names.
+    # to that node and the concept it names. A record number is compared only where it is an integer, the form the
+    # node check accepts.
     $conceptIds = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
     $lpsnRecords = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+    $mycoBankNumbers = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
     $ictvIds = [System.Collections.Generic.Dictionary[string, pscustomobject]]::new([System.StringComparer]::Ordinal)
+    $isInteger = { param($Value) $Value -is [int] -or $Value -is [long] }
     foreach ($record in @(Get-NeoIPCInfectiousAgentNodeRecord -Node $Tree['Hierarchies'] -IsSynonym $false -IsTop $true)) {
         $node = $record.Node
         $location = Get-NeoIPCInfectiousAgentNodeLocation -Node $node
@@ -384,7 +388,7 @@ function Get-NeoIPCInfectiousAgentIdentityFinding {
                 $conceptIds[$key] = $location
             }
         }
-        if ($source -ceq 'LPSN' -and $node.Contains('LpsnRecordNumber')) {
+        if ($source -ceq 'LPSN' -and $node.Contains('LpsnRecordNumber') -and (& $isInteger $node['LpsnRecordNumber'])) {
             $number = [string]$node['LpsnRecordNumber']
             if ($lpsnRecords.ContainsKey($number)) {
                 New-NeoIPCCheckFinding -Rule 'record-duplicate' -Location $location -Message "The LpsnRecordNumber $number is also that of $($lpsnRecords[$number]); an LPSN record is one name."
@@ -393,7 +397,16 @@ function Get-NeoIPCInfectiousAgentIdentityFinding {
                 $lpsnRecords[$number] = $location
             }
         }
-        if ($source -ceq 'ICTV' -and $node.Contains('IctvId')) {
+        if ($source -ceq 'MycoBank' -and $node.Contains('MycoBankNr') -and (& $isInteger $node['MycoBankNr'])) {
+            $number = [string]$node['MycoBankNr']
+            if ($mycoBankNumbers.ContainsKey($number)) {
+                New-NeoIPCCheckFinding -Rule 'record-duplicate' -Location $location -Message "The MycoBankNr $number is also that of $($mycoBankNumbers[$number]); a MycoBank number is one name, and a link to the name takes it."
+            }
+            else {
+                $mycoBankNumbers[$number] = $location
+            }
+        }
+        if ($source -ceq 'ICTV' -and $node.Contains('IctvId') -and (& $isInteger $node['IctvId'])) {
             $number = [string]$node['IctvId']
             if (-not $ictvIds.ContainsKey($number)) {
                 $ictvIds[$number] = [pscustomobject]@{ Location = $location; Concept = $record.Concept }
@@ -411,10 +424,12 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
     # (Get-NeoIPCCommonCommensalFlag), so a flag marks the highest node where a status holds, or an exception beneath
     # one: none sits on a synonym, which takes its concept's status, none repeats the status its node inherits, and
     # none sits where no Id-bearing node takes its status from it, as on a node without an Id under which every
-    # Id-bearing node, if there is one, takes its status from a flag further down. Each flag has the reason for it in
-    # the node's Comments, under the flag's key. Comments holds no key but a flag
-    # the node carries and Background, for NeoIPC's other prose about the node, and each of its values is a text. The
-    # resistance flags' placement and reasons stay outside these checks, but for their Comments keys.
+    # Id-bearing node, if there is one, takes its status from a flag further down. A flag reported on a synonym, or as
+    # repeating the status its node inherits, counts as absent for the nodes beneath it, as it is once removed, so that
+    # their findings judge the flags that stay. Each flag has the reason for it in the node's Comments, under the
+    # flag's key. Comments holds no key but a flag the node carries and Background, for NeoIPC's other prose about the
+    # node, and each of its values is a text. The resistance flags' placement and reasons stay outside these checks,
+    # but for their Comments keys.
     #
     # A warning names the highest node without the flag, other than a synonym, under which every Id-bearing node but
     # the node's own names, itself and its synonyms, takes one status from flags further down, other than the one the
@@ -424,8 +439,10 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
     # sits on a node without the flag: it answers the warning, and the check names the highest such nodes beneath
     # instead. A warning is the curator's to settle, with a flag or with that reason.
     #
-    # A flag whose value is no Boolean is the node check's to report: the status beneath it is unknown until a flag
-    # the check can read sets it again, so nothing that depends on that status is judged there.
+    # A flag whose value is no Boolean is the node check's to report. The status beneath it is unknown until a flag the
+    # check can read sets it again, and so is whether the nodes beneath it would take a flag above it instead, so
+    # nothing that depends on either is judged: no warning, no reason on a node as one no warning could ask for, and no
+    # flag above it as one that no Id-bearing node takes.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][AllowNull()]$Tree)
@@ -442,12 +459,14 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
         if ($Value -is [System.Collections.IList]) { foreach ($item in $Value) { & $items $item } }
         elseif ($Value -is [System.Collections.IDictionary]) { $Value }
     }
-    # Checks one node and its subtree, adding to the findings, and returns what the warning needs to know of the
-    # subtree: the statuses its Id-bearing nodes take ('True', 'False', or 'unknown', for an $Inherited of $null),
-    # those of the node's own names (Own) apart from those of the nodes beneath them (Beneath), and the nodes in it
-    # where the warning holds, each the highest of its branch. A node without the flag under which every Id-bearing
-    # node takes a status other than the one it inherits has them take it from flags beneath it, since nothing else
-    # can set it.
+    # Checks one node and its subtree, adding to the findings, and returns what the checks of the nodes above need to
+    # know of the subtree. For the warning: the statuses its Id-bearing nodes take ('True', 'False', or 'unknown', for
+    # an $Inherited of $null), those of the node's own names (Own) apart from those of the nodes beneath them
+    # (Beneath), and the nodes in it where the warning holds, each the highest of its branch (Candidates); a node
+    # without the flag under which every Id-bearing node takes a status other than the one it inherits has them take it
+    # from flags beneath it, since nothing else can set it. For a flag above: how many of its Id-bearing nodes take
+    # their status from that flag (Open), and whether more might, as where a flag the check cannot read stands between
+    # (Unsure).
     $walk = {
         param([System.Collections.IDictionary]$Node, [Nullable[bool]]$Inherited, [bool]$IsSynonym)
         $location = Get-NeoIPCInfectiousAgentNodeLocation -Node $Node
@@ -491,8 +510,10 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
             }
         }
 
+        # A flag the check reports on a synonym or as repeating the inherited status sets nothing beneath the node.
+        $sets = $carries -and -not $IsSynonym -and -not $redundant
         $status = $Inherited
-        if ($carries) { $status = $explicit }
+        if ($sets) { $status = $explicit }
         $statusKey = 'unknown'
         if ($null -ne $status) { $statusKey = [string]$status }
         $own = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
@@ -500,8 +521,9 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
         $beneath = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         $candidates = [System.Collections.Generic.List[pscustomobject]]::new()
         # The Id-bearing nodes beneath the node that no flag between it and them sets, which take their status from
-        # the node's flag or, where it carries none, from the nearest flag above it.
+        # the node's flag or, where it sets none, from the nearest flag above it.
         $takers = 0
+        $unsure = $false
         foreach ($list in 'Synonyms', 'Children') {
             if (-not $Node.Contains($list)) { continue }
             $isSynonymList = $list -ceq 'Synonyms'
@@ -512,25 +534,36 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
                 $beneath.UnionWith($summary.Beneath)
                 $candidates.AddRange($summary.Candidates)
                 $takers += $summary.Open
+                $unsure = $unsure -or $summary.Unsure
             }
         }
         if ($Node.Contains('Id')) { $takers++ }
-        if ($carries -and -not $IsSynonym -and $null -ne $explicit -and -not $redundant -and $takers -eq 0) {
+        if ($sets -and $null -ne $explicit -and $takers -eq 0 -and -not $unsure) {
             $findings.Add((New-NeoIPCCheckFinding -Rule 'flag-unused' -Location $location -Message "The node carries $flag, but no Id-bearing node takes its status from it: the node has no Id, and every Id-bearing node beneath it, if there is one, takes its status from a flag further down."))
         }
+        # The nodes that take the status of a flag the check cannot read may take that of the flag above once it is
+        # read or removed.
         $open = $takers
-        if ($carries) { $open = 0 }
+        if ($sets) {
+            $open = 0
+            $unsure = $null -eq $explicit -and ($takers -gt 0 -or $unsure)
+        }
         $hoistable = -not $carries -and -not $IsSynonym -and $null -ne $Inherited -and $beneath.Count -eq 1 -and
             -not $beneath.Contains('unknown') -and -not $beneath.Contains([string]$Inherited)
+        # Whether some reading of the flags the check cannot read makes the node one the warning names: something is
+        # beneath it, at most one known status, and not one the node is known to inherit.
+        $known = @($beneath | Where-Object { $_ -cne 'unknown' })
+        $mayHoist = -not $carries -and -not $IsSynonym -and $beneath.Count -gt 0 -and $known.Count -le 1 -and
+            -not ($null -ne $Inherited -and $known -ccontains [string]$Inherited)
         $answered = $null -ne $comments -and $comments.Contains($flag)
-        if ($answered -and -not $carries -and -not $hoistable) {
+        if ($answered -and -not $carries -and -not $mayHoist) {
             $findings.Add((New-NeoIPCCheckFinding -Rule 'comment-key' -Location $location -Message "Comments.$flag sits on a node without the flag, where no warning asks why the flags beneath it stay there; the reason for a flag sits on the node that carries it."))
         }
         if ($hoistable -and -not $answered) {
             $candidates.Clear()
             $candidates.Add([pscustomobject]@{ Location = $location; Status = -not $Inherited; HasOwnId = $own.Count -gt 0 })
         }
-        [pscustomobject]@{ Own = $own; Beneath = $beneath; Candidates = $candidates; Open = $open }
+        [pscustomobject]@{ Own = $own; Beneath = $beneath; Candidates = $candidates; Open = $open; Unsure = $unsure }
     }
 
     try {
