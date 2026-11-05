@@ -402,6 +402,7 @@ Hierarchies:
                     Group = $bacteria.Children[0].Children[0]; Epidermidis = $bacteria.Children[0].Children[0].Children[0]
                     Albus = $bacteria.Children[0].Children[0].Children[0].Synonyms[0]
                     Lugdunensis = $bacteria.Children[0].Children[0].Children[1]; Aureus = $bacteria.Children[0].Children[1]
+                    Escherichia = $bacteria.Children[1]; Coli = $bacteria.Children[1].Children[0]
                 }
                 & $Change $nodes
                 $tree
@@ -414,6 +415,8 @@ Hierarchies:
 
         It 'reports <Rule> for <Defect>' -ForEach @(
             @{ Defect = 'a flag on a synonym'; Rule = 'flag-on-synonym'; Change = { param($n) $n.Albus.CommonCommensal = $true } }
+            @{ Defect = 'a flag on a node without an Id that every Id-bearing node beneath it overrides'; Rule = 'flag-unused'; Change = { param($n) $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' }; $n.Coli.CommonCommensal = $false; $n.Coli.Comments = @{ CommonCommensal = 'A reason.' } } }
+            @{ Defect = 'a flag on a node without an Id that has no Id-bearing node beneath it'; Rule = 'flag-unused'; Change = { param($n) $n.Escherichia.Remove('Children'); $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a flag that repeats an inherited true'; Rule = 'flag-redundant'; Change = { param($n) $n.Epidermidis.CommonCommensal = $true; $n.Epidermidis.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a top-level false, the status without any flag'; Rule = 'flag-redundant'; Change = { param($n) $n.NotListed.CommonCommensal = $false; $n.NotListed.Comments = @{ CommonCommensal = 'A reason.' } } }
             @{ Defect = 'a flag without Comments'; Rule = 'flag-comment-missing'; Change = { param($n) $n.Group.Remove('Comments') } }
@@ -429,6 +432,11 @@ Hierarchies:
             $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree (Edit-FlagTree -Change $Change))
             Get-Rule $findings | Should -Be @($Rule)
             $findings.Severity | Should -Be @('Error')
+        }
+
+        It 'accepts a flag on a node without an Id that an Id-bearing node beneath it takes' {
+            $tree = Edit-FlagTree -Change { param($n) $n.Escherichia.CommonCommensal = $true; $n.Escherichia.Comments = @{ CommonCommensal = 'A reason.' } }
+            @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $tree) | Should -BeNullOrEmpty
         }
 
         It 'accepts the reason for a resistance flag the node carries' {

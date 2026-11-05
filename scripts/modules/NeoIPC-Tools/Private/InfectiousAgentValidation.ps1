@@ -409,8 +409,10 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
     # Checks where the CommonCommensal flags of a parsed ontology tree sit, and that NeoIPC's prose gives the reason
     # for each. A node's status is the nearest flag on its path to the root, false where there is none
     # (Get-NeoIPCCommonCommensalFlag), so a flag marks the highest node where a status holds, or an exception beneath
-    # one: none sits on a synonym, which takes its concept's status, and none repeats the status its node inherits.
-    # Each flag has the reason for it in the node's Comments, under the flag's key. Comments holds no key but a flag
+    # one: none sits on a synonym, which takes its concept's status, none repeats the status its node inherits, and
+    # none sits where no Id-bearing node takes its status from it, as on a node without an Id under which every
+    # Id-bearing node, if there is one, takes its status from a flag further down. Each flag has the reason for it in
+    # the node's Comments, under the flag's key. Comments holds no key but a flag
     # the node carries and Background, for NeoIPC's other prose about the node, and each of its values is a text. The
     # resistance flags' placement and reasons stay outside these checks, but for their Comments keys.
     #
@@ -476,11 +478,12 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
                 }
             }
         }
+        $redundant = $carries -and -not $IsSynonym -and $null -ne $explicit -and $null -ne $Inherited -and $explicit -eq $Inherited
         if ($carries) {
             if ($IsSynonym) {
                 $findings.Add((New-NeoIPCCheckFinding -Rule 'flag-on-synonym' -Location $location -Message "The synonym carries $flag; a synonym takes its concept's status, so the flag belongs on the concept."))
             }
-            elseif ($null -ne $explicit -and $null -ne $Inherited -and $explicit -eq $Inherited) {
+            elseif ($redundant) {
                 $findings.Add((New-NeoIPCCheckFinding -Rule 'flag-redundant' -Location $location -Message "The node's $flag is $($explicit.ToString().ToLowerInvariant()), the status it inherits."))
             }
             elseif ($null -eq $comments -or -not $comments.Contains($flag)) {
@@ -496,6 +499,9 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
         if ($Node.Contains('Id')) { [void]$own.Add($statusKey) }
         $beneath = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         $candidates = [System.Collections.Generic.List[pscustomobject]]::new()
+        # The Id-bearing nodes beneath the node that no flag between it and them sets, which take their status from
+        # the node's flag or, where it carries none, from the nearest flag above it.
+        $takers = 0
         foreach ($list in 'Synonyms', 'Children') {
             if (-not $Node.Contains($list)) { continue }
             $isSynonymList = $list -ceq 'Synonyms'
@@ -505,8 +511,15 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
                 if ($isSynonymList) { $own.UnionWith($summary.Own) } else { $beneath.UnionWith($summary.Own) }
                 $beneath.UnionWith($summary.Beneath)
                 $candidates.AddRange($summary.Candidates)
+                $takers += $summary.Open
             }
         }
+        if ($Node.Contains('Id')) { $takers++ }
+        if ($carries -and -not $IsSynonym -and $null -ne $explicit -and -not $redundant -and $takers -eq 0) {
+            $findings.Add((New-NeoIPCCheckFinding -Rule 'flag-unused' -Location $location -Message "The node carries $flag, but no Id-bearing node takes its status from it: the node has no Id, and every Id-bearing node beneath it, if there is one, takes its status from a flag further down."))
+        }
+        $open = $takers
+        if ($carries) { $open = 0 }
         $hoistable = -not $carries -and -not $IsSynonym -and $null -ne $Inherited -and $beneath.Count -eq 1 -and
             -not $beneath.Contains('unknown') -and -not $beneath.Contains([string]$Inherited)
         $answered = $null -ne $comments -and $comments.Contains($flag)
@@ -517,7 +530,7 @@ function Get-NeoIPCInfectiousAgentFlagFinding {
             $candidates.Clear()
             $candidates.Add([pscustomobject]@{ Location = $location; Status = -not $Inherited; HasOwnId = $own.Count -gt 0 })
         }
-        [pscustomobject]@{ Own = $own; Beneath = $beneath; Candidates = $candidates }
+        [pscustomobject]@{ Own = $own; Beneath = $beneath; Candidates = $candidates; Open = $open }
     }
 
     try {

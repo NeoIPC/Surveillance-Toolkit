@@ -16,13 +16,13 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 - CI checks of the list: its keys and structure; every node's `Id`, `Name`, rank, source, and record number, and the
   form each typed value takes in the file; that every node can be told from every other, a synonym by an `Id` of
   its own, a source's record by one node, an ICTV taxon by one concept, and a NeoIPC concept by an integer
-  `ConceptId`; that each common-commensal flag sits on a concept, only where it changes the status its node
-  inherits, with the reason for it in the node's `Comments`, and that a node under which every `Id`-bearing node
-  takes, from flags further down, a status one flag on it would give them all says there why the flags stay beneath
-  it; the option labels generated from it; its UID sidecar; the two frozen CSVs; and that it stays
-  append-only against every released version, so that a released `Id` keeps its name and the UID a release's
-  sidecar gave it, a new `Id` exceeds every released one, and a released `Id` never disappears, except from a branch
-  that maintains an earlier line, which need not carry a later line's `Id`s.
+  `ConceptId`; that each common-commensal flag sits on a concept, only where it changes the status its node inherits and
+  some `Id`-bearing node takes its status from it, with the reason for it in the node's `Comments`, and that a node
+  under which every `Id`-bearing node takes, from flags further down, a status one flag on it would give them all says
+  there why the flags stay beneath it; the option labels generated from it; its UID sidecar; the two frozen CSVs; and
+  that it stays append-only against every released version, so that a released `Id` keeps its name and the UID a
+  release's sidecar gave it, a new `Id` exceeds every released one, and a released `Id` never disappears, except from a
+  branch that maintains an earlier line, which need not carry a later line's `Id`s.
 - CI checks that the list keeps to YAML 1.2.2's portable subset, which YAML 1.1, YAML 1.2.2, and the YAML readers
   the toolkit meets read alike, and that those readers read it alike.
 - NeoIPC-Tools' `Get-NeoIPCInfectiousAgentCodeSet` returns the list's option codes, as its concepts and synonyms, and

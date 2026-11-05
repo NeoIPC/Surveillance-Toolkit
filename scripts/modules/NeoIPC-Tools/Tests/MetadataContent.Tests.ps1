@@ -165,7 +165,7 @@ InModuleScope 'NeoIPC-Tools' {
         }
 
         # A warning fails the test too: it is settled by a flag, or by Comments.CommonCommensal on the node it names.
-        It 'sets each common-commensal flag on a concept, only where it changes the inherited status, with its reason, and says why wherever one flag would hold for all beneath a node' {
+        It 'sets each common-commensal flag on a concept, only where it changes the inherited status and some Id-bearing node takes it, with its reason, and says why wherever one flag would hold for all beneath a node' {
             $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $script:ListTree)
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
         }
