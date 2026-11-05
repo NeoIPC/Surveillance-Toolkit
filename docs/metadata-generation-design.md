@@ -366,7 +366,7 @@ catches them):
   plausibility warning's `>=310` arm fires unconditionally of the `!=0` guard.
 - SSI `== -1` sentinel comparison, likely a `!= 1` typo (`sc6VLWeyY4U`, `NegativeSentinelComparison`).
 
-Definition-class hazards (surfaced for the audit, decided by NeoIPC's principal investigator — not
-generator-fixed): the BSI `Antibiotic treatment` cross-rule hidden-mandatory hazard (data element
-`NjFq3pakY2I`); SSI infectious-agent value semantics (`1`=identified / `-1`=not-cultured /
-`0`=not-listed).
+Definition-class hazards (surfaced for the audit, decided by the principal investigator of the NeoIPC
+Surveillance — not generator-fixed): the BSI `Antibiotic treatment` cross-rule hidden-mandatory hazard
+(data element `NjFq3pakY2I`); SSI infectious-agent value semantics (`1`=identified / `-1`=not-cultured
+/ `0`=not-listed).
