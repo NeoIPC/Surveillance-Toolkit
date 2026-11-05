@@ -69,8 +69,9 @@ clinically meaningful to anyone reading a report; and, less obviously but more s
 itself** — which substance sits in which ATC group and which AWaRe category is WHO's editorial work, and a selection
 and arrangement of that kind is what a database right protects even where the individual names are not copyrightable.
 The infectious-agent list's lineage, which its factual extracts carry, is a classification too: apart from NeoIPC's own
-nodes (its infectious-agent groups and the top-level `Viruses` and `Eukaryota`), it is each name's place in the
-classification its source publishes, for prokaryotes the arrangement LPSN chooses among those the taxonomic literature
+nodes (its infectious-agent groups and the top-level `Viruses` and `Eukaryota`) and the few nodes whose
+`Comments.Background` says the list places them otherwise, it is each name's place in the classification its source
+publishes, for prokaryotes the arrangement LPSN chooses among those the taxonomic literature
 publishes, for fungi MycoBank's, and for viruses the taxonomy ICTV ratifies. That list's terms rest on what such a
 classification records, how the infectious agents are related, whereas an ATC group and an AWaRe category sort
 substances by schemes made for a purpose: the ATC, developed in Norway from the European Pharmaceutical Market Research

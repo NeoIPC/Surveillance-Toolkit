@@ -159,6 +159,17 @@ InModuleScope 'NeoIPC-Tools' {
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
         }
 
+        It 'tells every node from every other: a synonym by an Id of its own, a record by one node, an ICTV taxon by one concept, and a NeoIPC concept by an integer ConceptId' {
+            $findings = @(Get-NeoIPCInfectiousAgentIdentityFinding -Tree $script:ListTree)
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+
+        # A warning fails the test too: it is settled by a flag, or by Comments.CommonCommensal on the node it names.
+        It 'sets each common-commensal flag on a concept, only where it changes the inherited status and some Id-bearing node takes it, with its reason, and says why wherever one flag would hold for all beneath a node' {
+            $findings = @(Get-NeoIPCInfectiousAgentFlagFinding -Tree $script:ListTree)
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+
         It 'generates option labels that are distinct and fit DHIS2' {
             $findings = @(Get-NeoIPCInfectiousAgentLabelFinding -Tree $script:ListTree)
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)

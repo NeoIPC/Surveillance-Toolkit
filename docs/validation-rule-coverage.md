@@ -529,10 +529,10 @@ the protocol authority below), and on the infectious-agent migration.
 The package's pathogen tables are built from the legacy catalogue, while the option codes the forms
 store are the canonical catalogue's, and the two disagree on which concept
 some codes name: *Raoultella* is a concept of its own in the package and a synonym of *Klebsiella* in
-the catalogue, and *Candida fabianii* resolves in the package to a second *Cyberlindnera fabianii*
-concept the catalogue does not carry, where the catalogue files it as a synonym of its own. A
-comparison through the package's tables would therefore report a mismatch between an organism and
-itself. The rule follows the infectious-agent migration, the same dependency G16 waits on: the package
+the catalogue, and *Candida fabianii* resolves in the package to a *Cyberlindnera fabianii* concept,
+where the catalogue files both names as synonyms of *Petasospora fabianii*. A
+comparison through the package's tables would therefore report a mismatch between an infectious agent
+and itself. The rule follows the infectious-agent migration, the same dependency G16 waits on: the package
 reading its pathogen tables from `NeoIPC-Infectious-Agents.yaml`, with production carrying the
 canonical metadata.
 
@@ -598,12 +598,13 @@ The dataset holds the inputs of the three definitions the rules check: the items
 and SSI forms, the antibiotic-treatment flag among them, and the infectious-agent findings. It cannot
 reproduce the definitions of the laboratory-confirmed BSI with a common commensal and of pneumonia
 today. The laboratory-confirmed BSI with a common commensal rests on the client's classification of
-the infectious agents as recognized pathogens or common commensals, an id list embedded in its
-program rules, and the package's legacy classification (`is_cc`) differs from
-that list: it counts the coagulase-negative staphylococci group (code 2776) as a common commensal,
-which the client's list does not. The pneumonia definition rests likewise on the client's list of
-viruses, which the package does not reproduce, and counts the pneumonia form's I/T ratio
-(`NEOIPC_HAP_IT_RATIO`), which the import does not read.
+the infectious agents as recognized pathogens or common commensals, an id list embedded in its program
+rules, and the package's legacy classification (`is_cc`) differs from that list: it counts, among
+others, the *Streptococcus bovis* group (code 2801) as a common commensal, which the client's list
+does not, and *Staphylococcus schleiferi* (code 741) as none, which the client's list counts as one.
+The pneumonia definition rests likewise on the client's list of viruses, which the package does not
+reproduce, and counts the pneumonia form's I/T ratio (`NEOIPC_HAP_IT_RATIO`), which the import does
+not read.
 
 For data entered through the interface a definition fails in only one way: residue. A culture-negative
 sepsis with an organism the hidden section kept, or findings of another depth than the SSI's recorded
@@ -1427,9 +1428,9 @@ licence statement constrains reuse, not records.
 
 ### B List of Infectious Agents (`sec-agent-list`)
 
-The recordable organisms are those of the list; the "Assumed Pathogenicity" column is what the
+The recordable infectious agents are those of the list; the "Assumed Pathogenicity" column is what the
 recognized-pathogen and common-commensal classification reads (G15), and the "Recorded Resistances"
-column is the applicability the per-slot program rules enforce (G16). The printed list is built from
-the legacy pathogen CSVs (`NeoIPC-Pathogen-Concepts.csv` and its synonyms file), not from the canonical
-`metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`; the two disagree for some
-organisms, as G16 records.
+column is the applicability the per-slot program rules enforce (G16). The printed list is built from the
+frozen CSVs (`NeoIPC-Pathogen-Concepts.csv` and its synonyms file), not from the canonical
+`metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml`; the two disagree for some infectious
+agents, as G15 records for the Assumed Pathogenicity column and G16 for the Recorded Resistances column.

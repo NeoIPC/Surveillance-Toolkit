@@ -370,6 +370,8 @@ d2:hasValue(#{NeoIPC SSI Pathogen 1 value})&&(
           || #{NeoIPC SSI Pathogen 1 value}==3223
           || #{NeoIPC SSI Pathogen 1 value}==3325
           || #{NeoIPC SSI Pathogen 1 value}==3543
+          || #{NeoIPC SSI Pathogen 1 value}==3575
+          || #{NeoIPC SSI Pathogen 1 value}==3576
         )
       )
     )
