@@ -10168,9 +10168,8 @@ Hierarchies:
                 CommonCommensal: >-
                   The NHSN Organism List (2024) lists the genus Aerococcus and the Aerococcus species it enumerates,
                   Aerococcus urinae and Aerococcus urinaeequi among them, as common commensals. Aerococcus urinae causes
-                  bacteraemia in older men with urological disease (PMID 21895858), but neonatal evidence is limited to
-                  a single case report of probable early-onset infection (PMID 25755882) and does not justify a
-                  departure.
+                  bacteraemia in older men with urological disease (PMID 21895858), but this adult evidence does not
+                  justify a departure for newborns.
               Children:
               - Name: Aerococcus christensenii
                 ConceptType: Species

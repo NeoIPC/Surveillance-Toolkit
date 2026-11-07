@@ -200,4 +200,44 @@ InModuleScope 'NeoIPC-Tools' {
             $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
         }
     }
+
+    Describe 'Infectious-agent reporting classification (metadata/common/infectious-agents)' {
+        # The checks of Private/InfectiousAgentReportingGroupValidation.ps1, applied to the committed classification and
+        # the list it classifies. YamlPortability.Tests.ps1 holds the classification to the portable subset.
+        BeforeAll {
+            Import-Module powershell-yaml -ErrorAction Stop
+            $directory = Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata/common/infectious-agents'
+            $script:ListTree = [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.yaml')) | ConvertFrom-Yaml
+            $script:Classification = [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml')) | ConvertFrom-Yaml
+
+            function Format-Finding {
+                # The first findings, one per line of the failure message.
+                param([AllowEmptyCollection()][object[]]$Finding)
+                (@($Finding | Select-Object -First 20 | ForEach-Object { "$($_.Rule) at $($_.Location): $($_.Message)" })) -join "`n"
+            }
+        }
+
+        It 'spells every key as its place has it and builds a tree of groups with unique keys and names, ECDC categories, cited members, and attributes with their vocabularies' {
+            $findings = @(Get-NeoIPCReportingGroupStructureFinding -Classification $script:Classification)
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+
+        It 'puts every Id-bearing node in one leaf group, but for the Ids 0 and 3561, through members that each name one node and serve some Id' {
+            $findings = @(Get-NeoIPCReportingGroupMemberFinding -Classification $script:Classification -Tree $script:ListTree)
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+
+        It 'gives every Id-bearing bacterial node one value of each attribute, through assignments that each name one node and serve some Id' {
+            $findings = @(Get-NeoIPCReportingGroupAttributeFinding -Classification $script:Classification -Tree $script:ListTree)
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+
+        It 'offers the translation catalogue, by paths and never by keys, the labels of the classification and the names, ranks, and terms of the list' {
+            $configuration = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot '..' '..' '..' '..' 'po/infectious_agents.po4a.cfg'))
+            $findings = @(Get-NeoIPCPo4aConfigurationFinding -Configuration $configuration -Classification $script:Classification -Tree $script:ListTree `
+                    -ClassificationMaster 'metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml' `
+                    -TreeMaster 'metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml')
+            $findings | Should -BeNullOrEmpty -Because (Format-Finding $findings)
+        }
+    }
 }

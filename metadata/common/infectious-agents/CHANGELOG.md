@@ -29,16 +29,32 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   the code sets the generated DHIS2 rules enumerate: the common commensals, the infectious agents each resistance
   category (3GCR, CARBR, COLR, MRSA, VRE) applies to, and the viruses, with the list's SHA-256.
   `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON, for consumers in other languages.
+- `NeoIPC-Infectious-Agent-Reporting-Groups.yaml`, the reporting classification above the ontology. It holds a tree of
+  reporting groups after the categories of Annex 1 of ECDC's protocol for the surveillance of healthcare-associated
+  infections in intensive care units (HAI-Net ICU protocol, version 2.3), into which every `Id`-bearing node falls but
+  the `Id`s 0 and 3561. The tree splits the Gram-negative bacilli outside the Enterobacterales into non-fermenting,
+  fermenting and fastidious, and variably fermenting ones, the other bacteria into actinomycetes, mycobacteria,
+  bacteria without a cell wall, obligate intracellular bacteria, and spirochaetes, and the fungi into yeasts, moulds,
+  and other fungi. The file also gives every bacterium its Gram reaction and oxygen requirement, and every placement
+  its evidence. CI checks that every `Id`-bearing node takes one group, and every bacterium one value of each
+  attribute, through members and assignments that each name one node, cite their evidence, and serve some `Id`, and
+  that every member of a group that shares its ECDC category with another says what sets it in its group. The
+  translation catalogue gains the groups' names and definitions and the names of the attributes and their values,
+  which po4a takes from the classification by path, as it now takes the list's names, ranks, and terms, so that
+  neither document's options reach the other; CI checks that the localized classifications differ from the canonical
+  one only in those labels, and the list's release bundles the classification with them.
 
 ### Changed
 
 - `LICENSE.md`: factual extracts of the list, outputs that carry nothing but `Id`s, names and synonyms, ranks and
   lineage, source records, and the statuses NeoIPC assigns, such as the Core Protocol's list of infectious agents,
   neoipcr's tables, and the reports' infectious-agent tables, fall outside the directory's CC BY-NC-ND 4.0 terms.
-  The file also says what MycoBank's curators approved in January 2023.
+  The file also says what MycoBank's curators approved in January 2023. The reporting classification is part of the
+  directory, and the reporting groups, Gram reactions, and oxygen requirements NeoIPC assigns are among the facts such
+  extracts carry.
 - `README.md`: which files are frozen and who reads them, what CI checks, which sources the ontology is compiled from,
-  in which editions, how it is reconciled with them, when its common-commensal status departs from NHSN's, and what
-  evidence its `Comments` cite.
+  in which editions, how it is reconciled with them, when its common-commensal status departs from NHSN's, what
+  evidence its `Comments` cite, and how the reporting classification groups the infectious agents.
 - In `NeoIPC-Infectious-Agents.yaml`, `ListTerms`' `Yes` is quoted, so that a YAML 1.1 reader reads it as text
   rather than as a Boolean. The per-locale overlays, which po4a writes, have it plain.
 - In `NeoIPC-Infectious-Agents.yaml`, NeoIPC's own prose about a node sits in its `Comments`: the reason for a flag

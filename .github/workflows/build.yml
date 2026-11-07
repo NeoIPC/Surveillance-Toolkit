@@ -631,10 +631,13 @@ jobs:
                 # UID, and the protocol compiles the pathogen CSVs
                 # (New-PathogenList) — the legacy concept and synonym tables plus the two only the protocol
                 # reads. Both sources are tracked, so a change to EITHER forces a list re-release before
-                # either product ships it. Translations (*.de.csv etc.) stay out of scope.
+                # either product ships it. The reporting classification is tracked too: the list's release
+                # bundles it, so the version a product incorporates names one classification. Translations
+                # (*.de.csv etc.) stay out of scope.
                 check_list infectious-agents \
                   metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml \
                   metadata/common/infectious-agents/NeoIPC-Infectious-Agents.uids.csv \
+                  metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml \
                   metadata/common/infectious-agents/NeoIPC-Owned-Pathogen-Concepts.csv \
                   metadata/common/infectious-agents/NeoIPC-Pathogen-Concepts.csv \
                   metadata/common/infectious-agents/NeoIPC-Pathogen-Synonyms.csv \
@@ -766,9 +769,10 @@ jobs:
             # Use the pinned po4a submodule (tools/po4a) — the Ubuntu apt po4a is too old to recognize the
             # --width / --wrap-po options our configs use. Invocation matches the "po4a Setup" section of .claude/rules/localization.md.
             - name: Run po4a (infectious agents)
-              # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml overlays bundled into the infectious agent
-              # list release. The protocol build does not read them: it compiles the pathogen list from the
-              # CSVs (see the incorporation check above), so a protocol tag skips this step.
+              # Generates the localized NeoIPC-Infectious-Agents.<lang>.yaml and
+              # NeoIPC-Infectious-Agent-Reporting-Groups.<lang>.yaml overlays bundled into the infectious agent list
+              # release. The protocol build does not read them: it compiles the list of infectious agents from the CSVs
+              # (see the incorporation check above), so a protocol tag skips this step.
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               # PERL_UNICODE=SDA must match scripts/Invoke-Localization.ps1: it decodes @ARGV/open() as UTF-8 so
@@ -778,6 +782,31 @@ jobs:
               # it CI msgmerges its checkout and then builds from a merged state that is not what is on main, which
               # hides drift instead of surfacing it. This is what Invoke-Localization.ps1 -Render does.
               run: PERL_UNICODE=SDA PERLLIB=tools/po4a/lib tools/po4a/po4a --verbose --no-update po/infectious_agents.po4a.cfg
+
+            - name: Check that the classification's translations change only its labels
+              # A localized classification may differ from the canonical one only in the labels the catalogue offers:
+              # a member's or an assignment's name that a translation changed would no longer name its ontology node.
+              # po4a carries one document's options over to the documents after it, and only the rendered files show
+              # what it did with them.
+              if: github.ref_type != 'tag' || steps.rel.outputs.product == 'infectious-agents'
+              shell: pwsh
+              run: |
+                Install-Module -Name powershell-yaml -RequiredVersion 0.4.12 -Force -Scope CurrentUser -SkipPublisherCheck
+                Import-Module ./scripts/modules/NeoIPC-Tools
+                $directory = 'metadata/common/infectious-agents'
+                $translations = @(Get-ChildItem -Path $directory -Filter 'NeoIPC-Infectious-Agent-Reporting-Groups.*.yaml')
+                if ($translations.Count -eq 0) { throw 'po4a wrote no localized classification.' }
+                $findings = @(& (Get-Module NeoIPC-Tools) {
+                    param($Directory, $Translations)
+                    $canonical = [System.IO.File]::ReadAllText((Join-Path $Directory 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml')) | ConvertFrom-Yaml
+                    foreach ($file in $Translations) {
+                        $translation = [System.IO.File]::ReadAllText($file.FullName) | ConvertFrom-Yaml
+                        Get-NeoIPCReportingGroupTranslationFinding -Classification $canonical -Translation $translation -Location $file.Name
+                    }
+                } $directory $translations)
+                foreach ($finding in $findings) { Write-Host "$($finding.Location): $($finding.Message)" }
+                Write-Host "$($translations.Count) localized classifications, $($findings.Count) differences outside the labels"
+                if ($findings.Count) { exit 1 }
 
             - name: Run po4a (documentation)
               if: github.ref_type != 'tag' || steps.rel.outputs.product == 'protocol'
@@ -831,7 +860,8 @@ jobs:
                 ls "$staged"/NeoIPC-Core-Collection-Forms*.zip >/dev/null
 
             - name: Bundle the infectious agent list (source + translations)
-              # Canonical YAML + the po4a-generated localized NeoIPC-Infectious-Agents.<lang>.yaml + the UID map.
+              # Canonical YAML + the po4a-generated localized NeoIPC-Infectious-Agents.<lang>.yaml + the UID map, and the
+              # reporting classification with its localized NeoIPC-Infectious-Agent-Reporting-Groups.<lang>.yaml.
               if: github.ref_type == 'tag' && steps.rel.outputs.product == 'infectious-agents'
               shell: bash
               run: |
@@ -839,8 +869,8 @@ jobs:
                 out="$PWD/artifacts/release-assets/NeoIPC-Infectious-Agents-${{ steps.rel.outputs.version }}.tar.gz"
                 cd metadata/common/infectious-agents
                 # LICENSE.md + README.md travel with the list so the bundle carries its own attribution + effective license.
-                files=(NeoIPC-Infectious-Agents.yaml NeoIPC-Infectious-Agents.uids.csv LICENSE.md README.md)
-                for f in NeoIPC-Infectious-Agents.*.yaml; do [ -e "$f" ] && files+=("$f"); done
+                files=(NeoIPC-Infectious-Agents.yaml NeoIPC-Infectious-Agents.uids.csv NeoIPC-Infectious-Agent-Reporting-Groups.yaml LICENSE.md README.md)
+                for f in NeoIPC-Infectious-Agents.*.yaml NeoIPC-Infectious-Agent-Reporting-Groups.*.yaml; do [ -e "$f" ] && files+=("$f"); done
                 tar czf "$out" "${files[@]}"
                 echo "Bundled: ${files[*]}"
 

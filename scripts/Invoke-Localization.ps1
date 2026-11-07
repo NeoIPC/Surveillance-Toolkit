@@ -195,8 +195,9 @@ $potPaths = @(
 # A catalogue's licence is set DELIBERATELY here; it is not inherited from the licence of the directory the
 # strings were extracted from, and the two routinely differ. What governs a catalogue is what the catalogue
 # actually contains. Concretely: metadata/common/infectious-agents/ is CC BY-NC-ND 4.0 because of its
-# upstream sources, but po4a extracts only `keys='Name ConceptType Value'` from it — taxonomic names,
-# synonyms, rank labels, controlled values, plus NeoIPC's own header/footer prose. None of the upstream
+# upstream sources, but po4a extracts from it only the paths po/infectious_agents.po4a.cfg names —
+# taxonomic names, synonyms, rank labels, controlled values, the reporting groups' names and definitions
+# and the names of their attributes and values, plus NeoIPC's own header/footer prose. None of the upstream
 # descriptions, authorities or references travels with them, and names are not copyrightable in any case.
 # A NoDerivatives term could not apply to a translation catalogue regardless: a translation *is* a
 # derivative work, so an ND catalogue could not lawfully be translated at all, which is its only purpose.

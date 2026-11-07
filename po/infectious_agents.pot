@@ -5,13 +5,353 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-11-05 10:04+0100\n"
+"POT-Creation-Date: 2026-11-07 08:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#. type: Hash Value: Attributes Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram reaction"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-positive"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-variable"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Not classified by the Gram stain"
+msgstr ""
+
+#. type: Hash Value: Attributes Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Oxygen requirement"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Aerobic"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Facultatively anaerobic"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Microaerophilic"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Aerotolerant anaerobic"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Obligately anaerobic"
+msgstr ""
+
+#. type: Hash Value: Attributes Values Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Not determined"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-positive cocci other than the anaerobes, such as staphylococci, streptococci, and enterococci."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-positive cocci"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative cocci other than the anaerobes, such as Neisseria, and the genus Moraxella, which ECDC counts among them."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative cocci"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-positive bacilli other than the anaerobes, the mycobacteria, and the actinomycetes, such as Corynebacterium, Bacillus, Lactobacillus, and Listeria, with the genera split from these since December 2010, anaerobic ones among them."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-positive bacilli"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "The bacteria of the order Enterobacterales, such as Escherichia, Klebsiella, Enterobacter, and Serratia."
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Children Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Enterobacterales"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative bacilli that grow on routine media without fermenting glucose, such as Pseudomonas, Acinetobacter, Stenotrophomonas, and Burkholderia."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Non-fermenting Gram-negative bacilli"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative bacilli that ferment glucose, such as Pasteurella, Aeromonas, and Vibrio, and the fastidious ones, fermenting or not, which grow only on enriched media or with added carbon dioxide or less oxygen, such as Haemophilus, Legionella, Campylobacter, and Helicobacter."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Fermenting and fastidious Gram-negative bacilli"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative bacilli that grow on routine media and whose descriptions give them a mainly respiratory metabolism in which fermentation may also occur, so that they are neither non-fermenting nor fermenting, such as Azospirillum."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Variably fermenting Gram-negative bacilli"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative bacilli outside the Enterobacterales, other than the anaerobes and the other bacteria."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Gram-negative bacilli, not Enterobacterales"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Obligately and aerotolerant anaerobic bacteria of any Gram reaction and shape, such as Bacteroides, Prevotella, Clostridium, and Cutibacterium, other than the other bacteria and the genera split since December 2010 from a genus that ECDC counts in another category."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Anaerobes"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Actinomyces, the genera formed from its former species, and the aerobic actinomycetes, such as Nocardia, Rhodococcus, and Streptomyces."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Actinomyces, Nocardia, and related bacteria"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "The acid-fast mycobacteria, such as Mycobacterium."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Mycobacteria"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "The Mollicutes, such as Mycoplasma and Ureaplasma."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Bacteria without a cell wall"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Bacteria that grow only in host cells, such as Chlamydia and Rickettsia, and Coxiella, which grows outside them only in a medium devised for it."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Obligate intracellular bacteria"
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Helical bacteria with periplasmic flagella, such as Treponema, Borrelia, and Leptospira."
+msgstr ""
+
+#. type: Hash Value: Groups Children Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Spirochaetes"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "The bacteria ECDC counts as other bacteria, by what they are: the actinomycetes, the mycobacteria, the bacteria without a cell wall, the obligate intracellular bacteria, and the spirochaetes."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Other bacteria"
+msgstr ""
+
+#. type: Hash Value: Groups Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Bacteria, in the categories of Annex 1 of ECDC's protocol for the surveillance of healthcare-associated infections in intensive care units."
+msgstr ""
+
+#. type: Hash Value: Hierarchies Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Bacteria"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Fungi that grow as single cells: the budding yeasts of the Saccharomycotina, such as Candida, and the basidiomycetous yeasts, such as Trichosporon, Rhodotorula, and Malassezia."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Yeasts"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Filamentous fungi, such as Aspergillus, Fusarium, and the Mucorales, the black yeasts and the dimorphic fungi included, which also grow as yeasts."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Moulds"
+msgstr ""
+
+#. type: Hash Value: Groups Children Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Fungal taxa that span yeasts and moulds, for an infectious agent identified only to such a taxon."
+msgstr ""
+
+#. type: Hash Value: Groups Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Other fungi"
+msgstr ""
+
+#. type: Hash Value: Groups Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Fungi, as yeasts, moulds, and other fungi."
+msgstr ""
+
+#. type: Hash Value: Hierarchies Children Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Fungi"
+msgstr ""
+
+#. type: Hash Value: Groups Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "All viruses."
+msgstr ""
+
+#. type: Hash Value: Hierarchies Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
+#, no-wrap
+msgid "Viruses"
+msgstr ""
+
+#. type: Hash Value: Groups Definition
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Eukaryotic infectious agents other than fungi, such as Plasmodium."
+msgstr ""
+
+#. type: Hash Value: Groups Name
+#: metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml:1
+#, no-wrap
+msgid "Parasites"
+msgstr ""
 
 #. type: Hash Value: Hierarchies ConceptType
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
@@ -2375,12 +2715,6 @@ msgstr ""
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Varidnaviria"
-msgstr ""
-
-#. type: Hash Value: Hierarchies Name
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "Viruses"
 msgstr ""
 
 #. type: Hash Value: Hierarchies Children Children Name
@@ -18121,12 +18455,6 @@ msgstr ""
 msgid "Yersiniaceae"
 msgstr ""
 
-#. type: Hash Value: Hierarchies Children Children Children Children Name
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "Enterobacterales"
-msgstr ""
-
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Name
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
@@ -20429,12 +20757,6 @@ msgstr ""
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Domain"
-msgstr ""
-
-#. type: Hash Value: Hierarchies Name
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "Bacteria"
 msgstr ""
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Children Children Children Children Name
@@ -24785,12 +25107,6 @@ msgstr ""
 #: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
 #, no-wrap
 msgid "Zoopagomyceta"
-msgstr ""
-
-#. type: Hash Value: Hierarchies Children Name
-#: metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml:1
-#, no-wrap
-msgid "Fungi"
 msgstr ""
 
 #. type: Hash Value: Hierarchies Children Children Children Children Children Name
