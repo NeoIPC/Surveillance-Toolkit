@@ -1,0 +1,5642 @@
+Groups:
+- Key: bacteria
+  Name: Bacteria
+  Definition: >-
+    Bacteria, in the categories of Annex 1 of ECDC's protocol for the surveillance of healthcare-associated infections
+    in intensive care units.
+  Evidence:
+  - doi:10.2900/7455254
+  Children:
+  - Key: gram-positive-cocci
+    Name: Gram-positive cocci
+    EcdcCategory: Gram-positive cocci
+    Definition: >-
+      Gram-positive cocci other than the anaerobes, such as staphylococci, streptococci, and enterococci.
+    Evidence:
+    - doi:10.2900/7455254
+    Members:
+    - Name: Abiotrophia
+      ConceptSource: LPSN
+      ConceptId: genus/abiotrophia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00580
+    - Name: Aerococcus
+      ConceptSource: LPSN
+      ConceptId: genus/aerococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00581
+    - Name: Alloiococcus
+      ConceptSource: LPSN
+      ConceptId: genus/alloiococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00589
+    - Name: Arsenicicoccus
+      ConceptSource: LPSN
+      ConceptId: genus/arsenicicoccus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00075
+    - Name: Deinococcus
+      ConceptSource: LPSN
+      ConceptId: genus/deinococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00475
+      - doi:10.1128/jb.186.10.3097-3107.2004
+      Reason: >-
+        It sits with the Gram-positive cocci: the genus is named for its spherical cells, which form pairs or tetrads,
+        and every species but Deinococcus grandis stains Gram-positive, although some strains form rods; its phylum,
+        which holds Gram-negative genera such as Thermus, gives it no Gram reaction to sit by.
+    - Name: Dermacoccus
+      ConceptSource: LPSN
+      ConceptId: genus/dermacoccus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00071
+    - Name: Dolosicoccus
+      ConceptSource: LPSN
+      ConceptId: genus/dolosicoccus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00582
+    - Name: Dolosigranulum
+      ConceptSource: LPSN
+      ConceptId: genus/dolosigranulum
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00595
+    - Name: Enterococcus
+      ConceptSource: LPSN
+      ConceptId: genus/enterococcus
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Facklamia
+      ConceptSource: LPSN
+      ConceptId: genus/facklamia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00584
+    - Name: Fannyhessea
+      ConceptSource: LPSN
+      ConceptId: genus/fannyhessea
+      Evidence:
+      - doi:10.3389/fmicb.2018.02007
+    - Name: Gemella
+      ConceptSource: LPSN
+      ConceptId: genus/gemella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00578
+    - Name: Globicatella
+      ConceptSource: LPSN
+      ConceptId: genus/globicatella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00585
+    - Name: Granulicatella
+      ConceptSource: LPSN
+      ConceptId: genus/granulicatella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00596
+    - Name: Helcococcus
+      ConceptSource: LPSN
+      ConceptId: genus/helcococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00715
+    - Name: Ignavigranum
+      ConceptSource: LPSN
+      ConceptId: genus/ignavigranum
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00586
+    - Name: Janibacter
+      ConceptSource: LPSN
+      ConceptId: genus/janibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00078
+    - Name: Kocuria
+      ConceptSource: LPSN
+      ConceptId: genus/kocuria
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00120
+    - Name: Kytococcus
+      ConceptSource: LPSN
+      ConceptId: genus/kytococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00072
+    - Name: Lactococcus
+      ConceptSource: LPSN
+      ConceptId: genus/lactococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00610
+    - Name: Leuconostoc
+      ConceptSource: LPSN
+      ConceptId: genus/leuconostoc
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00607.pub2
+    - Name: Macrococcus
+      ConceptSource: LPSN
+      ConceptId: genus/macrococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00567
+    - Name: Micrococcus
+      ConceptSource: LPSN
+      ConceptId: genus/micrococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00121
+    - Name: Pediococcus
+      ConceptSource: LPSN
+      ConceptId: genus/pediococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00606.pub2
+    - Name: Rothia mucilaginosa
+      ConceptSource: LPSN
+      ConceptId: species/rothia-mucilaginosa
+      Evidence:
+      - doi:10.3109/00365548.2014.980843
+      Reason: >-
+        Its cells are cocci, unlike the coccoid to rod-shaped cells of its genus.
+    - Name: Ruoffia
+      ConceptSource: LPSN
+      ConceptId: genus/ruoffia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00584
+      - doi:10.1007/s10482-021-01587-7
+      Reason: >-
+        The description of Facklamia, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Staphylococcus
+      ConceptSource: LPSN
+      ConceptId: genus/staphylococcus
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Streptococcus
+      ConceptSource: LPSN
+      ConceptId: genus/streptococcus
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Tetragenococcus
+      ConceptSource: LPSN
+      ConceptId: genus/tetragenococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00602
+    - Name: Vagococcus
+      ConceptSource: LPSN
+      ConceptId: genus/vagococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00603
+  - Key: gram-negative-cocci
+    Name: Gram-negative cocci
+    EcdcCategory: Gram-negative cocci
+    Definition: >-
+      Gram-negative cocci other than the anaerobes, such as Neisseria, and the genus Moraxella, which ECDC counts among
+      them.
+    Evidence:
+    - doi:10.2900/7455254
+    Members:
+    - Name: Kerstersia
+      ConceptSource: LPSN
+      ConceptId: genus/kerstersia
+      Evidence:
+      - doi:10.1099/ijs.0.02609-0
+    - Name: Moraxella
+      ConceptSource: LPSN
+      ConceptId: genus/moraxella
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Neisseria
+      ConceptSource: LPSN
+      ConceptId: genus/neisseria
+      Evidence:
+      - doi:10.2900/7455254
+  - Key: gram-positive-bacilli
+    Name: Gram-positive bacilli
+    EcdcCategory: Gram-positive bacilli
+    Definition: >-
+      Gram-positive bacilli other than the anaerobes, the mycobacteria, and the actinomycetes, such as Corynebacterium,
+      Bacillus, Lactobacillus, and Listeria, with the genera split from these since December 2010, anaerobic ones among
+      them.
+    Evidence:
+    - doi:10.2900/7455254
+    Members:
+    - Name: Actinotignum
+      ConceptSource: LPSN
+      ConceptId: genus/actinotignum
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00011
+      - doi:10.1099/ijs.0.069294-0
+      Reason: >-
+        The description of Actinobaculum, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Alkalicoccobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/alkalicoccobacillus
+      Evidence:
+      - doi:10.3389/fmicb.2021.722369
+    - Name: Alkalicoccus
+      ConceptSource: LPSN
+      ConceptId: genus/alkalicoccus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.001759
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Alkalihalobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/alkalihalobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003775
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Alkalihalophilus
+      ConceptSource: LPSN
+      ConceptId: genus/alkalihalophilus
+      Evidence:
+      - doi:10.3389/fmicb.2021.722369
+    - Name: Alloscardovia
+      ConceptSource: LPSN
+      ConceptId: genus/alloscardovia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00018.pub2
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Anaerobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/anaerobacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01785
+    - Name: Aneurinibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/aneurinibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00549
+    - Name: Arcanobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/arcanobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00013
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Arthrobacter
+      ConceptSource: LPSN
+      ConceptId: genus/arthrobacter
+      Evidence:
+      - doi:10.1099/ijsem.0.000702
+      - doi:10.1128/CMR.10.1.125
+      - doi:10.1128/jb.54.3.291-303.1947
+      - doi:10.1099/00207713-45-4-837
+      - doi:10.1099/ijsem.0.004002
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. It counts as Gram-positive, as clinical microbiology and descriptions of its species give it,
+        although the genus's first description, of 1947, gives it as Gram-variable, its young cells usually staining
+        Gram-negative.
+    - Name: Atopobium
+      ConceptSource: LPSN
+      ConceptId: genus/atopobium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00214
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Bacillus
+      ConceptSource: LPSN
+      ConceptId: genus/bacillus
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Bacillus circulans group
+      ConceptSource: NeoIPC
+      ConceptId: 113
+      Evidence:
+      - PMID:9103613
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      - doi:10.1002/9781118960608.gbm00553
+      Reason: >-
+        A group of species of Niallia and Paenibacillus, two genera among the Gram-positive bacilli.
+    - Name: Bhargavaea
+      ConceptSource: LPSN
+      ConceptId: genus/bhargavaea
+      Evidence:
+      - doi:10.1099/ijs.0.002691-0
+      - doi:10.1099/ijs.0.034850-0
+    - Name: Brachybacterium
+      ConceptSource: LPSN
+      ConceptId: genus/brachybacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00068
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Brevibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/brevibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00550
+    - Name: Brevibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/brevibacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00062
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Cellulomonas
+      ConceptSource: LPSN
+      ConceptId: genus/cellulomonas
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00063
+    - Name: Cellulosimicrobium
+      ConceptSource: LPSN
+      ConceptId: genus/cellulosimicrobium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00127
+    - Name: Corynebacterium
+      ConceptSource: LPSN
+      ConceptId: genus/corynebacterium
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Coryneform bacteria
+      ConceptSource: NeoIPC
+      ConceptId: 107
+      Evidence:
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Gram-positive rods of irregular shape, as a review of their clinical microbiology defines the coryneform
+        bacteria.
+    - Name: Curtobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/curtobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00096.pub2
+    - Name: Cytobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/cytobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003775
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Dermabacter
+      ConceptSource: LPSN
+      ConceptId: genus/dermabacter
+      Evidence:
+      - doi:10.1111/j.1574-6968.1988.tb02967.x
+    - Name: Dietzia
+      ConceptSource: LPSN
+      ConceptId: genus/dietzia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00028
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Ectobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/ectobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Eggerthia
+      ConceptSource: LPSN
+      ConceptId: genus/eggerthia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.029231-0
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Erysipelothrix
+      ConceptSource: LPSN
+      ConceptId: genus/erysipelothrix
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00763
+    - Name: Evansella
+      ConceptSource: LPSN
+      ConceptId: genus/evansella
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Exiguobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/exiguobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00579
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Falsarthrobacter
+      ConceptSource: LPSN
+      ConceptId: genus/falsarthrobacter
+      Evidence:
+      - doi:10.1099/00207713-52-2-569
+      - doi:10.1002/9781118960608.gbm00118
+      - doi:10.1099/ijsem.0.002680
+      - doi:10.1128/CMR.10.1.125
+      - doi:10.1128/jb.54.3.291-303.1947
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. The description of Arthrobacter, the genus it was formed from, gives its shape. It counts as
+        Gram-positive, as Arthrobacter does and as the description of its only species, Falsarthrobacter nasiphocae
+        (described as Arthrobacter nasiphocae), gives it, although the description of Arthrobacter gives it as
+        Gram-variable.
+    - Name: Falsibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/falsibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00530
+      - doi:10.1099/ijs.0.014316-0
+      Reason: >-
+        The description of Bacillus, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Ferdinandcohnia
+      ConceptSource: LPSN
+      ConceptId: genus/ferdinandcohnia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Fictibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/fictibacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.049171-0
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Geobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/geobacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00533
+    - Name: Glutamicibacter
+      ConceptSource: LPSN
+      ConceptId: genus/glutamicibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01431
+      - doi:10.1128/CMR.10.1.125
+      - doi:10.1128/jb.54.3.291-303.1947
+      - doi:10.1099/ijsem.0.000702
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. It counts as Gram-positive, as Arthrobacter does, although the description of Arthrobacter, the
+        genus it was formed from, gives it as Gram-variable.
+    - Name: Gottfriedia
+      ConceptSource: LPSN
+      ConceptId: genus/gottfriedia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Gracilibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/gracilibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00534
+    - Name: Halalkalibacter
+      ConceptSource: LPSN
+      ConceptId: genus/halalkalibacter
+      Evidence:
+      - doi:10.3389/fmicb.2021.722369
+    - Name: Halalkalibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/halalkalibacterium
+      Evidence:
+      - doi:10.3389/fmicb.2021.722369
+    - Name: Heyndrickxia
+      ConceptSource: LPSN
+      ConceptId: genus/heyndrickxia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Jeotgalibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/jeotgalibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00558
+    - Name: Jonesia
+      ConceptSource: LPSN
+      ConceptId: genus/jonesia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00090
+    - Name: Kandleria
+      ConceptSource: LPSN
+      ConceptId: genus/kandleria
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.029231-0
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Kroppenstedtia
+      ConceptSource: LPSN
+      ConceptId: genus/kroppenstedtia
+      Evidence:
+      - doi:10.1099/ijs.0.026179-0
+    - Name: Kurthia
+      ConceptSource: LPSN
+      ConceptId: genus/kurthia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00559
+    - Name: Kyrpidia
+      ConceptSource: LPSN
+      ConceptId: genus/kyrpidia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.044636-0
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Lacticaseibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/lacticaseibacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Lactiplantibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/lactiplantibacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Lactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/lactobacillus
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Lancefieldella
+      ConceptSource: LPSN
+      ConceptId: genus/lancefieldella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00214
+      - doi:10.3389/fmicb.2018.02007
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. The description of Atopobium, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Latilactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/latilactobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Lederbergia
+      ConceptSource: LPSN
+      ConceptId: genus/lederbergia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Leifsonia
+      ConceptSource: LPSN
+      ConceptId: genus/leifsonia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00102
+    - Name: Lentilactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/lentilactobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Levilactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/levilactobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Ligilactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/ligilactobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Limosilactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/limosilactobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004107
+      Reason: >-
+        Split from Lactobacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Listeria
+      ConceptSource: LPSN
+      ConceptId: genus/listeria
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Lysinibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/lysinibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00530
+      - doi:10.1099/ijs.0.63867-0
+      Reason: >-
+        The description of Bacillus, the genus it was formed from, gives its shape.
+    - Name: Mesobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/mesobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003775
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Metabacillus
+      ConceptSource: LPSN
+      ConceptId: genus/metabacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003775
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Microbacterium
+      ConceptSource: LPSN
+      ConceptId: genus/microbacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00104
+    - Name: Neobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/neobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003775
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Nesterenkonia
+      ConceptSource: LPSN
+      ConceptId: genus/nesterenkonia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00122
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Niallia
+      ConceptSource: LPSN
+      ConceptId: genus/niallia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Paenarthrobacter
+      ConceptSource: LPSN
+      ConceptId: genus/paenarthrobacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01436
+      - doi:10.1128/CMR.10.1.125
+      - doi:10.1128/jb.54.3.291-303.1947
+      - doi:10.1099/ijsem.0.000702
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. It counts as Gram-positive, as Arthrobacter does, although the description of Arthrobacter, the
+        genus it was formed from, gives it as Gram-variable.
+    - Name: Paenibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/paenibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00553
+    - Name: Paeniglutamicibacter
+      ConceptSource: LPSN
+      ConceptId: genus/paeniglutamicibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01437
+      - doi:10.1128/CMR.10.1.125
+      - doi:10.1128/jb.54.3.291-303.1947
+      - doi:10.1099/ijsem.0.000702
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. It counts as Gram-positive, as Arthrobacter does, although the description of Arthrobacter, the
+        genus it was formed from, gives it as Gram-variable.
+    - Name: Parageobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/parageobacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00533
+      - doi:10.1016/j.syapm.2016.09.004
+      Reason: >-
+        The description of Geobacillus, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Patulibacter
+      ConceptSource: LPSN
+      ConceptId: genus/patulibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00226
+    - Name: Peribacillus
+      ConceptSource: LPSN
+      ConceptId: genus/peribacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003775
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Priestia
+      ConceptSource: LPSN
+      ConceptId: genus/priestia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Propioniferax
+      ConceptSource: LPSN
+      ConceptId: genus/propioniferax
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00170
+    - Name: Pseudalkalibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/pseudalkalibacillus
+      Evidence:
+      - doi:10.1099/ijsem.0.006757
+    - Name: Pseudarthrobacter
+      ConceptSource: LPSN
+      ConceptId: genus/pseudarthrobacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01438
+      - doi:10.1128/CMR.10.1.125
+      - doi:10.1128/jb.54.3.291-303.1947
+      - doi:10.1099/ijsem.0.000702
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do. It counts as Gram-positive, as Arthrobacter does, although the description of Arthrobacter, the
+        genus it was formed from, gives it as Gram-variable.
+    - Name: Pseudobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/pseudobacillus
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1016/j.syapm.2019.03.003
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Pseudoclavibacter
+      ConceptSource: LPSN
+      ConceptId: genus/pseudoclavibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00111
+    - Name: Pseudoglutamicibacter
+      ConceptSource: LPSN
+      ConceptId: genus/pseudoglutamicibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01439
+      - doi:10.1128/jb.54.3.291-303.1947
+      - doi:10.1099/ijsem.0.000702
+      Reason: >-
+        It counts as Gram-positive, as Arthrobacter does, although the description of Arthrobacter, the genus it was
+        formed from, gives it as Gram-variable.
+    - Name: Psychrobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/psychrobacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00530
+      - doi:10.1016/j.syapm.2010.06.003
+      Reason: >-
+        The description of Bacillus, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Pullulanibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/pullulanibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01445
+      - doi:10.1002/9781118960608.gbm00530
+      - doi:10.1099/ijs.0.64303-0
+      Reason: >-
+        The description of Bacillus, the genus it was formed from, gives its shape.
+    - Name: Robertmurraya
+      ConceptSource: LPSN
+      ConceptId: genus/robertmurraya
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Rossellomorea
+      ConceptSource: LPSN
+      ConceptId: genus/rossellomorea
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Rothia
+      ConceptSource: LPSN
+      ConceptId: genus/rothia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00124
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Rummeliibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/rummeliibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00530
+      - doi:10.1099/ijs.0.006098-0
+      Reason: >-
+        The description of Bacillus, the genus it was formed from, gives its Gram reaction and shape.
+    - Name: Salipaludibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/salipaludibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01618
+    - Name: Salisediminibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/salisediminibacterium
+      Evidence:
+      - doi:10.1099/ijsem.0.004475
+    - Name: Schinkia
+      ConceptSource: LPSN
+      ConceptId: genus/schinkia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Shouchella
+      ConceptSource: LPSN
+      ConceptId: genus/shouchella
+      Evidence:
+      - doi:10.3389/fmicb.2021.722369
+    - Name: Siminovitchia
+      ConceptSource: LPSN
+      ConceptId: genus/siminovitchia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Solibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/solibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00530
+      - doi:10.1099/ijs.0.65742-0
+      Reason: >-
+        The description of Bacillus, the genus it was formed from, gives its shape.
+    - Name: Sporolactobacillus
+      ConceptSource: LPSN
+      ConceptId: genus/sporolactobacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00565
+    - Name: Sporosarcina
+      ConceptSource: LPSN
+      ConceptId: genus/sporosarcina
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00563
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+    - Name: Sutcliffiella
+      ConceptSource: LPSN
+      ConceptId: genus/sutcliffiella
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.004475
+      Reason: >-
+        Split from Bacillus, which ECDC counts among the Gram-positive bacilli.
+    - Name: Thermoactinomyces
+      ConceptSource: LPSN
+      ConceptId: genus/thermoactinomyces
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00575
+    - Name: Tropheryma
+      ConceptSource: LPSN
+      ConceptId: genus/tropheryma-1
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00065
+    - Name: Trueperella
+      ConceptSource: LPSN
+      ConceptId: genus/trueperella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01515
+    - Name: Ureibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/ureibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00564
+    - Name: Virgibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/virgibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00545
+    - Name: Weissella
+      ConceptSource: LPSN
+      ConceptId: genus/weissella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00609.pub2
+      - doi:10.1002/9781118960608.gbm00609
+      - doi:10.1128/CMR.10.1.125
+      Reason: >-
+        Its cells range from cocci to rods, and such Gram-positive bacteria count among the bacilli, as the coryneform
+        bacteria do.
+  - Key: enterobacterales
+    Name: Enterobacterales
+    EcdcCategory: Enterobacterales
+    Definition: >-
+      The bacteria of the order Enterobacterales, such as Escherichia, Klebsiella, Enterobacter, and Serratia.
+    Evidence:
+    - doi:10.2900/7455254
+    - doi:10.1099/ijsem.0.001485
+    Members:
+    - Name: Enterobacterales
+      ConceptSource: LPSN
+      ConceptId: order/enterobacterales
+      Evidence:
+      - doi:10.2900/7455254
+  - Key: gram-negative-bacilli
+    Name: Gram-negative bacilli, not Enterobacterales
+    EcdcCategory: Gram-negative bacilli
+    Definition: >-
+      Gram-negative bacilli outside the Enterobacterales, other than the anaerobes and the other bacteria.
+    Evidence:
+    - doi:10.2900/7455254
+    Children:
+    - Key: non-fermenting-gram-negative-bacilli
+      Name: Non-fermenting Gram-negative bacilli
+      EcdcCategory: Gram-negative bacilli
+      Definition: >-
+        Gram-negative bacilli that grow on routine media without fermenting glucose, such as Pseudomonas, Acinetobacter,
+        Stenotrophomonas, and Burkholderia.
+      Evidence:
+      - doi:10.1097/QCO.0000000000000969
+      Members:
+      - Name: Achromobacter
+        ConceptSource: LPSN
+        ConceptId: genus/achromobacter
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm00926
+        - doi:10.1097/qco.0000000000000977
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Acidovorax
+        ConceptSource: LPSN
+        ConceptId: genus/acidovorax
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00943
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Acinetobacter
+        ConceptSource: LPSN
+        ConceptId: genus/acinetobacter
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm01203
+        - doi:10.1002/9781118960608.gbm01203.pub2
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Afipia
+        ConceptSource: LPSN
+        ConceptId: genus/afipia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00798
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Agrobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/agrobacterium
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm00842
+        - doi:10.1016/s0176-6724(88)80068-3
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Alcaligenes
+        ConceptSource: LPSN
+        ConceptId: genus/alcaligenes
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm00927
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Alishewanella
+        ConceptSource: LPSN
+        ConceptId: genus/alishewanella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01088
+        - doi:10.1128/JCM.00157-08
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Allorhizobium
+        ConceptSource: LPSN
+        ConceptId: genus/allorhizobium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00843
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Aureimonas
+        ConceptSource: LPSN
+        ConceptId: genus/aureimonas
+        Evidence:
+        - doi:10.1099/ijs.0.027029-0
+        - doi:10.1099/ijs.0.047431-0
+        - doi:10.1099/ijsem.0.001661
+        - doi:10.1099/ijsem.0.002046
+        - doi:10.1099/ijsem.0.002479
+        - doi:10.1099/ijsem.0.003252
+        - doi:10.1099/ijsem.0.004820
+        - doi:10.1007/s00284-019-01826-1
+        - doi:10.1007/s00203-020-01872-5
+        - doi:10.1007/s00203-020-01988-8
+        - doi:10.13145/bacdive532.20260601.11
+        - doi:10.13145/bacdive533.20260601.11
+        - doi:10.13145/bacdive534.20260601.11
+        - doi:10.13145/bacdive23581.20260601.11
+        - doi:10.13145/bacdive23584.20260601.11
+        - doi:10.13145/bacdive132997.20260601.11
+        - doi:10.13145/bacdive139618.20260601.11
+        Reason: >-
+          Its description gives no fermentation of glucose but names no medium; the descriptions of its species, or the
+          culture collections' records of their type strains, show 16 of its 17 species growing on media without
+          enrichment, and the last, Aureimonas fodinaquatilis, growing without added salt, though described only on
+          marine media.
+      - Name: Azorhizobium
+        ConceptSource: LPSN
+        ConceptId: genus/azorhizobium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00814
+        - doi:10.13145/bacdive17440.20260601.11
+        - doi:10.13145/bacdive17441.20260601.11
+        - doi:10.13145/bacdive24668.20260601.11
+        Reason: >-
+          It grows on routine media without fermenting glucose. The culture collections that hold the type strains of
+          all its species record its growth on routine media.
+      - Name: Balneatrix
+        ConceptSource: LPSN
+        ConceptId: genus/balneatrix
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01192
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Bergeyella
+        ConceptSource: LPSN
+        ConceptId: genus/bergeyella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00297
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Bordetella
+        ConceptSource: LPSN
+        ConceptId: genus/bordetella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00928
+        - doi:10.1128/CMR.18.2.326-382.2005
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source shows it growing on
+          routine media.
+      - Name: Brevundimonas
+        ConceptSource: LPSN
+        ConceptId: genus/brevundimonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00791
+        - doi:10.1080/21505594.2017.1419116
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Burkholderia
+        ConceptSource: LPSN
+        ConceptId: genus/burkholderia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm00935
+        - doi:10.1097/QCO.0000000000000977
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Chryseobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/chryseobacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00301
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Comamonas
+        ConceptSource: LPSN
+        ConceptId: genus/comamonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00945
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Cupriavidus
+        ConceptSource: LPSN
+        ConceptId: genus/cupriavidus
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00936
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Delftia
+        ConceptSource: LPSN
+        ConceptId: genus/delftia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00946
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Dyella
+        ConceptSource: LPSN
+        ConceptId: genus/dyella
+        Evidence:
+        - doi:10.1099/ijs.0.63377-0
+        - doi:10.1007/s10482-014-0344-8
+        Reason: >-
+          No description of the genus or of its family states whether it ferments glucose, so it sits with the
+          non-fermenting Gram-negative bacilli as a Gram-negative rod of an aerobic family that grows on nutrient agar.
+      - Name: Elizabethkingia
+        ConceptSource: LPSN
+        ConceptId: genus/elizabethkingia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00308.pub2
+        - doi:10.1002/9781118960608.gbm00308
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Empedobacter
+        ConceptSource: LPSN
+        ConceptId: genus/empedobacter
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00309
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Flavobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/flavobacterium
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1038/s41598-020-73650-8
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Halomonas
+        ConceptSource: LPSN
+        ConceptId: genus/halomonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01190
+        - doi:10.3390/pathogens12070917
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Herbaspirillum
+        ConceptSource: LPSN
+        ConceptId: genus/herbaspirillum
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00963
+        - doi:10.1128/jcm.02192-14
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Inquilinus
+        ConceptSource: LPSN
+        ConceptId: genus/inquilinus
+        Evidence:
+        - doi:10.1128/JCM.40.6.2062-2069.2002
+        - doi:10.1016/j.jcf.2016.02.014
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Massilia
+        ConceptSource: LPSN
+        ConceptId: genus/massilia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00965
+        - doi:10.1128/JCM.36.10.2847-2852.1998
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Methylobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/methylobacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00830.pub2
+        - doi:10.3343/alm.2016.36.4.367
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Methylorubrum
+        ConceptSource: LPSN
+        ConceptId: genus/methylorubrum
+        Evidence:
+        - doi:10.1002/9781118960608.gbm02024
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Myroides
+        ConceptSource: LPSN
+        ConceptId: genus/myroides
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00328
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Oligella
+        ConceptSource: LPSN
+        ConceptId: genus/oligella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00930
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Pandoraea
+        ConceptSource: LPSN
+        ConceptId: genus/pandoraea
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00938
+        - doi:10.1007/s10482-026-02265-2
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Paraburkholderia
+        ConceptSource: LPSN
+        ConceptId: genus/paraburkholderia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.3389/fgene.2014.00429
+        - doi:10.1099/ijsem.0.001065
+        Reason: >-
+          Split from Burkholderia, which ECDC counts among the Gram-negative bacilli, it sits beside Burkholderia among
+          the non-fermenting ones: its descriptions name no medium but give its characteristics as similar in general to
+          those of Burkholderia.
+      - Name: Paracoccus
+        ConceptSource: LPSN
+        ConceptId: genus/paracoccus
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00860
+        - doi:10.1099/00207713-19-4-375
+        - doi:10.1128/CMR.00053-19
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Pedobacter
+        ConceptSource: LPSN
+        ConceptId: genus/pedobacter
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00360
+        - doi:10.1002/9781118960608.gbm00361
+        - doi:10.1099/00207713-48-1-165
+        Reason: >-
+          It grows on routine media without fermenting glucose. The description of Sphingobacterium, the genus it was
+          formed from, gives its growth on routine media.
+      - Name: Pseudomonadaceae
+        ConceptSource: LPSN
+        ConceptId: family/pseudomonadaceae
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1097/QCO.0000000000000969
+        Reason: >-
+          ECDC names the family among the Gram-negative bacilli, and a clinical-microbiology source counts Pseudomonas
+          aeruginosa, the type species of its type genus, among the non-fermenting ones.
+      - Name: Pseudoxanthomonas
+        ConceptSource: LPSN
+        ConceptId: genus/pseudoxanthomonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01234
+        - doi:10.1016/j.jiac.2026.103067
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Psychrobacter
+        ConceptSource: LPSN
+        ConceptId: genus/psychrobacter
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01205
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Ralstonia
+        ConceptSource: LPSN
+        ConceptId: genus/ralstonia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00941
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Rhizobium
+        ConceptSource: LPSN
+        ConceptId: genus/rhizobium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00847
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Riemerella
+        ConceptSource: LPSN
+        ConceptId: genus/riemerella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00336
+        - doi:10.3390/antibiotics12121648
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Roseomonas
+        ConceptSource: LPSN
+        ConceptId: genus/roseomonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00888
+        - doi:10.3343/alm.2016.36.4.367
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Sphingobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/sphingobacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00361
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Sphingomonas
+        ConceptSource: LPSN
+        ConceptId: genus/sphingomonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00924
+        - doi:10.1097/qco.0000000000000977
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Stenotrophomonas
+        ConceptSource: LPSN
+        ConceptId: genus/stenotrophomonas
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm01237
+        - doi:10.1177/10766294261424485
+        Reason: >-
+          It grows on routine media without fermenting glucose. A clinical-microbiology source counts it among the
+          non-fermenting Gram-negative bacilli.
+      - Name: Teichococcus cervicalis
+        ConceptSource: LPSN
+        ConceptId: species/teichococcus-cervicalis
+        Evidence:
+        - doi:10.1128/jcm.31.12.3275-3283.1993
+        - doi:10.1007/s00284-024-03877-5
+        Reason: >-
+          Placed by its own properties, since the descriptions of its genus state no use of glucose and name no medium:
+          its own description gives it as non-fermentative and growing on sheep blood agar, trypticase soy agar, and
+          almost always MacConkey agar.
+      - Name: Wautersia
+        ConceptSource: LPSN
+        ConceptId: genus/wautersia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00941
+        - doi:10.1099/ijs.0.02754-0
+        Reason: >-
+          It grows on routine media without fermenting glucose. The description of Ralstonia, the genus it was formed
+          from, gives its Gram reaction, shape, and growth on routine media.
+      - Name: Weeksella
+        ConceptSource: LPSN
+        ConceptId: genus/weeksella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00349
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+      - Name: Xanthomonas
+        ConceptSource: LPSN
+        ConceptId: genus/xanthomonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01239
+        - doi:10.1099/00207713-40-4-348
+        Reason: >-
+          It grows on routine media without fermenting glucose.
+    - Key: fermenting-and-fastidious-gram-negative-bacilli
+      Name: Fermenting and fastidious Gram-negative bacilli
+      EcdcCategory: Gram-negative bacilli
+      Definition: >-
+        Gram-negative bacilli that ferment glucose, such as Pasteurella, Aeromonas, and Vibrio, and the fastidious ones,
+        fermenting or not, which grow only on enriched media or with added carbon dioxide or less oxygen, such as
+        Haemophilus, Legionella, Campylobacter, and Helicobacter.
+      Evidence:
+      - doi:10.2900/7455254
+      Members:
+      - Name: Actinobacillus
+        ConceptSource: LPSN
+        ConceptId: genus/actinobacillus
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01197.pub2
+        Reason: >-
+          It ferments glucose.
+      - Name: Aeromonas
+        ConceptSource: LPSN
+        ConceptId: genus/aeromonas
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm01081
+        Reason: >-
+          It ferments glucose.
+      - Name: Aggregatibacter
+        ConceptSource: LPSN
+        ConceptId: genus/aggregatibacter
+        Evidence:
+        - doi:10.1099/ijs.0.64207-0
+        Reason: >-
+          It ferments glucose and is fastidious, growing only on enriched media or with added carbon dioxide or less
+          oxygen.
+      - Name: Alysiella
+        ConceptSource: LPSN
+        ConceptId: genus/alysiella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00973
+        - doi:10.1099/00221287-29-4-615
+        Reason: >-
+          It ferments glucose. The descriptions of all its species give its use of glucose.
+      - Name: Aquabacterium
+        ConceptSource: LPSN
+        ConceptId: genus/aquabacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00953
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Arcobacter
+        ConceptSource: LPSN
+        ConceptId: genus/arcobacter
+        Evidence:
+        - doi:10.1099/00207713-41-1-88
+        - doi:10.1099/00207713-42-3-344
+        - doi:10.3389/fmicb.2018.02077
+        - doi:10.1099/ijsem.0.005133
+        Reason: >-
+          Its boundaries are disputed, and no description covers the genus as LPSN now holds it, so it sits beside
+          Campylobacter, the genus it was formed from: its descriptions give its best growth in reduced oxygen, most of
+          its species grow only weakly on routine media, and its marine species need added salt.
+      - Name: Bartonella
+        ConceptSource: LPSN
+        ConceptId: genus/bartonella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00794
+        - doi:10.1093/femsre/fuac013
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen. A
+          clinical-microbiology source shows it fastidious.
+      - Name: Bordetella parapertussis
+        ConceptSource: LPSN
+        ConceptId: species/bordetella-parapertussis
+        Evidence:
+        - doi:10.1128/CMR.18.2.326-382.2005
+        Reason: >-
+          Its human-adapted strains are fastidious, unlike the rest of its genus.
+      - Name: Bordetella pertussis
+        ConceptSource: LPSN
+        ConceptId: species/bordetella-pertussis
+        Evidence:
+        - doi:10.1128/CMR.18.2.326-382.2005
+        Reason: >-
+          Fastidious, growing only on enriched media such as charcoal agar with horse blood, unlike the rest of its
+          genus.
+      - Name: Brucella
+        ConceptSource: LPSN
+        ConceptId: genus/brucella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00807
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Campylobacter
+        ConceptSource: LPSN
+        ConceptId: genus/campylobacter
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1099/00207713-41-1-88
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Canicola
+        ConceptSource: LPSN
+        ConceptId: genus/canicola
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1099/ijsem.0.004881
+        - doi:10.1002/9781118960608.gbm01198
+        Reason: >-
+          Split from Haemophilus, which ECDC counts among the Gram-negative bacilli. It ferments glucose. The
+          description of Haemophilus, the genus it was formed from, gives its use of glucose.
+      - Name: Capnocytophaga
+        ConceptSource: LPSN
+        ConceptId: genus/capnocytophaga
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00299
+        Reason: >-
+          It ferments glucose and is fastidious, growing only on enriched media or with added carbon dioxide or less
+          oxygen.
+      - Name: Cardiobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/cardiobacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01101
+        Reason: >-
+          It ferments glucose.
+      - Name: Chromobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/chromobacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00975
+        Reason: >-
+          It ferments glucose.
+      - Name: Dialister
+        ConceptSource: LPSN
+        ConceptId: genus/dialister
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00696
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Dysgonomonas
+        ConceptSource: LPSN
+        ConceptId: genus/dysgonomonas
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00243
+        Reason: >-
+          It ferments glucose and is fastidious, growing only on enriched media or with added carbon dioxide or less
+          oxygen.
+      - Name: Eikenella
+        ConceptSource: LPSN
+        ConceptId: genus/eikenella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00976
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Francisella
+        ConceptSource: LPSN
+        ConceptId: genus/francisella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01215
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Gardnerella
+        ConceptSource: LPSN
+        ConceptId: genus/gardnerella
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm00020
+        Reason: >-
+          It ferments glucose and is fastidious, growing only on enriched media or with added carbon dioxide or less
+          oxygen.
+      - Name: Grimontia
+        ConceptSource: LPSN
+        ConceptId: genus/grimontia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01952
+        Reason: >-
+          It ferments glucose.
+      - Name: Haemophilus
+        ConceptSource: LPSN
+        ConceptId: genus/haemophilus
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm01198.pub2
+        Reason: >-
+          It ferments glucose and is fastidious, growing only on enriched media or with added carbon dioxide or less
+          oxygen.
+      - Name: Helicobacter
+        ConceptSource: LPSN
+        ConceptId: genus/helicobacter
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1099/00207713-41-1-88
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Kingella
+        ConceptSource: LPSN
+        ConceptId: genus/kingella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00979
+        Reason: >-
+          It ferments glucose.
+      - Name: Legionella
+        ConceptSource: LPSN
+        ConceptId: genus/legionella
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm01178
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Listonella
+        ConceptSource: LPSN
+        ConceptId: genus/listonella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01078
+        - doi:10.1016/S0723-2020(85)80051-5
+        Reason: >-
+          It ferments glucose. The description of Vibrio, the genus it was formed from, gives its Gram reaction, shape,
+          and use of glucose.
+      - Name: Mannheimia
+        ConceptSource: LPSN
+        ConceptId: genus/mannheimia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01200.pub2
+        Reason: >-
+          It ferments glucose.
+      - Name: Pasteurella
+        ConceptSource: LPSN
+        ConceptId: genus/pasteurella
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.gbm01201.pub2
+        Reason: >-
+          It ferments glucose.
+      - Name: Photobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/photobacterium
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01076
+        Reason: >-
+          It ferments glucose.
+      - Name: Rodentibacter
+        ConceptSource: LPSN
+        ConceptId: genus/rodentibacter
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1099/ijsem.0.001866
+        - doi:10.1002/9781118960608.gbm01201
+        Reason: >-
+          Split from Pasteurella, which ECDC counts among the Gram-negative bacilli. It ferments glucose. The
+          description of Pasteurella, the genus it was formed from, gives its use of glucose.
+      - Name: Simonsiella
+        ConceptSource: LPSN
+        ConceptId: genus/simonsiella
+        Evidence:
+        - doi:10.1007/BF00429111
+        - doi:10.1007/BF02602854
+        - doi:10.1128/jcm.19.6.931-933.1984
+        - doi:10.1007/0-387-30745-1_38
+        - doi:10.13145/bacdive10504.20260601.11
+        - doi:10.1128/jcm.25.3.522-525.1987
+        - doi:10.1128/cmr.00048-25
+        - doi:10.1038/s41467-022-32260-w
+        Reason: >-
+          Clinical microbiology treats it as fastidious, so it sits here although one study grew it overnight on a
+          medium without blood or serum: it is isolated and kept on serum media, an isolate failed to grow on MacConkey
+          agar, and a clinical review counts it among the fastidious or rarely isolated Gram-negative rods. It is
+          strictly aerobic and oxidizes glucose.
+      - Name: Spirillum
+        ConceptSource: LPSN
+        ConceptId: genus/spirillum
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00993
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Streptobacillus
+        ConceptSource: LPSN
+        ConceptId: genus/streptobacillus
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00774
+        Reason: >-
+          It ferments glucose and is fastidious, growing only on enriched media or with added carbon dioxide or less
+          oxygen.
+      - Name: Sutterella
+        ConceptSource: LPSN
+        ConceptId: genus/sutterella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00933
+        Reason: >-
+          It is fastidious, growing only on enriched media or with added carbon dioxide or less oxygen.
+      - Name: Suttonella
+        ConceptSource: LPSN
+        ConceptId: genus/suttonella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01103
+        Reason: >-
+          It ferments glucose.
+      - Name: Vibrio
+        ConceptSource: LPSN
+        ConceptId: genus/vibrio
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01078
+        Reason: >-
+          It ferments glucose.
+    - Key: variably-fermenting-gram-negative-bacilli
+      Name: Variably fermenting Gram-negative bacilli
+      EcdcCategory: Gram-negative bacilli
+      Definition: >-
+        Gram-negative bacilli that grow on routine media and whose descriptions give them a mainly respiratory
+        metabolism in which fermentation may also occur, so that they are neither non-fermenting nor fermenting, such as
+        Azospirillum.
+      Evidence:
+      - doi:10.2900/7455254
+      Members:
+      - Name: Azospirillum
+        ConceptSource: LPSN
+        ConceptId: genus/azospirillum
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00891
+        Reason: >-
+          Its description gives it a mainly respiratory metabolism in which fermentation may also occur, and good growth
+          in air on salts of organic acids, so it is neither a non-fermenting nor a fermenting Gram-negative bacillus.
+      - Name: Shewanella
+        ConceptSource: LPSN
+        ConceptId: genus/shewanella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01100
+        - doi:10.1080/21505594.2022.2117831
+        Reason: >-
+          Its description gives it a mainly respiratory metabolism in which fermentation may also occur, and it grows on
+          routine media. A clinical-microbiology source shows it growing on routine media.
+  - Key: anaerobes
+    Name: Anaerobes
+    EcdcCategory: Anaerobes
+    Definition: >-
+      Obligately and aerotolerant anaerobic bacteria of any Gram reaction and shape, such as Bacteroides, Prevotella,
+      Clostridium, and Cutibacterium, other than the other bacteria and the genera split since December 2010 from a
+      genus that ECDC counts in another category.
+    Evidence:
+    - doi:10.2900/7455254
+    - doi:10.1073/pnas.68.5.1024
+    Members:
+    - Name: Acidaminococcus
+      ConceptSource: LPSN
+      ConceptId: genus/acidaminococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00687
+    - Name: Acidipropionibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/acidipropionibacterium
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.001367
+      Reason: >-
+        Split from Propionibacterium, which ECDC counts among the anaerobes.
+    - Name: Agathobacter
+      ConceptSource: LPSN
+      ConceptId: genus/agathobacter
+      Evidence:
+      - doi:10.1099/ijsem.0.000788
+    - Name: Alistipes
+      ConceptSource: LPSN
+      ConceptId: genus/alistipes
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00251
+    - Name: Alloprevotella
+      ConceptSource: LPSN
+      ConceptId: genus/alloprevotella
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.041376-0
+      Reason: >-
+        Split from Prevotella, which ECDC counts among the anaerobes.
+    - Name: Amedibacillus
+      ConceptSource: LPSN
+      ConceptId: genus/amedibacillus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00629
+      - doi:10.1099/ijsem.0.004215
+      Reason: >-
+        The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+    - Name: Anaerobic diphtheroids
+      ConceptSource: NeoIPC
+      ConceptId: 110
+      Evidence:
+      - doi:10.1088/1752-7155/6/2/024001
+      - doi:10.1128/jb.135.3.858-867.1978
+      Reason: >-
+        The cutaneous propionibacteria, such as Cutibacterium acnes, which studies of the skin flora call the anaerobic
+        diphtheroids, unlike the aerobic ones, such as Corynebacterium.
+    - Name: Anaerobiospirillum
+      ConceptSource: LPSN
+      ConceptId: genus/anaerobiospirillum
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01084
+    - Name: Anaerobutyricum
+      ConceptSource: LPSN
+      ConceptId: genus/anaerobutyricum
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00629
+      - doi:10.1099/ijsem.0.003041
+      Reason: >-
+        The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+    - Name: Anaerococcus
+      ConceptSource: LPSN
+      ConceptId: genus/anaerococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00712
+    - Name: Anaerorhabdus
+      ConceptSource: LPSN
+      ConceptId: genus/anaerorhabdus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00237
+    - Name: Anaerostipes
+      ConceptSource: LPSN
+      ConceptId: genus/anaerostipes
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00638
+    - Name: Asaccharospora
+      ConceptSource: LPSN
+      ConceptId: genus/asaccharospora
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.059543-0
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Bacteroides
+      ConceptSource: LPSN
+      ConceptId: genus/bacteroides
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Bifidobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/bifidobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00019
+    - Name: Bilophila
+      ConceptSource: LPSN
+      ConceptId: genus/bilophila
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01034
+    - Name: Blautia
+      ConceptSource: LPSN
+      ConceptId: genus/blautia
+      Evidence:
+      - doi:10.1080/19490976.2021.1875796
+      Reason: >-
+        A review gives its oxygen requirement.
+    - Name: Bulleidia
+      ConceptSource: LPSN
+      ConceptId: genus/bulleidia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00760
+    - Name: Butyricimonas
+      ConceptSource: LPSN
+      ConceptId: genus/butyricimonas
+      Evidence:
+      - doi:10.1099/ijs.0.007674-0
+    - Name: Butyrivibrio
+      ConceptSource: LPSN
+      ConceptId: genus/butyrivibrio
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00640
+    - Name: Catenibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/catenibacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00761
+    - Name: Catonella
+      ConceptSource: LPSN
+      ConceptId: genus/catonella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00641
+    - Name: Centipeda
+      ConceptSource: LPSN
+      ConceptId: genus/centipeda
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00694
+    - Name: Christensenella
+      ConceptSource: LPSN
+      ConceptId: genus/christensenella
+      Evidence:
+      - doi:10.1099/ijs.0.026989-0
+    - Name: Clostridioides
+      ConceptSource: LPSN
+      ConceptId: genus/clostridioides
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Clostridium
+      ConceptSource: LPSN
+      ConceptId: genus/clostridium
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Collinsella
+      ConceptSource: LPSN
+      ConceptId: genus/collinsella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00215
+    - Name: Coprococcus
+      ConceptSource: LPSN
+      ConceptId: genus/coprococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00642
+    - Name: Cryptobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/cryptobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00217
+    - Name: Cutibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/cutibacterium
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.001367
+      Reason: >-
+        Split from Propionibacterium, which ECDC counts among the anaerobes.
+    - Name: Desulfovibrio
+      ConceptSource: LPSN
+      ConceptId: genus/desulfovibrio
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01035
+    - Name: Dichelobacter
+      ConceptSource: LPSN
+      ConceptId: genus/dichelobacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01102
+    - Name: Dorea
+      ConceptSource: LPSN
+      ConceptId: genus/dorea
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00643
+    - Name: Eggerthella
+      ConceptSource: LPSN
+      ConceptId: genus/eggerthella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00219
+    - Name: Enterocloster
+      ConceptSource: LPSN
+      ConceptId: genus/enterocloster
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003698
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Eubacterium
+      ConceptSource: LPSN
+      ConceptId: genus/eubacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00629
+    - Name: Ezakiella
+      ConceptSource: LPSN
+      ConceptId: genus/ezakiella
+      Evidence:
+      - doi:10.1016/j.anaerobe.2014.12.002
+    - Name: Faecalibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/faecalibacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00674.pub2
+    - Name: Faecalicatena
+      ConceptSource: LPSN
+      ConceptId: genus/faecalicatena
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00629
+      - doi:10.1099/ijsem.0.001790
+      Reason: >-
+        The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+    - Name: Faecalispora sporosphaeroides
+      ConceptSource: LPSN
+      ConceptId: species/faecalispora-sporosphaeroides
+      Evidence:
+      - doi:10.13145/bacdive2716.20260601.11
+      Reason: >-
+        Placed by its own properties, since the descriptions of its genus give none: the culture collection that holds
+        its type strain records it as an anaerobe, and an obligately anaerobic bacterium is an anaerobe whatever its
+        Gram reaction and shape.
+    - Name: Faecalitalea
+      ConceptSource: LPSN
+      ConceptId: genus/faecalitalea
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00629
+      - doi:10.1099/ijs.0.064626-0
+      Reason: >-
+        The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+    - Name: Filifactor
+      ConceptSource: LPSN
+      ConceptId: genus/filifactor
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00667
+    - Name: Finegoldia
+      ConceptSource: LPSN
+      ConceptId: genus/finegoldia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00713
+    - Name: Flavonifractor
+      ConceptSource: LPSN
+      ConceptId: genus/flavonifractor
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01733
+    - Name: Fusobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/fusobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00768
+    - Name: Gallicola
+      ConceptSource: LPSN
+      ConceptId: genus/gallicola
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00714
+    - Name: Hathewaya
+      ConceptSource: LPSN
+      ConceptId: genus/hathewaya
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.000824
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Holdemanella
+      ConceptSource: LPSN
+      ConceptId: genus/holdemanella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00629
+      - doi:10.1099/ijs.0.064626-0
+      Reason: >-
+        The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+    - Name: Holdemania
+      ConceptSource: LPSN
+      ConceptId: genus/holdemania
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00764
+    - Name: Hungatella
+      ConceptSource: LPSN
+      ConceptId: genus/hungatella
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.056986-0
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Intestinibacter
+      ConceptSource: LPSN
+      ConceptId: genus/intestinibacter
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.059543-0
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Lachnoanaerobaculum
+      ConceptSource: LPSN
+      ConceptId: genus/lachnoanaerobaculum
+      Evidence:
+      - doi:10.1002/9781118960608.gbm02007
+    - Name: Lachnospira
+      ConceptSource: LPSN
+      ConceptId: genus/lachnospira
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00647
+    - Name: Lacrimispora
+      ConceptSource: LPSN
+      ConceptId: genus/lacrimispora
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.003698
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Leptotrichia
+      ConceptSource: LPSN
+      ConceptId: genus/leptotrichia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00771
+      Reason: >-
+        Its description gives it as obligately anaerobic or aerotolerant anaerobic.
+    - Name: Mediterraneibacter
+      ConceptSource: LPSN
+      ConceptId: genus/mediterraneibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00678
+      - doi:10.1007/s10482-018-1104-y
+      Reason: >-
+        The description of Ruminococcus, the genus it was formed from, gives its oxygen requirement.
+    - Name: Megamonas
+      ConceptSource: LPSN
+      ConceptId: genus/megamonas
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00238
+      - doi:10.1016/s0721-9571(82)80020-3
+      Reason: >-
+        The description of Bacteroides, the genus it was formed from, gives its oxygen requirement.
+    - Name: Megasphaera
+      ConceptSource: LPSN
+      ConceptId: genus/megasphaera
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00697
+    - Name: Mitsuokella
+      ConceptSource: LPSN
+      ConceptId: genus/mitsuokella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00698
+    - Name: Mobiluncus
+      ConceptSource: LPSN
+      ConceptId: genus/mobiluncus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00014
+    - Name: Mogibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/mogibacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00726
+    - Name: Nitratidesulfovibrio
+      ConceptSource: LPSN
+      ConceptId: genus/nitratidesulfovibrio
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01888
+    - Name: Odoribacter
+      ConceptSource: LPSN
+      ConceptId: genus/odoribacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00238
+      - doi:10.1099/ijs.0.63458-0
+      Reason: >-
+        The description of Bacteroides, the genus it was formed from, gives its oxygen requirement.
+    - Name: Paeniclostridium
+      ConceptSource: LPSN
+      ConceptId: genus/paeniclostridium
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.000874
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Parabacteroides
+      ConceptSource: LPSN
+      ConceptId: genus/parabacteroides
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00238
+      - doi:10.1099/ijs.0.64192-0
+      Reason: >-
+        The description of Bacteroides, the genus it was formed from, gives its oxygen requirement.
+    - Name: Paraclostridium
+      ConceptSource: LPSN
+      ConceptId: genus/paraclostridium
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.000874
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Parascardovia
+      ConceptSource: LPSN
+      ConceptId: genus/parascardovia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00022
+    - Name: Parvimonas
+      ConceptSource: LPSN
+      ConceptId: genus/parvimonas
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00716
+    - Name: Peptococcus
+      ConceptSource: LPSN
+      ConceptId: genus/peptococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00663
+    - Name: Peptoniphilus
+      ConceptSource: LPSN
+      ConceptId: genus/peptoniphilus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00717
+    - Name: Peptostreptococcus
+      ConceptSource: LPSN
+      ConceptId: genus/peptostreptococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00668
+    - Name: Phocaeicola
+      ConceptSource: LPSN
+      ConceptId: genus/phocaeicola
+      Evidence:
+      - doi:10.1099/ijs.0.007823-0
+    - Name: Porphyromonas
+      ConceptSource: LPSN
+      ConceptId: genus/porphyromonas
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00246
+    - Name: Prevotella
+      ConceptSource: LPSN
+      ConceptId: genus/prevotella
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Propionibacterium
+      ConceptSource: LPSN
+      ConceptId: genus/propionibacterium
+      Evidence:
+      - doi:10.2900/7455254
+    - Name: Propionimicrobium
+      ConceptSource: LPSN
+      ConceptId: genus/propionimicrobium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00171
+    - Name: Pseudoflavonifractor
+      ConceptSource: LPSN
+      ConceptId: genus/pseudoflavonifractor
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01739
+    - Name: Pseudoleptotrichia
+      ConceptSource: LPSN
+      ConceptId: genus/pseudoleptotrichia
+      Evidence:
+      - doi:10.1099/ijsem.0.004024
+    - Name: Pseudoramibacter
+      ConceptSource: LPSN
+      ConceptId: genus/pseudoramibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00631
+    - Name: Robinsoniella
+      ConceptSource: LPSN
+      ConceptId: genus/robinsoniella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01449
+    - Name: Ruminococcus
+      ConceptSource: LPSN
+      ConceptId: genus/ruminococcus
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00678
+    - Name: Sarcina
+      ConceptSource: LPSN
+      ConceptId: genus/sarcina
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00622
+    - Name: Scardovia
+      ConceptSource: LPSN
+      ConceptId: genus/scardovia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00023
+    - Name: Selenomonas
+      ConceptSource: LPSN
+      ConceptId: genus/selenomonas
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00705
+    - Name: Slackia
+      ConceptSource: LPSN
+      ConceptId: genus/slackia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00221
+    - Name: Sneathia
+      ConceptSource: LPSN
+      ConceptId: genus/sneathia
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00773
+    - Name: Solobacterium
+      ConceptSource: LPSN
+      ConceptId: genus/solobacterium
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00765
+    - Name: Succinivibrio
+      ConceptSource: LPSN
+      ConceptId: genus/succinivibrio
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01087
+    - Name: Tannerella
+      ConceptSource: LPSN
+      ConceptId: genus/tannerella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00248
+    - Name: Terrisporobacter
+      ConceptSource: LPSN
+      ConceptId: genus/terrisporobacter
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijs.0.059543-0
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Thomasclavelia
+      ConceptSource: LPSN
+      ConceptId: genus/thomasclavelia
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1099/ijsem.0.005694
+      Reason: >-
+        Split from Clostridium, which ECDC counts among the anaerobes.
+    - Name: Tissierella
+      ConceptSource: LPSN
+      ConceptId: genus/tissierella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00721
+    - Name: Turicibacter
+      ConceptSource: LPSN
+      ConceptId: genus/turicibacter
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00766
+    - Name: Veillonella
+      ConceptSource: LPSN
+      ConceptId: genus/veillonella
+      Evidence:
+      - doi:10.1002/9781118960608.gbm00710
+    - Name: Wolinella
+      ConceptSource: LPSN
+      ConceptId: genus/wolinella
+      Evidence:
+      - doi:10.1099/00207713-31-4-432
+  - Key: other-bacteria
+    Name: Other bacteria
+    EcdcCategory: Other bacteria
+    Definition: >-
+      The bacteria ECDC counts as other bacteria, by what they are: the actinomycetes, the mycobacteria, the bacteria
+      without a cell wall, the obligate intracellular bacteria, and the spirochaetes.
+    Evidence:
+    - doi:10.2900/7455254
+    Children:
+    - Key: actinomycetes
+      Name: Actinomyces, Nocardia, and related bacteria
+      EcdcCategory: Other bacteria
+      Definition: >-
+        Actinomyces, the genera formed from its former species, and the aerobic actinomycetes, such as Nocardia,
+        Rhodococcus, and Streptomyces.
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1128/jcm.01693-25
+      Members:
+      - Name: Actinobaculum
+        ConceptSource: LPSN
+        ConceptId: genus/actinobaculum
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1099/00207713-47-3-899
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+      - Name: Actinomadura
+        ConceptSource: LPSN
+        ConceptId: genus/actinomadura
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00210
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Actinomyces
+        ConceptSource: LPSN
+        ConceptId: genus/actinomyces
+        Evidence:
+        - doi:10.2900/7455254
+        Reason: >-
+          An actinomycete, which ECDC names among the other bacteria.
+      - Name: Agromyces
+        ConceptSource: LPSN
+        ConceptId: genus/agromyces
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00093
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Amycolatopsis
+        ConceptSource: LPSN
+        ConceptId: genus/amycolatopsis
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00176
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Arachnia
+        ConceptSource: LPSN
+        ConceptId: genus/arachnia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1099/00207713-19-3-267
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+      - Name: Bowdeniella
+        ConceptSource: LPSN
+        ConceptId: genus/bowdeniella
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.3389/fmicb.2018.02007
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+      - Name: Dermatophilus
+        ConceptSource: LPSN
+        ConceptId: genus/dermatophilus
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00073
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Gleimia
+        ConceptSource: LPSN
+        ConceptId: genus/gleimia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.3389/fmicb.2018.02007
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+      - Name: Gordonia
+        ConceptSource: LPSN
+        ConceptId: genus/gordonia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00030
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Micromonospora
+        ConceptSource: LPSN
+        ConceptId: genus/micromonospora
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00148
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Nocardia
+        ConceptSource: LPSN
+        ConceptId: genus/nocardia
+        Evidence:
+        - doi:10.2900/7455254
+        Reason: >-
+          An aerobic actinomycete, which ECDC names among the other bacteria.
+      - Name: Nocardiopsis
+        ConceptSource: LPSN
+        ConceptId: genus/nocardiopsis
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00195
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Oerskovia
+        ConceptSource: LPSN
+        ConceptId: genus/oerskovia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00064
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Pauljensenia
+        ConceptSource: LPSN
+        ConceptId: genus/pauljensenia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.3389/fmicb.2018.02007
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+      - Name: Rhodococcus
+        ConceptSource: LPSN
+        ConceptId: genus/rhodococcus
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00033
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Saccharomonospora
+        ConceptSource: LPSN
+        ConceptId: genus/saccharomonospora
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00185
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Saccharopolyspora
+        ConceptSource: LPSN
+        ConceptId: genus/saccharopolyspora
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00186
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Schaalia
+        ConceptSource: LPSN
+        ConceptId: genus/schaalia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.3389/fmicb.2018.02007
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+      - Name: Streptomyces
+        ConceptSource: LPSN
+        ConceptId: genus/streptomyces
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00191
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Tsukamurella
+        ConceptSource: LPSN
+        ConceptId: genus/tsukamurella
+        Evidence:
+        - doi:10.1002/9781118960608.gbm00038
+        - doi:10.1128/jcm.01693-25
+        Reason: >-
+          An aerobic actinomycete, which clinical microbiology groups with Nocardia.
+      - Name: Winkia
+        ConceptSource: LPSN
+        ConceptId: genus/winkia
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.3389/fmicb.2018.02007
+        Reason: >-
+          Split from Actinomyces, which ECDC counts among the other bacteria.
+    - Key: mycobacteria
+      Name: Mycobacteria
+      EcdcCategory: Other bacteria
+      Definition: >-
+        The acid-fast mycobacteria, such as Mycobacterium.
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1002/9781118960608.gbm00029
+      Members:
+      - Name: Mycobacterium
+        ConceptSource: LPSN
+        ConceptId: genus/mycobacterium
+        Evidence:
+        - doi:10.2900/7455254
+        Reason: >-
+          It is acid-fast, and the Gram stain does not reliably classify such bacteria.
+    - Key: bacteria-without-cell-wall
+      Name: Bacteria without a cell wall
+      EcdcCategory: Other bacteria
+      Definition: >-
+        The Mollicutes, such as Mycoplasma and Ureaplasma.
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1002/9781118960608.cbm00048.pub2
+      Members:
+      - Name: Mollicutes
+        ConceptSource: LPSN
+        ConceptId: class/mollicutes
+        Evidence:
+        - doi:10.2900/7455254
+        - doi:10.1002/9781118960608.cbm00048.pub2
+        Reason: >-
+          Its members have no cell wall, so that the Gram stain does not classify them.
+    - Key: obligate-intracellular-bacteria
+      Name: Obligate intracellular bacteria
+      EcdcCategory: Other bacteria
+      Definition: >-
+        Bacteria that grow only in host cells, such as Chlamydia and Rickettsia, and Coxiella, which grows outside them
+        only in a medium devised for it.
+      Evidence:
+      - doi:10.2900/7455254
+      - doi:10.1002/9781118960608.gbm00364
+      Members:
+      - Name: Chlamydia
+        ConceptSource: LPSN
+        ConceptId: genus/chlamydia
+        Evidence:
+        - doi:10.2900/7455254
+        Reason: >-
+          An obligate intracellular bacterium.
+      - Name: Coxiella
+        ConceptSource: LPSN
+        ConceptId: genus/coxiella
+        Evidence:
+        - doi:10.1073/pnas.0812074106
+        Reason: >-
+          An obligate intracellular bacterium, although a medium without host cells now grows it.
+      - Name: Rickettsiales
+        ConceptSource: LPSN
+        ConceptId: order/rickettsiales
+        Evidence:
+        - doi:10.1038/s41579-020-00507-2
+        - doi:10.1002/9781118960608.gbm00916
+        - doi:10.1002/9781118960608.gbm00915
+        - doi:10.1099/00207713-51-6-2145
+        Reason: >-
+          Its members are obligate intracellular bacteria.
+    - Key: spirochaetes
+      Name: Spirochaetes
+      EcdcCategory: Other bacteria
+      Definition: >-
+        Helical bacteria with periplasmic flagella, such as Treponema, Borrelia, and Leptospira.
+      Evidence:
+      - doi:10.1002/9781118960608.gbm01249
+      Members:
+      - Name: Borrelia
+        ConceptSource: LPSN
+        ConceptId: genus/borrelia
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01246
+        Reason: >-
+          A spirochaete.
+      - Name: Brachyspira
+        ConceptSource: LPSN
+        ConceptId: genus/brachyspira
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01241
+        Reason: >-
+          A spirochaete.
+      - Name: Leptospira
+        ConceptSource: LPSN
+        ConceptId: genus/leptospira
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01244
+        Reason: >-
+          A spirochaete.
+      - Name: Treponema
+        ConceptSource: LPSN
+        ConceptId: genus/treponema
+        Evidence:
+        - doi:10.1002/9781118960608.gbm01249
+        Reason: >-
+          A spirochaete.
+- Key: fungi
+  Name: Fungi
+  EcdcCategory: Fungi
+  Definition: >-
+    Fungi, as yeasts, moulds, and other fungi.
+  Evidence:
+  - doi:10.2900/7455254
+  Children:
+  - Key: yeasts
+    Name: Yeasts
+    EcdcCategory: Fungi
+    Definition: >-
+      Fungi that grow as single cells: the budding yeasts of the Saccharomycotina, such as Candida, and the
+      basidiomycetous yeasts, such as Trichosporon, Rhodotorula, and Malassezia.
+    Evidence:
+    - doi:10.2900/7455254
+    Members:
+    - Name: Cystofilobasidiales
+      ConceptSource: MycoBank
+      ConceptId: 92438
+      Evidence:
+      - doi:10.1016/j.simyco.2015.12.001
+      Reason: >-
+        Basidiomycetous yeasts, within the Dikarya, which hold moulds too.
+    - Name: Pucciniomycotina
+      ConceptSource: MycoBank
+      ConceptId: 431018
+      Evidence:
+      - doi:10.1016/j.simyco.2015.12.002
+      Reason: >-
+        Basidiomycetous yeasts, such as Rhodotorula and Sporobolomyces, within the Dikarya, which hold moulds too.
+    - Name: Saccharomycotina
+      ConceptSource: MycoBank
+      ConceptId: 430999
+      Evidence:
+      - doi:10.1128/mbio.01034-25
+      Reason: >-
+        The budding yeasts, within the Dikarya, which hold moulds too.
+    - Name: Trichosporonaceae
+      ConceptSource: MycoBank
+      ConceptId: 433332
+      Evidence:
+      - doi:10.3201/eid3201.250504
+      Reason: >-
+        Basidiomycetous yeast-like fungi that also form arthroconidia, within the Dikarya, which hold moulds too.
+    - Name: Ustilaginomycotina
+      ConceptSource: MycoBank
+      ConceptId: 452699
+      Evidence:
+      - doi:10.1016/j.simyco.2015.10.004
+      Reason: >-
+        Basidiomycetous yeasts, such as Malassezia and Pseudozyma, within the Dikarya, which hold moulds too.
+  - Key: moulds
+    Name: Moulds
+    EcdcCategory: Fungi
+    Definition: >-
+      Filamentous fungi, such as Aspergillus, Fusarium, and the Mucorales, the black yeasts and the dimorphic fungi
+      included, which also grow as yeasts.
+    Evidence:
+    - doi:10.2900/7455254
+    Members:
+    - Name: Agaricomycetes
+      ConceptSource: MycoBank
+      ConceptId: 430993
+      Evidence:
+      - doi:10.1016/j.actbio.2022.04.011
+      Reason: >-
+        The mushroom-forming fungi, which grow as filaments, within the Dikarya, which hold yeasts too.
+    - Name: Basidiobolus
+      ConceptSource: MycoBank
+      ConceptId: 56142
+      Evidence:
+      - doi:10.1086/514781
+      Reason: >-
+        A filamentous fungus.
+    - Name: Entomophthoromycotina
+      ConceptSource: MycoBank
+      ConceptId: 436126
+      Evidence:
+      - doi:10.3852/16-042
+      Reason: >-
+        Filamentous fungi, such as Conidiobolus.
+    - Name: Mortierellomycota
+      ConceptSource: MycoBank
+      ConceptId: 566852
+      Evidence:
+      - doi:10.3852/16-042
+      Reason: >-
+        Filamentous fungi, such as Mortierella.
+    - Name: Mucoromycota
+      ConceptSource: MycoBank
+      ConceptId: 452644
+      Evidence:
+      - doi:10.3852/16-042
+      Reason: >-
+        Filamentous fungi, such as Mucor and Rhizopus.
+    - Name: Pezizomycotina
+      ConceptSource: MycoBank
+      ConceptId: 430998
+      Evidence:
+      - doi:10.1128/CMR.00093-13
+      - doi:10.1111/myc.70222
+      Reason: >-
+        The filamentous ascomycetes, the black yeasts and the dimorphic fungi included, within the Dikarya, which hold
+        yeasts too.
+  - Key: other-fungi
+    Name: Other fungi
+    EcdcCategory: Fungi
+    Definition: >-
+      Fungal taxa that span yeasts and moulds, for an infectious agent identified only to such a taxon.
+    Evidence:
+    - doi:10.2900/7455254
+    Members:
+    - Name: Dikarya
+      ConceptSource: MycoBank
+      ConceptId: 432186
+      Evidence:
+      - doi:10.1128/mbio.01034-25
+      - doi:10.1128/CMR.00093-13
+      Reason: >-
+        It holds both yeasts and moulds.
+- Key: viruses
+  Name: Viruses
+  EcdcCategory: Viruses
+  Definition: >-
+    All viruses.
+  Evidence:
+  - doi:10.2900/7455254
+  Members:
+  - Name: Viruses
+    ConceptSource: NeoIPC
+    ConceptId: 100
+    Evidence:
+    - doi:10.2900/7455254
+- Key: parasites
+  Name: Parasites
+  EcdcCategory: Fungi
+  Definition: >-
+    Eukaryotic infectious agents other than fungi, such as Plasmodium.
+  Evidence:
+  - doi:10.2900/7455254
+  Members:
+  - Name: Protozoa
+    ConceptSource: MycoBank
+    ConceptId: 92339
+    Evidence:
+    - doi:10.2900/7455254
+    Reason: >-
+      The kingdom that holds the eukaryotes of the list other than the fungi.
+Attributes:
+- Key: gram-reaction
+  Name: Gram reaction
+  Values:
+  - Key: positive
+    Name: Gram-positive
+  - Key: negative
+    Name: Gram-negative
+  - Key: variable
+    Name: Gram-variable
+  - Key: none
+    Name: Not classified by the Gram stain
+  Assignments:
+  - Name: Actinomycetota
+    ConceptSource: LPSN
+    ConceptId: phylum/actinomycetota
+    Value: positive
+    Evidence:
+    - doi:10.1128/MMBR.00019-15
+  - Name: Bacillota
+    ConceptSource: LPSN
+    ConceptId: phylum/bacillota
+    Value: positive
+    Evidence:
+    - doi:10.1038/s41559-020-01299-7
+  - Name: Negativicutes
+    ConceptSource: LPSN
+    ConceptId: class/negativicutes
+    Value: negative
+    Evidence:
+    - doi:10.1099/ijs.0.013102-0
+    Reason: >-
+      The Negativicutes stain Gram-negative and have a Gram-negative type of cell wall, although they belong to the
+      Bacillota.
+  - Name: Mycoplasmatota
+    ConceptSource: LPSN
+    ConceptId: phylum/mycoplasmatota
+    Value: none
+    Evidence:
+    - doi:10.1002/9781118960608.pbm00025.pub3
+  - Name: Bacteroidota
+    ConceptSource: LPSN
+    ConceptId: phylum/bacteroidota
+    Value: negative
+    Evidence:
+    - doi:10.3389/fmicb.2016.02003
+  - Name: Fusobacteriota
+    ConceptSource: LPSN
+    ConceptId: phylum/fusobacteriota
+    Value: negative
+    Evidence:
+    - doi:10.1007/s10482-011-9616-8
+  - Name: Pseudomonadota
+    ConceptSource: LPSN
+    ConceptId: phylum/pseudomonadota
+    Value: negative
+    Evidence:
+    - doi:10.1038/npg.els.0004312
+  - Name: Coryneform bacteria
+    ConceptSource: NeoIPC
+    ConceptId: 107
+    Value: positive
+    Evidence:
+    - doi:10.1128/CMR.10.1.125
+  - Name: Chlamydiota
+    ConceptSource: LPSN
+    ConceptId: phylum/chlamydiota
+    Value: negative
+    Evidence:
+    - doi:10.1111/j.1865-1682.2011.01274.x
+  - Name: Mobiluncus
+    ConceptSource: LPSN
+    ConceptId: genus/mobiluncus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00014
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Gardnerella
+    ConceptSource: LPSN
+    ConceptId: genus/gardnerella
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00020
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Tropheryma
+    ConceptSource: LPSN
+    ConceptId: genus/tropheryma-1
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00065
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Gordonia
+    ConceptSource: LPSN
+    ConceptId: genus/gordonia
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00030
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Mycobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/mycobacterium
+    Value: none
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00029
+    Reason: >-
+      The Gram stain does not classify the genus, while its phylum is Gram-positive.
+  - Name: Nocardia
+    ConceptSource: LPSN
+    ConceptId: genus/nocardia
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00032
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Rhodococcus
+    ConceptSource: LPSN
+    ConceptId: genus/rhodococcus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00033
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Alkalicoccobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/alkalicoccobacillus
+    Value: variable
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Alkalihalobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/alkalihalobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Ectobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/ectobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Evansella
+    ConceptSource: LPSN
+    ConceptId: genus/evansella
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Falsibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/falsibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijs.0.014316-0
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Ferdinandcohnia
+    ConceptSource: LPSN
+    ConceptId: genus/ferdinandcohnia
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Fictibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/fictibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01620
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Geobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/geobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00533
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Gottfriedia
+    ConceptSource: LPSN
+    ConceptId: genus/gottfriedia
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Halalkalibacter
+    ConceptSource: LPSN
+    ConceptId: genus/halalkalibacter
+    Value: variable
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Halalkalibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/halalkalibacterium
+    Value: variable
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Heyndrickxia
+    ConceptSource: LPSN
+    ConceptId: genus/heyndrickxia
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Lederbergia
+    ConceptSource: LPSN
+    ConceptId: genus/lederbergia
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Metabacillus
+    ConceptSource: LPSN
+    ConceptId: genus/metabacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Parageobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/parageobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00533
+    - doi:10.1016/j.syapm.2016.09.004
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Geobacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Peribacillus
+    ConceptSource: LPSN
+    ConceptId: genus/peribacillus
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Priestia
+    ConceptSource: LPSN
+    ConceptId: genus/priestia
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Pseudalkalibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/pseudalkalibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.006757
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Pseudobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/pseudobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1016/j.syapm.2019.03.003
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Rossellomorea
+    ConceptSource: LPSN
+    ConceptId: genus/rossellomorea
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Siminovitchia
+    ConceptSource: LPSN
+    ConceptId: genus/siminovitchia
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Jeotgalibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/jeotgalibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00558
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Psychrobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/psychrobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1016/j.syapm.2010.06.003
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Rummeliibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/rummeliibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijs.0.006098-0
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive. The description of Bacillus, the genus it was
+      formed from, gives its Gram reaction.
+  - Name: Sporosarcina
+    ConceptSource: LPSN
+    ConceptId: genus/sporosarcina
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00563
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Ureibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/ureibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00564
+    - doi:10.3389/fmicb.2019.02821
+    - doi:10.1007/s00203-024-03970-0
+    Reason: >-
+      The genus is Gram-variable, although its Bergey's chapter gives it as Gram-stain-negative: its emended
+      description, which took ten species into the genus, gives no Gram reaction, and a species described since,
+      Ureibacillus aquaedulcis, stains Gram-positive.
+  - Name: Cytobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/cytobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Mesobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/mesobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Neobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/neobacillus
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Brevibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/brevibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00550
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Paenibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/paenibacillus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00553
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Christensenella
+    ConceptSource: LPSN
+    ConceptId: genus/christensenella
+    Value: negative
+    Evidence:
+    - doi:10.1099/ijs.0.026989-0
+    Reason: >-
+      The genus is Gram-negative, while its phylum is Gram-positive.
+  - Name: Clostridium
+    ConceptSource: LPSN
+    ConceptId: genus/clostridium
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.000824
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Hungatella
+    ConceptSource: LPSN
+    ConceptId: genus/hungatella
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01640
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Anaerostipes
+    ConceptSource: LPSN
+    ConceptId: genus/anaerostipes
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00638
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Blautia
+    ConceptSource: LPSN
+    ConceptId: genus/blautia
+    Value: variable
+    Evidence:
+    - doi:10.1016/j.anaerobe.2016.12.001
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Butyrivibrio
+    ConceptSource: LPSN
+    ConceptId: genus/butyrivibrio
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00640
+    Reason: >-
+      The genus is Gram-negative, while its phylum is Gram-positive.
+  - Name: Catonella
+    ConceptSource: LPSN
+    ConceptId: genus/catonella
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00641
+    Reason: >-
+      The genus is Gram-negative, while its phylum is Gram-positive.
+  - Name: Lachnospira
+    ConceptSource: LPSN
+    ConceptId: genus/lachnospira
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00647
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Lacrimispora
+    ConceptSource: LPSN
+    ConceptId: genus/lacrimispora
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijsem.0.003698
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Faecalibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/faecalibacterium
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00674.pub2
+    Reason: >-
+      The genus is Gram-negative, while its phylum is Gram-positive.
+  - Name: Pseudoflavonifractor
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoflavonifractor
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01739
+    Reason: >-
+      The genus is Gram-negative, while its phylum is Gram-positive.
+  - Name: Ruminococcus
+    ConceptSource: LPSN
+    ConceptId: genus/ruminococcus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00678
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Asaccharospora
+    ConceptSource: LPSN
+    ConceptId: genus/asaccharospora
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijs.0.059543-0
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Terrisporobacter
+    ConceptSource: LPSN
+    ConceptId: genus/terrisporobacter
+    Value: variable
+    Evidence:
+    - doi:10.1099/ijs.0.059543-0
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Tissierella
+    ConceptSource: LPSN
+    ConceptId: genus/tissierella
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00721
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-positive.
+  - Name: Anaerorhabdus
+    ConceptSource: LPSN
+    ConceptId: genus/anaerorhabdus
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00237
+    Reason: >-
+      The genus is Gram-negative, while its phylum is Gram-positive.
+  - Name: Methylobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/methylobacterium
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00830.pub2
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-negative.
+  - Name: Methylorubrum
+    ConceptSource: LPSN
+    ConceptId: genus/methylorubrum
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02024
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-negative.
+  - Name: Azospirillum
+    ConceptSource: LPSN
+    ConceptId: genus/azospirillum
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00891
+    Reason: >-
+      The genus is Gram-variable, while its phylum is Gram-negative.
+  - Name: Brachyspira
+    ConceptSource: LPSN
+    ConceptId: genus/brachyspira
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01241
+  - Name: Leptospira
+    ConceptSource: LPSN
+    ConceptId: genus/leptospira
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01244
+  - Name: Borrelia
+    ConceptSource: LPSN
+    ConceptId: genus/borrelia
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01246
+  - Name: Treponema
+    ConceptSource: LPSN
+    ConceptId: genus/treponema
+    Value: negative
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01249
+  - Name: Deinococcus
+    ConceptSource: LPSN
+    ConceptId: genus/deinococcus
+    Value: variable
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00475
+    Reason: >-
+      The genus is Gram-variable: by its Bergey's chapter, every species but Deinococcus grandis stains Gram-positive,
+      and the cell wall includes an outer membrane.
+- Key: oxygen-requirement
+  Name: Oxygen requirement
+  Values:
+  - Key: aerobic
+    Name: Aerobic
+  - Key: facultative-anaerobic
+    Name: Facultatively anaerobic
+  - Key: microaerophilic
+    Name: Microaerophilic
+  - Key: aerotolerant-anaerobic
+    Name: Aerotolerant anaerobic
+  - Key: obligate-anaerobic
+    Name: Obligately anaerobic
+  - Key: not-determined
+    Name: Not determined
+  Assignments:
+  - Name: Faecalispora sporosphaeroides
+    ConceptSource: LPSN
+    ConceptId: species/faecalispora-sporosphaeroides
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.13145/bacdive2716.20260601.11
+    Reason: >-
+      The descriptions of its genus give no oxygen requirement; the culture collection that holds its type strain
+      records it as an anaerobe.
+  - Name: Enterobacterales
+    ConceptSource: LPSN
+    ConceptId: order/enterobacterales
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.001485
+  - Name: Rickettsiales
+    ConceptSource: LPSN
+    ConceptId: order/rickettsiales
+    Value: not-determined
+    Evidence:
+    - doi:10.1038/s41579-020-00507-2
+    - doi:10.1002/9781118960608.gbm00916
+    - doi:10.1002/9781118960608.gbm00915
+    - doi:10.1099/00207713-51-6-2145
+    Reason: >-
+      Obligate intracellular bacteria, which grow only in host cells, so that no oxygen requirement of their own is
+      determined.
+  - Name: Coryneform bacteria
+    ConceptSource: NeoIPC
+    ConceptId: 107
+    Value: not-determined
+    Evidence:
+    - doi:10.1128/CMR.10.1.125
+    Reason: >-
+      The group holds the aerobic and the anaerobic diphtheroids.
+  - Name: Bacillus circulans group
+    ConceptSource: NeoIPC
+    ConceptId: 113
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+    - doi:10.1002/9781118960608.gbm00553
+    Reason: >-
+      Its species belong to Niallia, which is facultatively anaerobic, and to Paenibacillus, whose oxygen requirement is
+      not determined.
+  - Name: Actinobaculum
+    ConceptSource: LPSN
+    ConceptId: genus/actinobaculum
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00011
+  - Name: Actinomyces
+    ConceptSource: LPSN
+    ConceptId: genus/actinomyces
+    Value: not-determined
+    Evidence:
+    - doi:10.3389/fmicb.2018.02007
+  - Name: Actinotignum
+    ConceptSource: LPSN
+    ConceptId: genus/actinotignum
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00011
+    - doi:10.1099/ijs.0.069294-0
+    Reason: >-
+      The description of Actinobaculum, the genus it was formed from, gives its oxygen requirement.
+  - Name: Arcanobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/arcanobacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00013
+  - Name: Bowdeniella
+    ConceptSource: LPSN
+    ConceptId: genus/bowdeniella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.3389/fmicb.2018.02007
+  - Name: Gleimia
+    ConceptSource: LPSN
+    ConceptId: genus/gleimia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.3389/fmicb.2018.02007
+  - Name: Mobiluncus
+    ConceptSource: LPSN
+    ConceptId: genus/mobiluncus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00014
+  - Name: Pauljensenia
+    ConceptSource: LPSN
+    ConceptId: genus/pauljensenia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1078/072320203770865819
+    - doi:10.3389/fmicb.2018.02007
+    Reason: >-
+      Obligately anaerobic, as the description of its only species gives it: the genus description, which takes that
+      description over, calls the genus aerobic, yet has its colonies form after anaerobic incubation.
+  - Name: Schaalia
+    ConceptSource: LPSN
+    ConceptId: genus/schaalia
+    Value: aerobic
+    Evidence:
+    - doi:10.3389/fmicb.2018.02007
+  - Name: Trueperella
+    ConceptSource: LPSN
+    ConceptId: genus/trueperella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01515
+  - Name: Winkia
+    ConceptSource: LPSN
+    ConceptId: genus/winkia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.3389/fmicb.2018.02007
+  - Name: Alloscardovia
+    ConceptSource: LPSN
+    ConceptId: genus/alloscardovia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00018.pub2
+  - Name: Bifidobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/bifidobacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00019
+  - Name: Gardnerella
+    ConceptSource: LPSN
+    ConceptId: genus/gardnerella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00020
+  - Name: Parascardovia
+    ConceptSource: LPSN
+    ConceptId: genus/parascardovia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00022
+  - Name: Scardovia
+    ConceptSource: LPSN
+    ConceptId: genus/scardovia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00023
+  - Name: Streptomyces
+    ConceptSource: LPSN
+    ConceptId: genus/streptomyces
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00191
+  - Name: Brevibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/brevibacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00062
+  - Name: Cellulomonas
+    ConceptSource: LPSN
+    ConceptId: genus/cellulomonas
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00063
+  - Name: Brachybacterium
+    ConceptSource: LPSN
+    ConceptId: genus/brachybacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.3390/foods13020214
+    Reason: >-
+      A review gives its oxygen requirement.
+  - Name: Dermabacter
+    ConceptSource: LPSN
+    ConceptId: genus/dermabacter
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00069
+  - Name: Dermacoccus
+    ConceptSource: LPSN
+    ConceptId: genus/dermacoccus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00071
+  - Name: Arsenicicoccus
+    ConceptSource: LPSN
+    ConceptId: genus/arsenicicoccus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00075
+  - Name: Dermatophilus
+    ConceptSource: LPSN
+    ConceptId: genus/dermatophilus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00073
+  - Name: Janibacter
+    ConceptSource: LPSN
+    ConceptId: genus/janibacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00078
+  - Name: Jonesia
+    ConceptSource: LPSN
+    ConceptId: genus/jonesia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00547
+    - doi:10.1099/00207713-37-3-266
+    Reason: >-
+      The description of Listeria, the genus it was formed from, gives its oxygen requirement.
+  - Name: Kytococcus
+    ConceptSource: LPSN
+    ConceptId: genus/kytococcus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00072
+  - Name: Agromyces
+    ConceptSource: LPSN
+    ConceptId: genus/agromyces
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00093
+  - Name: Curtobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/curtobacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00096.pub2
+  - Name: Leifsonia
+    ConceptSource: LPSN
+    ConceptId: genus/leifsonia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00102
+  - Name: Microbacterium
+    ConceptSource: LPSN
+    ConceptId: genus/microbacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00104
+  - Name: Pseudoclavibacter
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoclavibacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00111
+  - Name: Arthrobacter
+    ConceptSource: LPSN
+    ConceptId: genus/arthrobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1128/jb.54.3.291-303.1947
+  - Name: Falsarthrobacter
+    ConceptSource: LPSN
+    ConceptId: genus/falsarthrobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1128/jb.54.3.291-303.1947
+    - doi:10.1099/ijsem.0.002680
+    Reason: >-
+      The description of Arthrobacter, the genus it was formed from, gives its oxygen requirement.
+  - Name: Glutamicibacter
+    ConceptSource: LPSN
+    ConceptId: genus/glutamicibacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1128/jb.54.3.291-303.1947
+    - doi:10.1099/ijsem.0.000702
+    Reason: >-
+      The description of Arthrobacter, the genus it was formed from, gives its oxygen requirement.
+  - Name: Kocuria
+    ConceptSource: LPSN
+    ConceptId: genus/kocuria
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00120
+  - Name: Micrococcus
+    ConceptSource: LPSN
+    ConceptId: genus/micrococcus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00121
+  - Name: Nesterenkonia
+    ConceptSource: LPSN
+    ConceptId: genus/nesterenkonia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00122
+  - Name: Paenarthrobacter
+    ConceptSource: LPSN
+    ConceptId: genus/paenarthrobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1128/jb.54.3.291-303.1947
+    - doi:10.1099/ijsem.0.000702
+    Reason: >-
+      The description of Arthrobacter, the genus it was formed from, gives its oxygen requirement.
+  - Name: Paeniglutamicibacter
+    ConceptSource: LPSN
+    ConceptId: genus/paeniglutamicibacter
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01437
+  - Name: Pseudarthrobacter
+    ConceptSource: LPSN
+    ConceptId: genus/pseudarthrobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1128/jb.54.3.291-303.1947
+    - doi:10.1099/ijsem.0.000702
+    Reason: >-
+      The description of Arthrobacter, the genus it was formed from, gives its oxygen requirement.
+  - Name: Pseudoglutamicibacter
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoglutamicibacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1128/jb.54.3.291-303.1947
+    - doi:10.1099/ijsem.0.000702
+    Reason: >-
+      The description of Arthrobacter, the genus it was formed from, gives its oxygen requirement.
+  - Name: Rothia
+    ConceptSource: LPSN
+    ConceptId: genus/rothia
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/00207713-17-1-79
+  - Name: Cellulosimicrobium
+    ConceptSource: LPSN
+    ConceptId: genus/cellulosimicrobium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00127
+  - Name: Oerskovia
+    ConceptSource: LPSN
+    ConceptId: genus/oerskovia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00064
+  - Name: Tropheryma
+    ConceptSource: LPSN
+    ConceptId: genus/tropheryma-1
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00065
+  - Name: Micromonospora
+    ConceptSource: LPSN
+    ConceptId: genus/micromonospora
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00148
+  - Name: Corynebacterium
+    ConceptSource: LPSN
+    ConceptId: genus/corynebacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00026
+  - Name: Dietzia
+    ConceptSource: LPSN
+    ConceptId: genus/dietzia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00028
+  - Name: Gordonia
+    ConceptSource: LPSN
+    ConceptId: genus/gordonia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00030
+  - Name: Mycobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/mycobacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00029
+  - Name: Nocardia
+    ConceptSource: LPSN
+    ConceptId: genus/nocardia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00032
+  - Name: Rhodococcus
+    ConceptSource: LPSN
+    ConceptId: genus/rhodococcus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00033
+  - Name: Tsukamurella
+    ConceptSource: LPSN
+    ConceptId: genus/tsukamurella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00038
+  - Name: Acidipropionibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/acidipropionibacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00167
+    - doi:10.1099/ijsem.0.001367
+    Reason: >-
+      The description of Propionibacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Arachnia
+    ConceptSource: LPSN
+    ConceptId: genus/arachnia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1099/00207713-19-3-267
+  - Name: Cutibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/cutibacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00167
+    - doi:10.1099/ijsem.0.001367
+    Reason: >-
+      The description of Propionibacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Propionibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/propionibacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00167
+  - Name: Propioniferax
+    ConceptSource: LPSN
+    ConceptId: genus/propioniferax
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00170
+  - Name: Propionimicrobium
+    ConceptSource: LPSN
+    ConceptId: genus/propionimicrobium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00171
+  - Name: Amycolatopsis
+    ConceptSource: LPSN
+    ConceptId: genus/amycolatopsis
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00176
+  - Name: Saccharomonospora
+    ConceptSource: LPSN
+    ConceptId: genus/saccharomonospora
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00185
+  - Name: Saccharopolyspora
+    ConceptSource: LPSN
+    ConceptId: genus/saccharopolyspora
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00186
+  - Name: Nocardiopsis
+    ConceptSource: LPSN
+    ConceptId: genus/nocardiopsis
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00195
+  - Name: Actinomadura
+    ConceptSource: LPSN
+    ConceptId: genus/actinomadura
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00210
+  - Name: Atopobium
+    ConceptSource: LPSN
+    ConceptId: genus/atopobium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00214
+  - Name: Fannyhessea
+    ConceptSource: LPSN
+    ConceptId: genus/fannyhessea
+    Value: not-determined
+    Evidence:
+    - doi:10.3389/fmicb.2018.02007
+  - Name: Lancefieldella
+    ConceptSource: LPSN
+    ConceptId: genus/lancefieldella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00214
+    - doi:10.3389/fmicb.2018.02007
+    Reason: >-
+      The description of Atopobium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Collinsella
+    ConceptSource: LPSN
+    ConceptId: genus/collinsella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00215
+  - Name: Cryptobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/cryptobacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00217
+  - Name: Eggerthella
+    ConceptSource: LPSN
+    ConceptId: genus/eggerthella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00219
+  - Name: Slackia
+    ConceptSource: LPSN
+    ConceptId: genus/slackia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00221
+  - Name: Patulibacter
+    ConceptSource: LPSN
+    ConceptId: genus/patulibacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00226
+  - Name: Kyrpidia
+    ConceptSource: LPSN
+    ConceptId: genus/kyrpidia
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.003037
+  - Name: Alkalicoccobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/alkalicoccobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+    - doi:10.3389/fmicb.2021.722369
+    Reason: >-
+      The description of Alkalihalobacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Alkalicoccus
+    ConceptSource: LPSN
+    ConceptId: genus/alkalicoccus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Alkalihalobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/alkalihalobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+  - Name: Alkalihalophilus
+    ConceptSource: LPSN
+    ConceptId: genus/alkalihalophilus
+    Value: aerobic
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+  - Name: Anaerobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/anaerobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01785
+  - Name: Bacillus
+    ConceptSource: LPSN
+    ConceptId: genus/bacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530.pub2
+  - Name: Ectobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/ectobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Evansella
+    ConceptSource: LPSN
+    ConceptId: genus/evansella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Exiguobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/exiguobacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00579
+  - Name: Falsibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/falsibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijs.0.014316-0
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Ferdinandcohnia
+    ConceptSource: LPSN
+    ConceptId: genus/ferdinandcohnia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Fictibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/fictibacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01620
+  - Name: Geobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/geobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00533
+  - Name: Gottfriedia
+    ConceptSource: LPSN
+    ConceptId: genus/gottfriedia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Gracilibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/gracilibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/00207713-49-2-821
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Halalkalibacter
+    ConceptSource: LPSN
+    ConceptId: genus/halalkalibacter
+    Value: not-determined
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+  - Name: Halalkalibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/halalkalibacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+  - Name: Heyndrickxia
+    ConceptSource: LPSN
+    ConceptId: genus/heyndrickxia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Lederbergia
+    ConceptSource: LPSN
+    ConceptId: genus/lederbergia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.004475
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Metabacillus
+    ConceptSource: LPSN
+    ConceptId: genus/metabacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijsem.0.003775
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Parageobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/parageobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00533
+    - doi:10.1016/j.syapm.2016.09.004
+    Reason: >-
+      The description of Geobacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Peribacillus
+    ConceptSource: LPSN
+    ConceptId: genus/peribacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+  - Name: Priestia
+    ConceptSource: LPSN
+    ConceptId: genus/priestia
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Pseudalkalibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/pseudalkalibacillus
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.006757
+  - Name: Pseudobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/pseudobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1016/j.syapm.2019.03.003
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Rossellomorea
+    ConceptSource: LPSN
+    ConceptId: genus/rossellomorea
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Salipaludibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/salipaludibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01618
+  - Name: Salisediminibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/salisediminibacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Schinkia
+    ConceptSource: LPSN
+    ConceptId: genus/schinkia
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Shouchella
+    ConceptSource: LPSN
+    ConceptId: genus/shouchella
+    Value: not-determined
+    Evidence:
+    - doi:10.3389/fmicb.2021.722369
+  - Name: Siminovitchia
+    ConceptSource: LPSN
+    ConceptId: genus/siminovitchia
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Sutcliffiella
+    ConceptSource: LPSN
+    ConceptId: genus/sutcliffiella
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Virgibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/virgibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00545
+  - Name: Bhargavaea
+    ConceptSource: LPSN
+    ConceptId: genus/bhargavaea
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijs.0.002691-0
+  - Name: Jeotgalibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/jeotgalibacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00558
+  - Name: Kurthia
+    ConceptSource: LPSN
+    ConceptId: genus/kurthia
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijs.0.056044-0
+  - Name: Lysinibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/lysinibacillus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01570
+  - Name: Psychrobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/psychrobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1016/j.syapm.2010.06.003
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Rummeliibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/rummeliibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijs.0.006098-0
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Solibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/solibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00530
+    - doi:10.1099/ijs.0.65742-0
+    Reason: >-
+      The description of Bacillus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Sporosarcina
+    ConceptSource: LPSN
+    ConceptId: genus/sporosarcina
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00563
+  - Name: Ureibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/ureibacillus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00564
+  - Name: Cytobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/cytobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+  - Name: Mesobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/mesobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+  - Name: Neobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/neobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.003775
+  - Name: Niallia
+    ConceptSource: LPSN
+    ConceptId: genus/niallia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Robertmurraya
+    ConceptSource: LPSN
+    ConceptId: genus/robertmurraya
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004475
+  - Name: Gemella
+    ConceptSource: LPSN
+    ConceptId: genus/gemella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00578
+  - Name: Listeria
+    ConceptSource: LPSN
+    ConceptId: genus/listeria
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00547
+  - Name: Aneurinibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/aneurinibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00549
+  - Name: Brevibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/brevibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00550
+  - Name: Paenibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/paenibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00553
+  - Name: Pullulanibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/pullulanibacillus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01445
+  - Name: Sporolactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/sporolactobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00565
+  - Name: Macrococcus
+    ConceptSource: LPSN
+    ConceptId: genus/macrococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00567
+  - Name: Staphylococcus
+    ConceptSource: LPSN
+    ConceptId: genus/staphylococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1080/01652176.2020.1748253
+    Reason: >-
+      A review gives its oxygen requirement.
+  - Name: Kroppenstedtia
+    ConceptSource: LPSN
+    ConceptId: genus/kroppenstedtia
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijs.0.026179-0
+  - Name: Thermoactinomyces
+    ConceptSource: LPSN
+    ConceptId: genus/thermoactinomyces
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00575
+  - Name: Abiotrophia
+    ConceptSource: LPSN
+    ConceptId: genus/abiotrophia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00580
+  - Name: Aerococcus
+    ConceptSource: LPSN
+    ConceptId: genus/aerococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00581
+  - Name: Dolosicoccus
+    ConceptSource: LPSN
+    ConceptId: genus/dolosicoccus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00582
+  - Name: Facklamia
+    ConceptSource: LPSN
+    ConceptId: genus/facklamia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00584
+  - Name: Globicatella
+    ConceptSource: LPSN
+    ConceptId: genus/globicatella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00585
+  - Name: Ignavigranum
+    ConceptSource: LPSN
+    ConceptId: genus/ignavigranum
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00586
+  - Name: Ruoffia
+    ConceptSource: LPSN
+    ConceptId: genus/ruoffia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00584
+    - doi:10.1007/s10482-021-01587-7
+    Reason: >-
+      The description of Facklamia, the genus it was formed from, gives its oxygen requirement.
+  - Name: Alloiococcus
+    ConceptSource: LPSN
+    ConceptId: genus/alloiococcus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00589
+  - Name: Dolosigranulum
+    ConceptSource: LPSN
+    ConceptId: genus/dolosigranulum
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00595
+  - Name: Granulicatella
+    ConceptSource: LPSN
+    ConceptId: genus/granulicatella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00596
+  - Name: Enterococcus
+    ConceptSource: LPSN
+    ConceptId: genus/enterococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00600.pub2
+  - Name: Tetragenococcus
+    ConceptSource: LPSN
+    ConceptId: genus/tetragenococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00602
+  - Name: Vagococcus
+    ConceptSource: LPSN
+    ConceptId: genus/vagococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00603
+  - Name: Lacticaseibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/lacticaseibacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02113
+  - Name: Lactiplantibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/lactiplantibacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.fbm00126.pub2
+    Reason: >-
+      The description of Lactobacillaceae, its family, gives its oxygen requirement.
+  - Name: Lactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/lactobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.fbm00126.pub2
+    Reason: >-
+      The description of Lactobacillaceae, its family, gives its oxygen requirement.
+  - Name: Latilactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/latilactobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.fbm00126.pub2
+    Reason: >-
+      The description of Lactobacillaceae, its family, gives its oxygen requirement.
+  - Name: Lentilactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/lentilactobacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02114
+  - Name: Leuconostoc
+    ConceptSource: LPSN
+    ConceptId: genus/leuconostoc
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.005284
+  - Name: Levilactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/levilactobacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02115
+  - Name: Ligilactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/ligilactobacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02124
+  - Name: Limosilactobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/limosilactobacillus
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.004107
+  - Name: Pediococcus
+    ConceptSource: LPSN
+    ConceptId: genus/pediococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00606.pub2
+  - Name: Weissella
+    ConceptSource: LPSN
+    ConceptId: genus/weissella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00609
+  - Name: Lactococcus
+    ConceptSource: LPSN
+    ConceptId: genus/lactococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00610
+  - Name: Streptococcus
+    ConceptSource: LPSN
+    ConceptId: genus/streptococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00612
+  - Name: Christensenella
+    ConceptSource: LPSN
+    ConceptId: genus/christensenella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.026989-0
+  - Name: Clostridium
+    ConceptSource: LPSN
+    ConceptId: genus/clostridium
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.000824
+  - Name: Hathewaya
+    ConceptSource: LPSN
+    ConceptId: genus/hathewaya
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.000824
+  - Name: Hungatella
+    ConceptSource: LPSN
+    ConceptId: genus/hungatella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01640
+  - Name: Sarcina
+    ConceptSource: LPSN
+    ConceptId: genus/sarcina
+    Value: aerotolerant-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00622
+  - Name: Eubacterium
+    ConceptSource: LPSN
+    ConceptId: genus/eubacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00629
+  - Name: Pseudoramibacter
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoramibacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00631
+  - Name: Agathobacter
+    ConceptSource: LPSN
+    ConceptId: genus/agathobacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.000788
+  - Name: Anaerobutyricum
+    ConceptSource: LPSN
+    ConceptId: genus/anaerobutyricum
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00629
+    - doi:10.1099/ijsem.0.003041
+    Reason: >-
+      The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Anaerostipes
+    ConceptSource: LPSN
+    ConceptId: genus/anaerostipes
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00638
+  - Name: Blautia
+    ConceptSource: LPSN
+    ConceptId: genus/blautia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1080/19490976.2021.1875796
+    Reason: >-
+      A review gives its oxygen requirement.
+  - Name: Butyrivibrio
+    ConceptSource: LPSN
+    ConceptId: genus/butyrivibrio
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00640
+  - Name: Catonella
+    ConceptSource: LPSN
+    ConceptId: genus/catonella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00641
+  - Name: Coprococcus
+    ConceptSource: LPSN
+    ConceptId: genus/coprococcus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00642
+  - Name: Dorea
+    ConceptSource: LPSN
+    ConceptId: genus/dorea
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00643
+  - Name: Enterocloster
+    ConceptSource: LPSN
+    ConceptId: genus/enterocloster
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.003698
+  - Name: Faecalicatena
+    ConceptSource: LPSN
+    ConceptId: genus/faecalicatena
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00629
+    - doi:10.1099/ijsem.0.001790
+    Reason: >-
+      The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Lachnoanaerobaculum
+    ConceptSource: LPSN
+    ConceptId: genus/lachnoanaerobaculum
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02007
+  - Name: Lachnospira
+    ConceptSource: LPSN
+    ConceptId: genus/lachnospira
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00647
+  - Name: Lacrimispora
+    ConceptSource: LPSN
+    ConceptId: genus/lacrimispora
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.003698
+  - Name: Mediterraneibacter
+    ConceptSource: LPSN
+    ConceptId: genus/mediterraneibacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00678
+    - doi:10.1007/s10482-018-1104-y
+    Reason: >-
+      The description of Ruminococcus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Robinsoniella
+    ConceptSource: LPSN
+    ConceptId: genus/robinsoniella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01449
+  - Name: Faecalibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/faecalibacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00674.pub2
+  - Name: Flavonifractor
+    ConceptSource: LPSN
+    ConceptId: genus/flavonifractor
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01733
+  - Name: Pseudoflavonifractor
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoflavonifractor
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01739
+  - Name: Ruminococcus
+    ConceptSource: LPSN
+    ConceptId: genus/ruminococcus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00678
+  - Name: Peptococcus
+    ConceptSource: LPSN
+    ConceptId: genus/peptococcus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00663
+  - Name: Anaerococcus
+    ConceptSource: LPSN
+    ConceptId: genus/anaerococcus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00712
+  - Name: Ezakiella
+    ConceptSource: LPSN
+    ConceptId: genus/ezakiella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1016/j.anaerobe.2014.12.002
+  - Name: Finegoldia
+    ConceptSource: LPSN
+    ConceptId: genus/finegoldia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00713
+  - Name: Gallicola
+    ConceptSource: LPSN
+    ConceptId: genus/gallicola
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00714
+  - Name: Helcococcus
+    ConceptSource: LPSN
+    ConceptId: genus/helcococcus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00715
+  - Name: Parvimonas
+    ConceptSource: LPSN
+    ConceptId: genus/parvimonas
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00716
+  - Name: Peptoniphilus
+    ConceptSource: LPSN
+    ConceptId: genus/peptoniphilus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00717
+  - Name: Mogibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/mogibacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00726
+  - Name: Asaccharospora
+    ConceptSource: LPSN
+    ConceptId: genus/asaccharospora
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.059543-0
+  - Name: Clostridioides
+    ConceptSource: LPSN
+    ConceptId: genus/clostridioides
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1016/j.anaerobe.2016.06.008
+  - Name: Filifactor
+    ConceptSource: LPSN
+    ConceptId: genus/filifactor
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00667
+  - Name: Intestinibacter
+    ConceptSource: LPSN
+    ConceptId: genus/intestinibacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1016/j.anaerobe.2004.04.004
+    Reason: >-
+      The description of Intestinibacter bartlettii, its only species, gives its oxygen requirement.
+  - Name: Paeniclostridium
+    ConceptSource: LPSN
+    ConceptId: genus/paeniclostridium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01631
+  - Name: Paraclostridium
+    ConceptSource: LPSN
+    ConceptId: genus/paraclostridium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01635
+  - Name: Peptostreptococcus
+    ConceptSource: LPSN
+    ConceptId: genus/peptostreptococcus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00668
+  - Name: Terrisporobacter
+    ConceptSource: LPSN
+    ConceptId: genus/terrisporobacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.059543-0
+  - Name: Tissierella
+    ConceptSource: LPSN
+    ConceptId: genus/tissierella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00721
+  - Name: Catenibacterium
+    ConceptSource: LPSN
+    ConceptId: genus/catenibacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00761
+  - Name: Eggerthia
+    ConceptSource: LPSN
+    ConceptId: genus/eggerthia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.029231-0
+  - Name: Kandleria
+    ConceptSource: LPSN
+    ConceptId: genus/kandleria
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.029231-0
+  - Name: Thomasclavelia
+    ConceptSource: LPSN
+    ConceptId: genus/thomasclavelia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.005694
+  - Name: Amedibacillus
+    ConceptSource: LPSN
+    ConceptId: genus/amedibacillus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00629
+    - doi:10.1099/ijsem.0.004215
+    Reason: >-
+      The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Anaerorhabdus
+    ConceptSource: LPSN
+    ConceptId: genus/anaerorhabdus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00237
+  - Name: Bulleidia
+    ConceptSource: LPSN
+    ConceptId: genus/bulleidia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00760
+  - Name: Erysipelothrix
+    ConceptSource: LPSN
+    ConceptId: genus/erysipelothrix
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00763
+  - Name: Faecalitalea
+    ConceptSource: LPSN
+    ConceptId: genus/faecalitalea
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00629
+    - doi:10.1099/ijs.0.064626-0
+    Reason: >-
+      The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Holdemanella
+    ConceptSource: LPSN
+    ConceptId: genus/holdemanella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00629
+    - doi:10.1099/ijs.0.064626-0
+    Reason: >-
+      The description of Eubacterium, the genus it was formed from, gives its oxygen requirement.
+  - Name: Holdemania
+    ConceptSource: LPSN
+    ConceptId: genus/holdemania
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00764
+  - Name: Solobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/solobacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00765
+  - Name: Turicibacter
+    ConceptSource: LPSN
+    ConceptId: genus/turicibacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00766
+  - Name: Acidaminococcus
+    ConceptSource: LPSN
+    ConceptId: genus/acidaminococcus
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00687
+  - Name: Centipeda
+    ConceptSource: LPSN
+    ConceptId: genus/centipeda
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00694
+  - Name: Megamonas
+    ConceptSource: LPSN
+    ConceptId: genus/megamonas
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00238
+    - doi:10.1016/s0721-9571(82)80020-3
+    Reason: >-
+      The description of Bacteroides, the genus it was formed from, gives its oxygen requirement.
+  - Name: Mitsuokella
+    ConceptSource: LPSN
+    ConceptId: genus/mitsuokella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00698
+  - Name: Selenomonas
+    ConceptSource: LPSN
+    ConceptId: genus/selenomonas
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00705
+  - Name: Dialister
+    ConceptSource: LPSN
+    ConceptId: genus/dialister
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00696
+  - Name: Megasphaera
+    ConceptSource: LPSN
+    ConceptId: genus/megasphaera
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00697
+  - Name: Veillonella
+    ConceptSource: LPSN
+    ConceptId: genus/veillonella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00710
+  - Name: Acholeplasma
+    ConceptSource: LPSN
+    ConceptId: genus/acholeplasma
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01256.pub2
+  - Name: Mycoplasma
+    ConceptSource: LPSN
+    ConceptId: genus/mycoplasma
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01263
+  - Name: Metamycoplasma
+    ConceptSource: LPSN
+    ConceptId: genus/metamycoplasma
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01263
+    - doi:10.1007/s10482-018-1047-3
+    Reason: >-
+      The description of Mycoplasma, the genus it was formed from, gives its oxygen requirement.
+  - Name: Mycoplasmopsis
+    ConceptSource: LPSN
+    ConceptId: genus/mycoplasmopsis
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01263
+    - doi:10.1007/s10482-018-1047-3
+    Reason: >-
+      The description of Mycoplasma, the genus it was formed from, gives its oxygen requirement.
+  - Name: Malacoplasma
+    ConceptSource: LPSN
+    ConceptId: genus/malacoplasma
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01263
+    - doi:10.1007/s10482-018-1047-3
+    Reason: >-
+      The description of Mycoplasma, the genus it was formed from, gives its oxygen requirement.
+  - Name: Mycoplasmoides
+    ConceptSource: LPSN
+    ConceptId: genus/mycoplasmoides
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01263
+    - doi:10.1007/s10482-018-1047-3
+    Reason: >-
+      The description of Mycoplasma, the genus it was formed from, gives its oxygen requirement.
+  - Name: Ureaplasma
+    ConceptSource: LPSN
+    ConceptId: genus/ureaplasma
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01264
+  - Name: Fusobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/fusobacterium
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00768
+  - Name: Leptotrichia
+    ConceptSource: LPSN
+    ConceptId: genus/leptotrichia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00771
+  - Name: Pseudoleptotrichia
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoleptotrichia
+    Value: aerotolerant-anaerobic
+    Evidence:
+    - doi:10.1099/ijsem.0.004024
+  - Name: Sneathia
+    ConceptSource: LPSN
+    ConceptId: genus/sneathia
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00773
+  - Name: Streptobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/streptobacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00774
+  - Name: Bacteroides
+    ConceptSource: LPSN
+    ConceptId: genus/bacteroides
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00238
+  - Name: Phocaeicola
+    ConceptSource: LPSN
+    ConceptId: genus/phocaeicola
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.007823-0
+  - Name: Dysgonomonas
+    ConceptSource: LPSN
+    ConceptId: genus/dysgonomonas
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00243
+  - Name: Butyricimonas
+    ConceptSource: LPSN
+    ConceptId: genus/butyricimonas
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.007674-0
+  - Name: Odoribacter
+    ConceptSource: LPSN
+    ConceptId: genus/odoribacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00238
+    - doi:10.1099/ijs.0.63458-0
+    Reason: >-
+      The description of Bacteroides, the genus it was formed from, gives its oxygen requirement.
+  - Name: Porphyromonas
+    ConceptSource: LPSN
+    ConceptId: genus/porphyromonas
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00246
+  - Name: Alloprevotella
+    ConceptSource: LPSN
+    ConceptId: genus/alloprevotella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.041376-0
+  - Name: Prevotella
+    ConceptSource: LPSN
+    ConceptId: genus/prevotella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00249
+  - Name: Alistipes
+    ConceptSource: LPSN
+    ConceptId: genus/alistipes
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00251
+  - Name: Parabacteroides
+    ConceptSource: LPSN
+    ConceptId: genus/parabacteroides
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00238
+    - doi:10.1099/ijs.0.64192-0
+    Reason: >-
+      The description of Bacteroides, the genus it was formed from, gives its oxygen requirement.
+  - Name: Tannerella
+    ConceptSource: LPSN
+    ConceptId: genus/tannerella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00248
+  - Name: Capnocytophaga
+    ConceptSource: LPSN
+    ConceptId: genus/capnocytophaga
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00299
+  - Name: Flavobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/flavobacterium
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00312
+  - Name: Myroides
+    ConceptSource: LPSN
+    ConceptId: genus/myroides
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00328
+  - Name: Bergeyella
+    ConceptSource: LPSN
+    ConceptId: genus/bergeyella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00297
+  - Name: Chryseobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/chryseobacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00301
+  - Name: Elizabethkingia
+    ConceptSource: LPSN
+    ConceptId: genus/elizabethkingia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00308
+  - Name: Empedobacter
+    ConceptSource: LPSN
+    ConceptId: genus/empedobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00309
+  - Name: Riemerella
+    ConceptSource: LPSN
+    ConceptId: genus/riemerella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00336
+  - Name: Weeksella
+    ConceptSource: LPSN
+    ConceptId: genus/weeksella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00349
+  - Name: Pedobacter
+    ConceptSource: LPSN
+    ConceptId: genus/pedobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00360
+  - Name: Sphingobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/sphingobacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.2169/internalmedicine.2178-18
+    Reason: >-
+      A clinical-microbiology source gives its oxygen requirement.
+  - Name: Chlamydia
+    ConceptSource: LPSN
+    ConceptId: genus/chlamydia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00364
+    Reason: >-
+      An obligate intracellular bacterium, which grows only in host cells, so that no oxygen requirement of its own is
+      determined.
+  - Name: Brevundimonas
+    ConceptSource: LPSN
+    ConceptId: genus/brevundimonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01210
+    - doi:10.1099/00207713-44-3-499
+    Reason: >-
+      The description of Pseudomonas, the genus it was formed from, gives its oxygen requirement.
+  - Name: Aureimonas
+    ConceptSource: LPSN
+    ConceptId: genus/aureimonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/ijs.0.02359-0
+    - doi:10.1099/ijs.0.027029-0
+    Reason: >-
+      The description of Aurantimonas, the genus it was formed from, gives its oxygen requirement.
+  - Name: Bartonella
+    ConceptSource: LPSN
+    ConceptId: genus/bartonella
+    Value: not-determined
+    Evidence:
+    - doi:10.1128/cmr.00013-17
+    Reason: >-
+      A clinical-microbiology source gives its oxygen requirement.
+  - Name: Brucella
+    ConceptSource: LPSN
+    ConceptId: genus/brucella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00807
+  - Name: Methylobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/methylobacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00830.pub2
+  - Name: Methylorubrum
+    ConceptSource: LPSN
+    ConceptId: genus/methylorubrum
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm02024
+  - Name: Afipia
+    ConceptSource: LPSN
+    ConceptId: genus/afipia
+    Value: not-determined
+    Evidence:
+    - doi:10.1128/jcm.29.11.2450-2460.1991
+    - doi:10.1099/00207713-52-5-1773
+    Reason: >-
+      Its descriptions, as first published and as emended, state no oxygen requirement, so that none is determined.
+  - Name: Agrobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/agrobacterium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00842
+  - Name: Allorhizobium
+    ConceptSource: LPSN
+    ConceptId: genus/allorhizobium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00843
+  - Name: Rhizobium
+    ConceptSource: LPSN
+    ConceptId: genus/rhizobium
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00847
+  - Name: Azorhizobium
+    ConceptSource: LPSN
+    ConceptId: genus/azorhizobium
+    Value: aerobic
+    Evidence:
+    - doi:10.1099/00207713-38-1-89
+  - Name: Paracoccus
+    ConceptSource: LPSN
+    ConceptId: genus/paracoccus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00860
+  - Name: Roseomonas
+    ConceptSource: LPSN
+    ConceptId: genus/roseomonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00888
+  - Name: Teichococcus
+    ConceptSource: LPSN
+    ConceptId: genus/teichococcus
+    Value: aerobic
+    Evidence:
+    - doi:10.1007/s00284-024-03877-5
+  - Name: Azospirillum
+    ConceptSource: LPSN
+    ConceptId: genus/azospirillum
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00891
+  - Name: Inquilinus
+    ConceptSource: LPSN
+    ConceptId: genus/inquilinus
+    Value: aerobic
+    Evidence:
+    - doi:10.13145/bacdive13941.20260601.11
+    - doi:10.13145/bacdive13942.20260601.11
+    Reason: >-
+      The culture collections that hold the type strains of all its species record its oxygen requirement.
+  - Name: Sphingomonas
+    ConceptSource: LPSN
+    ConceptId: genus/sphingomonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00924
+  - Name: Achromobacter
+    ConceptSource: LPSN
+    ConceptId: genus/achromobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00926
+  - Name: Alcaligenes
+    ConceptSource: LPSN
+    ConceptId: genus/alcaligenes
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00927
+  - Name: Bordetella
+    ConceptSource: LPSN
+    ConceptId: genus/bordetella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00928
+  - Name: Kerstersia
+    ConceptSource: LPSN
+    ConceptId: genus/kerstersia
+    Value: aerobic
+    Evidence:
+    - doi:10.13145/bacdive133793.20260601.11
+    - doi:10.13145/bacdive354.20260601.11
+    Reason: >-
+      The culture collections that hold the type strains of all its species record its oxygen requirement.
+  - Name: Oligella
+    ConceptSource: LPSN
+    ConceptId: genus/oligella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00930
+  - Name: Burkholderia
+    ConceptSource: LPSN
+    ConceptId: genus/burkholderia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00935
+  - Name: Cupriavidus
+    ConceptSource: LPSN
+    ConceptId: genus/cupriavidus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00936
+  - Name: Pandoraea
+    ConceptSource: LPSN
+    ConceptId: genus/pandoraea
+    Value: aerobic
+    Evidence:
+    - doi:10.3390/jcm13226905
+    Reason: >-
+      A review gives its oxygen requirement.
+  - Name: Paraburkholderia
+    ConceptSource: LPSN
+    ConceptId: genus/paraburkholderia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00935
+    - doi:10.3389/fgene.2014.00429
+    Reason: >-
+      The description of Burkholderia, the genus it was formed from, gives its oxygen requirement.
+  - Name: Ralstonia
+    ConceptSource: LPSN
+    ConceptId: genus/ralstonia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00941
+  - Name: Wautersia
+    ConceptSource: LPSN
+    ConceptId: genus/wautersia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00941
+    - doi:10.1099/ijs.0.02754-0
+    Reason: >-
+      The description of Ralstonia, the genus it was formed from, gives its oxygen requirement.
+  - Name: Acidovorax
+    ConceptSource: LPSN
+    ConceptId: genus/acidovorax
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00943
+  - Name: Comamonas
+    ConceptSource: LPSN
+    ConceptId: genus/comamonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00945
+  - Name: Delftia
+    ConceptSource: LPSN
+    ConceptId: genus/delftia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00946
+  - Name: Herbaspirillum
+    ConceptSource: LPSN
+    ConceptId: genus/herbaspirillum
+    Value: aerobic
+    Evidence:
+    - doi:10.3389/fcimb.2022.882827
+    Reason: >-
+      A clinical-microbiology source gives its oxygen requirement.
+  - Name: Massilia
+    ConceptSource: LPSN
+    ConceptId: genus/massilia
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00965
+  - Name: Aquabacterium
+    ConceptSource: LPSN
+    ConceptId: genus/aquabacterium
+    Value: microaerophilic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00953
+  - Name: Sutterella
+    ConceptSource: LPSN
+    ConceptId: genus/sutterella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00933
+  - Name: Chromobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/chromobacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00975
+  - Name: Alysiella
+    ConceptSource: LPSN
+    ConceptId: genus/alysiella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00973
+  - Name: Eikenella
+    ConceptSource: LPSN
+    ConceptId: genus/eikenella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00976
+  - Name: Kingella
+    ConceptSource: LPSN
+    ConceptId: genus/kingella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00979
+  - Name: Neisseria
+    ConceptSource: LPSN
+    ConceptId: genus/neisseria
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00981
+  - Name: Simonsiella
+    ConceptSource: LPSN
+    ConceptId: genus/simonsiella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00983
+  - Name: Spirillum
+    ConceptSource: LPSN
+    ConceptId: genus/spirillum
+    Value: microaerophilic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00993
+  - Name: Aeromonas
+    ConceptSource: LPSN
+    ConceptId: genus/aeromonas
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01081
+  - Name: Anaerobiospirillum
+    ConceptSource: LPSN
+    ConceptId: genus/anaerobiospirillum
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01084
+  - Name: Succinivibrio
+    ConceptSource: LPSN
+    ConceptId: genus/succinivibrio
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01087
+  - Name: Shewanella
+    ConceptSource: LPSN
+    ConceptId: genus/shewanella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01100
+  - Name: Francisella
+    ConceptSource: LPSN
+    ConceptId: genus/francisella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01215
+  - Name: Cardiobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/cardiobacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01101
+  - Name: Dichelobacter
+    ConceptSource: LPSN
+    ConceptId: genus/dichelobacter
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01102
+  - Name: Suttonella
+    ConceptSource: LPSN
+    ConceptId: genus/suttonella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01103
+  - Name: Alishewanella
+    ConceptSource: LPSN
+    ConceptId: genus/alishewanella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01088
+  - Name: Coxiella
+    ConceptSource: LPSN
+    ConceptId: genus/coxiella
+    Value: microaerophilic
+    Evidence:
+    - doi:10.1099/mic.0.000707
+    Reason: >-
+      A review gives its oxygen requirement.
+  - Name: Legionella
+    ConceptSource: LPSN
+    ConceptId: genus/legionella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01178
+  - Name: Pseudoxanthomonas
+    ConceptSource: LPSN
+    ConceptId: genus/pseudoxanthomonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01234
+  - Name: Stenotrophomonas
+    ConceptSource: LPSN
+    ConceptId: genus/stenotrophomonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01237
+  - Name: Xanthomonas
+    ConceptSource: LPSN
+    ConceptId: genus/xanthomonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01239
+  - Name: Dyella
+    ConceptSource: LPSN
+    ConceptId: genus/dyella
+    Value: aerobic
+    Evidence:
+    - doi:10.1007/s10482-014-0344-8
+    Reason: >-
+      The description of Rhodanobacteraceae, its family, gives its oxygen requirement.
+  - Name: Balneatrix
+    ConceptSource: LPSN
+    ConceptId: genus/balneatrix
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01192
+  - Name: Halomonas
+    ConceptSource: LPSN
+    ConceptId: genus/halomonas
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.fbm00228.pub2
+    Reason: >-
+      The description of Halomonadaceae, its family, gives its oxygen requirement.
+  - Name: Actinobacillus
+    ConceptSource: LPSN
+    ConceptId: genus/actinobacillus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01197.pub2
+  - Name: Aggregatibacter
+    ConceptSource: LPSN
+    ConceptId: genus/aggregatibacter
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1099/ijs.0.64207-0
+  - Name: Canicola
+    ConceptSource: LPSN
+    ConceptId: genus/canicola
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01198.pub2
+    - doi:10.1099/ijsem.0.004881
+    Reason: >-
+      The description of Haemophilus, the genus it was formed from, gives its oxygen requirement.
+  - Name: Haemophilus
+    ConceptSource: LPSN
+    ConceptId: genus/haemophilus
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01198.pub2
+  - Name: Mannheimia
+    ConceptSource: LPSN
+    ConceptId: genus/mannheimia
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01200.pub2
+  - Name: Pasteurella
+    ConceptSource: LPSN
+    ConceptId: genus/pasteurella
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01201.pub2
+  - Name: Rodentibacter
+    ConceptSource: LPSN
+    ConceptId: genus/rodentibacter
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01201
+    - doi:10.1099/ijsem.0.001866
+    Reason: >-
+      The description of Pasteurella, the genus it was formed from, gives its oxygen requirement.
+  - Name: Acinetobacter
+    ConceptSource: LPSN
+    ConceptId: genus/acinetobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01203.pub2
+  - Name: Moraxella
+    ConceptSource: LPSN
+    ConceptId: genus/moraxella
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01204.pub2
+  - Name: Psychrobacter
+    ConceptSource: LPSN
+    ConceptId: genus/psychrobacter
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01205
+  - Name: Halopseudomonas
+    ConceptSource: LPSN
+    ConceptId: genus/halopseudomonas
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/ijsem.0.005011
+  - Name: Pseudomonas
+    ConceptSource: LPSN
+    ConceptId: genus/pseudomonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01210
+  - Name: Stutzerimonas
+    ConceptSource: LPSN
+    ConceptId: genus/stutzerimonas
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01210
+    - doi:10.1016/j.syapm.2021.126289
+    Reason: >-
+      The description of Pseudomonas, the genus it was formed from, gives its oxygen requirement.
+  - Name: Grimontia
+    ConceptSource: LPSN
+    ConceptId: genus/grimontia
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01952
+  - Name: Listonella
+    ConceptSource: LPSN
+    ConceptId: genus/listonella
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01078
+    - doi:10.1016/S0723-2020(85)80051-5
+    Reason: >-
+      The description of Vibrio, the genus it was formed from, gives its oxygen requirement.
+  - Name: Photobacterium
+    ConceptSource: LPSN
+    ConceptId: genus/photobacterium
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01076
+  - Name: Vibrio
+    ConceptSource: LPSN
+    ConceptId: genus/vibrio
+    Value: facultative-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01078
+  - Name: Bilophila
+    ConceptSource: LPSN
+    ConceptId: genus/bilophila
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01034
+  - Name: Desulfovibrio
+    ConceptSource: LPSN
+    ConceptId: genus/desulfovibrio
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01035
+  - Name: Nitratidesulfovibrio
+    ConceptSource: LPSN
+    ConceptId: genus/nitratidesulfovibrio
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01888
+  - Name: Arcobacter
+    ConceptSource: LPSN
+    ConceptId: genus/arcobacter
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/00207713-41-1-88
+    - doi:10.1099/00207713-42-3-344
+    Reason: >-
+      Its descriptions give its best growth in reduced oxygen, and growth in air at 30 °C and without oxygen at 35 to 37
+      °C, so that no single value describes it.
+  - Name: Campylobacter
+    ConceptSource: LPSN
+    ConceptId: genus/campylobacter
+    Value: not-determined
+    Evidence:
+    - doi:10.1099/00207713-41-1-88
+  - Name: Helicobacter
+    ConceptSource: LPSN
+    ConceptId: genus/helicobacter
+    Value: microaerophilic
+    Evidence:
+    - doi:10.1099/00207713-41-1-88
+  - Name: Wolinella
+    ConceptSource: LPSN
+    ConceptId: genus/wolinella
+    Value: obligate-anaerobic
+    Evidence:
+    - doi:10.1099/00207713-31-4-432
+  - Name: Brachyspira
+    ConceptSource: LPSN
+    ConceptId: genus/brachyspira
+    Value: aerotolerant-anaerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01241
+  - Name: Leptospira
+    ConceptSource: LPSN
+    ConceptId: genus/leptospira
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01244
+  - Name: Borrelia
+    ConceptSource: LPSN
+    ConceptId: genus/borrelia
+    Value: microaerophilic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01246
+  - Name: Treponema
+    ConceptSource: LPSN
+    ConceptId: genus/treponema
+    Value: not-determined
+    Evidence:
+    - doi:10.1002/9781118960608.gbm01249
+  - Name: Deinococcus
+    ConceptSource: LPSN
+    ConceptId: genus/deinococcus
+    Value: aerobic
+    Evidence:
+    - doi:10.1002/9781118960608.gbm00475

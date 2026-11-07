@@ -66,10 +66,14 @@ layout. Terse is correct here.
 messages.
 
 **Infectious agents** — the names of several thousand infectious agents, scientific and vernacular (*Group A
-streptococcus*, *SARS-CoV-2*), their synonyms, rank labels such as *Species* and *Genus*, and the introduction and
-source notices of the standalone list of infectious agents. Read the project instructions about this one before touching it; the
-short version is that if your language uses these names unchanged, do not confirm thousands of entries by
-hand — tell us and we will fill them in for your language in one batch.
+streptococcus*, *SARS-CoV-2*), their synonyms, rank labels such as *Species* and *Genus*, the introduction and
+source notices of the standalone list of infectious agents, and the groups that infectious agents are reported in
+(*Non-fermenting Gram-negative bacilli*), each with a one-sentence definition, beside two properties of bacteria,
+the Gram reaction and the oxygen requirement, and their values. Read the project instructions about this one
+before touching it; the short version is that if your language uses the names of infectious agents unchanged, do
+not confirm thousands of entries by hand — tell us and we will fill them in for your language in one batch. The
+groups, their definitions, and the two properties with their values are ordinary language and need translating
+in every language.
 
 ## The Markup You Will Meet, and What Must Survive
 
@@ -262,10 +266,12 @@ this project thinks:
 
 - **The infectious-agents catalogue is CC BY 4.0 even though the directory it comes from is not.** That
   directory is CC BY-NC-ND 4.0, because it compiles content from LPSN, MycoBank, ICTV, and NHSN under their
-  terms. The catalogue is not, and the reason is what the catalogue actually contains: the extraction is
-  limited to the names of infectious agents, rank labels such as *Species* and *Genus*, controlled values
-  such as *Unknown*, and the standalone list's header and footer, NeoIPC's own introduction and the
-  citations and notices that attribute the sources. None of the upstream descriptions, authorities, or
+  terms, beside ECDC's surveillance protocol and BacDive's strain records, whose terms are no stricter. The
+  catalogue is not, and the reason is what the catalogue actually contains: the extraction is limited to the
+  names of infectious agents, rank labels such as *Species* and *Genus*, controlled values such as *Unknown*,
+  the names and definitions of the reporting groups and the names of the two bacterial properties and their
+  values, all in NeoIPC's own words, and the standalone list's header and footer, NeoIPC's own introduction
+  and the citations and notices that attribute the sources. None of the upstream descriptions, authorities, or
   per-name references — the material those licences exist to protect — is carried across, and names and
   short phrases are not subject to copyright in any case. (A NoDerivatives term could not have governed it
   regardless: a translation *is* a derivative work, so such a catalogue could not lawfully be translated at

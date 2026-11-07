@@ -8,7 +8,7 @@ has its own version file, its own tag stream, and its own GitHub Release stream:
 | NeoIPC Core Surveillance Protocol | `protocol-v*` | `doc/protocol/VERSION` | `NeoIPC-Core-Protocol*.pdf`, `*.docx`, `NeoIPC-Core-Collection-Forms*.zip`, `compatibility.yml` |
 | NeoIPC DHIS2 Metadata Package | `metadata-v*` | `metadata/VERSION` | `metadata-package/*.json`, data-dictionary CSV/XLSX, `compatibility.yml` |
 | NeoIPC Surveillance Reports | `reports-v*` | `reports/VERSION` | `compatibility.yml` (render-ready sources ship in the tag's source archive) |
-| NeoIPC Infectious Agent List | `infectious-agents-v*` | `metadata/common/infectious-agents/VERSION` | `NeoIPC-Infectious-Agents-<ver>.tar.gz` (canonical YAML + po4a-localized YAMLs + UID map + `LICENSE.md` and `README.md`) |
+| NeoIPC Infectious Agent List | `infectious-agents-v*` | `metadata/common/infectious-agents/VERSION` | `NeoIPC-Infectious-Agents-<ver>.tar.gz` (canonical YAML + reporting classification + po4a-localized YAMLs of both + UID map + `LICENSE.md` and `README.md`) |
 | NeoIPC Antibiotics List | `antibiotics-v*` | `metadata/common/antibiotics/VERSION` | `NeoIPC-Antibiotics-<ver>.tar.gz` (substance/group/AWaRe/list-element CSVs + gettext translation catalogue + `LICENSE.md` and `README.md`) |
 
 A release tag is `<product>-vMAJOR.MINOR.PATCH[-prerelease]`, where `-prerelease` is a standard semver
@@ -38,7 +38,10 @@ read different pathogen sources — the metadata package reads the canonical
 concept and synonym tables (`NeoIPC-Pathogen-Concepts.csv`, `NeoIPC-Pathogen-Synonyms.csv`) plus the
 two only the protocol reads (`NeoIPC-Owned-Pathogen-Concepts.csv`, `ListElements.csv`) — so the
 infectious-agent check tracks both sources, and a change to either forces a list re-release before
-either product ships it. For the antibiotics list it is the antibiotics/groups/AWaRe/list-element CSVs.
+either product ships it. It tracks the reporting classification
+(`NeoIPC-Infectious-Agent-Reporting-Groups.yaml`) too, which the list's release bundles, so the version a
+product incorporates names one classification. For the antibiotics list it is the
+antibiotics/groups/AWaRe/list-element CSVs.
 **Translations are out of scope** — the `.<lang>.csv` sidecars that the protocol's pathogen list reads
 and the `.po` catalogues that every other rendering of the lists is translated from both change independently
 of the list content, and requiring a list re-release for every translation update before any

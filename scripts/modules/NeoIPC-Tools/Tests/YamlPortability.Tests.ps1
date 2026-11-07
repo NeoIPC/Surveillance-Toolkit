@@ -505,6 +505,7 @@ foreach ($text in "label: Note: see below`n", "a: b: c`n", "a`nb: c`n", "key: [a
             $files = @($listing.Split([char]0, [System.StringSplitOptions]::RemoveEmptyEntries))
             $files | Should -Contain 'reports/common.yaml' -Because 'the reports read their common strings with a YAML 1.1 reader'
             $files | Should -Contain 'metadata/common/infectious-agents/NeoIPC-Infectious-Agents.yaml'
+            $files | Should -Contain 'metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.yaml'
             $findings = foreach ($file in $files) {
                 foreach ($f in @(Get-NeoIPCYamlPortabilityFinding -Text ([System.IO.File]::ReadAllText((Join-Path $root $file))))) {
                     "${file} $($f.Location): $($f.Message)"

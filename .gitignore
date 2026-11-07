@@ -24,6 +24,7 @@ doc/protocol/*/img/
 common/figure-strings.*.yaml
 glossary.*.yaml
 metadata/common/infectious-agents/NeoIPC-Infectious-Agents.*.yaml
+metadata/common/infectious-agents/NeoIPC-Infectious-Agent-Reporting-Groups.*.yaml
 metadata/common/infectious-agents/Output-Footer.*.adoc
 metadata/common/infectious-agents/Output-Header.*.adoc
 # Rendered metadata distribution packages — generated build artifacts (CI artifact + Release asset), never committed.
