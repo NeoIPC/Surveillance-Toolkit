@@ -647,7 +647,15 @@ function Get-NeoIPCReportingGroupTranslationFinding {
                     New-NeoIPCCheckFinding -Rule 'translation-difference' -Location $Location -Message "At $where the translation lacks the key '$key'."
                     continue
                 }
-                if ($labels.ContainsKey($Place) -and $key -cin $labels[$Place]) { continue }
+                if ($labels.ContainsKey($Place) -and $key -cin $labels[$Place]) {
+                    # A label may change its text but must stay one: po4a writes a translation unquoted unless it needs
+                    # quotes or looks like a number (format_scalar in Locale::Po4a::TransTractor), so a translation such
+                    # as No reads back as a Boolean, and one such as 2 as a number.
+                    if (-not (Test-NeoIPCReportingGroupText $Localized[$key])) {
+                        New-NeoIPCCheckFinding -Rule 'translation-difference' -Location $Location -Message "At $Path/$key the translation holds no text where the classification's label reads '$($Canonical[$key])'."
+                    }
+                    continue
+                }
                 $next = if ($placeOf.ContainsKey($Place) -and $placeOf[$Place].ContainsKey($key)) { $placeOf[$Place][$key] } else { 'Other' }
                 & $compare $Canonical[$key] $Localized[$key] $next "$Path/$key"
             }

@@ -670,6 +670,17 @@ Attributes:
             Get-Rule (Get-NeoIPCReportingGroupTranslationFinding -Classification (Edit-Classification) -Translation (Edit-Classification $Change) -Location 'de') | Should -Be @('translation-difference')
         }
 
+        It 'reports a translated label that is no text, <Case>' -ForEach @(
+            # po4a writes a translation unquoted unless it needs quotes or looks like a number, so a translation such as
+            # No reads back as a Boolean, and one such as 2 as a number.
+            @{ Case = 'a group''s Name read as a Boolean'; Change = { param($c) (Get-Group $c 'gram-positive-cocci')['Name'] = $false } }
+            @{ Case = 'a group''s Definition as a list'; Change = { param($c) (Get-Group $c 'gram-positive-cocci')['Definition'] = [System.Collections.Generic.List[object]]@('x') } }
+            @{ Case = 'a value''s Name left empty'; Change = { param($c) (Get-Attribute $c 'gram-reaction')['Values'][0]['Name'] = '' } }
+            @{ Case = 'an attribute''s Name read as a number'; Change = { param($c) (Get-Attribute $c 'gram-reaction')['Name'] = 2 } }
+        ) {
+            Get-Rule (Get-NeoIPCReportingGroupTranslationFinding -Classification (Edit-Classification) -Translation (Edit-Classification $Change) -Location 'de') | Should -Be @('translation-difference')
+        }
+
         It 'reports a translation that is no mapping' {
             Get-Rule (Get-NeoIPCReportingGroupTranslationFinding -Classification (Edit-Classification) -Translation 'Groups' -Location 'de') | Should -Be @('translation-difference')
         }
