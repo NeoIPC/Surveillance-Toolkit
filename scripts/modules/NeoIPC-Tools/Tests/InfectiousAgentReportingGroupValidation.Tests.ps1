@@ -389,11 +389,57 @@ Attributes:
             Get-Rule (Get-NeoIPCReportingGroupStructureFinding -Classification $c) | Should -Be @('group-shape')
         }
 
-        It 'reports a member that does not name its node in full' {
-            $c = Edit-Classification { param($c) (Get-Group $c 'anaerobes')['Members'][0].Remove('ConceptId') }
-            Get-Rule (Get-NeoIPCReportingGroupStructureFinding -Classification $c) | Should -Be @('entry')
-            $c = Edit-Classification { param($c) (Get-Group $c 'anaerobes')['Members'][0].Remove('ConceptSource') }
-            Get-Rule (Get-NeoIPCReportingGroupStructureFinding -Classification $c) | Should -Be @('entry')
+        It 'reports a member that does not name its node in full, <Case>' -ForEach @(
+            @{ Case = 'without a ConceptId'; Change = { param($c) (Get-Group $c 'anaerobes')['Members'][0].Remove('ConceptId') }; Message = 'The entry has no ConceptId.' }
+            @{ Case = 'with a blank ConceptId'; Change = { param($c) (Get-Group $c 'anaerobes')['Members'][0]['ConceptId'] = ' ' }; Message = 'The entry has no ConceptId.' }
+            @{ Case = 'without a ConceptSource'; Change = { param($c) (Get-Group $c 'anaerobes')['Members'][0].Remove('ConceptSource') }; Message = 'The entry has no ConceptSource.' }
+        ) {
+            $findings = @(Get-NeoIPCReportingGroupStructureFinding -Classification (Edit-Classification $Change))
+            Get-Rule $findings | Should -Be @('entry')
+            $findings[0].Message | Should -BeExactly $Message
+        }
+
+        It 'reports <Case>, which a check of its text alone would pass' -ForEach @(
+            @{ Case = 'a member''s ConceptId as a sequence of one'; Line = '      ConceptId: genus/clostridium'; Written = '      ConceptId: [genus/clostridium]'; Rule = 'entry'; Message = 'ConceptId is neither a text nor an integer.' }
+            @{ Case = 'a member''s ConceptId as a Boolean'; Line = '      ConceptId: genus/clostridium'; Written = '      ConceptId: true'; Rule = 'entry'; Message = 'ConceptId is neither a text nor an integer.' }
+            @{ Case = 'an assignment''s Value as a sequence of one'; Line = '    Value: positive'; Written = '    Value: [positive]'; Rule = 'attribute-value'; Message = 'Value is not a text.' }
+            @{ Case = 'a group''s EcdcCategory as a sequence of one'; Line = '    EcdcCategory: Gram-positive cocci'; Written = '    EcdcCategory: [Gram-positive cocci]'; Rule = 'ecdc-category'; Message = 'EcdcCategory is not a text.' }
+        ) {
+            $pattern = "(?m)^$([regex]::Escape($Line))$"
+            [regex]::Matches($script:ClassificationYaml, $pattern).Count | Should -Be 1
+            $c = ($script:ClassificationYaml -creplace $pattern, $Written) | ConvertFrom-Yaml
+            $findings = @(Get-NeoIPCReportingGroupStructureFinding -Classification $c)
+            Get-Rule $findings | Should -Be @($Rule)
+            $findings[0].Message | Should -BeExactly $Message
+        }
+
+        It 'accepts a ConceptId that is an integer beyond <Bits> bits, which the reader types as <Type>' -ForEach @(
+            @{ Bits = 32; Written = '4294967296'; Type = [long] }
+            @{ Bits = 64; Written = '9223372036854775808'; Type = [System.Numerics.BigInteger] }
+        ) {
+            $c = ($script:ClassificationYaml -creplace '(?m)^    ConceptId: 455206$', "    ConceptId: $Written") | ConvertFrom-Yaml
+            (Get-Group $c 'fungi')['Members'][0]['ConceptId'] | Should -BeOfType $Type
+            @(Get-NeoIPCReportingGroupStructureFinding -Classification $c) | Should -BeNullOrEmpty
+        }
+
+        It 'reports <Case> that is no text as such, rather than as missing or malformed' -ForEach @(
+            @{ Case = 'a member''s Name'; Line = '    - Name: Clostridium'; Written = '    - Name: [Clostridium]'; Rules = @('entry'); Message = 'Name is not a text.' }
+            @{ Case = 'a member''s ConceptSource'; Line = '    ConceptSource: MycoBank'; Written = '    ConceptSource: [MycoBank]'; Rules = @('entry'); Message = 'ConceptSource is not a text.' }
+            @{ Case = 'a group''s Key'; Line = '  - Key: anaerobes'; Written = '  - Key: [anaerobes]'; Rules = @('group-key'); Message = 'Key is not a text.' }
+            @{ Case = 'a group''s Name'; Line = '    Name: Anaerobes'; Written = '    Name: [Anaerobes]'; Rules = @('group-name'); Message = 'Name is not a text.' }
+            @{ Case = 'a group''s EcdcCategory'; Line = '    EcdcCategory: Gram-positive cocci'; Written = '    EcdcCategory: 5'; Rules = @('ecdc-category'); Message = 'EcdcCategory is not a text.' }
+            @{ Case = 'an attribute''s Key'; Line = '- Key: oxygen-requirement'; Written = '- Key: [oxygen-requirement]'; Rules = @('attribute-key', 'attribute-missing'); Message = 'Key is not a text.' }
+            @{ Case = 'an attribute''s Name'; Line = '  Name: Gram reaction'; Written = '  Name: [Gram reaction]'; Rules = @('attribute-name'); Message = 'Name is not a text.' }
+            @{ Case = 'a value''s Key'; Line = '  - Key: negative'; Written = '  - Key: [negative]'; Rules = @('attribute-value'); Message = 'Key is not a text.' }
+            @{ Case = 'a value''s Name'; Line = '    Name: Gram-negative'; Written = '    Name: [Gram-negative]'; Rules = @('attribute-value'); Message = 'Name is not a text.' }
+            @{ Case = 'an assignment''s Value'; Line = '    Value: positive'; Written = '    Value: 5'; Rules = @('attribute-value'); Message = 'Value is not a text.' }
+        ) {
+            $pattern = "(?m)^$([regex]::Escape($Line))$"
+            [regex]::Matches($script:ClassificationYaml, $pattern).Count | Should -Be 1
+            $c = ($script:ClassificationYaml -creplace $pattern, $Written) | ConvertFrom-Yaml
+            $findings = @(Get-NeoIPCReportingGroupStructureFinding -Classification $c)
+            Get-Rule $findings | Should -Be $Rules
+            $findings[0].Message | Should -BeExactly $Message
         }
 
         It 'reports an attribute Key that is no identifier, or one two attributes share' {
@@ -415,6 +461,13 @@ Attributes:
             Get-Rule (Get-NeoIPCReportingGroupStructureFinding -Classification $c) | Should -Be @('attribute-value')
             $c = Edit-Classification { param($c) (Get-Attribute $c 'gram-reaction')['Values'][1]['Key'] = 'positive' }
             Get-Rule (Get-NeoIPCReportingGroupStructureFinding -Classification $c) | Should -Be @('attribute-value')
+        }
+
+        It 'reports an assignment without a Value' {
+            $c = Edit-Classification { param($c) (Get-Attribute $c 'gram-reaction')['Assignments'][0].Remove('Value') }
+            $findings = @(Get-NeoIPCReportingGroupStructureFinding -Classification $c)
+            Get-Rule $findings | Should -Be @('attribute-value')
+            $findings[0].Message | Should -BeExactly 'The assignment has no Value.'
         }
 
         It 'reports a vocabulary that is <Case>' -ForEach @(

@@ -45,6 +45,15 @@ function Test-NeoIPCReportingGroupText {
     $Value -is [string] -and -not [string]::IsNullOrWhiteSpace($Value)
 }
 
+function Test-NeoIPCReportingGroupNonText {
+    # Whether a value is present but no text, such as a number, a Boolean, a list, or a mapping, which a cast to text
+    # would pass: a sequence of one reads as its item.
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param([AllowNull()]$Value)
+    $null -ne $Value -and $Value -isnot [string]
+}
+
 function Get-NeoIPCReportingGroupEvidenceFinding {
     # Checks a list of evidence: identifiers of peer-reviewed or official work, each a DOI as doi:10.<registrant>/<suffix>
     # or a PubMed identifier as PMID:<digits>, none repeated.
@@ -97,10 +106,10 @@ function Get-NeoIPCReportingGroupStructureFinding {
     # Key (lower-case letters and digits joined by hyphens, a stable identifier never translated) and a Name (its
     # English label), both unique, its Evidence, and either Children or Members, never both; an EcdcCategory, where a
     # group has one, from ECDC's nine, the same on every group beneath it, and on every leaf; members and attribute
-    # assignments that name an ontology node by ConceptSource, ConceptId, and Name, with their Evidence; texts where
-    # texts belong; and the attributes every bacterial node takes, each with a vocabulary of values, Key and Name
-    # unique, from which every assignment takes its Value. How the members and assignments meet the ontology is for
-    # Get-NeoIPCReportingGroupMemberFinding and Get-NeoIPCReportingGroupAttributeFinding to check.
+    # assignments that name an ontology node by ConceptSource, ConceptId, a text or an integer, and Name, with their
+    # Evidence; texts where texts belong; and the attributes every bacterial node takes, each with a vocabulary of
+    # values, Key and Name unique, from which every assignment takes its Value. How the members and assignments meet
+    # the ontology is for Get-NeoIPCReportingGroupMemberFinding and Get-NeoIPCReportingGroupAttributeFinding to check.
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param([Parameter(Mandatory)][AllowNull()]$Classification)
@@ -120,12 +129,20 @@ function Get-NeoIPCReportingGroupStructureFinding {
         param([System.Collections.IDictionary]$Entry, [string]$Place, [string]$Location)
         Get-NeoIPCReportingGroupKeyFinding -Mapping $Entry -Place $Place -Location $Location
         foreach ($field in 'Name', 'ConceptSource') {
-            if (-not (Test-NeoIPCReportingGroupText $Entry[$field])) {
+            if (Test-NeoIPCReportingGroupNonText $Entry[$field]) {
+                New-NeoIPCCheckFinding -Rule 'entry' -Location $Location -Message "$field is not a text."
+            }
+            elseif (-not (Test-NeoIPCReportingGroupText $Entry[$field])) {
                 New-NeoIPCCheckFinding -Rule 'entry' -Location $Location -Message "The entry has no $field."
             }
         }
-        if ($null -eq $Entry['ConceptId'] -or [string]::IsNullOrWhiteSpace([string]$Entry['ConceptId'])) {
+        # Typed as the reader typed it: a cast to text reads a sequence of one as its item.
+        $conceptId = $Entry['ConceptId']
+        if ($null -eq $conceptId -or ($conceptId -is [string] -and [string]::IsNullOrWhiteSpace($conceptId))) {
             New-NeoIPCCheckFinding -Rule 'entry' -Location $Location -Message 'The entry has no ConceptId.'
+        }
+        elseif ($conceptId -isnot [string] -and $conceptId -isnot [int] -and $conceptId -isnot [long] -and $conceptId -isnot [System.Numerics.BigInteger]) {
+            New-NeoIPCCheckFinding -Rule 'entry' -Location $Location -Message 'ConceptId is neither a text nor an integer.'
         }
         Get-NeoIPCReportingGroupEvidenceFinding -Evidence $Entry['Evidence'] -Location $Location -Required $true
         if ($Entry.Contains('Reason') -and -not (Test-NeoIPCReportingGroupText $Entry['Reason'])) {
@@ -141,14 +158,20 @@ function Get-NeoIPCReportingGroupStructureFinding {
         }
         $key = [string]$Group['Key']
         $location = "group '$key'"
-        if (-not (Test-NeoIPCReportingGroupText $Group['Key']) -or $key -cnotmatch $keyPattern) {
+        if (Test-NeoIPCReportingGroupNonText $Group['Key']) {
+            New-NeoIPCCheckFinding -Rule 'group-key' -Location $location -Message 'Key is not a text.'
+        }
+        elseif (-not (Test-NeoIPCReportingGroupText $Group['Key']) -or $key -cnotmatch $keyPattern) {
             New-NeoIPCCheckFinding -Rule 'group-key' -Location $location -Message "The group's Key '$key' is not lower-case letters and digits joined by hyphens."
         }
         elseif (-not $groupKeys.Add($key)) {
             New-NeoIPCCheckFinding -Rule 'group-key' -Location $location -Message 'Another group has the same Key.'
         }
         Get-NeoIPCReportingGroupKeyFinding -Mapping $Group -Place 'Group' -Location $location
-        if (-not (Test-NeoIPCReportingGroupText $Group['Name'])) {
+        if (Test-NeoIPCReportingGroupNonText $Group['Name']) {
+            New-NeoIPCCheckFinding -Rule 'group-name' -Location $location -Message 'Name is not a text.'
+        }
+        elseif (-not (Test-NeoIPCReportingGroupText $Group['Name'])) {
             New-NeoIPCCheckFinding -Rule 'group-name' -Location $location -Message 'The group has no Name.'
         }
         elseif (-not $groupNames.Add([string]$Group['Name'])) {
@@ -162,7 +185,10 @@ function Get-NeoIPCReportingGroupStructureFinding {
         $category = $Inherited
         if ($Group.Contains('EcdcCategory')) {
             $category = [string]$Group['EcdcCategory']
-            if (-not $script:NeoIPCEcdcCategories.Contains($category)) {
+            if ($Group['EcdcCategory'] -isnot [string]) {
+                New-NeoIPCCheckFinding -Rule 'ecdc-category' -Location $location -Message 'EcdcCategory is not a text.'
+            }
+            elseif (-not $script:NeoIPCEcdcCategories.Contains($category)) {
                 New-NeoIPCCheckFinding -Rule 'ecdc-category' -Location $location -Message "The EcdcCategory '$category' is not one of the nine of ECDC's Annex 1: $(@($script:NeoIPCEcdcCategories) -join ', ')."
             }
             elseif ($Inherited -and $category -cne $Inherited) {
@@ -228,13 +254,19 @@ function Get-NeoIPCReportingGroupStructureFinding {
         $key = [string]$attribute['Key']
         $location = "attribute '$key'"
         Get-NeoIPCReportingGroupKeyFinding -Mapping $attribute -Place 'Attribute' -Location $location
-        if (-not (Test-NeoIPCReportingGroupText $attribute['Key']) -or $key -cnotmatch $keyPattern) {
+        if (Test-NeoIPCReportingGroupNonText $attribute['Key']) {
+            New-NeoIPCCheckFinding -Rule 'attribute-key' -Location $location -Message 'Key is not a text.'
+        }
+        elseif (-not (Test-NeoIPCReportingGroupText $attribute['Key']) -or $key -cnotmatch $keyPattern) {
             New-NeoIPCCheckFinding -Rule 'attribute-key' -Location $location -Message "The attribute's Key '$key' is not lower-case letters and digits joined by hyphens."
         }
         elseif (-not $attributeKeys.Add($key)) {
             New-NeoIPCCheckFinding -Rule 'attribute-key' -Location $location -Message 'Another attribute has the same Key.'
         }
-        if (-not (Test-NeoIPCReportingGroupText $attribute['Name'])) {
+        if (Test-NeoIPCReportingGroupNonText $attribute['Name']) {
+            New-NeoIPCCheckFinding -Rule 'attribute-name' -Location $location -Message 'Name is not a text.'
+        }
+        elseif (-not (Test-NeoIPCReportingGroupText $attribute['Name'])) {
             New-NeoIPCCheckFinding -Rule 'attribute-name' -Location $location -Message 'The attribute has no Name.'
         }
         elseif (-not $attributeNames.Add([string]$attribute['Name'])) {
@@ -256,13 +288,19 @@ function Get-NeoIPCReportingGroupStructureFinding {
             $valueKey = [string]$value['Key']
             $valueLocation = "$location, value '$valueKey'"
             Get-NeoIPCReportingGroupKeyFinding -Mapping $value -Place 'Value' -Location $valueLocation
-            if (-not (Test-NeoIPCReportingGroupText $value['Key']) -or $valueKey -cnotmatch $keyPattern) {
+            if (Test-NeoIPCReportingGroupNonText $value['Key']) {
+                New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $valueLocation -Message 'Key is not a text.'
+            }
+            elseif (-not (Test-NeoIPCReportingGroupText $value['Key']) -or $valueKey -cnotmatch $keyPattern) {
                 New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $valueLocation -Message "The value's Key '$valueKey' is not lower-case letters and digits joined by hyphens."
             }
             elseif (-not $valueKeys.Add($valueKey)) {
                 New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $valueLocation -Message 'Another value of the attribute has the same Key.'
             }
-            if (-not (Test-NeoIPCReportingGroupText $value['Name'])) {
+            if (Test-NeoIPCReportingGroupNonText $value['Name']) {
+                New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $valueLocation -Message 'Name is not a text.'
+            }
+            elseif (-not (Test-NeoIPCReportingGroupText $value['Name'])) {
                 New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $valueLocation -Message 'The value has no Name.'
             }
             elseif (-not $valueNames.Add([string]$value['Name'])) {
@@ -282,8 +320,15 @@ function Get-NeoIPCReportingGroupStructureFinding {
             }
             $assignmentLocation = "$location, assignment '$($assignment['Name'])'"
             & $checkEntry $assignment 'Assignment' $assignmentLocation
-            if (-not $valueKeys.Contains([string]$assignment['Value'])) {
-                New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $assignmentLocation -Message "The Value '$($assignment['Value'])' is not the Key of one of the attribute's Values."
+            $assigned = $assignment['Value']
+            if ($null -eq $assigned) {
+                New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $assignmentLocation -Message 'The assignment has no Value.'
+            }
+            elseif ($assigned -isnot [string]) {
+                New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $assignmentLocation -Message 'Value is not a text.'
+            }
+            elseif (-not $valueKeys.Contains($assigned)) {
+                New-NeoIPCCheckFinding -Rule 'attribute-value' -Location $assignmentLocation -Message "The Value '$assigned' is not the Key of one of the attribute's Values."
             }
         }
     }
