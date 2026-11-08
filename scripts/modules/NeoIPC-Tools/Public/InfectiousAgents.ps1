@@ -146,8 +146,8 @@ function Add-NeoIPCInfectiousAgentUid {
 
 <#
 .SYNOPSIS
-Return the infectious-agent list's option codes and the code sets the generated DHIS2 rules enumerate, with the
-SHA-256 of the list they come from.
+Return the infectious-agent list's option codes, the code sets the generated DHIS2 rules enumerate, and what the
+reporting classification gives each code, with the SHA-256 of the two files they come from.
 
 .DESCRIPTION
 Reads NeoIPC-Infectious-Agents.yaml and returns the Ids of its Id-bearing nodes, each set in ascending order: the
@@ -162,46 +162,74 @@ reading of the list is held to them through the JSON that Export-NeoIPCInfectiou
 SHA-256 of the bytes the sets were read from, in lower-case hexadecimal, which names the revision of the list a copy
 of the sets comes from.
 
-The list must be UTF-8 without a byte order mark, as every text file of the repository is, and give each Id to one
-node only, as the option-set generator requires; a list that does not is refused, with the file or the Id named.
+It also reads the reporting classification, NeoIPC-Infectious-Agent-Reporting-Groups.yaml beside the list or the file
+-ClassificationPath names, which it cannot do without, and returns in Classification one row per Id, in ascending order: Id; ReportingGroup, the Key of the leaf group the node takes; and
+one property per attribute of the classification, named by its Key in PascalCase (GramReaction, OxygenRequirement), the
+Key of the value the node takes. Each comes from the nearest member or assignment at or above the node, a synonym's
+from its concept, as the classification's checks resolve them, so another language's reading of the classification is
+held to the same resolution; a value is $null where the node takes none, as the group of the Ids 0 and 3561 and the
+attributes outside the bacteria are. Judging the classification is for its checks, which MetadataContent.Tests.ps1
+applies to the committed files. ClassificationSha256 is the SHA-256 of the classification's bytes, also in lower-case
+hexadecimal, which names the revision of the classification the rows come from.
+
+Both files must be UTF-8 without a byte order mark, as every text file of the repository is, and valid YAML; the list
+must give each Id to one node only, as the option-set generator requires; and no attribute's Key may turn, in
+PascalCase, into the name of another property of a row (Id, ReportingGroup, or another attribute's), in any letter
+case. A file that does not, or that cannot be read, is refused, with the file, the Id, or the attribute named, and a
+refusal or a failure ends the call whatever the caller's error preference.
 
 .PARAMETER Path
 Path to the ontology YAML. Defaults to the canonical file in the repository.
 
+.PARAMETER ClassificationPath
+Path to the reporting classification. Defaults to NeoIPC-Infectious-Agent-Reporting-Groups.yaml beside the list.
+
 .OUTPUTS
-[pscustomobject] with Sha256, Concepts, Synonyms, CommonCommensals, ResistanceCategories (one set per category), and
-Viruses.
+[pscustomobject] with Sha256, Concepts, Synonyms, CommonCommensals, ResistanceCategories (one set per category),
+Viruses, ClassificationSha256, and Classification (one row per Id).
 
 .EXAMPLE
 PS> (Get-NeoIPCInfectiousAgentCodeSet).ResistanceCategories.MRSA
 Returns the Ids of the infectious agents for which a finding records whether they are MRSA.
+
+.EXAMPLE
+PS> (Get-NeoIPCInfectiousAgentCodeSet).Classification | Where-Object ReportingGroup -EQ 'anaerobes'
+Returns the rows of the infectious agents in the reporting group of the anaerobes.
 #>
 function Get-NeoIPCInfectiousAgentCodeSet {
     [CmdletBinding()]
     [OutputType([pscustomobject])]
     param(
         [Parameter(Position = 0)]
-        [string]$Path = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml')
+        [string]$Path = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml'),
+
+        [string]$ClassificationPath
     )
 
+    # Under Stop, so that a refusal or a failure ends the call whatever the caller's preference: under SilentlyContinue
+    # or Ignore, PowerShell drops a throw that no try encloses and runs on past it.
+    $ErrorActionPreference = 'Stop'
     Import-Module powershell-yaml -ErrorAction Stop
-    $resolved = Resolve-Path -LiteralPath $Path -ErrorAction Stop
-    # Read once, so that the hash is of the very text the sets come from.
-    $bytes = [System.IO.File]::ReadAllBytes($resolved.ProviderPath)
-    if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
-        throw "The list '$($resolved.ProviderPath)' begins with a byte order mark; it must be UTF-8 without one."
-    }
-    try { $text = [System.Text.UTF8Encoding]::new($false, $true).GetString($bytes) }
-    catch [System.Text.DecoderFallbackException] { throw "The list '$($resolved.ProviderPath)' is not valid UTF-8: $($_.Exception.Message)" }
-    $tree = $text | ConvertFrom-Yaml
+    # Each file is read once, so that each hash is of the very text its part of the output comes from. powershell-yaml
+    # raises a parse error in its own module, beyond this function's preference, so each parse is caught here, to end
+    # the call and to name the file.
+    $list = Read-NeoIPCTextFile -Path $Path -Noun 'list'
+    try { $tree = $list.Text | ConvertFrom-Yaml }
+    catch { throw "The list '$($list.Path)' is not valid YAML: $($_.Exception.Message)" }
     $nodes = @(Get-NeoIPCInfectiousAgentConcept -Node $tree)
     $nameById = [System.Collections.Generic.Dictionary[int, string]]::new()
     foreach ($node in $nodes) {
         if ($nameById.ContainsKey($node.Id)) {
-            throw "The Id $($node.Id) is that of two nodes of '$($resolved.ProviderPath)', '$($nameById[$node.Id])' and '$($node.Name)'; an Id is the option code of one infectious agent."
+            throw "The Id $($node.Id) is that of two nodes of '$($list.Path)', '$($nameById[$node.Id])' and '$($node.Name)'; an Id is the option code of one infectious agent."
         }
         $nameById[$node.Id] = $node.Name
     }
+    $classificationFile = Resolve-NeoIPCReportingClassificationPath -ListPath $list.Path -ClassificationPath $ClassificationPath
+    $classification = Read-NeoIPCTextFile -Path $classificationFile -Noun 'classification'
+    try { $parsed = $classification.Text | ConvertFrom-Yaml }
+    catch { throw "The classification '$($classification.Path)' is not valid YAML: $($_.Exception.Message)" }
+    try { $rows = @(Get-NeoIPCInfectiousAgentClassificationRow -Classification $parsed -Tree $tree) }
+    catch { throw "The classification '$($classification.Path)' cannot be read into rows: $($_.Exception.Message)" }
     $resistance = Get-NeoIPCResistanceCodeSet -Node $tree
     $categories = [ordered]@{}
     foreach ($category in $resistance.Keys) {
@@ -209,61 +237,85 @@ function Get-NeoIPCInfectiousAgentCodeSet {
         $categories[$script:NeoIPCResistanceCategoryName[$category]] = [int[]]@($resistance[$category])
     }
     [pscustomobject][ordered]@{
-        Sha256               = [System.Convert]::ToHexStringLower([System.Security.Cryptography.SHA256]::HashData($bytes))
+        Sha256               = [System.Convert]::ToHexStringLower([System.Security.Cryptography.SHA256]::HashData($list.Bytes))
         Concepts             = [int[]]@($nodes | Where-Object { -not $_.IsSynonym } | ForEach-Object { [int]$_.Id } | Sort-Object)
         Synonyms             = [int[]]@($nodes | Where-Object { $_.IsSynonym } | ForEach-Object { [int]$_.Id } | Sort-Object)
         CommonCommensals     = [int[]]@(Get-NeoIPCCommonCommensalCodeSet -Node $tree)
         ResistanceCategories = [pscustomobject]$categories
         Viruses              = [int[]]@(Get-NeoIPCVirusCodeSet -Node $tree)
+        ClassificationSha256 = [System.Convert]::ToHexStringLower([System.Security.Cryptography.SHA256]::HashData($classification.Bytes))
+        Classification       = [pscustomobject[]]$rows
     }
 }
 
 
 <#
 .SYNOPSIS
-Write the infectious-agent list's option codes and code sets, with the SHA-256 of the list, to a JSON file.
+Write the infectious-agent list's option codes and code sets, and what the reporting classification gives each code,
+with the SHA-256 of the two files, to a JSON file.
 
 .DESCRIPTION
 Writes what Get-NeoIPCInfectiousAgentCodeSet returns as JSON, in UTF-8 without a byte order mark, with LF line endings
 and a final line break, for consumers outside PowerShell, such as a test that holds another language's reading of the
-list to the sets the generated DHIS2 metadata takes. Its Sha256 names the revision of the list the file was written
-from. The output is named by -OutputPath alone, and the cmdlet refuses to write over the list it reads, whether the
-output path names the list or reaches it through a link: since no comparison of paths tells a link from another file,
-it refuses any existing file that holds the list's very bytes, an identical copy of the list among them.
+list and its classification to the sets the generated DHIS2 metadata takes and to the rows the classification's
+checks resolve. Its Sha256 and ClassificationSha256 name the revisions of the two files it was written from. The output
+is named by -OutputPath alone, and the cmdlet refuses to write over either file it reads, whether the output path
+names it or reaches it through a link: since no comparison of paths tells a link from another file, it refuses any
+existing file that holds the very bytes of the list or the classification, an identical copy among them. A refusal or
+a failure ends the call before anything is written, whatever the caller's error preference.
 
 .PARAMETER Path
 Path to the ontology YAML. Defaults to the canonical file in the repository.
 
+.PARAMETER ClassificationPath
+Path to the reporting classification. Defaults to NeoIPC-Infectious-Agent-Reporting-Groups.yaml beside the list.
+
 .PARAMETER OutputPath
-The JSON file to write. An existing file is replaced, unless it is the list or holds the list's bytes.
+The JSON file to write. An existing file is replaced, unless it is the list or the classification, or holds the bytes
+of either.
 
 .EXAMPLE
 PS> Export-NeoIPCInfectiousAgentCodeSet -OutputPath infectious-agent-code-sets.json
-Writes the canonical list's code sets to infectious-agent-code-sets.json in the current location.
+Writes the canonical list's option codes and code sets, and what the classification beside it gives each code, to
+infectious-agent-code-sets.json in the current location.
 #>
 function Export-NeoIPCInfectiousAgentCodeSet {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Position = 0)]
         [string]$Path = (Join-Path $PSScriptRoot '..' '..' '..' '..' 'metadata' 'common' 'infectious-agents' 'NeoIPC-Infectious-Agents.yaml'),
+        [string]$ClassificationPath,
         [Parameter(Mandatory)]
         [string]$OutputPath
     )
 
+    # Under Stop, so that a refusal or a failure ends the call whatever the caller's preference: under SilentlyContinue
+    # or Ignore, PowerShell drops a throw that no try encloses and runs on past it, into a write over the very file a
+    # refusal protects.
+    $ErrorActionPreference = 'Stop'
     # The list is the input at Position 0, as in the module's other cmdlets, and the output is named, so that a list
-    # path given where the output belongs cannot replace the list it is read from; nor can the output name the list.
+    # path given where the output belongs cannot replace the list it is read from; nor can the output name the list or
+    # the classification.
     $listPath = [System.IO.Path]::GetFullPath((Resolve-Path -LiteralPath $Path -ErrorAction Stop).ProviderPath)
+    if (-not (Test-Path -LiteralPath $listPath -PathType Leaf)) { throw "The list '$listPath' is no file." }
+    $classificationFile = [System.IO.Path]::GetFullPath((Resolve-NeoIPCReportingClassificationPath -ListPath $listPath -ClassificationPath $ClassificationPath))
     $target = [System.IO.Path]::GetFullPath($PSCmdlet.GetUnresolvedProviderPathFromPSPath($OutputPath))
     $comparison = if ($IsLinux) { [System.StringComparison]::Ordinal } else { [System.StringComparison]::OrdinalIgnoreCase }
-    if ([string]::Equals($listPath, $target, $comparison)) {
-        throw "The output path '$OutputPath' is the list the code sets are read from; name another file."
+    foreach ($source in @(@{ File = $listPath; Noun = 'list' }, @{ File = $classificationFile; Noun = 'classification' })) {
+        if ([string]::Equals($source.File, $target, $comparison)) {
+            throw "The output path '$OutputPath' is the $($source.Noun) the code sets are read from; name another file."
+        }
     }
-    $sets = Get-NeoIPCInfectiousAgentCodeSet -Path $Path
-    # A link to the list, or a path through a linked directory, names the list by another path, which no comparison
-    # of paths tells from another file; what it holds does, since every such alias reads back the list's very bytes.
-    if ([System.IO.File]::Exists($target) -and
-        [System.Convert]::ToHexStringLower([System.Security.Cryptography.SHA256]::HashData([System.IO.File]::ReadAllBytes($target))) -ceq $sets.Sha256) {
-        throw "The output path '$OutputPath' holds the very bytes of the list the code sets are read from, as a link to the list does; name another file."
+    $sets = Get-NeoIPCInfectiousAgentCodeSet -Path $Path -ClassificationPath $classificationFile
+    # A link to a file read, or a path through a linked directory, names that file by another path, which no
+    # comparison of paths tells from another file; what it holds does, since every such alias reads back its very bytes.
+    if ([System.IO.File]::Exists($target)) {
+        $held = [System.Convert]::ToHexStringLower([System.Security.Cryptography.SHA256]::HashData([System.IO.File]::ReadAllBytes($target)))
+        foreach ($read in @(@{ Sha256 = $sets.Sha256; Noun = 'list' }, @{ Sha256 = $sets.ClassificationSha256; Noun = 'classification' })) {
+            if ($held -ceq $read.Sha256) {
+                throw "The output path '$OutputPath' holds the very bytes of the $($read.Noun) the code sets are read from, as a link to it does; name another file."
+            }
+        }
     }
     $json = ($sets | ConvertTo-Json -Depth 100) + "`n"
     if ($PSCmdlet.ShouldProcess($OutputPath, 'Write the infectious-agent code sets')) {

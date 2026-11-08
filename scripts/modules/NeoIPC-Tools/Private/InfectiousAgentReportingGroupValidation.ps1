@@ -7,7 +7,8 @@
 # assignment on its path to the root. Like the ontology's checks (InfectiousAgentValidation.ps1), each Get-NeoIPC*Finding
 # function returns one [pscustomobject] per finding, from New-NeoIPCCheckFinding, and never throws;
 # MetadataContent.Tests.ps1 applies them to the committed files, and CI applies the translation check to the localized
-# classifications po4a writes.
+# classifications po4a writes. Get-NeoIPCInfectiousAgentClassificationRow hands on what the member and attribute checks
+# resolve, for the code sets that Get-NeoIPCInfectiousAgentCodeSet returns.
 
 # The keys of each place in the classification, compared ordinally: powershell-yaml reads mappings case-insensitively,
 # so a key in another letter case would pass a lookup unseen. YamlPortability.Tests.ps1 reports a key repeated in
@@ -36,6 +37,30 @@ $script:NeoIPCReportingGroupRequiredAttributes = @('gram-reaction', 'oxygen-requ
 # one for an infectious agent the laboratory could not identify (Id 3561). Neither says what the agent was, so no group
 # could hold it.
 $script:NeoIPCUngroupedInfectiousAgentIds = @(0, 3561)
+
+# The classification's file name, under which it sits beside the list.
+$script:NeoIPCReportingClassificationFileName = 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml'
+
+function Resolve-NeoIPCReportingClassificationPath {
+    # The provider path of the classification a code-set cmdlet reads: the file ClassificationPath names, or the
+    # classification beside the list where it names none. Throws, naming the path and how it was chosen, where it names
+    # no file.
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$ListPath, [AllowEmptyString()][string]$ClassificationPath)
+
+    $candidate = $ClassificationPath
+    $chosen = 'which -ClassificationPath names'
+    if (-not $candidate) {
+        $candidate = Join-Path ([System.IO.Path]::GetDirectoryName($ListPath)) $script:NeoIPCReportingClassificationFileName
+        $chosen = 'the one beside the list, which is read unless -ClassificationPath names another'
+    }
+    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+        $what = if (Test-Path -LiteralPath $candidate) { 'is no file' } else { 'does not exist' }
+        throw "The classification '$candidate', $chosen, $what."
+    }
+    (Resolve-Path -LiteralPath $candidate -ErrorAction Stop).ProviderPath
+}
 
 function Test-NeoIPCReportingGroupText {
     # Whether a value is a text with something in it.
@@ -654,6 +679,48 @@ function Get-NeoIPCReportingGroupAttributeFinding {
     }
     catch {
         New-NeoIPCCheckFinding -Rule 'assignment' -Location '' -Message "The attributes cannot be checked: $($_.Exception.Message)"
+    }
+}
+
+function Get-NeoIPCInfectiousAgentClassificationRow {
+    # What the classification gives every Id-bearing node of a parsed ontology tree, resolved as the member and
+    # attribute checks resolve it, for Get-NeoIPCInfectiousAgentCodeSet to hand on: one row per Id, in ascending order,
+    # with Id; ReportingGroup, the Key of the leaf group the node takes; and one property per attribute, named by its
+    # Key in PascalCase (gram-reaction is GramReaction), the Key of the value the node takes. A value is $null where
+    # the node takes none: the group of the Ids 0 and 3561, the attributes outside the bacteria, and whatever the checks
+    # would report as missing, since judging the classification is theirs. Throws where an attribute has no Key, or
+    # where its Key turns, in any letter case, into the name of another property, which would take the place of that
+    # property's value, since a row's property names ignore letter case.
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    param([Parameter(Mandatory)][AllowNull()]$Classification, [Parameter(Mandatory)][AllowNull()]$Tree)
+
+    $index = Get-NeoIPCInfectiousAgentIndex -Tree $Tree
+    $groups = [ordered]@{}
+    $attributes = [ordered]@{}
+    if ($Classification -is [System.Collections.IDictionary]) {
+        $leaves = @(Get-NeoIPCReportingGroupLeaf -Groups $Classification['Groups'])
+        $placements = foreach ($leaf in $leaves) {
+            Get-NeoIPCReportingGroupPlacement -Entry $leaf.Group['Members'] -Location $leaf.Location -Value $leaf.Key -Noun 'member'
+        }
+        $groups = (Resolve-NeoIPCReportingGroupPlacement -Placement @($placements) -Index $index -Noun 'member').Resolved
+        foreach ($attribute in @($Classification['Attributes'])) {
+            if ($attribute -isnot [System.Collections.IDictionary]) { continue }
+            $key = [string]$attribute['Key']
+            $name = -join @($key -split '-' | Where-Object { $_ } | ForEach-Object { $_.Substring(0, 1).ToUpperInvariant() + $_.Substring(1) })
+            if (-not $name) { throw 'An attribute has no Key to hand its values on under.' }
+            if ($name -in @('Id', 'ReportingGroup') -or $attributes.Contains($name)) {
+                throw "The attribute '$key' would be handed on as $name, the name of another property."
+            }
+            $location = "attribute '$key'"
+            $placements = Get-NeoIPCReportingGroupPlacement -Entry $attribute['Assignments'] -Location $location -Noun 'assignment'
+            $attributes[$name] = (Resolve-NeoIPCReportingGroupPlacement -Placement @($placements) -Index $index -Noun 'assignment' -BacteriaOnly).Resolved
+        }
+    }
+    foreach ($node in @($index.IdBearing | Sort-Object { [long]$_.Id })) {
+        $row = [ordered]@{ Id = [int]$node.Id; ReportingGroup = $groups[$node.Location] }
+        foreach ($name in $attributes.Keys) { $row[$name] = $attributes[$name][$node.Location] }
+        [pscustomobject]$row
     }
 }
 

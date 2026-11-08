@@ -27,8 +27,10 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   the toolkit meets read alike, and that those readers read it alike.
 - NeoIPC-Tools' `Get-NeoIPCInfectiousAgentCodeSet` returns the list's option codes, as its concepts and synonyms, and
   the code sets the generated DHIS2 rules enumerate: the common commensals, the infectious agents each resistance
-  category (3GCR, CARBR, COLR, MRSA, VRE) applies to, and the viruses, with the list's SHA-256.
-  `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON, for consumers in other languages.
+  category (3GCR, CARBR, COLR, MRSA, VRE) applies to, and the viruses, with the list's SHA-256; and, for every `Id`,
+  the reporting group, Gram reaction, and oxygen requirement that the reporting classification gives it, as the
+  classification's checks resolve them, with the classification's SHA-256. `Export-NeoIPCInfectiousAgentCodeSet`
+  writes them as JSON, for consumers in other languages.
 - `NeoIPC-Infectious-Agent-Reporting-Groups.yaml`, the reporting classification above the ontology. It holds a tree of
   reporting groups after the categories of Annex 1 of ECDC's protocol for the surveillance of healthcare-associated
   infections in intensive care units (HAI-Net ICU protocol, version 2.3), into which every `Id`-bearing node falls but
