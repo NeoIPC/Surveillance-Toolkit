@@ -828,6 +828,21 @@ Attributes:
         }
     }
 
+    It 'places well-known infectious agents of the committed files where the classification puts them' {
+        # Known answers, each read from the two files by hand through the nearest member and assignment on the agent's
+        # lineage, a genus, family, order, or phylum: the test above holds every node to a group and values that exist,
+        # which a resolution placing nodes in the wrong ones would still pass.
+        $rows = @((Get-NeoIPCInfectiousAgentCodeSet).Classification | Where-Object { $_.Id -in 934, 1296, 1807, 1958, 2273, 2600 })
+        Get-TestRow -Row $rows | Should -BeExactly @(
+            '934|gram-positive-cocci|positive|facultative-anaerobic'
+            '1296|anaerobes|negative|obligate-anaerobic'
+            '1807|enterobacterales|negative|facultative-anaerobic'
+            '1958|non-fermenting-gram-negative-bacilli|negative|aerobic'
+            '2273|yeasts|<null>|<null>'
+            '2600|gram-positive-cocci|positive|facultative-anaerobic'
+        )
+    }
+
     It 'reads the list a relative path names, against the current location' {
         # .NET resolves a relative path against the process's directory, which Push-Location leaves where it is.
         $path = New-TestCodeSetList -Name 'relative'
