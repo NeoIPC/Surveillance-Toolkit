@@ -13,6 +13,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.2.0-alpha] - 2026-11-09
+
 ### Added
 
 - Each package says how to deploy it: its manifest's `deployment` entry names NeoIPC-Tools' `Deploy-NeoIPCMetadata`
@@ -29,8 +31,9 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   `NEOIPC_PATHOGENS` option set. The Maintenance app's option-set editor deletes each of them; through the API,
   each is removed from the set's `options` before its own `DELETE`, which DHIS2 2.40.12 refuses while the set
   lists it.
-- The infectious-agent options and the program rules generated from the infectious-agent list follow the list's
-  reconciliation with LPSN, ICTV, MycoBank, and the NHSN Organism List (2024), which the list's CHANGELOG describes. The
+- The package incorporates the infectious-agent list at 0.2.0-alpha, so its infectious-agent options and the program
+  rules generated from the list follow the list's reconciliation with LPSN, ICTV, MycoBank, and the NHSN Organism List
+  (2024), which the list's CHANGELOG describes. The
   `NEOIPC_PATHOGENS` option set gains the options of the list's 71 new `Id`s, 3570 to 3640, and an option whose node
   changes its rank or turns from a concept into a synonym, or back, takes its new label. The BSI form's
   recognized-pathogen rules enumerate the list's common commensals, among them the coagulase-negative staphylococci
