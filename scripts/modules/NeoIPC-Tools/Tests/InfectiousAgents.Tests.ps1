@@ -215,6 +215,45 @@ try { $call } catch { `$_.Exception.Message }
                 Should -BeExactly "id,uid`n0,$($added[0].Uid)`n2,$($added[1].Uid)`n10,a1234567890`n11,$($added[2].Uid)`n"
         }
 
+        It 'refuses a sidecar on a drive of a provider other than the file system, and writes nothing' {
+            # The provider path of a variable is no file-system path: .NET would read it relative to the process's
+            # directory, and PowerShell's cmdlets relative to the current location, here both the list's directory.
+            $directory = New-TestList -Name 'variable-sidecar' -Sidecar "id,uid`n10,a1234567890`n"
+            $processDirectory = [System.Environment]::CurrentDirectory
+            [System.Environment]::CurrentDirectory = $directory
+            Push-Location -LiteralPath $directory
+            try {
+                { Add-NeoIPCInfectiousAgentUid -Path (Join-Path $directory 'NeoIPC-Infectious-Agents.yaml') -UidSidecarPath 'Variable:\NeoIPCTestSidecar' } |
+                    Should -Throw -ExpectedMessage "The sidecar 'Variable:\NeoIPCTestSidecar' is on a drive of the Variable provider, not in the file system*"
+            }
+            finally {
+                Pop-Location
+                [System.Environment]::CurrentDirectory = $processDirectory
+            }
+            @(Get-ChildItem -LiteralPath $directory -Name | Sort-Object) | Should -Be @('NeoIPC-Infectious-Agents.uids.csv', 'NeoIPC-Infectious-Agents.yaml')
+        }
+
+        It 'ends at a <Case> it refuses, writing nothing, under the caller''s SilentlyContinue' -ForEach @(
+            @{ Case = 'sidecar on a drive of another provider'; Name = 'silently-variable'; Sidecar = "id,uid`n10,a1234567890`n"; Named = 'Variable:\NeoIPCTestSidecar'; Message = "*The sidecar 'Variable:\NeoIPCTestSidecar' is on a drive of the Variable provider*" }
+            @{ Case = 'sidecar row whose id is no Id'; Name = 'silently-odd'; Sidecar = "id,uid`nfoo,a1234567890`n"; Named = 'none'; Message = '*has rows whose id is no Id: foo*' }
+        ) {
+            # In a process of its own, whose global preference the module's functions see: inside Pester's own try, the
+            # first error ends the call whatever the cmdlet does. The child works in the list's directory, where a
+            # dropped refusal would have written the sidecar or the variable's name; NormalView prints the message on
+            # one line.
+            $directory = New-TestList -Name $Name -Sidecar $Sidecar
+            $before = [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv'))
+            $caller = Join-Path $TestDrive "$Name.ps1"
+            $callerText = "param(`$Module, `$Directory, `$Named)`n`$PSStyle.OutputRendering = 'PlainText'`n`$ErrorView = 'NormalView'`n`$global:ErrorActionPreference = 'SilentlyContinue'`nImport-Module `$Module`nSet-Location -LiteralPath `$Directory`n[System.Environment]::CurrentDirectory = `$Directory`n`$arguments = @{ Path = (Join-Path `$Directory 'NeoIPC-Infectious-Agents.yaml') }`nif (`$Named -ne 'none') { `$arguments.UidSidecarPath = `$Named }`n`$added = @(Add-NeoIPCInfectiousAgentUid @arguments)`n""added `$(`$added.Count)""`n"
+            [System.IO.File]::WriteAllText($caller, $callerText, [System.Text.UTF8Encoding]::new($false))
+            $module = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+            $said = @(& (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $caller -Module $module -Directory $directory -Named $Named 2>&1 | ForEach-Object { "$_" })
+            ($said -join "`n") | Should -BeLike $Message
+            $said | Should -Not -BeLike 'added*'
+            @(Get-ChildItem -LiteralPath $directory -Name | Sort-Object) | Should -Be @('NeoIPC-Infectious-Agents.uids.csv', 'NeoIPC-Infectious-Agents.yaml')
+            [System.IO.File]::ReadAllText((Join-Path $directory 'NeoIPC-Infectious-Agents.uids.csv')) | Should -BeExactly $before
+        }
+
         It 'writes nothing with WhatIf' {
             $directory = New-TestList -Name 'what-if' -Sidecar "id,uid`n"
             @(Add-NeoIPCInfectiousAgentUid -Path (Join-Path $directory 'NeoIPC-Infectious-Agents.yaml') -WhatIf) | Should -BeNullOrEmpty
@@ -533,16 +572,53 @@ Attributes:
         { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "*'$classification'*"
     }
 
-    It 'refuses a <Noun> that is not valid YAML, naming the file' -ForEach @(
-        @{ Noun = 'list' }
-        @{ Noun = 'classification' }
+    It 'refuses a file that is no reporting classification, naming it: <Case>' -ForEach @(
+        @{ Case = 'an empty file'; Kind = 'empty' }
+        @{ Case = 'a mapping of other keys'; Kind = 'other' }
+        @{ Case = 'a mapping of Groups without Attributes'; Kind = 'no-attributes' }
+        @{ Case = 'a mapping with no group'; Kind = 'no-group' }
+        @{ Case = 'a mapping whose Groups hold no group'; Kind = 'no-group-mapping' }
+        @{ Case = 'the list itself, which -ClassificationPath names'; Kind = 'list' }
     ) {
-        $arguments = @{ Name = "yaml-$Noun" }
-        if ($Noun -eq 'list') { $arguments.Yaml = $script:CodeSetYaml.Replace("`r`n", "`n") + "`nbroken: [`n" }
-        else { $arguments.Classification = $script:CodeSetClassificationYaml.Replace("`r`n", "`n") + "`nbroken: [`n" }
+        # None holds anything for the checks to judge; read into rows, each would come back without groups, without the
+        # attributes' columns, or not at all.
+        $classification = $script:CodeSetClassificationYaml.Replace("`r`n", "`n")
+        $attributes = $classification.IndexOf("`nAttributes:") + 1
+        $text = switch ($Kind) {
+            'empty' { '' }
+            'other' { "Foo: bar`n" }
+            'no-attributes' { $classification.Substring(0, $attributes) }
+            'no-group' { "Groups: []`n" + $classification.Substring($attributes) }
+            'no-group-mapping' { "Groups: [foo]`n" + $classification.Substring($attributes) }
+            default { $classification }
+        }
+        $path = New-TestCodeSetList -Name "not-classification-$Kind" -Classification $text
+        $arguments = @{ Path = $path }
+        $file = Join-Path (Split-Path -Parent $path) 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml'
+        if ($Kind -eq 'list') {
+            $arguments.ClassificationPath = $path
+            $file = $path
+        }
+        { Get-NeoIPCInfectiousAgentCodeSet @arguments } | Should -Throw -ExpectedMessage "The classification '$file' is no reporting classification*"
+    }
+
+    It 'refuses a <Noun> that is not valid YAML, naming the file and where its parser stopped: <Case>' -ForEach @(
+        @{ Noun = 'list'; Case = 'an unclosed sequence'; Appended = "`nbroken: [`n"; Message = '*did not find expected node content*' }
+        @{ Noun = 'classification'; Case = 'an unclosed sequence'; Appended = "`nbroken: [`n"; Message = '*did not find expected node content*' }
+        @{ Noun = 'classification'; Case = 'a repeated key'; Appended = "`nGroups: []`n"; Message = '*Duplicate key*' }
+    ) {
+        $source = if ($Noun -eq 'list') { $script:CodeSetYaml } else { $script:CodeSetClassificationYaml }
+        $text = $source.Replace("`r`n", "`n") + $Appended
+        $arguments = @{ Name = "yaml-$Noun-$($Appended.Length)" }
+        if ($Noun -eq 'list') { $arguments.Yaml = $text } else { $arguments.Classification = $text }
         $path = New-TestCodeSetList @arguments
         $file = if ($Noun -eq 'list') { $path } else { Join-Path (Split-Path -Parent $path) 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml' }
-        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "The $Noun '$file' is not valid YAML*"
+        # The parser stops at the end of the file for an unclosed sequence, past the file's last line, and for a
+        # repeated key at the line of that key, here the text's last line, whose number is the count of its line feeds.
+        $where = if ($Case -eq 'a repeated key') { "at line $(@($text -split "`n").Count - 1), column 1" } else { 'at the end of the file' }
+        $thrown = { Get-NeoIPCInfectiousAgentCodeSet -Path $path } |
+            Should -Throw -ExpectedMessage "The $Noun '$file' is not valid YAML ${where}: $Message" -PassThru
+        $thrown.Exception.Message | Should -Not -BeLike '*Load*' -Because 'the parser''s message is given without the wrapper PowerShell puts around it'
     }
 
     It 'refuses a path that names a directory, saying so: <Case>' -ForEach @(
@@ -573,7 +649,10 @@ Attributes:
         $lock = $null
         if ($IsWindows) { $lock = [System.IO.File]::Open($classification, 'Open', 'Read', 'None') }
         else { [System.IO.File]::SetUnixFileMode($classification, [System.IO.UnixFileMode]::None) }
-        try { { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "The classification '$classification' cannot be read*" }
+        try {
+            $thrown = { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "The classification '$classification' cannot be read*" -PassThru
+            $thrown.Exception.Message | Should -Not -BeLike '*ReadAllBytes*' -Because 'the reader''s message is given without the wrapper PowerShell puts around it'
+        }
         finally {
             if ($lock) { $lock.Dispose() }
             else { [System.IO.File]::SetUnixFileMode($classification, [System.IO.UnixFileMode]'UserRead, UserWrite') }
@@ -594,6 +673,7 @@ Attributes:
         @{ Case = 'the Id'; Key = 'id'; Name = 'Id' }
         @{ Case = 'the Id, in another letter case'; Key = 'i-d'; Name = 'ID' }
         @{ Case = 'another attribute'; Key = 'gram-reaction'; Name = 'GramReaction' }
+        @{ Case = 'another attribute, in another letter case'; Key = 'gramreaction'; Name = 'Gramreaction' }
     ) {
         $classification = $script:CodeSetClassificationYaml.Replace('- Key: oxygen-requirement', "- Key: $Key")
         $path = New-TestCodeSetList -Name "classification-clash-$Key" -Classification $classification
@@ -605,6 +685,83 @@ Attributes:
         $path = New-TestCodeSetList -Name 'classification-keyless' -Classification $classification
         $file = Join-Path (Split-Path -Parent $path) 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml'
         { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "The classification '$file' cannot be read into rows: An attribute has no Key*"
+    }
+
+    It 'refuses an attribute that is no mapping, naming the classification and the attribute' {
+        # Its column would otherwise vanish from every row unseen.
+        $classification = $script:CodeSetClassificationYaml.Replace("`r`n", "`n") + "`n- oxygen`n"
+        $path = New-TestCodeSetList -Name 'classification-attribute-scalar' -Classification $classification
+        $file = Join-Path (Split-Path -Parent $path) 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml'
+        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } |
+            Should -Throw -ExpectedMessage "The classification '$file' cannot be read into rows: An attribute, 'oxygen', is no mapping with a Key to hand its values on under*"
+    }
+
+    It 'reads a classification without Attributes into rows without their columns, where its rows are read on their own' {
+        # The cmdlets refuse such a file before its rows are read; the rows themselves refuse only an attribute that is
+        # there and no mapping, such as the null item of Attributes: [~].
+        $parameters = @{ List = $script:CodeSetYaml; Classification = $script:CodeSetClassificationYaml }
+        InModuleScope 'NeoIPC-Tools' -Parameters $parameters {
+            param($List, $Classification)
+            Import-Module powershell-yaml -ErrorAction Stop
+            $tree = $List | ConvertFrom-Yaml
+            $parsed = $Classification | ConvertFrom-Yaml
+            $parsed.Remove('Attributes')
+            $rows = @(Get-NeoIPCInfectiousAgentClassificationRow -Classification $parsed -Tree $tree)
+            $rows.Count | Should -BeGreaterThan 0
+            @($rows | ForEach-Object { $_.PSObject.Properties.Name -join ',' } | Sort-Object -Unique) | Should -Be @('Id,ReportingGroup')
+            $parsed['Attributes'] = [System.Collections.Generic.List[object]]::new()
+            $parsed['Attributes'].Add($null)
+            { Get-NeoIPCInfectiousAgentClassificationRow -Classification $parsed -Tree $tree } | Should -Throw -ExpectedMessage "An attribute, '', is no mapping*"
+        }
+    }
+
+    It 'refuses an attribute whose Key gives its values no name to be handed on under: <Case>' -ForEach @(
+        @{ Case = 'spaces'; Key = "'  '"; Refusal = "An attribute's Key, '  ', is no text with a word in it" }
+        @{ Case = 'hyphens alone'; Key = "'- -'"; Refusal = "An attribute's Key, '- -', is no text with a word in it" }
+        @{ Case = 'punctuation alone'; Key = "'!'"; Refusal = "An attribute's Key, '!', is no text with a word in it" }
+        @{ Case = 'a number'; Key = '5'; Refusal = "An attribute's Key is a number, not a text with a word in it" }
+        @{ Case = 'a Boolean'; Key = 'true'; Refusal = "An attribute's Key is a Boolean, not a text with a word in it" }
+        @{ Case = 'a sequence'; Key = '[gram, reaction]'; Refusal = "An attribute's Key is a sequence, not a text with a word in it" }
+        @{ Case = 'a mapping'; Key = '{gram: reaction}'; Refusal = "An attribute's Key is a mapping, not a text with a word in it" }
+    ) {
+        # A Key that is no text is named by its kind, since PowerShell would quote a sequence's items as if they were
+        # one text.
+        $classification = $script:CodeSetClassificationYaml.Replace('- Key: oxygen-requirement', "- Key: $Key")
+        $path = New-TestCodeSetList -Name "classification-key-$($Case.Replace(' ', '-'))" -Classification $classification
+        $file = Join-Path (Split-Path -Parent $path) 'NeoIPC-Infectious-Agent-Reporting-Groups.yaml'
+        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } |
+            Should -Throw -ExpectedMessage "The classification '$file' cannot be read into rows: $Refusal to hand its values on under*"
+    }
+
+    It 'refuses an attribute whose Key, in PascalCase, is a name PowerShell reserves: <Key>' -ForEach @(
+        @{ Key = 'ps-object'; Name = 'PsObject' }
+        @{ Key = 'ps-type-names'; Name = 'PsTypeNames' }
+        @{ Key = 'ps-type-name'; Name = 'PsTypeName' }
+    ) {
+        # PsTypeName holds no value of its own: a row cast from a dictionary takes it for the row's type name, so its
+        # column would vanish from every row whose value is not $null.
+        $classification = $script:CodeSetClassificationYaml.Replace('- Key: oxygen-requirement', "- Key: $Key")
+        $path = New-TestCodeSetList -Name "classification-reserved-$Key" -Classification $classification
+        { Get-NeoIPCInfectiousAgentCodeSet -Path $path } | Should -Throw -ExpectedMessage "*attribute '$Key' would be handed on as $Name, a name PowerShell reserves*"
+    }
+
+    It 'hands on $null, not an empty text, where <Case>' -ForEach @(
+        @{ Case = 'an assignment has no Value'; Name = 'no-value'; From = "    ConceptId: domain/bacteria`n    Value: facultative-anaerobic`n"; To = "    ConceptId: domain/bacteria`n"; Given = '|facultative-anaerobic'; Handed = '|<null>'; Stray = $false }
+        @{ Case = 'a group has no Key'; Name = 'no-key'; From = "  - Key: enterobacterales`n    Name: Enterobacterales`n"; To = "  - Name: Enterobacterales`n"; Given = '|enterobacterales|'; Handed = '|<null>|'; Stray = $false }
+        @{ Case = 'a member of a group without a Key carries a Value of its own'; Name = 'stray-value'; From = "  - Key: enterobacterales`n    Name: Enterobacterales`n"; To = "  - Name: Enterobacterales`n"; Given = '|enterobacterales|'; Handed = '|<null>|'; Stray = $true }
+    ) {
+        # The classification's checks report each case; a consumer reading JSON null as NA would take an empty text for
+        # a value, and a member's own Value for a group's Key.
+        $classification = $script:CodeSetClassificationYaml.Replace("`r`n", "`n").Replace($From, $To)
+        if ($Stray) { $classification = $classification.Replace("      ConceptId: genus/klebsiella`n", "      ConceptId: genus/klebsiella`n      Value: positive`n") }
+        $sets = Get-NeoIPCInfectiousAgentCodeSet -Path (New-TestCodeSetList -Name "handed-null-$Name" -Classification $classification)
+        Get-TestRow -Row $sets.Classification | Should -BeExactly @($script:ExpectedRows | ForEach-Object { $_.Replace($Given, $Handed) })
+    }
+
+    It 'gives each row the Id the list''s walker reads, so that the form of an Id is never laid at the classification''s door' {
+        # A one-item sequence, which the list's checks report, is read by the walker as its item.
+        $path = New-TestCodeSetList -Name 'id-form' -Yaml $script:CodeSetYaml.Replace('    - Id: 12', '    - Id: [12]')
+        Get-TestRow -Row (Get-NeoIPCInfectiousAgentCodeSet -Path $path).Classification | Should -BeExactly $script:ExpectedRows
     }
 
     It 'gives $null where nothing reaches a node: a group to Klebsiella, an oxygen requirement to all but Klebsiella' {
@@ -725,6 +882,71 @@ Attributes:
         (Read-TestJson -Path (Join-Path (Split-Path -Parent $path) 'code-sets.json'))['Sha256'] | Should -BeExactly $sets.Sha256
     }
 
+    It 'reads, writes from, and guards the classification -ClassificationPath names on a PowerShell drive' {
+        $path = New-TestCodeSetList -Name 'drive-classification'
+        $directory = Split-Path -Parent $path
+        $named = Join-Path $directory 'named.yaml'
+        [System.IO.File]::WriteAllText($named, $script:CodeSetClassificationYaml.Replace("`r`n", "`n").Replace('- Key: viruses', '- Key: viral-agents'), [System.Text.UTF8Encoding]::new($false))
+        $before = Get-TestFileHash -Path $named
+        $null = New-PSDrive -Name NeoIPCTestCodeSet -PSProvider FileSystem -Root $directory -Scope Global
+        try {
+            $sets = Get-NeoIPCInfectiousAgentCodeSet -Path $path -ClassificationPath 'NeoIPCTestCodeSet:\named.yaml'
+            Export-NeoIPCInfectiousAgentCodeSet -Path $path -ClassificationPath 'NeoIPCTestCodeSet:\named.yaml' -OutputPath (Join-Path $directory 'code-sets.json')
+            { Export-NeoIPCInfectiousAgentCodeSet -Path $path -ClassificationPath 'NeoIPCTestCodeSet:\named.yaml' -OutputPath 'NeoIPCTestCodeSet:\named.yaml' } |
+                Should -Throw -ExpectedMessage '*is the classification the code sets are read from*'
+        }
+        finally { Remove-PSDrive -Name NeoIPCTestCodeSet -Scope Global }
+        $expected = @($script:ExpectedRows | ForEach-Object { $_.Replace('|viruses|', '|viral-agents|') })
+        $sets.ClassificationSha256 | Should -BeExactly $before
+        Get-TestRow -Row $sets.Classification | Should -BeExactly $expected
+        $read = Read-TestJson -Path (Join-Path $directory 'code-sets.json')
+        $read['ClassificationSha256'] | Should -BeExactly $before
+        Get-TestRow -Row $read['Classification'] | Should -BeExactly $expected
+        Get-TestFileHash -Path $named | Should -BeExactly $before
+    }
+
+    It 'refuses <Case> on a drive of a provider other than the file system, writing nothing' -ForEach @(
+        @{ Case = 'the list'; Name = 'variable-list'; Cmdlet = 'Get'; Named = 'Path'; Noun = 'list' }
+        @{ Case = 'the list, to the export'; Name = 'variable-list-export'; Cmdlet = 'Export'; Named = 'Path'; Noun = 'list' }
+        @{ Case = 'the classification'; Name = 'variable-classification'; Cmdlet = 'Get'; Named = 'ClassificationPath'; Noun = 'classification' }
+        @{ Case = 'the classification, to the export'; Name = 'variable-classification-export'; Cmdlet = 'Export'; Named = 'ClassificationPath'; Noun = 'classification' }
+        @{ Case = 'the output'; Name = 'variable-output'; Cmdlet = 'Export'; Named = 'OutputPath'; Noun = 'output path' }
+    ) {
+        # An alias is an item every session has, on a drive of the Alias provider. Its provider path, the alias's name,
+        # is no file-system path: .NET would read or write it relative to the process's directory, and PowerShell's
+        # cmdlets relative to the current location, here both the list's directory.
+        $path = New-TestCodeSetList -Name $Name
+        $directory = Split-Path -Parent $path
+        $arguments = @{ Path = $path }
+        if ($Cmdlet -eq 'Export') { $arguments.OutputPath = Join-Path $directory 'code-sets.json' }
+        $arguments[$Named] = 'Alias:\gci'
+        $processDirectory = [System.Environment]::CurrentDirectory
+        [System.Environment]::CurrentDirectory = $directory
+        Push-Location -LiteralPath $directory
+        try {
+            $call = if ($Cmdlet -eq 'Export') { { Export-NeoIPCInfectiousAgentCodeSet @arguments } } else { { Get-NeoIPCInfectiousAgentCodeSet @arguments } }
+            $call | Should -Throw -ExpectedMessage "The $Noun 'Alias:\gci' is on a drive of the Alias provider, not in the file system*"
+        }
+        finally {
+            Pop-Location
+            [System.Environment]::CurrentDirectory = $processDirectory
+        }
+        @(Get-ChildItem -LiteralPath $directory -Name | Sort-Object) | Should -Be @('NeoIPC-Infectious-Agent-Reporting-Groups.yaml', 'NeoIPC-Infectious-Agents.yaml')
+    }
+
+    It 'refuses <Case> on a drive that does not exist, naming it, without the wrapper PowerShell puts around the reason' -ForEach @(
+        @{ Case = 'the list'; Name = 'missing-drive-list'; Cmdlet = 'Get'; Named = 'Path'; Noun = 'list' }
+        @{ Case = 'the output'; Name = 'missing-drive-output'; Cmdlet = 'Export'; Named = 'OutputPath'; Noun = 'output path' }
+    ) {
+        $path = New-TestCodeSetList -Name $Name
+        $arguments = @{ Path = $path }
+        if ($Cmdlet -eq 'Export') { $arguments.OutputPath = Join-Path (Split-Path -Parent $path) 'code-sets.json' }
+        $arguments[$Named] = 'NeoIPCNoSuchDrive:\file'
+        $call = if ($Cmdlet -eq 'Export') { { Export-NeoIPCInfectiousAgentCodeSet @arguments } } else { { Get-NeoIPCInfectiousAgentCodeSet @arguments } }
+        $thrown = $call | Should -Throw -ExpectedMessage "The $Noun 'NeoIPCNoSuchDrive:\file' cannot be resolved: *" -PassThru
+        $thrown.Exception.Message | Should -Not -BeLike '*GetUnresolvedProviderPathFromPSPath*'
+    }
+
     It 'refuses a list <Case>, naming the file' -ForEach @(
         @{ Case = 'that begins with a byte order mark'; Name = 'bom'; Prefix = [byte[]](0xEF, 0xBB, 0xBF); Suffix = [byte[]]@(); Message = "The list '*' begins with a byte order mark*" }
         @{ Case = 'that is not valid UTF-8'; Name = 'invalid'; Prefix = [byte[]]@(); Suffix = [byte[]](0x23, 0x20, 0xFF, 0x0A); Message = "The list '*' is not valid UTF-8*" }
@@ -823,8 +1045,11 @@ Attributes:
         $json = Join-Path $TestDrive 'committed-code-sets.json'
         Export-NeoIPCInfectiousAgentCodeSet -OutputPath $json
         $read = Read-TestJson -Path $json
+        $sets = Get-NeoIPCInfectiousAgentCodeSet
         $read['Sha256'] | Should -BeExactly (Get-TestFileHash -Path $script:CanonicalList)
         $read['ClassificationSha256'] | Should -BeExactly (Get-TestFileHash -Path $script:CanonicalClassification)
+        @($read['Classification'] | ForEach-Object { $_['Id'] }) | Should -Be @(@($sets.Concepts) + @($sets.Synonyms) | Sort-Object)
+        Get-TestRow -Row $read['Classification'] | Should -BeExactly (Get-TestRow -Row $sets.Classification)
     }
 
     It 'takes the list as its first positional argument, as the module''s other cmdlets take their input, and the output by name only' {
@@ -921,12 +1146,14 @@ Attributes:
         Get-TestFileHash -Path $copy | Should -BeExactly $before
     }
 
-    It 'ends at a <Case>, leaving the file it would write over as it was, under the caller''s <Preference>' -ForEach @(
-        @{ Case = 'classification that is not valid YAML'; Name = 'stop-yaml'; Preference = 'Continue'; Over = 'Output' }
-        @{ Case = 'refusal to write over the list'; Name = 'stop-refusal'; Preference = 'SilentlyContinue'; Over = 'List' }
+    It 'ends at a <Case>, saying so and leaving the file it would write over as it was, under the caller''s <Preference>' -ForEach @(
+        @{ Case = 'classification that is not valid YAML'; Name = 'stop-yaml'; Preference = 'Continue'; Over = 'Output'; Message = "*The classification '*' is not valid YAML*" }
+        @{ Case = 'refusal to write over the list'; Name = 'stop-refusal'; Preference = 'SilentlyContinue'; Over = 'List'; Message = "*The output path '*' is the list the code sets are read from*" }
     ) {
         # In a process of its own, whose global preference the module's functions see: inside Pester's own try, the
-        # first error ends the call whatever the cmdlet does.
+        # first error ends the call whatever the cmdlet does. The message shows that the child reached the cmdlet: a
+        # child that failed before it, at its import, would leave the file as it was too. NormalView prints the message
+        # on one line, where the default view wraps it at the width of the console.
         $path = New-TestCodeSetList -Name $Name
         $directory = Split-Path -Parent $path
         $output = $path
@@ -938,10 +1165,11 @@ Attributes:
         }
         $before = Get-TestFileHash -Path $output
         $caller = Join-Path $TestDrive "$Name.ps1"
-        $callerText = "param(`$Module, `$List, `$Output, `$Preference)`n`$global:ErrorActionPreference = `$Preference`nImport-Module `$Module`nExport-NeoIPCInfectiousAgentCodeSet -Path `$List -OutputPath `$Output`n"
+        $callerText = "param(`$Module, `$List, `$Output, `$Preference)`n`$PSStyle.OutputRendering = 'PlainText'`n`$ErrorView = 'NormalView'`n`$global:ErrorActionPreference = `$Preference`nImport-Module `$Module`nExport-NeoIPCInfectiousAgentCodeSet -Path `$List -OutputPath `$Output`n"
         [System.IO.File]::WriteAllText($caller, $callerText, [System.Text.UTF8Encoding]::new($false))
         $module = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
-        $null = & (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $caller -Module $module -List $path -Output $output -Preference $Preference 2>&1
+        $said = @(& (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $caller -Module $module -List $path -Output $output -Preference $Preference 2>&1 | ForEach-Object { "$_" })
+        ($said -join "`n") | Should -BeLike $Message
         Get-TestFileHash -Path $output | Should -BeExactly $before
     }
 

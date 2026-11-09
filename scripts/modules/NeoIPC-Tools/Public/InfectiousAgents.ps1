@@ -71,13 +71,14 @@ a release of the list carried. Nothing is written for a sidecar with (1) a row w
 is no DHIS2 UID, which is restored from the sidecar's history or, where it never held a valid UID, removed for the
 call to draw one, or (3) a change since the call read it, by another run, an editor, or git, whose rows the write
 would discard. Case 3 is checked just before the write, without a lock on the file, so a change in the instant
-between the check and the write is not caught.
+between the check and the write is not caught. A refusal ends the call whatever the caller's error preference.
 
 .PARAMETER Path
 Path to the ontology YAML. Defaults to the canonical file in the repository.
 
 .PARAMETER UidSidecarPath
-Path to the sidecar. Defaults to NeoIPC-Infectious-Agents.uids.csv beside the YAML, which is created if absent.
+Path to the sidecar, which must be in the file system. Defaults to NeoIPC-Infectious-Agents.uids.csv beside the YAML,
+which is created if absent.
 
 .OUTPUTS
 [pscustomobject] One per row added, with its Id and Uid; nothing when every Id has a row.
@@ -95,13 +96,16 @@ function Add-NeoIPCInfectiousAgentUid {
         [string]$UidSidecarPath
     )
 
+    # Under Stop, so that a refusal ends the call whatever the caller's preference: under SilentlyContinue or Ignore,
+    # PowerShell drops a throw that no try encloses and runs on past it, here to write the sidecar it refused.
+    $ErrorActionPreference = 'Stop'
     Import-Module powershell-yaml -ErrorAction Stop
     $resolved = Resolve-Path -LiteralPath $Path -ErrorAction Stop
     if (-not $UidSidecarPath) { $UidSidecarPath = Join-Path (Split-Path -Parent $resolved) 'NeoIPC-Infectious-Agents.uids.csv' }
     # .NET resolves a relative path against the process's directory, not PowerShell's location, and cannot open a
     # path on a PowerShell drive, so the bytes are read from the provider's path, the file the rows come from and the
-    # text goes to.
-    $UidSidecarPath = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($UidSidecarPath)
+    # text goes to, which must be in the file system.
+    $UidSidecarPath = Resolve-NeoIPCFileSystemPath -Path $UidSidecarPath -Noun 'sidecar'
     $tree = Get-Content -LiteralPath $resolved -Raw | ConvertFrom-Yaml
     # The sidecar's bytes as read, against which the write tells whether it changed since; assigned inside the try
     # block, since a statement's output would be enumerated into an array of objects.
@@ -162,21 +166,27 @@ reading of the list is held to them through the JSON that Export-NeoIPCInfectiou
 SHA-256 of the bytes the sets were read from, in lower-case hexadecimal, which names the revision of the list a copy
 of the sets comes from.
 
-It also reads the reporting classification, NeoIPC-Infectious-Agent-Reporting-Groups.yaml beside the list or the file
--ClassificationPath names, which it cannot do without, and returns in Classification one row per Id, in ascending order: Id; ReportingGroup, the Key of the leaf group the node takes; and
-one property per attribute of the classification, named by its Key in PascalCase (GramReaction, OxygenRequirement), the
-Key of the value the node takes. Each comes from the nearest member or assignment at or above the node, a synonym's
-from its concept, as the classification's checks resolve them, so another language's reading of the classification is
-held to the same resolution; a value is $null where the node takes none, as the group of the Ids 0 and 3561 and the
-attributes outside the bacteria are. Judging the classification is for its checks, which MetadataContent.Tests.ps1
+It also reads, and does not run without, the reporting classification: NeoIPC-Infectious-Agent-Reporting-Groups.yaml
+beside the list, or the file -ClassificationPath names. It returns in Classification one row per Id, in ascending
+order: Id; ReportingGroup, the Key of the leaf group the node takes; and one property per attribute of the
+classification, named by its Key in PascalCase (GramReaction, OxygenRequirement), the Key of the value the node takes.
+Each comes from the nearest member or assignment at or above the node, a synonym's from its concept, through the very
+resolution the classification's checks judge, so another language's reading of the classification is held to the
+same resolution. A value is $null where the node takes none, as the attributes outside the bacteria always are and
+the group of the Ids 0 and 3561 is in a classification that passes its checks, and where the group or the assignment
+it takes has no Key or Value to hand on. Judging the classification is for its checks, which MetadataContent.Tests.ps1
 applies to the committed files. ClassificationSha256 is the SHA-256 of the classification's bytes, also in lower-case
 hexadecimal, which names the revision of the classification the rows come from.
 
-Both files must be UTF-8 without a byte order mark, as every text file of the repository is, and valid YAML; the list
-must give each Id to one node only, as the option-set generator requires; and no attribute's Key may turn, in
-PascalCase, into the name of another property of a row (Id, ReportingGroup, or another attribute's), in any letter
-case. A file that does not, or that cannot be read, is refused, with the file, the Id, or the attribute named, and a
-refusal or a failure ends the call whatever the caller's error preference.
+Both files must be in the file system, UTF-8 without a byte order mark, as every text file of the repository is, and
+valid YAML; the list must give each Id to one node only, as the option-set generator requires; the classification
+must be a mapping that holds a list of Groups, with at least one group in it, and a list of Attributes; and each
+attribute must be a mapping with a Key, a text with a word in it, that turns, in PascalCase, neither into the name of
+another property of a row (Id, ReportingGroup, or another attribute's), in any letter case, nor into a name
+PowerShell reserves, such as PSObject or PSTypeName. A file that does not, or that cannot be read, is refused, with
+the file, the Id, or the attribute named, and a file that is not valid YAML with the line and the column where the
+parser stopped, or with the end of the file; a refusal or a failure ends the call whatever the caller's error
+preference.
 
 .PARAMETER Path
 Path to the ontology YAML. Defaults to the canonical file in the repository.
@@ -215,7 +225,7 @@ function Get-NeoIPCInfectiousAgentCodeSet {
     # the call and to name the file.
     $list = Read-NeoIPCTextFile -Path $Path -Noun 'list'
     try { $tree = $list.Text | ConvertFrom-Yaml }
-    catch { throw "The list '$($list.Path)' is not valid YAML: $($_.Exception.Message)" }
+    catch { throw (Get-NeoIPCYamlRefusalMessage -Noun 'list' -Path $list.Path -Text $list.Text -Exception $_.Exception) }
     $nodes = @(Get-NeoIPCInfectiousAgentConcept -Node $tree)
     $nameById = [System.Collections.Generic.Dictionary[int, string]]::new()
     foreach ($node in $nodes) {
@@ -227,7 +237,23 @@ function Get-NeoIPCInfectiousAgentCodeSet {
     $classificationFile = Resolve-NeoIPCReportingClassificationPath -ListPath $list.Path -ClassificationPath $ClassificationPath
     $classification = Read-NeoIPCTextFile -Path $classificationFile -Noun 'classification'
     try { $parsed = $classification.Text | ConvertFrom-Yaml }
-    catch { throw "The classification '$($classification.Path)' is not valid YAML: $($_.Exception.Message)" }
+    catch {
+        throw (Get-NeoIPCYamlRefusalMessage -Noun 'classification' -Path $classification.Path -Text $classification.Text -Exception $_.Exception)
+    }
+    # A file that is no classification, such as an empty one or the list itself, holds nothing for the checks to judge,
+    # and its rows would come back without groups, without the attributes' columns, or not at all, so it is refused
+    # here, with the file named. The lists are assigned in the block, since an if statement's output would unroll a
+    # list of one group into the group.
+    $groupList = $null
+    $attributeList = $null
+    if ($parsed -is [System.Collections.IDictionary]) {
+        $groupList = $parsed['Groups']
+        $attributeList = $parsed['Attributes']
+    }
+    $groupCount = if ($groupList -is [System.Collections.IList]) { @($groupList | Where-Object { $_ -is [System.Collections.IDictionary] }).Count } else { 0 }
+    if ($groupCount -eq 0 -or $attributeList -isnot [System.Collections.IList]) {
+        throw "The classification '$($classification.Path)' is no reporting classification: it is no mapping that holds a list of Groups, with at least one group in it, and a list of Attributes."
+    }
     try { $rows = @(Get-NeoIPCInfectiousAgentClassificationRow -Classification $parsed -Tree $tree) }
     catch { throw "The classification '$($classification.Path)' cannot be read into rows: $($_.Exception.Message)" }
     $resistance = Get-NeoIPCResistanceCodeSet -Node $tree
@@ -261,8 +287,9 @@ list and its classification to the sets the generated DHIS2 metadata takes and t
 checks resolve. Its Sha256 and ClassificationSha256 name the revisions of the two files it was written from. The output
 is named by -OutputPath alone, and the cmdlet refuses to write over either file it reads, whether the output path
 names it or reaches it through a link: since no comparison of paths tells a link from another file, it refuses any
-existing file that holds the very bytes of the list or the classification, an identical copy among them. A refusal or
-a failure ends the call before anything is written, whatever the caller's error preference.
+existing file that holds the very bytes of the list or the classification, an identical copy among them. Each of the
+three paths must be in the file system. A refusal or a failure ends the call before anything is written, whatever the
+caller's error preference.
 
 .PARAMETER Path
 Path to the ontology YAML. Defaults to the canonical file in the repository.
@@ -296,10 +323,10 @@ function Export-NeoIPCInfectiousAgentCodeSet {
     # The list is the input at Position 0, as in the module's other cmdlets, and the output is named, so that a list
     # path given where the output belongs cannot replace the list it is read from; nor can the output name the list or
     # the classification.
-    $listPath = [System.IO.Path]::GetFullPath((Resolve-Path -LiteralPath $Path -ErrorAction Stop).ProviderPath)
+    $listPath = [System.IO.Path]::GetFullPath((Resolve-NeoIPCFileSystemPath -Path $Path -Noun 'list' -Existing))
     if (-not (Test-Path -LiteralPath $listPath -PathType Leaf)) { throw "The list '$listPath' is no file." }
     $classificationFile = [System.IO.Path]::GetFullPath((Resolve-NeoIPCReportingClassificationPath -ListPath $listPath -ClassificationPath $ClassificationPath))
-    $target = [System.IO.Path]::GetFullPath($PSCmdlet.GetUnresolvedProviderPathFromPSPath($OutputPath))
+    $target = [System.IO.Path]::GetFullPath((Resolve-NeoIPCFileSystemPath -Path $OutputPath -Noun 'output path'))
     $comparison = if ($IsLinux) { [System.StringComparison]::Ordinal } else { [System.StringComparison]::OrdinalIgnoreCase }
     foreach ($source in @(@{ File = $listPath; Noun = 'list' }, @{ File = $classificationFile; Noun = 'classification' })) {
         if ([string]::Equals($source.File, $target, $comparison)) {
