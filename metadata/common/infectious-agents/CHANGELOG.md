@@ -11,6 +11,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.2.0-alpha] - 2026-11-09
+
 ### Added
 
 - CI checks of the list: its keys and structure; every node's `Id`, `Name`, rank, source, and record number, and the
