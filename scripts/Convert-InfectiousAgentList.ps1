@@ -19,6 +19,12 @@
     (Get-NeoIPCInfectiousAgentCodeSet): a node takes them from the nearest flag on its path, and a synonym
     from its concept, which it cross-references.
 
+.PARAMETER InputDirectory
+    The directory that holds the list, NeoIPC-Infectious-Agents.yaml, with its translations and the files the output
+    is built from, and the reporting classification beside it, NeoIPC-Infectious-Agent-Reporting-Groups.yaml, without
+    which Get-NeoIPCInfectiousAgentCodeSet, from which each row takes its common-commensal mark and resistances, does
+    not run. Defaults to the list's directory in the repository.
+
 .PARAMETER OutputFormats
     Any of AsciiDoc, CSV, PDF.
 

@@ -3,8 +3,8 @@
 
 <#
 .SYNOPSIS
-    Pester tests for file writes given a path relative to PowerShell's current location, and for the
-    failures a localization writer must not report as success.
+    Pester tests for file writes given a path relative to PowerShell's current location or outside the file
+    system, and for the failures a localization writer must not report as success.
 
 .DESCRIPTION
     The file APIs of .NET resolve a relative path against the process's working directory, which a
@@ -12,8 +12,11 @@
     A script that reads a file with Get-Content and writes it back with [System.IO.File]::WriteAllText
     therefore reads one file and writes another, or fails to write, whenever the two differ, which is the
     case in any session that changed directory after it started. Each test here sets the process's working
-    directory away from the current location, so the three that run their writer in the Pester process go
-    red for a writer that resolves the path through .NET.
+    directory away from the current location, so each test that runs its writer in the Pester process goes
+    red for a writer that resolves the path through .NET. A path on a drive of a provider other than the file
+    system, such as Variable:, has a provider path that .NET would take for one relative to the process's
+    working directory, so the module's write point refuses it, under the caller's SilentlyContinue too, and
+    refuses a path on a drive that does not exist with the reason.
 
     A failed write, a malformed YAML master, and a master that cannot be found each have to stop
     Update-Po4aYamlKeys.ps1 with a non-zero exit code and no success line, leaving the config as it was.
@@ -50,7 +53,7 @@ BeforeAll {
     }
 }
 
-Describe 'Writes given a path relative to the current location' {
+Describe 'Writes given a path relative to the current location or outside the file system' {
 
     BeforeEach {
         $script:processDirectory = [System.Environment]::CurrentDirectory
@@ -75,6 +78,37 @@ Describe 'Writes given a path relative to the current location' {
         Join-Path $script:here 'out.txt' | Should -Exist
         Join-Path $script:elsewhere 'out.txt' | Should -Not -Exist
         [System.IO.File]::ReadAllText((Join-Path $script:here 'out.txt')) | Should -BeExactly "a`nb"
+    }
+
+    It 'Write-NeoIPCTextFile refuses a path on a drive of a provider other than the file system, writing nothing' {
+        # The provider path of a variable is no file-system path, which .NET would write relative to the process's
+        # working directory.
+        { InModuleScope 'NeoIPC-Tools' { Write-NeoIPCTextFile -Path 'Variable:\NeoIPCTestTarget' -Text 'a' } } |
+            Should -Throw -ExpectedMessage "The path 'Variable:\NeoIPCTestTarget' is on a drive of the Variable provider, not in the file system*"
+
+        Join-Path $script:elsewhere 'NeoIPCTestTarget' | Should -Not -Exist
+        Join-Path $script:here 'NeoIPCTestTarget' | Should -Not -Exist
+    }
+
+    It 'Write-NeoIPCTextFile writes nothing for a path on a drive of another provider under the caller''s SilentlyContinue' {
+        # In a process of its own, whose global preference the module's functions see: inside Pester's own try, the
+        # refusal ends the call whatever the function does. The child starts in the current location, where a dropped
+        # refusal would have written the variable's name; its last line shows that it reached the call.
+        $caller = Join-Path $script:testRoot 'silently.ps1'
+        $callerText = "param(`$Module)`n`$global:ErrorActionPreference = 'SilentlyContinue'`nImport-Module `$Module`n& (Get-Module NeoIPC-Tools) { Write-NeoIPCTextFile -Path 'Variable:\NeoIPCTestTarget' -Text 'a' }`n'reached'`n"
+        [System.IO.File]::WriteAllText($caller, $callerText, [System.Text.UTF8Encoding]::new($false))
+        $module = Join-Path (Get-Module NeoIPC-Tools).ModuleBase 'NeoIPC-Tools.psd1'
+        $said = @(& (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File $caller -Module $module 2>&1 | ForEach-Object { "$_" })
+
+        $said | Should -Contain 'reached'
+        Join-Path $script:here 'NeoIPCTestTarget' | Should -Not -Exist
+        Join-Path $script:elsewhere 'NeoIPCTestTarget' | Should -Not -Exist
+    }
+
+    It 'Write-NeoIPCTextFile refuses a path on a drive that does not exist, without the wrapper PowerShell puts around the reason' {
+        $thrown = { InModuleScope 'NeoIPC-Tools' { Write-NeoIPCTextFile -Path 'NeoIPCNoSuchDrive:\out.txt' -Text 'a' } } |
+            Should -Throw -ExpectedMessage "The path 'NeoIPCNoSuchDrive:\out.txt' cannot be resolved: *" -PassThru
+        $thrown.Exception.Message | Should -Not -BeLike '*GetUnresolvedProviderPathFromPSPath*'
     }
 
     It 'Update-Po4aYamlKeys.ps1 rewrites the config it read' {

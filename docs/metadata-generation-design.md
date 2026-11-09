@@ -235,7 +235,9 @@ The flag→category mapping: `3GCR`→3GCR, `MRSA`→MRSA, `VRE`→VRE,
 (`CommonCommensal` flag) drives the recognized-pathogen gating by the same effective-flag rule.
 Outside the module, `Get-NeoIPCInfectiousAgentCodeSet` returns these sets under the names the project
 gives the categories (`3GCR`, `CARBR`, `COLR`, `MRSA`, `VRE`), with the concepts, the synonyms, the
-viruses, and the list's SHA-256, and `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON.
+viruses, and the list's SHA-256, and what the reporting classification beside the list gives each `Id`
+(its reporting group, Gram reaction, and oxygen requirement, as the classification's checks resolve them),
+with the classification's SHA-256; `Export-NeoIPCInfectiousAgentCodeSet` writes them as JSON.
 
 A resistance flag means *"ask about **acquired** `<CAT>` resistance"* — intrinsically-resistant
 infectious agents are deliberately left unflagged (e.g. *Proteus*: 3GCR + carbapenem but not colistin). So a
