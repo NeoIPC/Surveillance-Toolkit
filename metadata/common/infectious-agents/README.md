@@ -156,13 +156,13 @@ LPSN carries the list: the page of a name on it says whether the name is the one
 
 ### MycoBank
 
-<https://www.mycobank.org/>, and its web services, <https://webservices.bio-aware.com/westerdijk/public>
+<https://www.mycobank.org/>, and its web services, `https://webservices.bio-aware.com/westerdijk/mycobank`
 
 Vincent Robert, Duong Vu, Ammar Ben Hadj Amor, Nathalie van de Wiele, Carlo Brouwer, Bernard Jabas, Szaniszlo Szoke, Ahmed Dridi, Maher Triki, Samy ben Daoud, Oussema Chouchen, Lea Vaas, Arthur de Cock, Joost A. Stalpers, Dora Stalpers, Gerard J.M. Verkley, Marizeth Groenewald, Felipe Borges dos Santos, Gerrit Stegehuis, Wei Li, Linhuan Wu, Run Zhang, Juncai Ma, Miaomiao Zhou, Sergio Pérez Gorjón, Lily Eurwilaichitr, Supawadee Ingsriswang, Karen Hansen, Conrad Schoch, Barbara Robbertse, Laszlo Irinyi, Wieland Meyer, Gianluigi Cardinali, David L. Hawksworth, John W. Taylor, and Pedro W. Crous. 2013. MycoBank gearing up for new horizons. IMA Fungus · volume 4 · no 2: 371–379; DOI: [10.5598/imafungus.2013.04.02.16](https://doi.org/10.5598/imafungus.2013.04.02.16)
 
 ### International Committee on Taxonomy of Viruses (ICTV)
 
-<https://ictv.global/taxonomy/>
+<https://ictv.global/taxonomy>
 
 Lefkowitz E, Hendrickson R, International Committee on Taxonomy of Viruses. [ICTV Master Species List (MSL), MSL41.v1, as corrected on 14 October 2026](https://doi.org/10.5281/zenodo.23376199). Zenodo; 2026. doi: 10.5281/zenodo.23376199. The ontology's viruses follow this release.
 
