@@ -11,6 +11,12 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Fixed
+
+- `README.md` names MycoBank's web services at the address the list's reconciliation reads, written as code since it
+  needs a login and has no page of its own, in place of an address that answers 503, and links ICTV's taxonomy page at
+  the address its former link redirected to.
+
 ## [0.2.0-alpha] - 2026-11-09
 
 ### Added
