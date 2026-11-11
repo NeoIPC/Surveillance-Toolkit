@@ -141,7 +141,7 @@ try { $Dhis2Hostname = Resolve-NeoIPCReportHostname -Hostname $Dhis2Hostname } c
 # /^([^=:]+)[=:](.*)$/, whose `.` does not match `\n`, `\r`, U+2028, or
 # U+2029, and drops an argument that does not match without a warning
 # (parseMetadataFlagValue() in Quarto's src/command/render/flags.ts, line 510
-# at v1.10.18). The report would then link to the address the data is read
+# at v1.11.9). The report would then link to the address the data is read
 # from, the one the caller has just said the readers cannot open. .NET's `\s`
 # matches every Unicode separator, so it covers U+2028 and U+2029 as well.
 if ($Dhis2PublicBaseUrl) {
