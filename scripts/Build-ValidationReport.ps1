@@ -59,8 +59,10 @@ A department without findings renders a report saying so.
     _output directory.
 
 .PARAMETER Quiet
-    Runs the whole build at log level quiet: the Quarto child renders with --quiet, and the wrapper's own
-    progress, verbose, debug, and information streams are silenced. Takes precedence over -Verbose and -Debug.
+    Runs the build at log level quiet: the Quarto child renders with --quiet, and the wrapper's own
+    progress, verbose, debug, and information streams are silenced, its console build summary with them.
+    Warnings, terminating errors, and whatever a child still prints as it runs stay visible. Takes
+    precedence over -Verbose and -Debug.
 
 .PARAMETER JsonReport
     Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
