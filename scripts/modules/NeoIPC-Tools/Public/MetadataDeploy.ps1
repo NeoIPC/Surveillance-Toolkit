@@ -154,8 +154,10 @@ function Deploy-NeoIPCMetadata {
         Alone, it reads the instance's version and checks the package's expressions as a committing run does — an
         unverified release ends it the same way, before anything is shown — then shows the deployment it would send
         and returns: the live-state reads, the deployment, and the cache clear all stand behind this gate, so none
-        runs. With -DryRun, -WhatIf gates only the cache clear, which it shows and skips; the live-state reads, the
-        plan, and the hazard gate run as in any dry run, so an unacknowledged hazard ends the run there too.
+        runs. With -DryRun, -WhatIf gates the cache clear and the validation request alike, showing and skipping
+        each and recording the step validate (dry run) as skipped; the live-state reads, the plan, and the hazard
+        gate run as in any dry run, so an unacknowledged hazard ends the run there too, and the plan it reports is
+        one the server has not validated.
     .PARAMETER Confirm
         A committing run asks before anything is written, its impact being High; -Confirm:$false runs it unattended.
         A -DryRun writes no metadata but still asks before clearing the instance's caches, which is maintenance the
