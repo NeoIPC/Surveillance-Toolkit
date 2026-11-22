@@ -73,7 +73,7 @@
     its confirm impact is Medium.
 
 .EXAMPLE
-    ./scripts/Build-PatientDataReport.ps1 'NEOIPC-000123' -OutputFormat html
+    ./scripts/Build-PatientDataReport.ps1 'NEOIPC-000123' -DepartmentCode 'NEO_DE_01' -OutputFormat html
 #>
 
 [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Render')]
