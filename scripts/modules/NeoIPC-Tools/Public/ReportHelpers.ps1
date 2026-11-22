@@ -214,6 +214,11 @@ function Invoke-WithNeoIPCAuth {
 .SYNOPSIS
 Stream and parse Quarto render output, detecting errors and warnings.
 
+.DESCRIPTION
+A failed render's reason reaches the caller on the error stream, once per error line, so
+it survives a quiet build; its warnings go on as warnings and the rest of the output is
+verbose. The word on a finished render is the one host line this helper writes.
+
 .PARAMETER Arguments
 Array of arguments to pass to quarto.
 
@@ -253,7 +258,7 @@ function Invoke-QuartoRender {
                 $inBacktrace = $true
                 if ($pendingErrorLine) {
                     $errorLines.Add($pendingErrorLine) | Out-Null
-                    Write-Host $pendingErrorLine -ForegroundColor Red
+                    Write-Error $pendingErrorLine
                     $pendingErrorLine = $null
                 }
             }
@@ -266,11 +271,11 @@ function Invoke-QuartoRender {
             else {
                 if ($pendingErrorLine) {
                     $errorLines.Add($pendingErrorLine) | Out-Null
-                    Write-Host $pendingErrorLine -ForegroundColor Red
+                    Write-Error $pendingErrorLine
                     $pendingErrorLine = $null
                 }
                 $errorLines.Add($s) | Out-Null
-                Write-Host $s -ForegroundColor Red
+                Write-Error $s
             }
         }
         elseif ($warningBody) {
@@ -307,7 +312,7 @@ function Invoke-QuartoRender {
 
     if ($pendingErrorLine) {
         $errorLines.Add($pendingErrorLine) | Out-Null
-        Write-Host $pendingErrorLine -ForegroundColor Red
+        Write-Error $pendingErrorLine
     }
 
     $exitCode = $LASTEXITCODE
@@ -318,14 +323,14 @@ function Invoke-QuartoRender {
             $messages.Add("Quarto exit code $exitCode") | Out-Null
         }
         # Safety net: if the process failed but nothing got classified as an
-        # error above (regex didn't match), the user sees nothing useful.
-        # Dump the tail of the captured output so at least some diagnostic
-        # text reaches the console.
+        # error above (regex didn't match), the caller of a quiet run would hear
+        # nothing at all. The tail of the captured output goes to the error
+        # stream, the one stream that survives quiet.
         if ($errorLines.Count -eq 0) {
             $tailCount = [math]::Min(40, $messages.Count)
-            Write-Host "Quarto render failed (exit code $exitCode) but no recognised error line was captured. Last $tailCount lines of output:" -ForegroundColor Red
+            Write-Error "Quarto render failed (exit code $exitCode) but no recognised error line was captured. Last $tailCount lines of output:"
             $messages | Select-Object -Last $tailCount | ForEach-Object {
-                if ($_ -ne '') { Write-Host "  $_" -ForegroundColor Red }
+                if ($_ -ne '') { Write-Error "  $_" }
             }
         }
     }
@@ -344,6 +349,11 @@ function Invoke-QuartoRender {
 <#
 .SYNOPSIS
 Run an Rscript command and parse its output, handling multi-line rlang errors.
+
+.DESCRIPTION
+A failed run's reason reaches the caller on the error stream, once per error line, so it
+survives a quiet build; its warnings go on as warnings and the rest of the output is
+verbose.
 
 .PARAMETER Arguments
 Array of arguments to pass to Rscript.
@@ -398,13 +408,13 @@ function Invoke-Rscript {
             }
             else {
                 $errorLines.Add($s) | Out-Null
-                Write-Host $s -ForegroundColor Red
+                Write-Error $s
             }
         }
         elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Error') {
             $isError = $true
             $errorLines.Add($s) | Out-Null
-            Write-Host $s -ForegroundColor Red
+            Write-Error $s
         }
         elseif ((Get-NeoIPCRenderLogLevel -Line $s) -eq 'Warning') {
             $s | Write-Warning
@@ -422,14 +432,14 @@ function Invoke-Rscript {
             $messages.Add("$Description exit code $exitCode") | Out-Null
         }
         # Safety net: if the process failed but nothing got classified as an
-        # error above (regex didn't match), the user sees nothing useful.
-        # Dump the tail of the captured output so at least some diagnostic
-        # text reaches the console.
+        # error above (regex didn't match), the caller of a quiet run would hear
+        # nothing at all. The tail of the captured output goes to the error
+        # stream, the one stream that survives quiet.
         if ($errorLines.Count -eq 0) {
             $tailCount = [math]::Min(40, $messages.Count)
-            Write-Host "$Description failed (exit code $exitCode) but no recognised error line was captured. Last $tailCount lines of output:" -ForegroundColor Red
+            Write-Error "$Description failed (exit code $exitCode) but no recognised error line was captured. Last $tailCount lines of output:"
             $messages | Select-Object -Last $tailCount | ForEach-Object {
-                if ($_ -ne '') { Write-Host "  $_" -ForegroundColor Red }
+                if ($_ -ne '') { Write-Error "  $_" }
             }
         }
     }

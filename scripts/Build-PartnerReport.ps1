@@ -114,11 +114,11 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
     says, as every read of the NeoIPC-Tools module is. Online set.
 
 .PARAMETER Quiet
-    Runs the build at log level quiet: the R and Quarto children run with their quiet flags, and the
-    wrapper's verbose, debug, and information streams and its progress bar are silenced. Console
-    messages written with Write-Host stay visible, the build summary among them, as do warnings,
-    terminating errors, and whatever a child still prints as it runs. Takes precedence over -Verbose
-    and -Debug.
+    Silences the build down to warnings: no line reaches the console, not the notices of what
+    the build is generating, not the build summary the report writer prints — the verbose,
+    debug, and information streams and the progress bar go quiet, and the R and Quarto children
+    run with their quiet flags. Warnings and errors stay visible: a build that fails gives its
+    reason on the error stream. Takes precedence over -Verbose and -Debug.
 
 .PARAMETER WhatIf
     Shows each data generation per site and each render per site, locale, and format without running any of
@@ -442,13 +442,20 @@ $logLevel =
     elseif ($verboseRequested) { 'verbose' }
     else { 'normal' }
 
-# -Quiet also silences the wrapper's own progress/verbose/info streams so the
-# whole pipeline is quiet, not just the logger channel.
+# -Quiet silences everything below a warning. SilentlyContinue does not: it leaves
+# Write-Host lines on screen, this script's own as well as the module functions'. Ignore
+# silences the script's own, the build scriptblock below included; a module function's
+# lines need -InformationAction Ignore at the call, which the data step and the report call
+# take from $moduleInformationAction. The render this script runs itself, outside the
+# helpers, already writes a failed child's error lines to the error stream, which quiet
+# runs keep.
+$moduleInformationAction = 'SilentlyContinue'
 if ($Quiet) {
-    $VerbosePreference     = 'SilentlyContinue'
-    $DebugPreference       = 'SilentlyContinue'
-    $InformationPreference = 'SilentlyContinue'
-    $ProgressPreference    = 'SilentlyContinue'
+    $VerbosePreference       = 'SilentlyContinue'
+    $DebugPreference         = 'SilentlyContinue'
+    $InformationPreference   = 'Ignore'
+    $ProgressPreference      = 'SilentlyContinue'
+    $moduleInformationAction = 'Ignore'
 }
 
 # Native verbosity flags for the child processes, derived from the same level.
@@ -588,7 +595,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
                 $rArgs += $rscriptVerbosityArgs
 
-                $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-PartnerData.R ($siteCode)"
+                $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-PartnerData.R ($siteCode)" -InformationAction $moduleInformationAction
 
                 $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $rResult
                 if ($rResult.Status -eq 'Success') {
@@ -745,6 +752,10 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                             }
                         }
 
+                        # The last line can be the error: flush the pending line the way
+                        # the helpers do, or a failure's reason reaches neither stream.
+                        if ($isError -and $errorLine.Length -gt 0) { Write-Error -Message $errorLine }
+
                         # Record exit status
                         $currentEntry.exitCode = $LASTEXITCODE
                         $currentEntry.messages += $currentMessages
@@ -783,6 +794,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
 }
 catch {
     $errors += $_.Exception.Message
+    Write-Error $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $wd
@@ -798,7 +810,8 @@ finally {
         -ScriptTimestamp $scriptTimestamp -OutputDirPath $buildReportDirPath `
         -SiteCodes $siteCodes -OutputLocales $OutputLocales -OutputFormats $OutputFormats `
         -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
-        -BuildSteps $buildLog
+        -BuildSteps $buildLog `
+        -InformationAction $moduleInformationAction
 
     if ($status -ne 'success') {
         exit 1

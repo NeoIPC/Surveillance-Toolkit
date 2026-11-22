@@ -7,7 +7,8 @@ Write a standardised build report to the console and optionally to a JSON file.
 .DESCRIPTION
 Owns the build-report JSON schema so every report wrapper produces a consistent report.
 Computes the build status from the error list and the $BuildCompleted flag, writes a
-coloured console summary, and optionally persists the JSON.
+coloured console summary — a failed build's status on the error stream, where a quiet
+caller still sees it — and optionally persists the JSON.
 
 Common fields are first-class parameters, emitted with fixed camelCase keys in a fixed
 order and only when supplied — so per-wrapper field sets stay honest while the naming,
@@ -161,7 +162,9 @@ function Write-NeoIPCBuildReport {
     } elseif ($status -eq 'cancelled') {
         Write-Host "Build status: $status" -ForegroundColor Yellow
     } else {
-        Write-Host "Build status: $status" -ForegroundColor Red
+        # A quiet build silences this function's host lines at the call, so the failed
+        # status goes to the error stream instead: the one stream a quiet run keeps.
+        Write-Error "Build status: $status"
     }
 
     Write-Host "Outputs:"

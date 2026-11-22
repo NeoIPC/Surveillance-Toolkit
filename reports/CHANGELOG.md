@@ -16,10 +16,16 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 ### Changed
 
 - `Build-ValidationReport.ps1` whose filter matches no department warns, reports the build
-  cancelled in its build report, and ends with exit code 1, where it ended with 0 and no report; a batch
-  calling it can now tell an empty scope from a build that ran. And a build cancelled before its first
-  output delivers the JSON report it was asked for even where no render has created the default `_output`
-  directory: the report writer creates a parent directory missing on the way.
+  cancelled in its build report, and ends with exit code 1, where it ended with 0 and no report;
+  a batch calling it can now tell an empty scope from a build that ran.
+- The build report writer the 5 report builders share delivers a JSON report to the path a build
+  asked for even when the build cancels before its first output: a parent directory missing on
+  the way is created, which no render had created for the default `_output` directory.
+- `-Quiet` on the 5 report builders silences everything that is not at least a warning: the
+  builders' generating notices and the build summary of the shared report writer are gone, where
+  both stayed before, and the render helpers write a failed child's error lines to the error
+  stream instead of the console. A build that fails now gives its reason on the error stream,
+  quiet or not: each error the build collects, once, and the failed status with it.
 
 ## [0.3.0-alpha] - 2026-10-09
 

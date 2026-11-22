@@ -59,10 +59,11 @@ A department without findings renders a report saying so.
     _output directory.
 
 .PARAMETER Quiet
-    Runs the build at log level quiet: the Quarto child renders with --quiet, and the wrapper's verbose,
-    debug, and information streams and its progress bar are silenced. Console messages written with
-    Write-Host stay visible, the build summary among them, as do warnings, terminating errors, and
-    whatever a child still prints as it runs. Takes precedence over -Verbose and -Debug.
+    Silences the build down to warnings: no line reaches the console, not the notices of what
+    the build is generating, not the build summary the report writer prints — the verbose,
+    debug, and information streams and the progress bar go quiet, and the Quarto child renders
+    with --quiet. Warnings and errors stay visible: a build that fails gives its reason on the
+    error stream. Takes precedence over -Verbose and -Debug.
 
 .PARAMETER JsonReport
     Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
@@ -297,13 +298,18 @@ $logLevel =
     elseif ($verboseRequested) { 'verbose' }
     else { 'normal' }
 
-# -Quiet also silences the wrapper's own progress/verbose/info streams so the
-# whole pipeline is quiet, not just the logger channel.
+# -Quiet silences everything below a warning. SilentlyContinue does not: it leaves
+# Write-Host lines on screen, this script's own as well as the module functions'. Ignore
+# silences the script's own, the build scriptblock below included; a module function's
+# lines need -InformationAction Ignore at the call, which the render and report calls take
+# from $moduleInformationAction.
+$moduleInformationAction = 'SilentlyContinue'
 if ($Quiet) {
-    $VerbosePreference     = 'SilentlyContinue'
-    $DebugPreference       = 'SilentlyContinue'
-    $InformationPreference = 'SilentlyContinue'
-    $ProgressPreference    = 'SilentlyContinue'
+    $VerbosePreference       = 'SilentlyContinue'
+    $DebugPreference         = 'SilentlyContinue'
+    $InformationPreference   = 'Ignore'
+    $ProgressPreference      = 'SilentlyContinue'
+    $moduleInformationAction = 'Ignore'
 }
 
 # Native verbosity flags for the Quarto child, derived from the same level.
@@ -395,10 +401,12 @@ try {
 
         if ($PSCmdlet.ShouldProcess($outFileName, 'Render combined validation report')) {
             Write-Host "Generating combined validation report..."
-            $result = Invoke-QuartoRender -Arguments $quartoArgs -Description 'combined validation report'
+            $result = Invoke-QuartoRender -Arguments $quartoArgs -Description 'combined validation report' -InformationAction $moduleInformationAction
             $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
             if ($result.Status -eq 'Error') {
-                $errors += "Quarto render failed for combined report."
+                $errMsg = 'Quarto render failed for combined report.'
+                Write-Error $errMsg
+                $errors += $errMsg
             } else {
                 $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
@@ -438,10 +446,12 @@ try {
 
             if ($PSCmdlet.ShouldProcess($outFileName, "Render validation report for $siteCode")) {
                 Write-Host "Generating validation report for $siteCode..."
-                $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $siteCode"
+                $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "validation report for $siteCode" -InformationAction $moduleInformationAction
                 $currentEntry = $currentEntry | Complete-NeoIPCBuildStep -Result $result
                 if ($result.Status -eq 'Error') {
-                    $errors += "Quarto render failed for $siteCode."
+                    $errMsg = "Quarto render failed for $siteCode."
+                    Write-Error $errMsg
+                    $errors += $errMsg
                 } else {
                     $outputFiles += (Join-Path $outputDirPath $outFileName)
                 }
@@ -456,6 +466,7 @@ try {
 }
 catch {
     $errors += $_.Exception.Message
+    Write-Error $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $wd
@@ -472,7 +483,8 @@ finally {
         -SiteCodes $siteCodes -OutputLocales @($OutputLocale) `
         -BuildSteps $buildLog `
         -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
-        -ExtraFields ([ordered]@{ outputLayout = if ($isCombined) { 'combined' } else { 'per-site' } })
+        -ExtraFields ([ordered]@{ outputLayout = if ($isCombined) { 'combined' } else { 'per-site' } }) `
+        -InformationAction $moduleInformationAction
 
     if ($status -ne 'success') {
         exit 1

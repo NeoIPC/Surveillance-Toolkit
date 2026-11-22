@@ -94,11 +94,11 @@
     Without it, the build reports itself on the console only.
 
 .PARAMETER Quiet
-    Runs the build at log level quiet: the R and Quarto children run with their quiet flags, and the
-    wrapper's verbose, debug, and information streams and its progress bar are silenced. Console
-    messages written with Write-Host stay visible, the build summary among them, as do warnings,
-    terminating errors, and whatever a child still prints as it runs. Takes precedence over -Verbose
-    and -Debug.
+    Silences the build down to warnings: no line reaches the console, not the notices of what
+    the build is generating, not the build summary the report writer prints — the verbose,
+    debug, and information streams and the progress bar go quiet, and the R and Quarto children
+    run with their quiet flags. Warnings and errors stay visible: a build that fails gives its
+    reason on the error stream. Takes precedence over -Verbose and -Debug.
 
 .PARAMETER Dhis2Scheme
     http or https for the DHIS2 requests of the build, by default https. The choice reaches the data
@@ -370,13 +370,18 @@ $logLevel =
     elseif ($verboseRequested) { 'verbose' }
     else { 'normal' }
 
-# -Quiet also silences the wrapper's own progress/verbose/info streams so the
-# whole pipeline is quiet, not just the logger channel.
+# -Quiet silences everything below a warning. SilentlyContinue does not: it leaves
+# Write-Host lines on screen, this script's own as well as the module functions'. Ignore
+# silences the script's own, the build scriptblock below included; a module function's
+# lines need -InformationAction Ignore at the call, which the render and report calls take
+# from $moduleInformationAction.
+$moduleInformationAction = 'SilentlyContinue'
 if ($Quiet) {
-    $VerbosePreference     = 'SilentlyContinue'
-    $DebugPreference       = 'SilentlyContinue'
-    $InformationPreference = 'SilentlyContinue'
-    $ProgressPreference    = 'SilentlyContinue'
+    $VerbosePreference       = 'SilentlyContinue'
+    $DebugPreference         = 'SilentlyContinue'
+    $InformationPreference   = 'Ignore'
+    $ProgressPreference      = 'SilentlyContinue'
+    $moduleInformationAction = 'Ignore'
 }
 
 # Native verbosity flags for the child processes, derived from the same level.
@@ -494,7 +499,7 @@ try {
             if ($Dhis2Hostname) { $rArgs += @('--host', $Dhis2Hostname) }
             if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
-            $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-ReferenceData.R"
+            $rResult = Invoke-Rscript -Arguments $rArgs -Command $rscriptCmd -Description "Generate-ReferenceData.R" -InformationAction $moduleInformationAction
             if ($rResult.Status -eq 'Error') {
                 throw "Generate-ReferenceData.R failed (exit code $($rResult.ExitCode))."
             }
@@ -557,7 +562,7 @@ try {
                 $quartoArgs += $quartoArgsCommon
                 if ($PSCmdlet.ShouldProcess($outFilePath, "Render $format for $locale")) {
                     Write-Verbose "Rendering $format for $locale"
-                    $renderResult = Invoke-QuartoRender -Arguments $quartoArgs -Description "$format for $locale"
+                    $renderResult = Invoke-QuartoRender -Arguments $quartoArgs -Description "$format for $locale" -InformationAction $moduleInformationAction
                     if ($renderResult.Status -eq 'Error') {
                         $errors += $renderResult.Messages
                         throw "Quarto render failed for $locale/$format."
@@ -576,6 +581,7 @@ try {
 }
 catch {
     $errors += $_.Exception.Message
+    Write-Error $_.Exception.Message
 }
 finally {
     if ($jsonIntermediate -and $errors.Count -eq 0 -and (Test-Path -LiteralPath $jsonFilePath)) {
@@ -602,7 +608,8 @@ finally {
         -ScriptTimestamp $scriptTimestamp -OutputDirPath $outputDirPath `
         -OutputLocales $OutputLocales -OutputFormats $OutputFormats `
         -GeneratedDataFile $json -Backup $backup `
-        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source
+        -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
+        -InformationAction $moduleInformationAction
 
     if ($status -ne 'success') {
         exit 1

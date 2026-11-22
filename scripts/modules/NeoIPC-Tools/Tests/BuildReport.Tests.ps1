@@ -30,6 +30,34 @@ Describe 'Write-NeoIPCBuildReport' {
         Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $false 6>$null | Should -BeExactly 'cancelled'
     }
 
+    # The console of a quiet build carries warnings and errors only, so the status of a
+    # failed build — the one thing only the writer knows before the builder exits 1 —
+    # has to reach the caller on the error stream, where -Quiet cannot hide it.
+    It 'sends the status of a failed build to the error stream' {
+        $errorRecords = @()
+        $null = Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true -Errors @('boom') `
+            -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
+        @($errorRecords | ForEach-Object { $_.Exception.Message }) | Should -Be @('Build status: failed')
+    }
+    It 'keeps a build that succeeds, and one that was cancelled, off the error stream' {
+        $errorRecords = @()
+        $null = Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true `
+            -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
+        @($errorRecords).Count | Should -Be 0
+        $null = Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $false `
+            -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
+        @($errorRecords).Count | Should -Be 0
+    }
+    # The builders call this writer under -InformationAction Ignore for -Quiet; the
+    # summary lines below have to be the information stream's, so that call silences
+    # them. Pinned against a future line that bypasses the stream, which Ignore could
+    # not silence and a quiet build would leak.
+    It 'writes no host line when it is called with -InformationAction Ignore' {
+        $records = @(Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true `
+            -InformationAction Ignore 6>&1)
+        @($records | Where-Object { $_ -is [System.Management.Automation.InformationRecord] }).Count | Should -Be 0
+    }
+
     Context 'JSON shape' {
         BeforeAll {
             $reportFilePath = Join-Path $TestDrive 'report.json'
@@ -350,5 +378,87 @@ Describe 'Invoke-QuartoRender' {
         }
         $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
         @($warnings | ForEach-Object { $_.Message }) | Should -Be @('[WARNING] Could not fetch resource')
+    }
+
+    # A failed render's reason has to reach the caller, not just the host: the host is
+    # the one thing a quiet build silences, and a build that fails has to say why even
+    # then. The error stream is the stream that survives.
+    It 'sends the failed child''s error lines to the error stream' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 1
+            'ERROR [validation-report] the import failed'
+            'Quitting from lines 3-9'
+        }
+        $errorRecords = @()
+        $records = @(Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorVariable errorRecords 6>&1)
+        @($errorRecords | ForEach-Object { $_.Exception.Message }) | Should -Contain 'ERROR [validation-report] the import failed'
+        @($records | ForEach-Object { "$_" }) | Should -Not -Contain 'ERROR [validation-report] the import failed'
+    }
+
+    It 'sends the safety net, the word on a failure it could not classify, to the error stream too' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 1
+            'quarto stopped without an error line'
+        }
+        $errorRecords = @()
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorVariable errorRecords 6>$null
+        @($errorRecords | ForEach-Object { $_.Exception.Message } | Where-Object { $_ -like '*no recognised error line was captured*' }).Count |
+            Should -Be 1
+    }
+
+    # The success case pins what stays: the reason of a failure may move to the error
+    # stream, but the finished render keeps its console word for callers without -Quiet.
+    It 'says done on the host, and nothing on the error stream, for a render that succeeds' {
+        Mock -ModuleName NeoIPC-Tools -CommandName quarto -MockWith {
+            $global:LASTEXITCODE = 0
+            'Output created: report.pdf'
+        }
+        $errorRecords = @()
+        $records = @(Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorVariable errorRecords 6>&1)
+        @($errorRecords).Count | Should -Be 0
+        @($records | Where-Object { $_ -is [System.Management.Automation.InformationRecord] } |
+                ForEach-Object { "$_" }) | Should -Contain 'done.'
+    }
+}
+
+Describe 'Invoke-Rscript' {
+    BeforeAll {
+        # The helper runs the Rscript executable. A global stub stands in for it so the
+        # command resolves wherever the tests run; each case then mocks its behaviour in
+        # the module's scope, as Invoke-QuartoRender's cases do for quarto.
+        function global:Rscript { param([Parameter(ValueFromRemainingArguments)] $Arguments) }
+    }
+    AfterAll {
+        Remove-Item -Path 'Function:\Rscript' -ErrorAction SilentlyContinue
+    }
+
+    It 'sends the failed child''s error lines to the error stream' {
+        Mock -ModuleName NeoIPC-Tools -CommandName Rscript -MockWith {
+            $global:LASTEXITCODE = 1
+            "Error: cannot open file 'a.R'"
+        }
+        $errorRecords = @()
+        $null = Invoke-Rscript -Arguments @('a.R') -ErrorVariable errorRecords 6>$null
+        @($errorRecords | ForEach-Object { $_.Exception.Message }) | Should -Contain "Error: cannot open file 'a.R'"
+    }
+
+    It 'sends the safety net, the word on a failure it could not classify, to the error stream too' {
+        Mock -ModuleName NeoIPC-Tools -CommandName Rscript -MockWith {
+            $global:LASTEXITCODE = 1
+            'Rscript stopped without an error line'
+        }
+        $errorRecords = @()
+        $null = Invoke-Rscript -Arguments @('a.R') -ErrorVariable errorRecords 6>$null
+        @($errorRecords | ForEach-Object { $_.Exception.Message } | Where-Object { $_ -like '*no recognised error line was captured*' }).Count |
+            Should -Be 1
+    }
+
+    It 'writes no host line for a run that succeeds' {
+        Mock -ModuleName NeoIPC-Tools -CommandName Rscript -MockWith {
+            $global:LASTEXITCODE = 0
+            'reading data'
+        }
+        $records = @(Invoke-Rscript -Arguments @('a.R') 6>&1)
+        @($records | Where-Object { $_ -is [System.Management.Automation.InformationRecord] }).Count | Should -Be 0
     }
 }

@@ -36,11 +36,11 @@
     DHIS2 username and password.
 
 .PARAMETER Quiet
-    Runs the build at log level quiet: the R and Quarto children run with their quiet flags, and the
-    wrapper's verbose, debug, and information streams and its progress bar are silenced. Console
-    messages written with Write-Host stay visible, the build summary among them, as do warnings,
-    terminating errors, and whatever a child still prints as it runs. Takes precedence over -Verbose
-    and -Debug.
+    Silences the build down to warnings: no line reaches the console, not the notices of what
+    the build is generating, not the build summary the report writer prints — the verbose,
+    debug, and information streams and the progress bar go quiet, and the R and Quarto children
+    run with their quiet flags. Warnings and errors stay visible: a build that fails gives its
+    reason on the error stream. Takes precedence over -Verbose and -Debug.
 
 .PARAMETER JsonReport
     Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
@@ -187,13 +187,18 @@ $logLevel =
     elseif ($verboseRequested) { 'verbose' }
     else { 'normal' }
 
-# -Quiet also silences the wrapper's own progress/verbose/info streams so the
-# whole pipeline is quiet, not just the logger channel.
+# -Quiet silences everything below a warning. SilentlyContinue does not: it leaves
+# Write-Host lines on screen, this script's own as well as the module functions'. Ignore
+# silences the script's own, the build scriptblock below included; a module function's
+# lines need -InformationAction Ignore at the call, which the render and report calls take
+# from $moduleInformationAction.
+$moduleInformationAction = 'SilentlyContinue'
 if ($Quiet) {
-    $VerbosePreference     = 'SilentlyContinue'
-    $DebugPreference       = 'SilentlyContinue'
-    $InformationPreference = 'SilentlyContinue'
-    $ProgressPreference    = 'SilentlyContinue'
+    $VerbosePreference       = 'SilentlyContinue'
+    $DebugPreference         = 'SilentlyContinue'
+    $InformationPreference   = 'Ignore'
+    $ProgressPreference      = 'SilentlyContinue'
+    $moduleInformationAction = 'Ignore'
 }
 
 # Native verbosity flags for the child processes, derived from the same level.
@@ -253,9 +258,11 @@ try {
             if ($Dhis2Port) { $rArgs += @('--port', $Dhis2Port) }
             if ($Dhis2Path) { $rArgs += @('--path', $Dhis2Path) }
             $rArgs += $rscriptVerbosityArgs
-            $rResult = Invoke-Rscript -Arguments $rArgs -Description "Generate-PatientData.R"
+            $rResult = Invoke-Rscript -Arguments $rArgs -Description "Generate-PatientData.R" -InformationAction $moduleInformationAction
             if ($rResult.Status -eq 'Error') {
-                $errors += "Generate-PatientData.R failed (exit code $($rResult.ExitCode))."
+                $errMsg = "Generate-PatientData.R failed (exit code $($rResult.ExitCode))."
+                Write-Error $errMsg
+                $errors += $errMsg
             } else {
                 $outputFiles += $outFilePath
             }
@@ -278,9 +285,11 @@ try {
             if ($Dhis2Port) { $quartoArgs += @('-P', "dhis2Port:$Dhis2Port") }
             if ($Dhis2Path) { $quartoArgs += @('-P', "dhis2Path:$Dhis2Path") }
             $quartoArgs += $quartoVerbosityArgs
-            $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "patient data report for $PatientId"
+            $result = Invoke-QuartoRender -Arguments $quartoArgs -Description "patient data report for $PatientId" -InformationAction $moduleInformationAction
             if ($result.Status -eq 'Error') {
-                $errors += "Quarto render failed for $PatientId (exit code $($result.ExitCode))."
+                $errMsg = "Quarto render failed for $PatientId (exit code $($result.ExitCode))."
+                Write-Error $errMsg
+                $errors += $errMsg
             } else {
                 $outputFiles += (Join-Path $outputDirPath $outFileName)
             }
@@ -291,6 +300,7 @@ try {
 }
 catch {
     $errors += $_.Exception.Message
+    Write-Error $_.Exception.Message
 }
 finally {
     Set-Location -LiteralPath $currentDir
@@ -311,7 +321,8 @@ finally {
         -OutputLocales @($OutputLocale) -OutputFormats @($OutputFormat) `
         -GeneratedDataFile $generatedDataFile `
         -ParameterHash $paramSnapshot.hash -Parameters $paramSnapshot.source `
-        -ExtraFields ([ordered]@{ patientId = $PatientId; departmentCode = $DepartmentCode })
+        -ExtraFields ([ordered]@{ patientId = $PatientId; departmentCode = $DepartmentCode }) `
+        -InformationAction $moduleInformationAction
 
     if ($status -ne 'success') {
         exit 1
