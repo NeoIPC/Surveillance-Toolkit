@@ -61,8 +61,8 @@ downloaded from the World Bank and deleted after reading. Reading it needs the D
 module provisions under lib/.
 
 .PARAMETER WhatIf
-    Shows the country it would add, with the org units and groups the plan carries, and writes nothing; the returned
-    object then says it was not Added, with the Id the preview drew — a real run draws its own.
+Shows the country it would add, with the org units and groups the plan carries, and writes nothing; the returned
+object then says it was not Added, with the Id the preview drew — a real run draws its own.
 
 .PARAMETER Confirm
 Asks before adding: -Confirm asks every time, -Confirm:$false answers for the write. Without either the command does
