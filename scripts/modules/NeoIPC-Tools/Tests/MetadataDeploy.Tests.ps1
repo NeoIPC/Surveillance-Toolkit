@@ -1825,21 +1825,14 @@ InModuleScope 'NeoIPC-Tools' {
             Get-FakeObject 'optionGroups' 'ogAAAAAAAA1' | Should -Not -BeNullOrEmpty
         }
 
-        It 'asks before clearing the caches for a dry run; declined, it still validates, plans, and gates hazards' {
+        It 'asks before clearing the caches for a dry run; declined, it sends nothing but still plans and gates hazards' {
             $pkg = New-TestPackage
             Set-FakeFromPackage $pkg
             $pkg['dataElements'][0]['name'] = 'Changed'
             # -WhatIf declines every confirmation; a cache clear sent without asking would still reach the fake.
-            # The validation request commits nothing server-side, so it runs under -WhatIf like the reads: a dry
-            # run whose answer says Succeeded must have been validated by the server whoever asked for it.
             $r = Deploy-NeoIPCMetadata -Json ($pkg | ConvertTo-Json -Depth 100 -Compress) -Auth @{ AuthType = 'Basic' } -Hostname 'dhis2.example.org' -DryRun -WhatIf 6>$null
-            @($script:Fake.Requests | Where-Object { $_.Kind -in 'cacheClear', 'put', 'delete' }).Count | Should -Be 0
-            $validate = @($script:Fake.Requests | Where-Object { $_.Kind -eq 'metadata' })
-            $validate.Count | Should -Be 1 -Because 'the declined dry run is still server-validated'
-            $validate[0].Mode | Should -Be 'VALIDATE'
-            @($r.Steps | Where-Object Name -eq 'validate (dry run)')[0].Status | Should -Be 'OK'
+            @($script:Fake.Requests | Where-Object { $_.Kind -in 'cacheClear', 'metadata', 'put', 'delete' }).Count | Should -Be 0
             @($r.Steps | Where-Object Name -eq 'cache clear')[0].Status | Should -Be 'Skipped'
-            $r.Succeeded | Should -BeTrue
             @($r.Plan | Where-Object Type -eq 'dataElements')[0].Changed | Should -Be 1
             $pkg['options'][0]['code'] = 'one'
             { Deploy-NeoIPCMetadata -Json ($pkg | ConvertTo-Json -Depth 100 -Compress) -Auth @{ AuthType = 'Basic' } -Hostname 'dhis2.example.org' -DryRun -WhatIf 6>$null } |

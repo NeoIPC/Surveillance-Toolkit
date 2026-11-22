@@ -155,8 +155,7 @@ function Deploy-NeoIPCMetadata {
         unverified release ends it the same way, before anything is shown — then shows the deployment it would send
         and returns: the live-state reads, the deployment, and the cache clear all stand behind this gate, so none
         runs. With -DryRun, -WhatIf gates only the cache clear, which it shows and skips; the live-state reads, the
-        plan, the hazard gate, and the validation request, which commits nothing server-side, run as in any dry run,
-        so an unacknowledged hazard ends the run there too and the answer is still one the server validated.
+        plan, and the hazard gate run as in any dry run, so an unacknowledged hazard ends the run there too.
     .PARAMETER Confirm
         A committing run asks before anything is written, its impact being High; -Confirm:$false runs it unattended.
         A -DryRun writes no metadata but still asks before clearing the instance's caches, which is maintenance the
@@ -307,14 +306,9 @@ function Deploy-NeoIPCMetadata {
         # or a dropped connection, can follow a commit.
         $scopedBefore = $progress.ProgramScoped
         if (-not $Validate -and @($payload.Keys | Where-Object { -not $script:NeoIPCDeployOutsideProgramTypes.Contains([string]$_) }).Count -gt 0) { $progress.ProgramScoped = $true }
-        # The validation request commits nothing server-side, so it runs under -WhatIf too, like the reads a plan
-        # is built from; a dry run ended with -WhatIf that was never validated would read as one that was.
-        $whatIfGate = @{}
-        if ($Validate) { $whatIfGate['WhatIf'] = $false }
-        $import = Import-NeoIPCMetadata -Json ($payload | ConvertTo-Json -Depth 100 -Compress) @endpoint @whatIfGate -ImportStrategy 'CREATE_AND_UPDATE' -AtomicMode 'ALL' -DryRun:$Validate -Confirm:$false
+        $import = Import-NeoIPCMetadata -Json ($payload | ConvertTo-Json -Depth 100 -Compress) @endpoint -ImportStrategy 'CREATE_AND_UPDATE' -AtomicMode 'ALL' -DryRun:$Validate -Confirm:$false
         if ($null -eq $import -or $import.Status -eq 'ERROR' -or (Test-RefusedStatus $import.HttpStatusCode)) { $progress.ProgramScoped = $scopedBefore }
-        # -WhatIf can now decline only the committing request here (every request runs with -Confirm:$false), and it
-        # returns before any commit.
+        # Only -WhatIf declines here (every request runs with -Confirm:$false), and it returns before any commit.
         if ($null -eq $import) {
             if ($Validate) { Add-Step $Name 'Skipped' 'declined'; return $null }
             Exit-Deployment "Deployment step '$Name' was declined."
