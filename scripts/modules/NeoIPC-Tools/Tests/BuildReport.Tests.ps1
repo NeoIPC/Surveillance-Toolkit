@@ -44,6 +44,12 @@ Describe 'Write-NeoIPCBuildReport' {
             $script:keys = @($report.PSObject.Properties.Name)
         }
         It 'writes the JSON file' { Test-Path -LiteralPath (Join-Path $TestDrive 'report.json') | Should -BeTrue }
+        It 'creates a parent directory missing on the way' {
+            $nested = Join-Path $TestDrive 'not-yet\deeper\report.json'
+            Write-NeoIPCBuildReport -Name 'Validation Report Build' -StartedAt $StartedAt -BuildCompleted $false -BuildReportFilePath $nested 6>$null | Out-Null
+            Test-Path -LiteralPath $nested | Should -BeTrue -Because 'a build cancelled before its first output asked for the report, and no render created the directory'
+            ((Get-Content -LiteralPath $nested -Raw) | ConvertFrom-Json).status | Should -BeExactly 'cancelled'
+        }
         It 'emits keys in the fixed order: envelope, common fields, extras, errors last' {
             $keys | Should -Be @('name', 'status', 'startedAt', 'completedAt', 'outputFilePaths',
                 'scriptTimestamp', 'outputDirPath',

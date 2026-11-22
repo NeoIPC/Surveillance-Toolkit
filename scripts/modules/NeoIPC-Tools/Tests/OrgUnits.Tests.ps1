@@ -530,6 +530,32 @@ InModuleScope 'NeoIPC-Tools' {
                     @(Get-Message $hostLines) | Should -Contain 'Build status: cancelled'
                     $LASTEXITCODE | Should -Be 1
                 }
+
+                It 'writes the requested JSON report to the default output directory when the build cancels there' {
+                    $defaultOut = Join-Path $script:RepoRoot 'reports' 'Validation-Report' '_output'
+                    $existed = Test-Path -LiteralPath $defaultOut -PathType Container
+                    $before = @(Get-ChildItem -LiteralPath $defaultOut -Filter '*.json' -File -ErrorAction SilentlyContinue | ForEach-Object Name)
+                    try {
+                        $global:LASTEXITCODE = 0
+                        $hostLines = & $script:ValidationReport -SiteCodeFilter 'NOPE' -Dhis2Hostname $script:Host1 -JsonReport `
+                            -WarningVariable warnings -WarningAction SilentlyContinue 6>&1
+                        Get-Message $warnings | Should -BeLike "*No sites matched filter 'NOPE'*"
+                        Should -Invoke Invoke-QuartoRender -Times 0 -Exactly
+                        @(Get-Message $hostLines) | Should -Contain 'Build status: cancelled'
+                        $LASTEXITCODE | Should -Be 1
+                        $dirExists = Test-Path -LiteralPath $defaultOut -PathType Container
+                        $newReports = @(if ($dirExists) {
+                                Get-ChildItem -LiteralPath $defaultOut -Filter '*_NeoIPC-Surveillance-Validation-Report-Build.json' -File |
+                                    Where-Object Name -notin $before
+                            })
+                        $newReports.Count | Should -Be 1 -Because '-JsonReport must deliver the build report even when the default directory does not exist yet'
+                        (Get-Content -LiteralPath $newReports[0].FullName -Raw | ConvertFrom-Json).status | Should -BeExactly 'cancelled'
+                    }
+                    finally {
+                        Remove-Item -LiteralPath (Join-Path $defaultOut '*_NeoIPC-Surveillance-Validation-Report-Build.json') -Force -ErrorAction SilentlyContinue
+                        if (-not $existed) { Remove-Item -LiteralPath $defaultOut -Recurse -Force -ErrorAction SilentlyContinue }
+                    }
+                }
             }
 
             It 'Update-NeoIPCCache.ps1 describes every parameter, and that its host falls back to the production instance' {
