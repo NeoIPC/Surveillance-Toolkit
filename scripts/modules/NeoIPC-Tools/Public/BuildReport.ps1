@@ -36,7 +36,8 @@ Whether the build ran through to its end. False with no errors gives the status 
 which is how an interrupted or early-returning build tells itself apart from a clean finish.
 
 .PARAMETER BuildReportFilePath
-Where to write the report as JSON, when non-blank. A parent directory missing on the way is
+Where to write the report as JSON, when non-blank. A relative path resolves against the
+caller's location, as every cmdlet resolves it, and a parent directory missing on the way is
 created, so a build cancelled before its first output still delivers the report it asked for.
 A failure to write it is a warning; the console summary is printed either way.
 
@@ -140,11 +141,15 @@ function Write-NeoIPCBuildReport {
 
     if (-not [string]::IsNullOrWhiteSpace($BuildReportFilePath)) {
         try {
-            # .NET, not New-Item: an inherited -WhatIf turns New-Item into a message, and the report
-            # belongs on disk even for a -WhatIf or cancelled run, whose directory no render created.
-            [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($BuildReportFilePath))
-            Write-NeoIPCTextFile -Path $BuildReportFilePath -Text ($buildReport | ConvertTo-Json -Depth 100)
-            Write-Verbose "Generated build report: $BuildReportFilePath"
+            # Resolved through the writer's own helper, so the parent is derived for the path the writer
+            # really writes, not for .NET's working directory, which Set-Location never reaches. The
+            # directory is made through .NET, not New-Item: an inherited -WhatIf turns New-Item into a
+            # message, and the report belongs on disk even for a -WhatIf or cancelled run, whose
+            # directory no render created.
+            $reportPath = Resolve-NeoIPCFileSystemPath -Path $BuildReportFilePath -Noun 'build report path'
+            [void][System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($reportPath))
+            Write-NeoIPCTextFile -Path $reportPath -Text ($buildReport | ConvertTo-Json -Depth 100)
+            Write-Verbose "Generated build report: $reportPath"
         }
         catch {
             Write-Warning "Failed to write build report: $($_.Exception.Message)"

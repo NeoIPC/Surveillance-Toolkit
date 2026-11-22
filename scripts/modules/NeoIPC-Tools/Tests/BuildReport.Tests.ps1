@@ -50,6 +50,16 @@ Describe 'Write-NeoIPCBuildReport' {
             Test-Path -LiteralPath $nested | Should -BeTrue -Because 'a build cancelled before its first output asked for the report, and no render created the directory'
             ((Get-Content -LiteralPath $nested -Raw) | ConvertFrom-Json).status | Should -BeExactly 'cancelled'
         }
+        It 'resolves a relative destination against the caller''s location, as every cmdlet does' {
+            $null = Push-Location -LiteralPath $TestDrive
+            try {
+                Write-NeoIPCBuildReport -Name 'Validation Report Build' -StartedAt $StartedAt -BuildCompleted $false -BuildReportFilePath 'caller\report.json' 6>$null | Out-Null
+            }
+            finally {
+                Pop-Location
+            }
+            Test-Path -LiteralPath (Join-Path $TestDrive 'caller\report.json') | Should -BeTrue -Because 'the parent is created for the path the writer writes, not for .NET''s working directory'
+        }
         It 'emits keys in the fixed order: envelope, common fields, extras, errors last' {
             $keys | Should -Be @('name', 'status', 'startedAt', 'completedAt', 'outputFilePaths',
                 'scriptTimestamp', 'outputDirPath',
