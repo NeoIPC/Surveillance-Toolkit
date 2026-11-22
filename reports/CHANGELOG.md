@@ -13,6 +13,14 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Changed
+
+- `Build-ValidationReport.ps1` whose filter matches no department warns, reports the build
+  cancelled in its build report, and ends with exit code 1, where it ended with 0 and no report; a batch
+  calling it can now tell an empty scope from a build that ran. And a build cancelled before its first
+  output delivers the JSON report it was asked for even where no render has created the default `_output`
+  directory: the report writer creates a parent directory missing on the way.
+
 ## [0.3.0-alpha] - 2026-10-09
 
 ### Added
