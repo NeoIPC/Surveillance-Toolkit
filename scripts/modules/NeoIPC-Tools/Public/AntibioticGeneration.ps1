@@ -193,8 +193,11 @@ function New-NeoIPCAntibioticOptionGroup {
     .PARAMETER ExistingPackage
         Optional parsed export supplying each group's deployed sharing by code (never identity). Omit for
         sharing-less groups.
-    .PARAMETER PoDirectory / .PARAMETER PoBaseName
-        Optional bilingual antibiotic catalogues for localized group name/shortName/description (default 'antibiotics').
+    .PARAMETER PoDirectory
+        Optional directory of the bilingual antibiotic catalogues the group name/shortName/description are
+        localized from. Omit for unlocalized groups.
+    .PARAMETER PoBaseName
+        Catalogue base name inside -PoDirectory. Default 'antibiotics'.
     .OUTPUTS
         [ordered] hashtable with key 'optionGroups' (37 at the canonical counts).
     #>
@@ -311,8 +314,11 @@ function New-NeoIPCAntibioticOptionGroupSet {
         (via any group's optionSet ref) the generated option set's UID.
     .PARAMETER ExistingPackage
         Optional parsed export supplying each group-set's deployed dataDimension + sharing by code (never identity).
-    .PARAMETER PoDirectory / .PARAMETER PoBaseName
-        Optional bilingual antibiotic catalogues for localized group-set name/description (default base 'antibiotics').
+    .PARAMETER PoDirectory
+        Optional directory of the bilingual antibiotic catalogues the group-set name/description are localized
+        from. Omit for unlocalized group-sets.
+    .PARAMETER PoBaseName
+        Catalogue base name inside -PoDirectory. Default 'antibiotics'.
     .OUTPUTS
         [ordered] hashtable with key 'optionGroupSets' (2).
     #>

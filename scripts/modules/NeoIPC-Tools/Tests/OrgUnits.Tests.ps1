@@ -31,9 +31,10 @@
     The report builders' department step is checked by parsing the scripts: every key a script puts into the hashtable
     it splats into Get-NeoIPCDepartments must be a parameter Get-NeoIPCDepartments declares. Running every builder
     instead would need Quarto, R, and their whole environment mocked, while parsing reaches all of them at once.
-    Build-PartnerCertificate.ps1, whose department step decides what it renders, is also run, with the module's
-    import, the authentication, the department list, and the render mocked: once given -Dhis2Path, and once with no
-    department matching.
+    Build-PartnerCertificate.ps1 and Build-ValidationReport.ps1, whose department steps decide what they render,
+    are also run, with the module's import, the authentication, the department list, and the render mocked: the
+    former once given -Dhis2Path, and once with no department matching; the latter with no department matching,
+    which must warn, report the build cancelled, and exit 1.
 
 .EXAMPLE
     Invoke-Pester -Path scripts/modules/NeoIPC-Tools/Tests/OrgUnits.Tests.ps1
@@ -507,6 +508,27 @@ InModuleScope 'NeoIPC-Tools' {
                     Get-Message $warnings | Should -BeLike "*No department matched -DepartmentCode 'NOPE'*"
                     Should -Invoke Invoke-QuartoRender -Times 0 -Exactly
                     @(Get-Message $hostLines) | Should -Contain 'Build status: cancelled'
+                }
+            }
+
+            Context 'Build-ValidationReport.ps1, run with its import, authentication, department list, and render mocked' {
+                BeforeEach {
+                    $script:ValidationReport = Join-Path $script:RepoRoot 'scripts' 'Build-ValidationReport.ps1'
+                    Mock Import-Module { }
+                    Mock Resolve-NeoIPCAuth { @{ AuthType = 'None' } }
+                    Mock Get-NeoIPCDepartments { @() }
+                    Mock Invoke-QuartoRender { [pscustomobject]@{ Status = 'Success'; ExitCode = 0; Messages = @() } }
+                }
+
+                It 'warns, renders nothing, reports the build as cancelled, and ends with exit code 1 when no department matches' {
+                    $global:LASTEXITCODE = 0
+                    $hostLines = & $script:ValidationReport -SiteCodeFilter 'NOPE' -Dhis2Hostname $script:Host1 `
+                        -OutputDir (Join-Path $TestDrive 'out') -WarningVariable warnings -WarningAction SilentlyContinue 6>&1
+                    Should -Invoke Get-NeoIPCDepartments -Times 1 -Exactly -ParameterFilter { $SiteCodeFilter -eq 'NOPE' -and $ExcludeTestUnits }
+                    Get-Message $warnings | Should -BeLike "*No sites matched filter 'NOPE'*"
+                    Should -Invoke Invoke-QuartoRender -Times 0 -Exactly
+                    @(Get-Message $hostLines) | Should -Contain 'Build status: cancelled'
+                    $LASTEXITCODE | Should -Be 1
                 }
             }
 

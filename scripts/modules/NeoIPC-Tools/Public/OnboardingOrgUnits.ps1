@@ -131,6 +131,14 @@ The DHIS2 host. Mandatory, with no default, so that every call names the instanc
 .PARAMETER Port
 The DHIS2 port. Default: the scheme's.
 
+.PARAMETER WhatIf
+Reads the instance and lists every write the call plans on it — units, memberships, and the program assignment —
+without writing any of them; the returned records then show what already exists.
+
+.PARAMETER Confirm
+Asks once, listing all the writes together, its impact being High; -Confirm:$false answers the question and writes
+without asking. A session that cannot ask ends the call before anything is written.
+
 .OUTPUTS
 System.Management.Automation.PSCustomObject. One record each for the hospital and the department, after one for a
 country the call creates or completes, with Kind, Code, Id (empty for a unit that does not exist yet when -WhatIf or

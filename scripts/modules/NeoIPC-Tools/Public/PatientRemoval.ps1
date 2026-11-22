@@ -122,6 +122,13 @@ function Remove-NeoIPCPatient {
         later patch of one of these lines counts as verified. Any other release is refused before a patient is read
         unless this switch is given. On such a release DHIS2's dry run is unverified as well: should its answer report
         any patient as deleted, the run ends at once, though what the dry run did cannot be undone.
+    .PARAMETER WhatIf
+        Runs everything up to the preview — the selection, the checks, DHIS2's own dry run — shows it, deletes
+        nothing, and reports each deletable patient as WouldDelete; the result errors other outcomes write stay
+        unwritten.
+    .PARAMETER Confirm
+        Asks once, after the preview and with its totals, its impact being High; -Confirm:$false deletes without
+        asking. A declined question leaves every deletable patient Declined and deletes nothing.
     .OUTPUTS
         One [pscustomobject] per selected patient: TrackedEntityId, NeoIpcId, OrgUnitId, OrgUnitCode, EnrollmentIds and
         EventIds (the live ones the preview showed), Outcome, Reason, ErrorCodes, HttpStatusCode, and Message.

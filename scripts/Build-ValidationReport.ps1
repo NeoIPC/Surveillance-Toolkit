@@ -11,27 +11,96 @@ With -Combined, it renders a single report covering all departments (no departme
 With -Rules, only the named validation rules are applied; the report's header says which rules were left out.
 A department without findings renders a report saying so.
 
-.PARAMETER Dhis2PublicBaseUrl
-The base URL at which the report's readers reach DHIS2, which the Tracker Capture links of the report's
-patients start from: http:// or https://, the host, an optional port, and any context path, for example
-https://neoipc.example.org/dhis. Give it when the data is read over an address the readers cannot open,
-such as a tunnel or an internal host. Omitted, the links point at the DHIS2 instance the data is read from.
-The host is a host name or an IPv4 address of dot-separated labels of ASCII letters, digits, hyphens, and
-underscores; the path may also carry full stops, tildes, and percent-encoded bytes. Before it authenticates
-or renders, the script itself refuses a value with any '@', which before the host introduces a user name
-or password, any '?' or '#', which begins a query or fragment, or any whitespace or control character.
-The report refuses any other value outside this shape, such as one with a bracketed host such as an IPv6
-literal. No refusal repeats the value.
+.PARAMETER SiteCodeFilter
+    A regular expression a department code must match, compared ignoring case as -match does, applied where
+    the department list is read from DHIS2. Default '.+', every department, test units left out unless
+    -IncludeTestData keeps them. When nothing matches, the build warns, reports itself cancelled, and ends
+    with exit code 1. PerSite set.
 
-.PARAMETER Dhis2Path
-The API base path the report's R code reads the data from, and the last part of the key that keeps each
-instance's tab-completion cache apart. The site list is read from the instance's /api root whatever this
-says, as every read of the NeoIPC-Tools module is.
+.PARAMETER Combined
+    Render a single report covering all departments instead of one report per site: no department list is
+    read, the data arrives without a department filter, and the build report records the combined layout. The
+    Combined set, which takes no -SiteCodeFilter.
+
+.PARAMETER OutputLocale
+    Language the report renders in, by default English. Its language part is what Quarto receives as the
+    report's profile (de_AT renders with profile de). The localized Quarto file is looked up by the locale's
+    language and falls back to the base one; a locale with a territory subtag (de_AT) additionally sets the
+    render child's LC_ALL to that locale's UTF-8 form. Tab-completion lists the Quarto profiles defined
+    beside the report (en, audit, minimal); audit and minimal are build variants rather than locales, and
+    the shipped locale de needs no profile file, so completion offers it nowhere.
+
+.PARAMETER Token
+    DHIS2 personal access token, or the path of a file whose first line holds one. When empty, the
+    environment variable NEOIPC_DHIS2_TOKEN is read instead; with no token at all, the build prompts for a
+    DHIS2 username and password.
+
+.PARAMETER ValidationExceptionFile
+    CSV file of records exempting patients from validation findings, passed to the report. Resolved against
+    the caller's current location; a path that names no file ends the build, since rendering without the
+    exceptions the caller named could not be told apart from a run that named none.
 
 .PARAMETER IncludeUnusedValidationExceptions
-Add an appendix listing the records of the -ValidationExceptionFile list for the report's departments that
-match no record, or match one but exempt nothing, for the list's upkeep. The appendix names patients and is
-not meant to be passed on. Without a list, it says that none was applied.
+    Add an appendix listing the records of the -ValidationExceptionFile list for the report's departments that
+    match no record, or match one but exempt nothing, for the list's upkeep. The appendix names patients and is
+    not meant to be passed on. Without a list, it says that none was applied.
+
+.PARAMETER Rules
+    Numbers of the validation rules the report applies. Without it the report applies every rule; with it the
+    report's header names the rules left out.
+
+.PARAMETER IncludeTestData
+    Report test departments: their codes stay in the department list, which otherwise leaves the test units
+    out, and their patients stay in the report data, which otherwise excludes them.
+
+.PARAMETER OutputDir
+    Directory the reports and the build report are written to. A relative path resolves against the caller's
+    current location, and the directory is created when it does not exist yet. Defaults to the report's
+    _output directory.
+
+.PARAMETER Quiet
+    Runs the whole build at log level quiet: the Quarto child renders with --quiet, and the wrapper's own
+    progress, verbose, debug, and information streams are silenced. Takes precedence over -Verbose and -Debug.
+
+.PARAMETER JsonReport
+    Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
+    Without it, the build reports itself on the console only.
+
+.PARAMETER Dhis2Scheme
+    http or https for the DHIS2 requests of the build, by default https. The choice reaches the department
+    list and the report's R child alike.
+
+.PARAMETER Dhis2Hostname
+    The DHIS2 instance the build reads from: the given host, else the NEOIPC_DHIS2_HOST environment variable,
+    else the NeoIPC production host.
+
+.PARAMETER Dhis2Port
+    Port of the DHIS2 instance, for one served on a non-default port. Defaults to the scheme's own port.
+
+.PARAMETER Dhis2Path
+    The API base path the report's R code reads the data from, and the last part of the key that keeps each
+    instance's tab-completion cache apart. The site list is read from the instance's /api root whatever this
+    says, as every read of the NeoIPC-Tools module is.
+
+.PARAMETER Dhis2PublicBaseUrl
+    The base URL at which the report's readers reach DHIS2, which the Tracker Capture links of the report's
+    patients start from: http:// or https://, the host, an optional port, and any context path, for example
+    https://neoipc.example.org/dhis. Give it when the data is read over an address the readers cannot open,
+    such as a tunnel or an internal host. Omitted, the links point at the DHIS2 instance the data is read from.
+    The host is a host name or an IPv4 address of dot-separated labels of ASCII letters, digits, hyphens, and
+    underscores; the path may also carry full stops, tildes, and percent-encoded bytes. Before it authenticates
+    or renders, the script itself refuses a value with any '@', which before the host introduces a user name
+    or password, any '?' or '#', which begins a query or fragment, or any whitespace or control character.
+    The report refuses any other value outside this shape, such as one with a bracketed host such as an IPv6
+    literal. No refusal repeats the value.
+
+.PARAMETER WhatIf
+    Shows each report the build would render, combined or per site, without rendering any of it. The
+    department list is still read, and the build report notes each planned report as a would-render step.
+
+.PARAMETER Confirm
+    Asks before rendering: -Confirm asks for every report, -Confirm:$false answers for them. Without either
+    the build does not ask, as its confirm impact is Medium.
 
 .EXAMPLE
     .\Build-ValidationReport.ps1 -SiteCodeFilter 'NEO_AT.*' -OutputLocale 'de' -Token $myToken -Verbose
@@ -206,20 +275,6 @@ $publicBaseUrlParam = if ($Dhis2PublicBaseUrl) {
     "dhis2PublicBaseUrl:'$($Dhis2PublicBaseUrl.Replace("'", "''"))'"
 }
 
-if (-not $isCombined) {
-    $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
-    if (-not $IncludeTestData) { $deptArgs.ExcludeTestUnits = $true }
-    if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
-    if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
-    if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
-    $siteCodes = Get-NeoIPCDepartments @deptArgs
-
-    if (-not $siteCodes -or $siteCodes.Count -eq 0) {
-        Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
-        return
-    }
-}
-
 $wd = Get-Location
 
 # Resolve the unified log verbosity from -Quiet / -Verbose / -Debug. It reaches
@@ -268,13 +323,33 @@ $errors = @()
 $outputFiles = @()
 $buildLog = @()
 $buildCompleted = $false
+$siteCodes = $null
 $startedAt = (Get-Date -AsUTC).ToString('o')
 $scriptTimestamp = [datetime]::UtcNow.ToString("yyyy-MM-dd_HHmmss'Z'")
-$totalSteps = if ($isCombined) { 1 } else { $siteCodes.Count }
+$totalSteps = 0
 $completedSteps = 0
 
 try {
     Set-Location -LiteralPath $reportDirPath
+
+    # The department list is read inside the auth scope and the try, as in the other
+    # builders, so that a filter matching nothing warns, reports the build cancelled,
+    # and ends with exit code 1 rather than ending the script before the build report.
+    if (-not $isCombined) {
+        $deptArgs = @{ Auth = $auth; SiteCodeFilter = $SiteCodeFilter }
+        if (-not $IncludeTestData) { $deptArgs.ExcludeTestUnits = $true }
+        if ($Dhis2Scheme) { $deptArgs.Scheme = $Dhis2Scheme }
+        if ($Dhis2Hostname) { $deptArgs.Hostname = $Dhis2Hostname }
+        if ($Dhis2Port) { $deptArgs.Port = $Dhis2Port }
+        $siteCodes = Get-NeoIPCDepartments @deptArgs
+
+        if (-not $siteCodes -or $siteCodes.Count -eq 0) {
+            Write-Warning "No sites matched filter '$SiteCodeFilter'. Nothing to do."
+            return
+        }
+    }
+
+    $totalSteps = if ($isCombined) { 1 } else { $siteCodes.Count }
 
     $localeParts = Split-NeoIPCLocale -Locale $OutputLocale
     $language = $localeParts.Language

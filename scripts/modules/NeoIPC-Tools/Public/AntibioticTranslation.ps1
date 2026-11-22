@@ -26,12 +26,28 @@ function Export-NeoIPCAntibioticTranslation {
         Pure file processing — no DHIS2 API. Both the .pot and each updated .po are msgfmt-validated (best-effort;
         a warning, never a hard failure, when gettext is unavailable). ATC/AWaRe content is reproduced under WHO
         attribution (see antibiotics/README.md); keying by the English name keeps WHO ATC *codes* out of the PO.
-    .PARAMETER SubstancePath / GroupPath / AwareGroupPath / ListElementsPath
-        The canonical antibiotic sources. Default to the repository files under metadata/common/antibiotics/.
+    .PARAMETER SubstancePath
+        The substance source CSV. Defaults to the repository file under metadata/common/antibiotics/.
+    .PARAMETER GroupPath
+        The ATC group source CSV. Defaults to the repository file under metadata/common/antibiotics/.
+    .PARAMETER AwareGroupPath
+        The AWaRe group source CSV. Defaults to the repository file under metadata/common/antibiotics/.
+    .PARAMETER ListElementsPath
+        The printed-list UI label source CSV. Defaults to the repository file under
+        metadata/common/antibiotics/.
     .PARAMETER PoDirectory
         The directory holding the catalogues. Default: the repository po/ directory.
     .PARAMETER PoBaseName
         Catalogue base name. Default: antibiotics (so antibiotics.pot + antibiotics.<locale>.po).
+    .PARAMETER WhatIf
+        Shows the PO directory it would create, the .pot it would write, and each existing .po it would
+        update, without writing any of them. The preview needs an existing -PoDirectory: creating it is
+        shown, not done, and the path resolution that follows then fails. With an existing directory the
+        collected string set and the returned summary still come out; the summary's UpdatedLocales stays
+        empty.
+    .PARAMETER Confirm
+        Asks before writing: -Confirm asks every time, -Confirm:$false answers for the writes. Without
+        either the command does not ask, as its confirm impact is Medium.
     .OUTPUTS
         A summary object { PotPath; StringCount; UpdatedLocales }.
     #>

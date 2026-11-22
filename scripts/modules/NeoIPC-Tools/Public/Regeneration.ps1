@@ -43,6 +43,12 @@ function Update-NeoIPCGeneratedMetadataDirectory {
         Path to the infectious-agent YAML. Defaults (in each generator) to the canonical file in the repository.
     .PARAMETER PoDirectory
         Directory of the po4a locale catalogues the option labels are localized from. Defaults to the repository's po/.
+    .PARAMETER WhatIf
+        Regenerates the generated-class objects and shows the re-materialization of the generated matrix families
+        into common/ that it would perform, writing nothing.
+    .PARAMETER Confirm
+        Asks before rewriting common/: -Confirm asks every time, -Confirm:$false answers for the write. Without
+        either the command does not ask, as its confirm impact is Medium.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param(

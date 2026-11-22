@@ -103,6 +103,12 @@ function Update-NeoIPCMetadataDirectory {
     .PARAMETER Apply
         Write the reconciled changes (row-merge the affected CSVs + regenerate the source template). Without it,
         the cmdlet only reports the drift and changes nothing. Requires a git-tracked, clean directory.
+    .PARAMETER WhatIf
+        Shows the row-merge of each affected type's CSV and the source-template regeneration that -Apply would
+        perform, and writes nothing; a report-only run writes nothing anyway.
+    .PARAMETER Confirm
+        Asks before each -Apply write: -Confirm asks every time, -Confirm:$false answers for the writes. Without
+        either the command does not ask, as its confirm impact is Medium.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([pscustomobject])]

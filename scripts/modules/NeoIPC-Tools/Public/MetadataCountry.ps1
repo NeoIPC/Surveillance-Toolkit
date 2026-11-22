@@ -60,6 +60,14 @@ A copy of the World Bank's "historical classification by income" workbook (OGHIS
 downloaded from the World Bank and deleted after reading. Reading it needs the DocumentFormat.OpenXml assembly that the
 module provisions under lib/.
 
+.PARAMETER WhatIf
+    Shows the country it would add, with the org units and groups the plan carries, and writes nothing; the returned
+    object then says it was not Added, with the Id the preview drew — a real run draws its own.
+
+.PARAMETER Confirm
+Asks before adding: -Confirm asks every time, -Confirm:$false answers for the write. Without either the command does
+not ask, as its confirm impact is Medium.
+
 .OUTPUTS
 System.Management.Automation.PSCustomObject. The country: Code, Id, Name, ShortName, IncomeClass (fiscal year to class,
 for the years the groups cover), the Groups it joins, the codes of its TestHospital and TestDepartment, and whether it

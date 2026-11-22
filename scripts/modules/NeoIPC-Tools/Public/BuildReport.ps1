@@ -17,6 +17,55 @@ one-off fields (e.g. patientId, departmentCode, outputLayout).
 CTRL+C (PipelineStoppedException) bypasses catch blocks, so $BuildCompleted distinguishes
 a clean finish (true) from an interrupted one (false with no errors).
 
+.PARAMETER Name
+Build name, recorded under the report's name key, e.g. 'Partner Report Build'.
+
+.PARAMETER StartedAt
+When the build started, as the ISO 8601 text recorded under the report's startedAt key.
+
+.PARAMETER Errors
+The error messages the build collected. Any of them makes the status 'failed', and they
+are recorded under the report's errors key.
+
+.PARAMETER OutputFilePaths
+The output files the build produced, recorded deduplicated and sorted under the report's
+outputFilePaths key and listed on the console.
+
+.PARAMETER BuildCompleted
+Whether the build ran through to its end. False with no errors gives the status 'cancelled',
+which is how an interrupted or early-returning build tells itself apart from a clean finish.
+
+.PARAMETER BuildReportFilePath
+Where to write the report as JSON, when non-blank. A failure to write it is a warning; the
+console summary is printed either way.
+
+.PARAMETER OutputDirPath
+The directory the outputs were written to, recorded under outputDirPath when supplied.
+
+.PARAMETER OutputLocales
+The locales the build produced, recorded under outputLocales as an array whenever supplied.
+
+.PARAMETER OutputFormats
+The formats the build produced, recorded under outputFormats as an array whenever supplied.
+
+.PARAMETER GeneratedDataFile
+The dictionary describing the generated data file (its filePath, whether it was requested,
+and whether it was only intermediate), recorded under generatedDataFile.
+
+.PARAMETER Backup
+The dictionary describing the dataset backup (whether it was enabled and its filePath),
+recorded under backup.
+
+.PARAMETER ParameterHash
+The SHA-256 hex digest of the parameter snapshot, recorded under parameterHash.
+
+.PARAMETER Parameters
+The parameter snapshot the digest was computed from, recorded under parameters.
+
+.PARAMETER BuildSteps
+The step entries made by New-NeoIPCBuildStep and completed by Complete-NeoIPCBuildStep,
+recorded under buildSteps.
+
 .OUTPUTS
 The status string: 'success', 'failed', or 'cancelled'.
 #>
@@ -124,6 +173,25 @@ Construct a standard build-step entry for a build report's buildSteps array.
 Returns an ordered dictionary with the canonical per-step schema (camelCase). Omitted
 fields stay $null. Pair with Complete-NeoIPCBuildStep to record the outcome after the
 step runs.
+
+.PARAMETER SiteCode
+The department the step belongs to, kept under the siteCode key.
+
+.PARAMETER OutputLocale
+The locale the step produces, kept under the outputLocale key.
+
+.PARAMETER OutputFormat
+The format the step's artefact is produced in, kept under the outputFormat key.
+
+.PARAMETER OutputFileName
+The file name the step produces, kept under the outputFileName key.
+
+.PARAMETER QmdFilePath
+The Quarto file the step renders, kept under the qmdFilePath key.
+
+.PARAMETER QmdParams
+The parameter values the step passes to the render, kept under the qmdParams key, or an
+empty dictionary when not given.
 #>
 function New-NeoIPCBuildStep {
     [CmdletBinding()]
@@ -161,6 +229,25 @@ return onto the step's status (Success->success, Error->error; anything else lea
 current status), exitCode, and messages (appended). Explicit -Status /
 -ExitCode / -Messages override, for callers without a helper result (e.g. -WhatIf planned
 steps). Mutates the step in place and returns it.
+
+.PARAMETER Step
+The step entry to record the outcome on, taken from the pipeline too, so the caller can
+pipe the step through and keep the result.
+
+.PARAMETER Result
+The { Status, ExitCode, Messages } result of Invoke-Rscript or Invoke-QuartoRender: a
+'Success' or 'Error' status sets the step's status, and the exit code and messages carry
+over onto it.
+
+.PARAMETER Status
+Status to set directly — 'planned', 'success', or 'error' — for callers that have no
+helper result, such as the would-render steps of a -WhatIf run.
+
+.PARAMETER ExitCode
+Exit code to record directly, overriding whatever -Result carried.
+
+.PARAMETER Messages
+Messages appended to those the step already carries.
 #>
 function Complete-NeoIPCBuildStep {
     [CmdletBinding()]
@@ -204,6 +291,14 @@ site (parameters left at their defaults are absent, and values are as bound, not
 — drops sensitive/excluded keys, and returns @{ hash = <sha256 hex>; source = <ordered
 snapshot> } so every wrapper records the same shape of invocation metadata. Feed the two
 members to Write-NeoIPCBuildReport's -ParameterHash / -Parameters.
+
+.PARAMETER BoundParameters
+The caller's $PSBoundParameters dictionary: only what the call site supplied, with values
+as bound rather than resolved.
+
+.PARAMETER Exclude
+Keys to leave out of the snapshot, by default Token and Password so no credential reaches
+a build report.
 #>
 function Get-NeoIPCParameterSnapshot {
     [CmdletBinding()]

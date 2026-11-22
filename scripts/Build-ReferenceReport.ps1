@@ -13,11 +13,113 @@
     and acquires the reference dataset from the instance. DataFile renders from a previously exported
     dataset instead, which needs no credentials and makes a render reproducible from a fixed input.
 
+.PARAMETER Token
+    DHIS2 personal access token, or the path of a file whose first line holds one. When empty, the
+    environment variable NEOIPC_DHIS2_TOKEN is read instead; with no token at all, the build prompts for a
+    DHIS2 username and password. Online set; DataFile mode needs no credentials.
+
 .PARAMETER DataFile
     Render from this previously exported dataset rather than querying DHIS2.
 
 .PARAMETER OutputFormats
     One or more of pdf, html, docx, json. Defaults to pdf.
+
+.PARAMETER OutputLocales
+    Languages the report renders in, by default English; the report renders once per locale and format.
+    Entries may also arrive comma-joined, are taken case-insensitively, and repeats collapse. The localized
+    Quarto file is looked up by the locale's language and falls back to the base one; a locale with a
+    territory subtag (de_AT) additionally sets the children's LC_ALL to that locale's UTF-8 form.
+    Tab-completion lists the locales the report ships.
+
+.PARAMETER OutputDir
+    Directory the reports, the generated data, and the build report are written to. A relative path resolves
+    against the caller's current location, and the directory is created when it does not exist yet. Defaults
+    to the report's _output directory.
+
+.PARAMETER ReportingPeriodFrom
+    Earliest date of the reporting period, given as text and passed to data acquisition and the report
+    unchanged: surveillance data before it stays out. Online set.
+
+.PARAMETER ReportingPeriodTo
+    Latest date of the reporting period, given as text and passed unchanged: surveillance data after it
+    stays out. Online set.
+
+.PARAMETER BirthWeightFrom
+    Minimal included birth weight. Online set.
+
+.PARAMETER BirthWeightTo
+    Maximal included birth weight. Online set.
+
+.PARAMETER GestationWeeksFrom
+    Minimal included gestational age, in weeks. Online set.
+
+.PARAMETER GestationWeeksTo
+    Maximal included gestational age, in weeks. Online set.
+
+.PARAMETER ReportingCountries
+    ISO 3166-1 alpha-2 codes of the countries whose departments the reference data covers, from the set the
+    network reports from (DE, EE, GR, IT, ZA, ES, CH, GB); one or more. Without it every participating
+    country is covered. Online set.
+
+.PARAMETER ValidationExceptionFile
+    CSV file listing patients to include despite failed validation, passed to data acquisition and the
+    report as given. Online set.
+
+.PARAMETER IncludeTestUnits
+    Keep the patients of departments flagged as test units in the reference data, which by default filters
+    them out. Online set.
+
+.PARAMETER IncludeNonCorePatients
+    Include patients who do not meet the core inclusion criteria; without it the reference data covers only
+    patients in the NEOIPC_CORE set. Online set.
+
+.PARAMETER BackupDataset
+    Additionally write a password-protected archive of the acquired dataset next to the report data, for
+    off-site keeping. The build asks for the backup password at a hidden prompt, clears any value the
+    environment already carried before asking, and hands what it read to the data child in the
+    NEOIPC_BACKUP_PASSWORD environment variable; an ambient value of that variable is not used. Online set.
+
+.PARAMETER HideIntroductionTexts
+    Leave the sections' introduction texts out of the rendered report.
+
+.PARAMETER HideMethodsTexts
+    Leave the sections' methods texts out of the rendered report.
+
+.PARAMETER ConfidenceIntervals
+    Which confidence intervals the report shows: all, none, or the families pooled and quartiles, one or
+    more. Passed to the report as a comma-joined display mode; omitted, the report keeps its own default.
+
+.PARAMETER JsonReport
+    Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
+    Without it, the build reports itself on the console only.
+
+.PARAMETER Quiet
+    Runs the whole build at log level quiet: the R and Quarto children run with their quiet flags, and the
+    wrapper's own progress, verbose, debug, and information streams are silenced. Takes precedence over
+    -Verbose and -Debug.
+
+.PARAMETER Dhis2Scheme
+    http or https for the DHIS2 requests of the build, by default https. The choice reaches the data
+    acquisition and the report's R child alike. Online set.
+
+.PARAMETER Dhis2Hostname
+    The DHIS2 instance the build reads from: the given host, else the NEOIPC_DHIS2_HOST environment variable,
+    else the NeoIPC production host. Online set.
+
+.PARAMETER Dhis2Port
+    Port of the DHIS2 instance, for one served on a non-default port. Defaults to the scheme's own port.
+    Online set.
+
+.PARAMETER Dhis2Path
+    The API base path the report's R code reads the data from. Online set.
+
+.PARAMETER WhatIf
+    Shows the data generation and each render without doing either; the build finishes and reports itself as
+    if nothing had been produced.
+
+.PARAMETER Confirm
+    Asks before each step: -Confirm asks every time, -Confirm:$false answers for them. Without either the
+    build does not ask, as its confirm impact is Medium.
 
 .EXAMPLE
     ./scripts/Build-ReferenceReport.ps1 -OutputFormats pdf,html

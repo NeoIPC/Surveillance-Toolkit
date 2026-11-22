@@ -19,10 +19,73 @@
 .PARAMETER SignatureImagePath
     Path to the signature image reproduced on the certificate.
 
+.PARAMETER DepartmentCode
+    The departments to certify, given as their codes. Each code is matched as a case-insensitive regular
+    expression against every department code the build reads from the DHIS2 instance, and one certificate is
+    rendered per matching department. When nothing matches, the build warns, reports itself cancelled, and ends
+    with exit code 1.
+
+.PARAMETER StartYear
+    Year the certified participation period begins, taken as given instead of read from the department's
+    surveillance data (Pass set). Required together with EndYear, NumberOfPatients, and HospitalName.
+
+.PARAMETER EndYear
+    Year the certified participation period ends. Part of the Pass set.
+
+.PARAMETER NumberOfPatients
+    Patient count the certificate states, taken as given instead of computed from surveillance data. Part of the
+    Pass set.
+
+.PARAMETER HospitalName
+    Hospital name the certificate is issued in, in place of a department code. Part of the Pass set, which
+    renders a single certificate from the passed figures and reads no department list.
+
+.PARAMETER OutputLocale
+    Language the certificate renders in, by default English. The localized Quarto file is looked up by the
+    locale's language and falls back to the base one; a locale with a territory subtag (de_AT) additionally sets
+    the render child's LC_ALL to that locale's UTF-8 form. Tab-completion lists the locales the report ships.
+
+.PARAMETER Token
+    DHIS2 personal access token, or the path of a file whose first line holds one. When empty, the environment
+    variable NEOIPC_DHIS2_TOKEN is read instead; with no token at all, the build prompts for a DHIS2 username
+    and password.
+
+.PARAMETER Quiet
+    Runs the whole build at log level quiet: the Quarto child renders with --quiet, and the wrapper's own
+    progress, verbose, debug, and information streams are silenced. Takes precedence over -Verbose and -Debug.
+
+.PARAMETER JsonReport
+    Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
+    Without it, the build reports itself on the console only.
+
+.PARAMETER OutputDir
+    Directory the certificates and the build report are written to. A relative path resolves against the
+    caller's current location, and the directory is created when it does not exist yet. Defaults to the
+    report's _output directory.
+
+.PARAMETER Dhis2Scheme
+    http or https for the DHIS2 requests of the build, by default https. The choice reaches the department list
+    and the certificate's R child alike.
+
+.PARAMETER Dhis2Hostname
+    The DHIS2 instance the build reads from: the given host, else the NEOIPC_DHIS2_HOST environment variable,
+    else the NeoIPC production host.
+
+.PARAMETER Dhis2Port
+    Port of the DHIS2 instance, for one served on a non-default port. Defaults to the scheme's own port.
+
 .PARAMETER Dhis2Path
     The API base path the certificate's R code reads the participation data from, and the last part of the
     key that keeps each instance's tab-completion cache apart. The department list is read from the
     instance's /api root whatever this says, as every read of the NeoIPC-Tools module is.
+
+.PARAMETER WhatIf
+    Shows each certificate the build would render without rendering it. The department list is still read from
+    DHIS2, and the build report notes each planned certificate as a would-render step.
+
+.PARAMETER Confirm
+    Asks before rendering: -Confirm asks for every certificate, -Confirm:$false answers for them. Without
+    either the build does not ask, as its confirm impact is Medium.
 
 .EXAMPLE
     ./scripts/Build-PartnerCertificate.ps1 'A. Signatory' ./signature.png -Department AT_TEST_TEST

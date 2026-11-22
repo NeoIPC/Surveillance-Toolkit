@@ -80,6 +80,14 @@ Path to the ontology YAML. Defaults to the canonical file in the repository.
 Path to the sidecar, which must be in the file system. Defaults to NeoIPC-Infectious-Agents.uids.csv beside the YAML,
 which is created if absent.
 
+.PARAMETER WhatIf
+Says how many random UIDs the call would draw, and writes nothing; the sidecar is still read and checked, but the
+new rows are not emitted, as they stand inside the same gate.
+
+.PARAMETER Confirm
+Asks before writing the sidecar: -Confirm asks every time, -Confirm:$false answers for the write. Without either the
+command does not ask, as its confirm impact is Medium.
+
 .OUTPUTS
 [pscustomobject] One per row added, with its Id and Uid; nothing when every Id has a row.
 
@@ -300,6 +308,14 @@ Path to the reporting classification. Defaults to NeoIPC-Infectious-Agent-Report
 .PARAMETER OutputPath
 The JSON file to write. An existing file is replaced, unless it is the list or the classification, or holds the bytes
 of either.
+
+.PARAMETER WhatIf
+Says which JSON file the command would write, and writes nothing; the read, the refusal checks, and the computed sets
+still happen.
+
+.PARAMETER Confirm
+Asks before writing: -Confirm asks every time, -Confirm:$false answers for the write. Without either the command does
+not ask, as its confirm impact is Medium.
 
 .EXAMPLE
 PS> Export-NeoIPCInfectiousAgentCodeSet -OutputPath infectious-agent-code-sets.json

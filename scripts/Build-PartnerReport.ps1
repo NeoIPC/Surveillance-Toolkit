@@ -11,6 +11,121 @@ It requires a DHIS2 API token provided as the -Token parameter or via the NEOIPC
 
 In DataFile mode (-DataFile), the script renders a formatted report from a pre-computed partner data JSON file without needing network access.
 
+.PARAMETER SiteCodeFilter
+    A regular expression a department code must match, compared ignoring case as -match does, applied where
+    the department list is read from DHIS2. Default '.+', every department in the hierarchy. When nothing
+    matches, the build warns, reports itself cancelled, and ends with exit code 1. Online set.
+
+.PARAMETER DataFile
+    A pre-computed partner data JSON file — the json format of an online run — rendered into the report
+    without any network access. DataFile set, which takes no online data parameters and refuses the json
+    output format.
+
+.PARAMETER OutputLocales
+    Languages the report renders in, by default English; every site renders once per locale. The localized
+    Quarto file is looked up by the locale's language and falls back to the base one; a locale with a
+    territory subtag (de_AT) additionally sets the children's LC_ALL to that locale's UTF-8 form.
+    Tab-completion lists the locales the report ships.
+
+.PARAMETER Token
+    DHIS2 personal access token, or the path of a file whose first line holds one. When empty, the
+    environment variable NEOIPC_DHIS2_TOKEN is read instead; with no token at all, the build prompts for a
+    DHIS2 username and password. Online set; DataFile mode needs no credentials.
+
+.PARAMETER OutputDir
+    Directory the reports, data files, and build report are written to. A relative path resolves against the
+    caller's current location, and the directory is created when it does not exist yet. Defaults to the
+    report's _output directory.
+
+.PARAMETER ReferenceDataFile
+    Path to the reference data JSON passed to data generation and to the report as the reference data set the
+    report compares against. Resolved against the caller's current location before the build enters the
+    report directory.
+
+.PARAMETER ReportingPeriodFrom
+    Earliest date of the reporting period: surveillance data before it stays out of the report. Passed to the
+    data generation and the render alike.
+
+.PARAMETER ReportingPeriodTo
+    Latest date of the reporting period: surveillance data after it stays out of the report.
+
+.PARAMETER BirthWeightFrom
+    Minimal included birth weight.
+
+.PARAMETER BirthWeightTo
+    Maximal included birth weight.
+
+.PARAMETER GestationWeeksFrom
+    Minimal included gestational age, in weeks.
+
+.PARAMETER GestationWeeksTo
+    Maximal included gestational age, in weeks.
+
+.PARAMETER IncludeNonCorePatients
+    Include patients who do not meet the core inclusion criteria; without it the data covers only patients in
+    the NEOIPC_CORE set.
+
+.PARAMETER ValidationExceptionFile
+    CSV file listing patients to include despite failed validation, passed to the data generation and the
+    report. Resolved against the caller's current location.
+
+.PARAMETER IncludeTestData
+    Include the patients of test departments in the report data; without it, patients of departments flagged
+    as test units stay out of the dataset even where the department filter matched such a department.
+
+.PARAMETER HideIntroductionTexts
+    Leave the sections' introduction texts out of the rendered report.
+
+.PARAMETER ConfidenceIntervals
+    Which confidence intervals the report shows: all, none, or the families rate, pooled, and quartiles, one
+    or more. Passed to the report as a comma-joined display mode; omitted, the report keeps its default of
+    rate intervals.
+
+.PARAMETER HideMethodsTexts
+    Leave the sections' methods texts out of the rendered report.
+
+.PARAMETER HideOutlierInterpretation
+    Leave the interpretation text that accompanies flagged outliers out of the rendered report.
+
+.PARAMETER OutputFormats
+    Formats to produce, by default pdf. The pdf, html, and docx formats render the report once per site,
+    locale, and format; json asks the data generation for each site's partner data without rendering —
+    online mode only, refused with -DataFile.
+
+.PARAMETER JsonReport
+    Writes the build report as a JSON file into the output directory, named with the build's UTC start time.
+    Without it, the build reports itself on the console only.
+
+.PARAMETER Dhis2Scheme
+    http or https for the DHIS2 requests of the build, by default https. The choice reaches the department
+    list, the data generation, and the render alike. Online set.
+
+.PARAMETER Dhis2Hostname
+    The DHIS2 instance the build reads from: the given host, else the NEOIPC_DHIS2_HOST environment variable,
+    else the NeoIPC production host. Online set.
+
+.PARAMETER Dhis2Port
+    Port of the DHIS2 instance, for one served on a non-default port. Defaults to the scheme's own port.
+    Online set.
+
+.PARAMETER Dhis2Path
+    The API base path the report's R code reads the data from, and the last part of the key that keeps each
+    instance's tab-completion cache apart. The site list is read from the instance's /api root whatever this
+    says, as every read of the NeoIPC-Tools module is. Online set.
+
+.PARAMETER Quiet
+    Runs the whole build at log level quiet: the R and Quarto children run with their quiet flags, and the
+    wrapper's own progress, verbose, debug, and information streams are silenced. Takes precedence over
+    -Verbose and -Debug.
+
+.PARAMETER WhatIf
+    Shows each data generation per site and each render per site, locale, and format without running any of
+    them, recording every planned step in the build report.
+
+.PARAMETER Confirm
+    Asks before each step: -Confirm asks for every one of them, -Confirm:$false answers for them. Without
+    either the build never asks, as its confirm impact is Low.
+
 .NOTES
 - Cleans Quarto temporary files before each render to avoid cross-iteration contamination.
 - Streams and parses Quarto output to detect and report errors and warnings.

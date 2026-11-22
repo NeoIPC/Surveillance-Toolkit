@@ -26,6 +26,12 @@ function ConvertFrom-NeoIPCMetadataJson {
         here as sharing.yaml: an authored file is the source of truth (an unrecognized sharing shape then
         fails loud, to be named by hand); when absent, the profiles are derived from the package and written
         out, so the materialized directory is self-contained.
+    .PARAMETER WhatIf
+        Shows the output directory, the sharing profiles, the expression files, and every CSV it would write,
+        and writes none of them; the reading and conversion still run through.
+    .PARAMETER Confirm
+        Asks before each write: -Confirm asks every time, -Confirm:$false answers for the writes. Without
+        either the command does not ask, as its confirm impact is Medium.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param(
@@ -629,6 +635,12 @@ function Import-NeoIPCMetadata {
         DHIS2 atomicMode: ALL (default — all-or-nothing) or NONE (import what is valid, report the rest).
     .PARAMETER DryRun
         Validate only (importMode=VALIDATE); the server commits nothing.
+    .PARAMETER WhatIf
+        Shows the request it would send — a validation for a -DryRun, the import strategy otherwise — and sends
+        nothing.
+    .PARAMETER Confirm
+        Asks before a real import, whose impact is High: -Confirm:$false runs it unattended. A -DryRun changes
+        nothing server-side and does not ask unless -Confirm asks for one.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Path')]
     [OutputType([pscustomobject])]
@@ -753,6 +765,12 @@ function Export-NeoIPCMetadataTranslation {
         Directory for metadata.pot (created if absent).
     .PARAMETER Validate
         Run `msgfmt -c` on the generated template (best-effort; via WSL on Windows; skipped if gettext is unavailable).
+    .PARAMETER WhatIf
+        Shows the PO directory it would create and the metadata.pot it would write, and does neither; the string
+        extraction and the keep-the-old-date comparison still run through.
+    .PARAMETER Confirm
+        Asks before each write: -Confirm asks every time, -Confirm:$false answers for the writes. Without either
+        the command does not ask, as its confirm impact is Medium.
     #>
     [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
     param(

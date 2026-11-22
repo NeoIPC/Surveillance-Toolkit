@@ -125,6 +125,12 @@ function Import-NeoIPCPlayData {
         Validate only (importMode=VALIDATE); the server persists nothing.
     .PARAMETER SkipRuleEngine
         Force the server-side program-rule engine on/off, overriding the 2.43.0.x auto-skip.
+    .PARAMETER WhatIf
+        Shows the import or validation it would send and sends nothing; reading the instance's version still
+        happens, as it decides the request.
+    .PARAMETER Confirm
+        Asks before a real commit, its impact being High; -Confirm:$false runs it unattended. A -DryRun persists
+        nothing server-side and does not ask unless -Confirm asks for one.
     #>
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'Path')]
     [OutputType([pscustomobject])]
@@ -346,6 +352,12 @@ function Export-NeoIPCPlayDataCsv {
         The DHIS2 host. Without it, the NEOIPC_DHIS2_HOST environment variable; with neither, the call stops.
     .PARAMETER Port
         DHIS2 port. Default none (the scheme's).
+    .PARAMETER WhatIf
+        Reaches the code-map reads, which -WhatIf then shows instead of performing, so the call ends with a
+        metadata error before any CSV is shown or written.
+    .PARAMETER Confirm
+        Asks before writing: -Confirm asks every time, -Confirm:$false answers for the writes. Without either the
+        command does not ask, as its confirm impact is Medium.
     #>
     [CmdletBinding(SupportsShouldProcess, DefaultParameterSetName = 'Path')]
     param(
