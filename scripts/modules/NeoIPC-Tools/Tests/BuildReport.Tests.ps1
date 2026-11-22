@@ -24,7 +24,10 @@ Describe 'Write-NeoIPCBuildReport' {
         Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true 6>$null | Should -BeExactly 'success'
     }
     It 'computes status: failed when there are errors' {
-        Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true -Errors @('boom') 6>$null | Should -BeExactly 'failed'
+        # The writer's reason is a non-terminating error by contract, so the call pins
+        # the preference and observes the record whatever the test runner's session set
+        # ErrorActionPreference to — the build-metadata step's pwsh shell sets Stop.
+        Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true -Errors @('boom') -ErrorAction SilentlyContinue 6>$null | Should -BeExactly 'failed'
     }
     It 'computes status: cancelled when not completed and no errors' {
         Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $false 6>$null | Should -BeExactly 'cancelled'
@@ -36,16 +39,16 @@ Describe 'Write-NeoIPCBuildReport' {
     It 'sends the status of a failed build to the error stream' {
         $errorRecords = @()
         $null = Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true -Errors @('boom') `
-            -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
+            -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
         @($errorRecords | ForEach-Object { $_.Exception.Message }) | Should -Be @('Build status: failed')
     }
     It 'keeps a build that succeeds, and one that was cancelled, off the error stream' {
         $errorRecords = @()
         $null = Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $true `
-            -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
+            -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
         @($errorRecords).Count | Should -Be 0
         $null = Write-NeoIPCBuildReport -Name 'X' -StartedAt $StartedAt -BuildCompleted $false `
-            -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
+            -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 3>$null 6>$null
         @($errorRecords).Count | Should -Be 0
     }
     # The builders call this writer under -InformationAction Ignore for -Quiet; the
@@ -271,7 +274,7 @@ Describe 'Invoke-QuartoRender' {
             $global:LASTEXITCODE = 1
             'Quitting from lines 3-9'
         }
-        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorAction SilentlyContinue 6>$null
         $result.Status | Should -BeExactly 'Error'
         $result.ExitCode | Should -Be 1
     }
@@ -280,7 +283,7 @@ Describe 'Invoke-QuartoRender' {
             $global:LASTEXITCODE = 0
             'ERROR [validation-report] the import failed'
         }
-        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') 6>$null
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorAction SilentlyContinue 6>$null
         $result.Status | Should -BeExactly 'Error'
     }
 
@@ -333,7 +336,7 @@ Describe 'Invoke-QuartoRender' {
             ''
             'ERROR [validation-report] a real error after the body'
         }
-        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -WarningVariable warnings 6>$null 3>$null
+        $result = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorAction SilentlyContinue -WarningVariable warnings 6>$null 3>$null
         @($warnings | ForEach-Object { $_.Message }) | Should -Be @(
             'WARNING (main.lua:10090) ',
             'ERROR: this sentence belongs to the warning')
@@ -390,7 +393,7 @@ Describe 'Invoke-QuartoRender' {
             'Quitting from lines 3-9'
         }
         $errorRecords = @()
-        $records = @(Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorVariable errorRecords 6>&1)
+        $records = @(Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorAction SilentlyContinue -ErrorVariable errorRecords 6>&1)
         @($errorRecords | ForEach-Object { $_.Exception.Message }) | Should -Contain 'ERROR [validation-report] the import failed'
         @($records | ForEach-Object { "$_" }) | Should -Not -Contain 'ERROR [validation-report] the import failed'
     }
@@ -401,7 +404,7 @@ Describe 'Invoke-QuartoRender' {
             'quarto stopped without an error line'
         }
         $errorRecords = @()
-        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorVariable errorRecords 6>$null
+        $null = Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorAction SilentlyContinue -ErrorVariable errorRecords 6>$null
         @($errorRecords | ForEach-Object { $_.Exception.Message } | Where-Object { $_ -like '*no recognised error line was captured*' }).Count |
             Should -Be 1
     }
@@ -414,7 +417,7 @@ Describe 'Invoke-QuartoRender' {
             'Output created: report.pdf'
         }
         $errorRecords = @()
-        $records = @(Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorVariable errorRecords 6>&1)
+        $records = @(Invoke-QuartoRender -Arguments @('render', 'r.qmd') -ErrorAction SilentlyContinue -ErrorVariable errorRecords 6>&1)
         @($errorRecords).Count | Should -Be 0
         @($records | Where-Object { $_ -is [System.Management.Automation.InformationRecord] } |
                 ForEach-Object { "$_" }) | Should -Contain 'done.'
@@ -438,7 +441,7 @@ Describe 'Invoke-Rscript' {
             "Error: cannot open file 'a.R'"
         }
         $errorRecords = @()
-        $null = Invoke-Rscript -Arguments @('a.R') -ErrorVariable errorRecords 6>$null
+        $null = Invoke-Rscript -Arguments @('a.R') -ErrorAction SilentlyContinue -ErrorVariable errorRecords 6>$null
         @($errorRecords | ForEach-Object { $_.Exception.Message }) | Should -Contain "Error: cannot open file 'a.R'"
     }
 
@@ -448,7 +451,7 @@ Describe 'Invoke-Rscript' {
             'Rscript stopped without an error line'
         }
         $errorRecords = @()
-        $null = Invoke-Rscript -Arguments @('a.R') -ErrorVariable errorRecords 6>$null
+        $null = Invoke-Rscript -Arguments @('a.R') -ErrorAction SilentlyContinue -ErrorVariable errorRecords 6>$null
         @($errorRecords | ForEach-Object { $_.Exception.Message } | Where-Object { $_ -like '*no recognised error line was captured*' }).Count |
             Should -Be 1
     }

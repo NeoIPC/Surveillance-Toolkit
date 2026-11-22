@@ -523,7 +523,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $errorRecords = @()
                     $hostLines = & $script:Certificate 'A. Signatory' $script:Signature -DepartmentCode '^DEPT_A1$' `
                         -Dhis2Hostname $script:Host1 -Quiet -OutputDir (Join-Path $TestDrive 'out') `
-                        -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
+                        -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
                     @(Get-Message $hostLines | Where-Object { $_ }) | Should -BeNullOrEmpty
                     $messages = @($errorRecords | ForEach-Object { $_.Exception.Message })
                     $messages | Should -Contain 'Quarto render failed for DEPT_A1 (exit code 1).'
@@ -623,7 +623,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $global:LASTEXITCODE = 0
                     $errorRecords = @()
                     $null = & $script:ValidationReport -SiteCodeFilter '^DEPT_A1$' -Dhis2Hostname $script:Host1 `
-                        -OutputDir (Join-Path $TestDrive 'out') -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
+                        -OutputDir (Join-Path $TestDrive 'out') -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
                     $messages = @($errorRecords | ForEach-Object { $_.Exception.Message })
                     $messages | Should -Contain 'Quarto render failed for DEPT_A1.'
                     $messages | Should -Contain 'Build status: failed'
@@ -636,7 +636,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $global:LASTEXITCODE = 0
                     $errorRecords = @()
                     $hostLines = & $script:ValidationReport -SiteCodeFilter '^DEPT_A1$' -Dhis2Hostname $script:Host1 -Quiet `
-                        -OutputDir (Join-Path $TestDrive 'out') -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
+                        -OutputDir (Join-Path $TestDrive 'out') -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
                     @(Get-Message $hostLines | Where-Object { $_ }) | Should -BeNullOrEmpty
                     $messages = @($errorRecords | ForEach-Object { $_.Exception.Message })
                     $messages | Should -Contain 'Quarto render failed for DEPT_A1.'
@@ -668,6 +668,16 @@ InModuleScope 'NeoIPC-Tools' {
                 $script:PatientDataReport = Join-Path $script:RepoRoot 'scripts' 'Build-PatientDataReport.ps1'
                 $script:ReferenceReport = Join-Path $script:RepoRoot 'scripts' 'Build-ReferenceReport.ps1'
                 $script:PartnerReport = Join-Path $script:RepoRoot 'scripts' 'Build-PartnerReport.ps1'
+                # Build-ReferenceReport.ps1 resolves quarto and Rscript itself before
+                # it delegates the render, and Build-PartnerReport.ps1 runs quarto inline.
+                # Global stubs let those commands resolve wherever the tests run, and
+                # shadow the real executables, so no case can run the real toolchain by
+                # accident; each case mocks the behaviour.
+                function global:quarto { param([Parameter(ValueFromRemainingArguments)] $Arguments) }
+                function global:Rscript { param([Parameter(ValueFromRemainingArguments)] $Arguments) }
+            }
+            AfterAll {
+                Remove-Item -Path 'Function:\quarto', 'Function:\Rscript' -ErrorAction SilentlyContinue
             }
             BeforeEach {
                 Mock Import-Module { }
@@ -688,7 +698,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $global:LASTEXITCODE = 0
                     $errorRecords = @()
                     $hostLines = & $script:PatientDataReport 'P-001' 'DEPT_A1' -Dhis2Hostname $script:Host1 -Quiet `
-                        -OutputDir (Join-Path $TestDrive 'out') -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
+                        -OutputDir (Join-Path $TestDrive 'out') -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
                     @(Get-Message $hostLines | Where-Object { $_ }) | Should -BeNullOrEmpty
                     $messages = @($errorRecords | ForEach-Object { $_.Exception.Message })
                     $messages | Should -Contain 'Quarto render failed for P-001 (exit code 1).'
@@ -713,7 +723,7 @@ InModuleScope 'NeoIPC-Tools' {
                     $global:LASTEXITCODE = 0
                     $errorRecords = @()
                     $hostLines = & $script:ReferenceReport -Dhis2Hostname $script:Host1 -Quiet `
-                        -OutputDir (Join-Path $TestDrive 'out') -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
+                        -OutputDir (Join-Path $TestDrive 'out') -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
                     @(Get-Message $hostLines | Where-Object { $_ }) | Should -BeNullOrEmpty
                     $messages = @($errorRecords | ForEach-Object { $_.Exception.Message })
                     $messages | Should -Contain 'Quarto render failed for en/pdf.'
@@ -738,11 +748,17 @@ InModuleScope 'NeoIPC-Tools' {
                 }
 
                 It 'gives the reason of a render that fails on the error stream, and no host line, with -Quiet' {
+                    # The builder runs quarto inline, so the stand-in is the quarto command;
+                    # the stub in the Describe's BeforeAll lets the mock bind wherever the
+                    # suite runs. The builder's reasons are non-terminating errors by
+                    # contract, so the call pins the preference and observes the records
+                    # whatever the runner's session set ErrorActionPreference to — the
+                    # build-metadata step's pwsh shell sets Stop.
                     Mock quarto { $global:LASTEXITCODE = 1; 'ERROR [partner-report] the data read failed' }
                     $global:LASTEXITCODE = 0
                     $errorRecords = @()
                     $hostLines = & $script:PartnerReport '^DEPT_A1$' -Dhis2Hostname $script:Host1 -Quiet `
-                        -OutputDir (Join-Path $TestDrive 'out') -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
+                        -OutputDir (Join-Path $TestDrive 'out') -ErrorAction SilentlyContinue -ErrorVariable errorRecords -WarningAction SilentlyContinue 6>&1
                     @(Get-Message $hostLines | Where-Object { $_ }) | Should -BeNullOrEmpty
                     $messages = @($errorRecords | ForEach-Object { $_.Exception.Message })
                     $messages | Should -Contain 'ERROR [partner-report] the data read failed'
