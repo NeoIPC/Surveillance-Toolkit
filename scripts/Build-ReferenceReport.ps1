@@ -95,9 +95,10 @@
 
 .PARAMETER Quiet
     Runs the build at log level quiet: the R and Quarto children run with their quiet flags, and the
-    wrapper's own progress, verbose, debug, and information streams are silenced, its console build
-    summary with them. Warnings, terminating errors, and whatever a child still prints as it runs stay
-    visible. Takes precedence over -Verbose and -Debug.
+    wrapper's verbose, debug, and information streams and its progress bar are silenced. Console
+    messages written with Write-Host stay visible, the build summary among them, as do warnings,
+    terminating errors, and whatever a child still prints as it runs. Takes precedence over -Verbose
+    and -Debug.
 
 .PARAMETER Dhis2Scheme
     http or https for the DHIS2 requests of the build, by default https. The choice reaches the data

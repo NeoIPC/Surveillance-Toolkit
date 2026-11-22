@@ -115,9 +115,10 @@ In DataFile mode (-DataFile), the script renders a formatted report from a pre-c
 
 .PARAMETER Quiet
     Runs the build at log level quiet: the R and Quarto children run with their quiet flags, and the
-    wrapper's own progress, verbose, debug, and information streams are silenced, its console build
-    summary with them. Warnings, terminating errors, and whatever a child still prints as it runs stay
-    visible. Takes precedence over -Verbose and -Debug.
+    wrapper's verbose, debug, and information streams and its progress bar are silenced. Console
+    messages written with Write-Host stay visible, the build summary among them, as do warnings,
+    terminating errors, and whatever a child still prints as it runs. Takes precedence over -Verbose
+    and -Debug.
 
 .PARAMETER WhatIf
     Shows each data generation per site and each render per site, locale, and format without running any of
