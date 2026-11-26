@@ -687,12 +687,18 @@ reference_data: Reference data
 
 tbl-abr-infection-rate:
   n_footnote: "{column}: The aggregated number of infections with resistant pathogens in your department's infants."
+  n_footnote_engine: >-
+    {column}: The infections in your department in which an infectious agent
+    at or beneath the row was recorded resistant in this category.
   no_resistant_pathogens_note: >
     No resistant pathogens were detected in your department's infections during this period.
   no_resistant_pathogens_note_ast_ref: >
     If antimicrobial susceptibility testing rates in @tbl-resistance-test-rate are low,
     under-detection of resistant organisms cannot be excluded.
   rate_footnote: "{column}: The Antibiotic-Resistant Infection Rate for your department (percentage of infections with resistant pathogens)."
+  rate_footnote_engine: >-
+    {column}: The infections in your department per 1000 patient-days with at
+    least one infectious agent recorded resistant in this category.
   ast_table_note: >-
     {reference} reports how completely susceptibility testing was performed;
     the detected resistant pathogens and the completeness of testing are both
@@ -703,11 +709,27 @@ tbl-organism-resistance-rate:
     While {reference} reports the rate of infections involving resistant
     pathogens, this table uses organism-level detections as the denominator.
   n_footnote: "{column}: The number of resistant detections of this organism in your department's infants."
+  n_footnote_engine: >-
+    {column}: The infections in your department with at least one infectious
+    agent at or beneath the row recorded resistant in this category.
   rate_footnote: "{column}: The organism-specific resistance rate for your department (percentage of tested detections that are resistant)."
+  rate_footnote_engine: >-
+    {column}: The percentage of your department's infections with a result for
+    an infectious agent of the row in which at least one was recorded resistant
+    in this category.
 
 tbl-agent-per-infection-rate:
   n_footnote: "{column}: The aggregated number of infections with this infectious agent detected in your department's infants."
+  n_footnote_engine: >-
+    {column}: The microbiologically confirmed infections in your
+    department's infants in which an infectious agent at or beneath the row
+    was found. The Total counts the infectious agents in all
+    microbiologically confirmed infections.
   rate_footnote: "{column}: The percentage of infections in your department where this infectious agent was detected."
+  rate_footnote_engine: >-
+    {column}: The percentage of your department's microbiologically
+    confirmed infections in which an infectious agent at or beneath the row
+    was found. The Total gives the infectious agents per 100 such infections.
 
 tbl-device-associated-incidence-density-rates:
   n_footnote: "{column}: The aggregated number of device-associated infections in your department's infants."

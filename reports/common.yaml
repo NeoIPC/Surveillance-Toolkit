@@ -101,8 +101,19 @@ percent_symbol: "%"
 si: "Severe infection"
 surgical_procedures: "Surgical Procedures"
 nos_footnote: "n.o.s. = not otherwise specified; isolates identified to genus but not species level."
+not_comparable_note: >-
+  The reference data for this table were calculated under other rate
+  definitions than the department's data, so the two cannot be compared here.
+  The table shows the department's rows only.
+residual_above_genus_footnote: >-
+  Above the genus, a row marked n.o.s. counts the infectious agents recorded
+  at its node that no row beneath it counts.
 sparse_data_footnote: "Fewer than {threshold} events; interpret rate and confidence interval with caution."
 sparse_data_footnote_no_ci: "Fewer than {threshold} events; interpret rate with caution."
+summary_block_note: >-
+  The summary block counts bacteria by Gram reaction and by oxygen
+  requirement, apart from the groups; its rows therefore count infections
+  that the group rows count again.
 table_headers:
   count: "N"
   pooled: "Pooled"
@@ -111,7 +122,16 @@ table_headers:
   q3: "Q₃"
   rate: "Rate"
 tbl-abr-infection-rate:
+  block_total_only_footnote: >-
+    {count} of the infections in this Total have no row in this block because
+    their resistant infectious agents are Unidentifiable, Not listed, or codes
+    the released infectious-agent list lacks.
   n_footnote: "{column}: The aggregated number of antibiotic resistant pathogens in all infections."
+  n_footnote_engine: >-
+    {column}: The infections in which an infectious agent at or beneath the
+    row was recorded resistant in this category. The Total counts the
+    infections with at least one infectious agent of this category recorded
+    resistant.
   resistance_overlap_footnote: >-
     Resistance categories are not mutually exclusive. An organism may meet the
     criteria for more than one category and will appear under each applicable one.
@@ -123,8 +143,16 @@ tbl-abr-infection-rate:
   no_data: "No resistant pathogen infection data available for these report settings."
   pooled_footnote: "{column}: The resistant pathogen infection rate calculated across all infants from all departments."
   rate_denominator: "Number of infections where a pathogen was detected"
+  rate_denominator_engine: "Patient-days"
+  rate_footnote_engine: >-
+    {column}: The infections per 1000 patient-days with at least one
+    infectious agent recorded resistant in this category.
   rate_name: "Resistant pathogen infection rate"
+  rate_name_engine: "Infection rate with resistant infectious agents"
   rate_numerator: "Number of antibiotic resistant pathogens in infections"
+  rate_numerator_engine: >-
+    Infections with at least one infectious agent recorded resistant in the
+    category
   tbl-cap: "Nosocomial infections with resistant pathogens"
 tbl-antibiotic-utilization:
   aware_column_footnote: >-
@@ -143,20 +171,52 @@ tbl-antibiotic-utilization:
   tbl-cap: "Antibiotic utilization by pharmacological subgroup and substance"
 tbl-organism-resistance-rate:
   n_footnote: "{column}: The aggregated number of resistant detections of the organism."
+  n_footnote_engine: >-
+    {column}: The infections with at least one infectious agent at or beneath
+    the row recorded resistant in this category.
   no_data: "No organism-specific resistance data available for these report settings."
   pooled_footnote: "{column}: The organism-specific resistance rate calculated across all infants from all departments."
   rate_denominator: "Number of tested detections of the organism"
+  rate_denominator_engine: >-
+    Infections with a result for an infectious agent at or beneath the row
+  rate_footnote_engine: >-
+    {column}: The infections with a result for an infectious agent of the row
+    in which at least one was recorded resistant in this category, as a
+    percentage.
   rate_name: "Organism-specific resistance rate"
+  rate_name_engine: "Infectious-agent resistance rate"
   rate_numerator: "Number of resistant detections of the organism"
+  rate_numerator_engine: >-
+    Infections with at least one infectious agent at or beneath the row
+    recorded resistant in the category
   tbl-cap: "Organism-specific resistance rates"
 tbl-agent-per-infection-rate:
   n_footnote: "{column}: The aggregated number of infectious agents in all infections."
+  n_footnote_engine: >-
+    {column}: The microbiologically confirmed infections in which an
+    infectious agent at or beneath the row was found. The Total counts the
+    infectious agents in all microbiologically confirmed infections.
   no_data: "No infectious agent data available for these report settings."
   pooled_footnote: "{column}: The Agent-per-Infection Rate calculated across all infants from all departments."
   rate_denominator: "No of infections where an infectious agent was detected"
+  rate_denominator_engine: "No of microbiologically confirmed infections"
   rate_name: "Agent-per-Infection Rate"
   rate_numerator: "No of infectious agents that were detected in infections"
+  rate_numerator_engine: >-
+    No of microbiologically confirmed infections with an infectious agent at or
+    beneath the row (the Total: no of infectious agents)
   tbl-cap: "Infectious agents detected in nosocomial infections"
+  tbl_cap_engine: >-
+    Infectious agents detected in microbiologically confirmed nosocomial
+    infections
+  total_only_footnote: >-
+    {count} infectious agents were recorded as Unidentifiable, Not listed, or
+    under a code the released infectious-agent list lacks; they count in the
+    Total only.
+  type_columns_label: "By infection type"
+  type_share_footnote: >-
+    Each column gives the share of the microbiologically confirmed infections
+    of that type in which an infectious agent at or beneath the row was found.
 tbl-device-associated-incidence-density-rates:
   dev_ass_incidence_density_rate: "Device-Associated Incidence Density Rate"
   grp_vc: "Vascular catheter associated sepsis / bloodstream infection"

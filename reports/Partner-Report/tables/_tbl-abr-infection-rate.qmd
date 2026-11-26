@@ -38,25 +38,77 @@ include_localised("_methods-abr-infection.Rmd")
 
 check_outlier_interpretation <- FALSE
 
+# The version of the table the report renders, as for the infectious-agent
+# table; see the marker of the same scope there.
+# NEOIPC-COMPAT(infectious-agent-engine): remove the fallback once
+# reports/compatibility.yml lists v0.0.0.9009 or later as tested and minimum
+# together.
+ia_slot <- if (identical(infectious_agent_rows, "ontology"))
+  "abr_infection_rate_ontology_table" else "abr_infection_rate_table"
+tbl_data <- benchmark_data[[ia_slot]]
+if (is.null(tbl_data)) {
+  ia_slot <- "abr_infection_rate_table"
+  tbl_data <- benchmark_data[[ia_slot]]
+}
+
 # Conditionally render table only if department data exists
-if (!is.null(benchmark_data$abr_infection_rate_table) &&
-    "n_own" %in% rlang::names2(benchmark_data$abr_infection_rate_table) &&
-    sum(benchmark_data$abr_infection_rate_table$n_own, na.rm = TRUE) > 0) {
+if (!is.null(tbl_data) &&
+    "n_own" %in% rlang::names2(tbl_data) &&
+    sum(tbl_data$n_own, na.rm = TRUE) > 0) {
+
+  ia_engine <- "node_id" %in% names(tbl_data)
+  ia_groups <- identical(ia_slot, "abr_infection_rate_table")
 
   # Check if reference data columns exist
-  has_reference <- "pooled_ref" %in% names(benchmark_data$abr_infection_rate_table)
+  has_reference <- "pooled_ref" %in% names(tbl_data) &&
+    any(!is.na(tbl_data$pooled_ref))
   check_outlier_interpretation <- has_reference
-  
-  tbl_data <- benchmark_data$abr_infection_rate_table
+
+  # A refused benchmark join still contributes all-NA `_ref` columns for the
+  # table. Dropping them when there is no reference is what makes the table
+  # show department rows only, as the not-comparable callout says it does.
+  if (!has_reference)
+    tbl_data <- tbl_data |> dplyr::select(!dplyr::ends_with("_ref"))
+
   cw <- compute_col_widths(tbl_data, stub_min = 27, has_reference = has_reference)
+
+  # Row styling: the engine styles by `rank` and the row identity; the older
+  # table styled by `taxon`. Within a block its Total heads the block, and a
+  # summary row counts bacteria by Gram reaction or oxygen requirement.
+  ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
+  ia_summary <- if (ia_engine)
+    !is.na(ia_node_id) & grepl("^[a-z_]+\\|", ia_node_id) else
+    rep(FALSE, nrow(tbl_data))
+  ia_bold <- if (ia_engine) {
+    (tbl_data$level == 0) | ia_summary |
+      (ia_groups & !is.na(ia_node_id)) |
+      (!ia_groups & !is.na(tbl_data$rank) & tbl_data$rank %in%
+         c("Domain", "Kingdom", "Realm", "Subkingdom", "Phylum",
+           "Order", "Genus", "Group"))
+  } else {
+    tbl_data$taxon %in% c("none", "domain", "kingdom", "order", "genus",
+                          "coag_type")
+  }
+  ia_italic <- if (ia_engine) {
+    !is.na(tbl_data$rank) & tbl_data$rank %in% c(
+      "Realm", "Domain", "Subkingdom", "Kingdom", "Phylum", "Subphylum",
+      "Class", "Subclass", "Order", "Suborder", "Family", "Subfamily",
+      "Species", "Subspecies", "Serotype", "Variety")
+  } else {
+    tbl_data$taxon %in% c("domain", "kingdom", "order", "species")
+  }
 
   ci_pattern <- ci_pattern_inline
 
   tbl <- tbl_data |>
-    dplyr::select(-tidyselect::any_of(c("n_ref", ".ontology_path"))) |>
+    dplyr::select(-tidyselect::any_of(c(
+      "n_ref", ".ontology_path_own", ".ontology_path_ref",
+      "node_id", "parent_id", "rank",
+      "quartile_departments_ref", "n_total_only_own", "n_total_only_ref",
+      "total_own", "total_ref"))) |>
     dplyr::mutate(
       group = dplyr::if_else(
-        stringr::str_detect(group, "spp."),
+        !ia_engine & stringr::str_detect(group, "spp."),
         paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
         group
       )) |>
@@ -90,7 +142,7 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         "cor" ~ sR$colr_label,
         "mrsa" ~ sR$mrsa_label,
         "vre" ~ sR$vre_label),
-      level = .data$level + 2) |>
+      level = .data$level + if (ia_engine) 0L else 2L) |>
     dplyr::group_by(.data$abr) |>
     gt(rowname_col = "group") |>
     sub_missing() |>
@@ -133,13 +185,7 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         weight = "bold"
       ),
       locations = cells_stub(
-        rows = taxon %in% c(
-          "none",
-          "domain",
-          "kingdom",
-          "order",
-          "genus",
-          "coag_type")
+        rows = ia_bold
       )
     ) |>
     tab_style(
@@ -147,11 +193,7 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         style = "italic"
       ),
       locations = cells_stub(
-        rows = taxon %in% c(
-          "domain",
-          "kingdom",
-          "order",
-          "species")
+        rows = ia_italic
       )
     ) |>
     cols_hide(columns = any_of(c("level","taxon"))) |>
@@ -164,7 +206,8 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
       )
     ) |>
       tab_spanner(
-        label = sR$`tbl-abr-infection-rate`$`rate_name`,
+        label = if (ia_engine) sR$`tbl-abr-infection-rate`$rate_name_engine else
+          sR$`tbl-abr-infection-rate`$`rate_name`,
         columns = tidyselect::any_of(
           c(
             sR$table_headers$rate,
@@ -179,13 +222,16 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
       footnote = md(
         paste0(
           "$$\\text{",
-          sR$`tbl-abr-infection-rate`$`rate_name`,
+          if (ia_engine) sR$`tbl-abr-infection-rate`$rate_name_engine else
+            sR$`tbl-abr-infection-rate`$`rate_name`,
           "} = \\frac{\\text{",
-          sR$`tbl-abr-infection-rate`$`rate_numerator`,
+          if (ia_engine) sR$`tbl-abr-infection-rate`$rate_numerator_engine else
+            sR$`tbl-abr-infection-rate`$`rate_numerator`,
           "}}{\\text{",
-          sR$`tbl-abr-infection-rate`$`rate_denominator`,
+          if (ia_engine) sR$`tbl-abr-infection-rate`$rate_denominator_engine else
+            sR$`tbl-abr-infection-rate`$`rate_denominator`,
           "}} \\times ",
-          format_integer(100),
+          format_integer(if (ia_engine) 1000 else 100),
           "$$"
         )),
       locations = cells_column_spanners(spanners = "resistant_pathogen_infection_rate"),
@@ -193,14 +239,16 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
     ) |>
     tab_footnote(
       footnote = interpolate_translation(
-        sR$`tbl-abr-infection-rate`$n_footnote,
+        if (ia_engine) sR$`tbl-abr-infection-rate`$n_footnote_engine else
+          sR$`tbl-abr-infection-rate`$n_footnote,
         column = sR$table_headers$count),
       locations = cells_column_labels(columns = sR$table_headers$count),
       placement = "right"
     ) |>
     tab_footnote(
       footnote = interpolate_translation(
-        sR$`tbl-abr-infection-rate`$rate_footnote,
+        if (ia_engine) sR$`tbl-abr-infection-rate`$rate_footnote_engine else
+          sR$`tbl-abr-infection-rate`$rate_footnote,
         column = sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate),
       placement = "right"
@@ -308,15 +356,47 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
         rows = tbl_data$group == "Total"),
       placement = "right")
 
+  # Infections a block's Total counts but no row of the block counts: the
+  # engine reports that number on each block's Total.
+  if (ia_engine) {
+    ia_total_only <- suppressWarnings(as.integer(tbl_data$n_total_only_own))
+    for (ia_row_i in seq_along(ia_total_only)) {
+      if (!is.na(ia_total_only[ia_row_i]) && ia_total_only[ia_row_i] > 0)
+        tbl <- tbl |>
+          gt::tab_footnote(
+            footnote = interpolate_translation(
+              sR$`tbl-abr-infection-rate`$block_total_only_footnote,
+              count = format_integer(ia_total_only[ia_row_i])),
+            locations = gt::cells_body(
+              columns = sR$table_headers$count,
+              rows = ia_row_i),
+            placement = "right")
+    }
+  }
+
   # Resistance category overlap source note
   tbl <- tbl |>
     gt::tab_source_note(
       source_note = sR$`tbl-abr-infection-rate`$resistance_overlap_footnote)
 
+  # The summary block counts the same infections as the groups, apart from
+  # them; it is a property of the engine's groups version.
+  if (ia_engine && ia_groups && any(ia_summary, na.rm = TRUE))
+    tbl <- tbl |>
+      gt::tab_source_note(source_note = sR$summary_block_note)
+
   # n.o.s. definition source note
-  if (any(tbl_data$taxon == "species_nos", na.rm = TRUE)) {
+  ia_residual <- if (ia_engine)
+    !is.na(ia_node_id) & grepl("~n\\.o\\.s\\.$", ia_node_id) else
+    tbl_data$taxon == "species_nos"
+  if (any(ia_residual, na.rm = TRUE)) {
     tbl <- tbl |>
       gt::tab_source_note(source_note = sR$nos_footnote)
+    if (ia_engine && any(ia_residual & !grepl("\\|genus/", ia_node_id),
+                         na.rm = TRUE))
+      tbl <- tbl |>
+        gt::tab_source_note(
+          source_note = sR$residual_above_genus_footnote)
   }
 
   tbl
@@ -328,10 +408,19 @@ if (!is.null(benchmark_data$abr_infection_rate_table) &&
 
 ```{r}
 #| output: asis
+if (not_comparable_here(ia_slot, not_comparable_tables)) {
+  cat("\n\n::: {.callout-warning}\n")
+  cat(sR$not_comparable_note, "\n")
+  cat(":::\n")
+}
+```
+
+```{r}
+#| output: asis
 # Show explanation when no resistant pathogens were detected
-if (is.null(benchmark_data$abr_infection_rate_table) ||
-    !("n_own" %in% rlang::names2(benchmark_data$abr_infection_rate_table)) ||
-    sum(benchmark_data$abr_infection_rate_table$n_own, na.rm = TRUE) == 0) {
+if (is.null(tbl_data) ||
+    !("n_own" %in% rlang::names2(tbl_data)) ||
+    sum(tbl_data$n_own, na.rm = TRUE) == 0) {
   note <- sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note
   ast_enabled <- params$includeAntibioticResistanceTestRateTable
   if (ast_enabled && !is.null(sR$`tbl-abr-infection-rate`$no_resistant_pathogens_note_ast_ref))
@@ -350,9 +439,11 @@ if (is.null(benchmark_data$abr_infection_rate_table) ||
 ```{r}
 #| output: asis
 if (check_outlier_interpretation) {
-  states <- metric_registry$abr_infection_rate_table
+  states <- metric_registry[[ia_slot]]
   if (has_outliers(states)) {
-    grouped <- group_outliers(states, "abr_infection_rate_table", sR, metric_registry)
+    grouped <- group_outliers(states, ia_slot, sR,
+                              metric_registry,
+                              labels = metric_labels[[ia_slot]])
     outlier_text <- format_outlier_text(grouped, sR)
     if (nchar(outlier_text) > 0) {
       cat("\n\n::: {.callout-tip}\n")

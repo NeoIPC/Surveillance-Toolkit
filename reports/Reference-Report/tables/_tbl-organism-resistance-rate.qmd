@@ -20,16 +20,64 @@ include_localised("_methods-organism-resistance.Rmd")
 #| tbl-cap: !expr 'sR$`tbl-organism-resistance-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
-tbl_data <- reference_data |>
-  neoipcr::get_organism_resistance_rate_table()
+# The version of the table the report renders, as for the infectious-agent
+# table; see the marker of the same scope there. The engine's resistance
+# table is named for the infectious agents on its rows; a dataset saved
+# before the engine arrived carries it under the older name, and the older-
+# name fallbacks stand as long as such a dataset can be rendered.
+# NEOIPC-PERMANENT(dataset-format): never drop these fallbacks; a stored
+# dataset outlives every release.
+ia_slot <- if (identical(infectious_agent_rows, "ontology"))
+  "infectious_agent_resistance_rate_ontology_table" else
+  "infectious_agent_resistance_rate_table"
+tbl_data <- reference_data[[ia_slot]]
+if (is.null(tbl_data)) {
+  ia_slot <- "infectious_agent_resistance_rate_table"
+  tbl_data <- reference_data[[ia_slot]]
+}
+if (is.null(tbl_data)) {
+  ia_slot <- "organism_resistance_rate_table"
+  tbl_data <- reference_data[[ia_slot]]
+}
 
-if (nrow(tbl_data) > 0) {
+# Rows keyed by node_id come from the classification engine; rows keyed by
+# their printed label come from the taxonomy that preceded it.
+ia_engine <- !is.null(tbl_data) && "node_id" %in% names(tbl_data)
+ia_groups <- !identical(ia_slot, "infectious_agent_resistance_rate_ontology_table")
+
+ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
+ia_summary <- if (ia_engine)
+  !is.na(ia_node_id) & grepl("^[a-z_]+\\|", ia_node_id) else
+  rep(FALSE, nrow(tbl_data))
+ia_bold <- if (ia_engine) {
+  ia_summary |
+    (ia_groups & !is.na(ia_node_id)) |
+    (!ia_groups & !is.na(tbl_data$rank) & tbl_data$rank %in%
+       c("Domain", "Kingdom", "Realm", "Subkingdom", "Phylum",
+         "Order", "Genus", "Group"))
+} else {
+  tbl_data$taxon %in% c("genus")
+}
+ia_italic <- if (ia_engine) {
+  !is.na(tbl_data$rank) & tbl_data$rank %in% c(
+    "Realm", "Domain", "Subkingdom", "Kingdom", "Phylum", "Subphylum",
+    "Class", "Subclass", "Order", "Suborder", "Family", "Subfamily",
+    "Species", "Subspecies", "Serotype", "Variety")
+} else {
+  tbl_data$taxon %in% c("species")
+}
+
+if (!is.null(tbl_data) && nrow(tbl_data) > 0) {
 
 tbl <- tbl_data |>
-  dplyr::select(-tidyselect::any_of(c(".ontology_path", "ia_tst_tot"))) |>
+  dplyr::select(-tidyselect::any_of(c(
+    ".ontology_path", "ia_tst_tot", "node_id", "parent_id", "rank",
+    "quartile_departments", "total",
+    "tested_n", "tested_total", "tested_pooled",
+    "tested_ci_lower", "tested_ci_upper"))) |>
   dplyr::mutate(
     group = dplyr::if_else(
-      stringr::str_detect(group, "spp."),
+      !ia_engine & stringr::str_detect(group, "spp."),
       paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
       group
       )) |>
@@ -47,7 +95,7 @@ tbl <- tbl_data |>
       "cor" ~ sR$colr_label,
       "mrsa" ~ sR$mrsa_label,
       "vre" ~ sR$vre_label),
-    level = .data$level + 2) |>
+    level = .data$level + if (ia_engine) 0L else 2L) |>
   dplyr::group_by(.data$abr)
 
 cw <- compute_col_widths(tbl_data, stub_min = 34)
@@ -143,7 +191,7 @@ gt_tbl <- gt_tbl |>
       weight = "bold"
     ),
     locations = cells_stub(
-      rows = taxon %in% c("genus")
+      rows = ia_bold
     )
   ) |>
   tab_style(
@@ -151,7 +199,7 @@ gt_tbl <- gt_tbl |>
       style = "italic"
     ),
     locations = cells_stub(
-      rows = taxon %in% c("species")
+      rows = ia_italic
     )
   ) |>
   cols_hide(columns = any_of(c("level","taxon"))) |>
@@ -177,11 +225,14 @@ gt_tbl <- gt_tbl |>
     footnote = md(
       paste0(
         "$$\\text{",
-        sR$`tbl-organism-resistance-rate`$`rate_name`,
+        if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_name_engine else
+          sR$`tbl-organism-resistance-rate`$`rate_name`,
         "} = \\frac{\\text{",
-        sR$`tbl-organism-resistance-rate`$`rate_numerator`,
+        if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_numerator_engine else
+          sR$`tbl-organism-resistance-rate`$`rate_numerator`,
         "}}{\\text{",
-        sR$`tbl-organism-resistance-rate`$`rate_denominator`,
+        if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_denominator_engine else
+          sR$`tbl-organism-resistance-rate`$`rate_denominator`,
         "}} \\times ",
         format_integer(100),
         "$$"
@@ -191,13 +242,15 @@ gt_tbl <- gt_tbl |>
   ) |>
   tab_footnote(
     footnote = interpolate_translation(
-      sR$`tbl-organism-resistance-rate`$n_footnote,
+      if (ia_engine) sR$`tbl-organism-resistance-rate`$n_footnote_engine else
+        sR$`tbl-organism-resistance-rate`$n_footnote,
       column = sR$table_headers$count),
     locations = cells_column_labels(columns = sR$table_headers$count),
     placement = "right") |>
   tab_footnote(
     footnote = interpolate_translation(
-      sR$`tbl-organism-resistance-rate`$pooled_footnote,
+      if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_footnote_engine else
+        sR$`tbl-organism-resistance-rate`$pooled_footnote,
       column = sR$table_headers$pooled),
     locations = cells_column_labels(columns = sR$table_headers$pooled),
     placement = "right")
@@ -220,10 +273,23 @@ gt_tbl <- gt_tbl |>
   gt::tab_source_note(
     source_note = sR$`tbl-abr-infection-rate`$resistance_overlap_footnote)
 
+# The summary block counts the same infections as the groups, apart from
+# them; it is a property of the engine's groups version.
+if (ia_engine && ia_groups && any(ia_summary, na.rm = TRUE))
+  gt_tbl <- gt_tbl |>
+    gt::tab_source_note(source_note = sR$summary_block_note)
+
 # n.o.s. definition source note
-if (any(tbl_data$taxon == "species_nos", na.rm = TRUE)) {
+ia_residual <- if (ia_engine)
+  !is.na(ia_node_id) & grepl("~n\\.o\\.s\\.$", ia_node_id) else
+  tbl_data$taxon == "species_nos"
+if (any(ia_residual, na.rm = TRUE)) {
   gt_tbl <- gt_tbl |>
     gt::tab_source_note(source_note = sR$nos_footnote)
+  if (ia_engine && any(ia_residual & !grepl("\\|genus/", ia_node_id),
+                       na.rm = TRUE))
+    gt_tbl <- gt_tbl |>
+      gt::tab_source_note(source_note = sR$residual_above_genus_footnote)
 }
 
 gt_tbl

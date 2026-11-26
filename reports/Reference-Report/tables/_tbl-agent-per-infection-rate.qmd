@@ -17,17 +17,55 @@ include_localised("_methods-agent-per-infection.Rmd")
 
 ```{r}
 #| label: tbl-agent-per-infection-rate
-#| tbl-cap: !expr 'sR$`tbl-agent-per-infection-rate`$`tbl-cap`'
+#| tbl-cap: !expr 'if (ia_engine) sR$`tbl-agent-per-infection-rate`$tbl_cap_engine else sR$`tbl-agent-per-infection-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
-tbl_data <- reference_data |>
-  neoipcr::get_infectious_agent_detection_rate_per_agent_table()
+# The version of the table the report renders: the reporting groups of the
+# released classification, or the full ontology when the parameter asks for
+# it. A dataset saved before the classification engine carries no ontology
+# version.
+# NEOIPC-PERMANENT(dataset-format): never drop this fallback. A stored
+# dataset outlives every release, and this report renders a dataset saved
+# before the engine arrived no matter how far compatibility moves on; see the
+# marker of the same scope in `_setup.qmd`.
+ia_slot <- if (identical(infectious_agent_rows, "ontology"))
+  "infectious_agent_detection_rate_per_agent_ontology_table" else
+  "infectious_agent_detection_rate_per_agent_table"
+tbl_data <- reference_data[[ia_slot]]
+if (is.null(tbl_data)) {
+  ia_slot <- "infectious_agent_detection_rate_per_agent_table"
+  tbl_data <- reference_data[[ia_slot]]
+}
+
+# Rows keyed by node_id come from the classification engine; rows keyed by
+# their printed label come from the taxonomy that preceded it.
+ia_engine <- "node_id" %in% names(tbl_data)
+ia_groups <- identical(ia_slot, "infectious_agent_detection_rate_per_agent_table")
+
+cw <- compute_col_widths(tbl_data, stub_min = 34)
+
+# Reset to the default CI pattern in case an earlier sibling table mutated
+# the shared `ci_pattern` to inline.
+ci_pattern <- ci_pattern_default
+
+# The infection-type columns beside the pooled share: every reference
+# department's share among the confirmed infections of that type. The
+# denominators themselves are not printed.
+ia_type_headers <- c(
+  bsi = sR$primary_sepsis_bsi_sc,
+  hap = sR$pneumonia_sc,
+  nec = sR$necrotizing_enterocolitis_sc,
+  ssi = sR$ssi_sc)
+ia_types <- if (ia_engine)
+  ia_type_headers[paste0("pooled_", names(ia_type_headers)) %in%
+                     names(tbl_data)] else
+    character(0)
 
 tbl <- tbl_data |>
   dplyr::select(-tidyselect::any_of(".ontology_path")) |>
   dplyr::mutate(
     group = dplyr::if_else(
-      stringr::str_detect(group, "spp."),
+      !ia_engine & stringr::str_detect(group, "spp."),
       paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
       group
       )) |>
@@ -38,11 +76,45 @@ tbl <- tbl_data |>
     !!sR$table_headers$q2 := "q2",
     !!sR$table_headers$q3 := "q3")
 
-cw <- compute_col_widths(tbl_data, stub_min = 34)
+if (length(ia_types) > 0) {
+  ia_type_old_cols <- stats::setNames(
+    paste0("pooled_", names(ia_types)), unname(ia_types))
+  tbl <- tbl |> dplyr::rename(!!!ia_type_old_cols)
+}
 
-# Reset to the default CI pattern in case an earlier sibling table mutated
-# the shared `ci_pattern` to inline.
-ci_pattern <- ci_pattern_default
+# Columns no cell shows: the engine's tree bookkeeping and the per-row
+# denominators. `level` stays, hidden, for the stub indent.
+if (ia_engine)
+  tbl <- tbl |> dplyr::select(-tidyselect::any_of(c(
+    "node_id", "parent_id", "rank", "quartile_departments",
+    "n_total_only", "total",
+    paste0("n_", names(ia_types)),
+    paste0("total_", names(ia_types)))))
+
+# Row styling: the engine styles by `rank` and the row identity; the older
+# table styled by `taxon`.
+ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
+ia_summary <- if (ia_engine)
+  !is.na(ia_node_id) & grepl("^[a-z_]+\\|", ia_node_id) else
+  rep(FALSE, nrow(tbl_data))
+ia_bold <- if (ia_engine) {
+  (tbl_data$level == 0) |
+    (ia_groups & !is.na(ia_node_id) & !ia_summary) |
+    ia_summary |
+    (!ia_groups & !is.na(tbl_data$rank) & tbl_data$rank %in%
+       c("Domain", "Kingdom", "Realm", "Subkingdom", "Phylum",
+         "Order", "Genus", "Group"))
+} else {
+  rep(FALSE, nrow(tbl_data))
+}
+ia_italic <- if (ia_engine) {
+  !is.na(tbl_data$rank) & tbl_data$rank %in% c(
+    "Realm", "Domain", "Subkingdom", "Kingdom", "Phylum", "Subphylum",
+    "Class", "Subclass", "Order", "Suborder", "Family", "Subfamily",
+    "Species", "Subspecies", "Serotype", "Variety")
+} else {
+  rep(FALSE, nrow(tbl_data))
+}
 
 gt_tbl <- tbl |>
   gt(rowname_col = "group") |>
@@ -56,7 +128,7 @@ gt_tbl <- tbl |>
     footnotes.marks = "extended"
   ) |>
   fmt_number(
-    columns = !sR$table_headers$count,
+    columns = !(tidyselect::any_of(sR$table_headers$count) | tidyselect::matches("^(group|level|taxon)$")),
     decimals = 1,
     sep_mark = sR$digit_group_separator,
     min_sep_threshold = 2,
@@ -75,6 +147,23 @@ if (include_pooled_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
       rows = !is.na(tbl_data$pooled))
 } else if ("ci_lower" %in% colnames(gt_tbl$`_data`)) {
   gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower", "ci_upper"))
+}
+
+# The infection-type shares, each with its own interval.
+for (ia_type in names(ia_types)) {
+  ia_type_col <- ia_types[[ia_type]]
+  ia_type_ci <- paste0(c("ci_lower_", "ci_upper_"), ia_type)
+  if (include_pooled_ci && all(ia_type_ci %in% colnames(gt_tbl$`_data`))) {
+    gt_tbl <- gt_tbl |>
+      gt::cols_merge(
+        columns = c(ia_type_col, ia_type_ci[1], ia_type_ci[2]),
+        pattern = ci_pattern_inline,
+        rows = !is.na(tbl_data[[paste0("pooled_", ia_type)]])
+      )
+  } else if (all(ia_type_ci %in% colnames(gt_tbl$`_data`))) {
+    gt_tbl <- gt_tbl |>
+      gt::cols_hide(columns = tidyselect::all_of(ia_type_ci))
+  }
 }
 
 # Quartile bootstrap CI merge
@@ -102,46 +191,67 @@ if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
   }
 }
 
+# The infection-type columns take fixed widths, the stub gives up the space.
+ia_type_w <- if (length(ia_types) > 0) 8 else 0
+ia_stub_w <- max(cw$stub - length(ia_types) * ia_type_w, 24)
+
 gt_tbl <- gt_tbl |>
   cols_width(
-    stub() ~ pct(cw$stub),
+    stub() ~ pct(ia_stub_w),
     sR$table_headers$count ~ pct(cw$n),
     sR$table_headers$pooled ~ pct(cw$pooled),
     sR$table_headers$q1 ~ pct(cw$q),
     sR$table_headers$q2 ~ pct(cw$q),
-    sR$table_headers$q3 ~ pct(cw$q))
+    sR$table_headers$q3 ~ pct(cw$q),
+    tidyselect::any_of(unname(ia_types)) ~ pct(ia_type_w))
 
 gt_tbl <- gt_tbl |>
   gt::tab_stub_indent(
     rows = gt::everything(),
     indent = gt::from_column(column = "level")
-  ) |>
-  tab_style(
-    style = cell_text(
-      weight = "bold"
-    ),
-    locations = cells_stub(
-      rows = taxon %in% c(
-        "none",
-        "domain",
-        "kingdom",
-        "order",
-        "genus",
-        "coag_type")
+  )
+
+if (ia_engine) {
+  gt_tbl <- gt_tbl |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_stub(rows = ia_bold)
+    ) |>
+    tab_style(
+      style = cell_text(style = "italic"),
+      locations = cells_stub(rows = ia_italic)
     )
-  ) |>
-  tab_style(
-    style = cell_text(
-      style = "italic"
+} else {
+  gt_tbl <- gt_tbl |>
+    tab_style(
+      style = cell_text(
+        weight = "bold"
       ),
-    locations = cells_stub(
-      rows = taxon %in% c(
-        "domain",
-        "kingdom",
-        "order",
-        "species")
+      locations = cells_stub(
+        rows = taxon %in% c(
+          "none",
+          "domain",
+          "kingdom",
+          "order",
+          "genus",
+          "coag_type")
       )
-  ) |>
+    ) |>
+    tab_style(
+      style = cell_text(
+        style = "italic"
+        ),
+      locations = cells_stub(
+        rows = taxon %in% c(
+          "domain",
+          "kingdom",
+          "order",
+          "species")
+        )
+      )
+}
+
+gt_tbl <- gt_tbl |>
   cols_hide(columns = any_of(c("level","taxon"))) |>
   tab_spanner(
     label = sR$`tbl-agent-per-infection-rate`$`rate_name`,
@@ -167,9 +277,11 @@ gt_tbl <- gt_tbl |>
         "$$\\text{",
         sR$`tbl-agent-per-infection-rate`$rate_name,
         "} = \\frac{\\text{",
-        sR$`tbl-agent-per-infection-rate`$rate_numerator,
+          if (ia_engine) sR$`tbl-agent-per-infection-rate`$rate_numerator_engine else
+            sR$`tbl-agent-per-infection-rate`$rate_numerator,
         "}}{\\text{",
-        sR$`tbl-agent-per-infection-rate`$rate_denominator,
+          if (ia_engine) sR$`tbl-agent-per-infection-rate`$rate_denominator_engine else
+            sR$`tbl-agent-per-infection-rate`$rate_denominator,
         "}} \\times ",
         format_integer(100),
         "$$"
@@ -179,7 +291,8 @@ gt_tbl <- gt_tbl |>
   ) |>
   tab_footnote(
     footnote = interpolate_translation(
-      sR$`tbl-agent-per-infection-rate`$n_footnote,
+      if (ia_engine) sR$`tbl-agent-per-infection-rate`$n_footnote_engine
+                     else sR$`tbl-agent-per-infection-rate`$n_footnote,
       column = sR$table_headers$count),
     locations = cells_column_labels(columns = sR$table_headers$count),
     placement = "right") |>
@@ -190,23 +303,96 @@ gt_tbl <- gt_tbl |>
     locations = cells_column_labels(columns = sR$table_headers$pooled),
     placement = "right")
 
-# Sparse-data footnote for N < sparse_threshold
-if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {
-  fn_text <- if (include_pooled_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
-  fn_text <- interpolate_translation(fn_text, threshold = sparse_threshold)
+if (length(ia_types) > 0) {
   gt_tbl <- gt_tbl |>
-    gt::tab_footnote(
-      footnote = fn_text,
-      locations = cells_body(
-        columns = sR$table_headers$count,
-        rows = !is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold),
-      placement = "right")
+    tab_spanner(
+      label = sR$`tbl-agent-per-infection-rate`$type_columns_label,
+      columns = tidyselect::all_of(unname(ia_types)),
+      id = "agent_type_shares",
+      level = 2
+    ) |>
+    tab_footnote(
+      footnote = sR$`tbl-agent-per-infection-rate`$type_share_footnote,
+      locations = cells_column_spanners(spanners = "agent_type_shares"),
+      placement = "right"
+    )
 }
 
-# n.o.s. definition source note
-if (any(tbl_data$taxon == "species_nos", na.rm = TRUE)) {
+# A share is flagged where its denominator is sparse; the Total, a count and
+# not a share, is flagged on its own count. The denominators are not printed,
+# so the footnote marks the share itself.
+if (ia_engine) {
+  ia_sparse <- !is.na(tbl_data$pooled) & tbl_data$level > 0 &
+    tbl_data$total < sparse_threshold
+  ia_sparse_total <- !is.na(tbl_data$pooled) & tbl_data$level == 0 &
+    tbl_data$n < sparse_threshold
+  fn_text <- if (include_pooled_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+  fn_text <- interpolate_translation(fn_text, threshold = sparse_threshold)
+  if (any(ia_sparse, na.rm = TRUE))
+    gt_tbl <- gt_tbl |>
+      gt::tab_footnote(
+        footnote = fn_text,
+        locations = cells_body(
+          columns = sR$table_headers$pooled,
+          rows = ia_sparse),
+        placement = "right")
+  if (any(ia_sparse_total, na.rm = TRUE))
+    gt_tbl <- gt_tbl |>
+      gt::tab_footnote(
+        footnote = fn_text,
+        locations = cells_body(
+          columns = sR$table_headers$count,
+          rows = ia_sparse_total),
+        placement = "right")
+
+  # The Total's infectious agents that no row counts, from `n_total_only`.
+  ia_total_only <- tbl_data$n_total_only[1]
+  if (!is.null(ia_total_only) && !is.na(ia_total_only) && ia_total_only > 0) {
+    gt_tbl <- gt_tbl |>
+      gt::tab_footnote(
+        footnote = interpolate_translation(
+          sR$`tbl-agent-per-infection-rate`$total_only_footnote,
+          count = format_integer(ia_total_only)),
+        locations = cells_body(
+          columns = sR$table_headers$count,
+          rows = tbl_data$level == 0),
+        placement = "right")
+  }
+} else {
+  # Sparse-data footnote for N < sparse_threshold
+  if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {
+    fn_text <- if (include_pooled_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci
+    fn_text <- interpolate_translation(fn_text, threshold = sparse_threshold)
+    gt_tbl <- gt_tbl |>
+      gt::tab_footnote(
+        footnote = fn_text,
+        locations = cells_body(
+          columns = sR$table_headers$count,
+          rows = !is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold),
+        placement = "right")
+  }
+}
+
+# n.o.s. definition source note: the engine marks a residual row by its
+# identity, the older table by its taxon. The footnote beside `nos_footnote`
+# explains residuals above the genus, where the genus footnote stops short.
+ia_residual <- if (ia_engine)
+  !is.na(ia_node_id) & grepl("~n\\.o\\.s\\.$", ia_node_id) else
+  tbl_data$taxon == "species_nos"
+if (any(ia_residual, na.rm = TRUE)) {
   gt_tbl <- gt_tbl |>
     gt::tab_source_note(source_note = sR$nos_footnote)
+  if (ia_engine && any(ia_residual & !grepl("\\|genus/", ia_node_id),
+                       na.rm = TRUE))
+    gt_tbl <- gt_tbl |>
+      gt::tab_source_note(
+        source_note = sR$residual_above_genus_footnote)
+}
+# The groups version alone carries the summary block beside its tree.
+if (ia_engine && ia_groups && any(ia_summary, na.rm = TRUE)) {
+  gt_tbl <- gt_tbl |>
+    gt::tab_source_note(
+      source_note = sR$summary_block_note)
 }
 
 gt_tbl

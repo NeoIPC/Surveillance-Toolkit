@@ -83,6 +83,12 @@ params:
   # @range 1..
   sparseDataThreshold: 16
 
+  # Rows of the infectious-agent tables: "groups", the reporting groups of the
+  # released classification, or "ontology", the full infectious-agent ontology.
+  # @type character
+  # @values [groups, ontology]
+  infectiousAgentRows: "groups"
+
   # Confidence-interval display mode.
   # @type character
   # @values [all, rate, none]
