@@ -18,6 +18,7 @@ params:
   dhis2Port: NULL
   dhis2Path: NULL
   sparseDataThreshold: 16
+  infectiousAgentRows: "groups"
   includeConfidenceIntervals: "all"
   includeIntroductionTexts: true
   includeMethodsTexts: true

@@ -36,6 +36,7 @@ params:
   includeAntibioticResistanceTestRateTable: false
   includeSecondaryBsiRateTable: false
   sparseDataThreshold: 16
+  infectiousAgentRows: "groups"
 subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---
 
