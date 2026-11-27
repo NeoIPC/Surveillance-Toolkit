@@ -194,7 +194,7 @@ param(
     [int]$SparseDataThreshold,
     # Rows of the infectious-agent tables: "groups", the reporting groups
     # of the released classification, or "ontology", the full infectious-
-    # agent ontology.
+    # agent ontology. Omitted, "groups" renders, the report's default.
     [Parameter()]
     [ValidateSet('groups', 'ontology')]
     [string]$InfectiousAgentRows,

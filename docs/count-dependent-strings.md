@@ -65,10 +65,10 @@ the obvious heuristic, which is why the list below was built by reading the sele
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
 | `days` | `reports/Patient-Data-Report/content/_sR.yaml` | `format_days_value()` in `_content.qmd` joins a count of days to the noun with `sR$unit_separator`, so one day reads "1 days". |
 
-**Nine now, where the design note that preceded this named three.** The three it named were found by
+**Nine, where the design note that preceded this named three.** The three it named were found by
 inspecting `reports/common.yaml`; four more live in a report's own `_sR.yaml` or in R code, which is
-why inspecting one file could not have found them, and the two infectious-agent Total-only footnotes
-joined the list with the classification-engine tables.
+why inspecting one file could not have found them, and two are the infectious-agent Total-only
+footnotes.
 
 ### The hand-rolled selections are already slightly wrong
 
