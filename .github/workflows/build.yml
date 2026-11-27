@@ -942,13 +942,25 @@ jobs:
               #
               # Recommended packages are left out: r-base-core recommends the compiler toolchain and the
               # recommended R packages, and r-cran-glue recommends dplyr, knitr, rmarkdown and testthat,
-              # none of which the tests read. What the tests need is listed here instead.
+              # none of which the tests read. What the tests need is listed here instead, plus testthat
+              # and rlang for the reports' own helper suite below.
               shell: bash
               run: |
                 sudo apt-get update -qq
                 sudo apt-get install -qq --no-install-recommends r-base-core r-cran-glue r-cran-yaml r-cran-stringr \
-                  r-cran-knitr r-cran-tibble r-cran-dplyr r-cran-purrr r-cran-lubridate
-                Rscript -e 'cat(R.version.string, "\n"); for (p in c("glue", "yaml", "stringr", "knitr", "tibble", "dplyr", "purrr", "lubridate")) cat(p, as.character(packageVersion(p)), "\n")'
+                  r-cran-knitr r-cran-tibble r-cran-dplyr r-cran-purrr r-cran-lubridate \
+                  r-cran-testthat r-cran-rlang
+                Rscript -e 'cat(R.version.string, "\n"); for (p in c("glue", "yaml", "stringr", "knitr", "tibble", "dplyr", "purrr", "lubridate", "testthat", "rlang")) cat(p, as.character(packageVersion(p)), "\n")'
+
+            - name: Run the reports' R helper tests
+              # The suite in reports/tests/ exercises the outlier framework and the
+              # row-identity helpers the infectious-agent tables render with, against
+              # fixtures in the engine's shape. It takes the identity keys the Partner
+              # Report's setup names and resolves them against those fixtures, so a
+              # key that names no row — or two — fails here rather than silently
+              # dropping a text from every report that renders afterwards.
+              shell: bash
+              run: Rscript reports/tests/run-report-tests.R
 
             - name: Provision and test NeoIPC-Tools
               shell: pwsh

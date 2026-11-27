@@ -260,6 +260,14 @@ param(
     [int]
     $SparseDataThreshold,
 
+    # Rows of the infectious-agent tables: "groups", the reporting groups
+    # of the released classification, or "ontology", the full infectious-
+    # agent ontology.
+    [Parameter()]
+    [ValidateSet('groups', 'ontology')]
+    [string]
+    $InfectiousAgentRows,
+
     [Parameter()]
     [ValidateSet('pdf','html','docx','json')]
     [string[]]
@@ -673,6 +681,7 @@ if (inherits(x, 'neoipcr_bnch_ds')) {
                 if ($ConfidenceIntervals) { $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals -join ',' }
                 if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
                 if ($SparseDataThreshold) { $qmdParams['sparseDataThreshold'] = $SparseDataThreshold }
+                if ($InfectiousAgentRows) { $qmdParams['infectiousAgentRows'] = $InfectiousAgentRows }
                 if ($HideOutlierInterpretation.IsPresent) { $qmdParams['includeOutlierInterpretation'] = 'false' }
 
                 # Apply per-element overrides on top of QMD defaults.

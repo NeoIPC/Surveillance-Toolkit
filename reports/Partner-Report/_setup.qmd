@@ -845,22 +845,39 @@ outlier_groupings <- list(
       interpret = interpret_secondary_bsi
     )
   ),
+  # The groupings stand per slot: a grouping of one version cannot name
+  # rows of the other, and `group_outliers()` reads this list by slot. The
+  # groups version's entry carries the reporting-group identities of the
+  # engine's groups table and the labels the tables printed before the
+  # engine; the ontology entry carries only the identities of the nodes,
+  # which alone names a row of that version — the ontology version holds
+  # the staphylococci groups the groups version has none of.
   infectious_agent_detection_rate_per_agent_table = list(
     staphylococci = list(
       metrics = c("Staphylococcus spp.", "Coagulase-negative staphylococci",
                   "Coagulase-positive staphylococci", "Staphylococcus epidermidis",
-                  "Staphylococcus aureus",
-                  "lpsn|genus/staphylococcus", "neoipc|63", "neoipc|64",
-                  "lpsn|species/staphylococcus-epidermidis",
-                  "lpsn|species/staphylococcus-aureus"),
+                  "Staphylococcus aureus"),
       template_prefix = "agent_staphylococci",
       interpret = interpret_agent_staphylococci
     ),
     enterobacterales = list(
       metrics = c("Enterobacterales", "Klebsiella spp.", "Escherichia spp.",
                   "Enterobacter spp.", "Serratia spp.",
-                  "enterobacterales",
-                  "lpsn|order/enterobacterales", "lpsn|genus/klebsiella",
+                  "enterobacterales"),
+      template_prefix = "agent_enterobacterales",
+      interpret = interpret_agent_enterobacterales
+    )
+  ),
+  infectious_agent_detection_rate_per_agent_ontology_table = list(
+    staphylococci = list(
+      metrics = c("lpsn|genus/staphylococcus", "neoipc|63", "neoipc|64",
+                  "lpsn|species/staphylococcus-epidermidis",
+                  "lpsn|species/staphylococcus-aureus"),
+      template_prefix = "agent_staphylococci",
+      interpret = interpret_agent_staphylococci
+    ),
+    enterobacterales = list(
+      metrics = c("lpsn|order/enterobacterales", "lpsn|genus/klebsiella",
                   "lpsn|genus/escherichia", "lpsn|genus/enterobacter",
                   "lpsn|genus/serratia"),
       template_prefix = "agent_enterobacterales",
@@ -875,8 +892,21 @@ outlier_groupings <- list(
     ),
     gram_positive_resistance = list(
       metrics = c("mrsa:Staphylococcus aureus", "vre:Enterococcus spp.",
-                  "mrsa:gram-positive-cocci", "vre:gram-positive-cocci",
-                  "mrsa:lpsn|species/staphylococcus-aureus",
+                  "mrsa:gram-positive-cocci", "vre:gram-positive-cocci"),
+      template_prefix = "abr_gram_positive",
+      interpret = interpret_abr_gram_positive
+    )
+  ),
+  # The ontology version's groupings beside the groups version's, for the
+  # same reason as the per-agent table's above.
+  abr_infection_rate_ontology_table = list(
+    gram_negative_resistance = list(
+      metrics = c("3gcr:Total", "car:Total", "cor:Total"),
+      template_prefix = "abr_gram_negative",
+      interpret = interpret_abr_gram_negative
+    ),
+    gram_positive_resistance = list(
+      metrics = c("mrsa:lpsn|species/staphylococcus-aureus",
                   "vre:lpsn|genus/enterococcus"),
       template_prefix = "abr_gram_positive",
       interpret = interpret_abr_gram_positive

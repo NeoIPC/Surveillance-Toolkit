@@ -192,6 +192,12 @@ param(
     [Parameter()]
     [ValidateRange(1, 100)]
     [int]$SparseDataThreshold,
+    # Rows of the infectious-agent tables: "groups", the reporting groups
+    # of the released classification, or "ontology", the full infectious-
+    # agent ontology.
+    [Parameter()]
+    [ValidateSet('groups', 'ontology')]
+    [string]$InfectiousAgentRows,
     [Parameter()]
     [ValidateSet('all', 'none', 'pooled', 'quartiles')]
     [string[]]$ConfidenceIntervals,
@@ -420,6 +426,7 @@ $qmdParams.defaultPatientFilter = (-not $IncludeNonCorePatients)
 if ($HideIntroductionTexts.IsPresent) { $qmdParams['includeIntroductionTexts'] = 'false' }
 if ($HideMethodsTexts.IsPresent) { $qmdParams['includeMethodsTexts'] = 'false' }
 if ($SparseDataThreshold) { $qmdParams['sparseDataThreshold'] = $SparseDataThreshold }
+if ($InfectiousAgentRows) { $qmdParams['infectiousAgentRows'] = $InfectiousAgentRows }
 if ($ConfidenceIntervals) {
     $qmdParams['includeConfidenceIntervals'] = $ConfidenceIntervals -join ','
 }

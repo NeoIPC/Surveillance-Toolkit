@@ -31,13 +31,6 @@ include_localised("_methods-agent-per-infection.Rmd")
 ```
 
 ```{r}
-#| output: asis
-#| label: tbl-agent-per-infection-rate
-#| tbl-cap: !expr 'if (ia_engine) sR$`tbl-agent-per-infection-rate`$tbl_cap_engine else sR$`tbl-agent-per-infection-rate`$`tbl-cap`'
-#| tbl-cap-location: top
-
-check_outlier_interpretation <- FALSE
-
 # The version of the table the report renders: the reporting groups of the
 # released classification, or the full ontology when the parameter asks for
 # it. A neoipcr that predates the classification engine carries no ontology
@@ -55,11 +48,20 @@ if (is.null(tbl_data)) {
 }
 
 # Rows keyed by node_id come from the classification engine; rows keyed by
-# their printed label come from the taxonomy that preceded it. Decided before
-# the guard because the table caption reads it, and the caption is evaluated
-# even where no data renders the table.
+# their printed label come from the taxonomy that preceded it. This stands in
+# its own chunk because knitr evaluates a `!expr` chunk option before the
+# chunk's own code, and the caption reads it.
 ia_engine <- "node_id" %in% names(tbl_data)
 ia_groups <- identical(ia_slot, "infectious_agent_detection_rate_per_agent_table")
+```
+
+```{r}
+#| output: asis
+#| label: tbl-agent-per-infection-rate
+#| tbl-cap: !expr 'if (ia_engine) sR$`tbl-agent-per-infection-rate`$tbl_cap_engine else sR$`tbl-agent-per-infection-rate`$`tbl-cap`'
+#| tbl-cap-location: top
+
+check_outlier_interpretation <- FALSE
 
 # Conditionally render table only if department data exists
 if (!is.null(tbl_data) &&
@@ -116,6 +118,12 @@ if (!is.null(tbl_data) &&
     tbl <- tbl |> dplyr::rename(!!!ia_type_old_cols)
   }
 
+  # `gt::tab_stub_indent()` caps its per-level indent at five levels, so the
+  # engine's deeper tree rows take their indent beyond the cap from the
+  # label itself; see `ia_indent_labels()`.
+  if (ia_engine)
+    tbl <- tbl |> dplyr::mutate(group = ia_indent_labels(group, level))
+
   ci_cols_to_drop <- character(0)
   if (!include_rate_ci)
     ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
@@ -153,30 +161,29 @@ if (!is.null(tbl_data) &&
   }
 
   # Row styling: the engine styles by `rank` and the row identity; the older
-  # table styled by `taxon`.
+  # table styled by `taxon`. The summary block sits at level 1 without rank or
+  # parent, and its identifiers are the attribute value's `<attribute>|<key>`;
+  # a tree top of the ontology version carries a rank and a groups identifier
+  # carries no `|`, so neither is mistaken for a summary row.
   ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
   ia_summary <- if (ia_engine)
-    !is.na(ia_node_id) & grepl("^[a-z_]+\\|", ia_node_id) else
+    tbl_data$level == 1 & is.na(tbl_data$parent_id) & is.na(tbl_data$rank) &
+      grepl("^[a-z_]+\\|", ia_node_id) else
     rep(FALSE, nrow(tbl_data))
   ia_bold <- if (ia_engine) {
-    (tbl_data$level == 0) |
-      (ia_groups & !is.na(ia_node_id) & !ia_summary) |
-      ia_summary |
-      (!ia_groups & !is.na(tbl_data$rank) & tbl_data$rank %in%
+    tbl_data$level == 0 | ia_summary |
+      (ia_groups & tbl_data$level == 1 & !ia_summary) |
+      (!ia_groups & tbl_data$rank %in%
          c("Domain", "Kingdom", "Realm", "Subkingdom", "Phylum",
            "Order", "Genus", "Group"))
   } else {
     tbl_data$taxon %in% c("none", "domain", "kingdom", "order", "genus",
                           "coag_type")
   }
-  ia_italic <- if (ia_engine) {
-    !is.na(tbl_data$rank) & tbl_data$rank %in% c(
-      "Realm", "Domain", "Subkingdom", "Kingdom", "Phylum", "Subphylum",
-      "Class", "Subclass", "Order", "Suborder", "Family", "Subfamily",
-      "Species", "Subspecies", "Serotype", "Variety")
-  } else {
+  ia_italic <- if (ia_engine)
+    tbl_data$rank %in% ia_italic_ranks
+  else
     tbl_data$taxon %in% c("domain", "kingdom", "order", "species")
-  }
 
   tbl <- tbl |>
     gt(rowname_col = "group") |>

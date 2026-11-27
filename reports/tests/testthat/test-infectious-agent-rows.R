@@ -15,7 +15,8 @@ test_that("a row's identity is its node_id, and the Total's is total", {
     ia_row_identities(onto),
     c("total", "NeoIPC|1", "LPSN|genus/staphylococcus", "NeoIPC|63",
       "LPSN|species/staphylococcus-epidermidis",
-      "LPSN|genus/staphylococcus~n.o.s.", "ICTV|191161"))
+      "LPSN|genus/staphylococcus~n.o.s.", "NeoIPC|63~n.o.s.",
+      "ICTV|191161"))
 })
 
 test_that("an identity is unique in every table, a resistance table's included", {
@@ -93,6 +94,36 @@ test_that("ia_above_genus keys on the parent node's rank, not the id shape", {
   residual <- c(FALSE, FALSE, TRUE, FALSE, TRUE, FALSE)
   expect_equal(ia_above_genus(tbl, ids, residual),
                c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE))
+})
+
+test_that("ia_above_genus judges a group's residual by the group's path", {
+  # The rank "Group" says nothing of depth: the list places groups within a
+  # genus and above it alike, so the walk up the parent chain decides.
+  tbl <- tibble::tribble(
+    ~rank, ~node_id, ~parent_id,
+    NA_character_, NA_character_, NA_character_,
+    "Genus", "LPSN|genus/staphylococcus", NA_character_,
+    "Group", "NeoIPC|63", "LPSN|genus/staphylococcus",
+    NA_character_, "NeoIPC|63~n.o.s.", "NeoIPC|63",
+    "Order", "LPSN|order/enterobacterales", NA_character_,
+    "Group", "NeoIPC|65", "LPSN|order/enterobacterales",
+    NA_character_, "NeoIPC|65~n.o.s.", "NeoIPC|65")
+  ids <- c(NA, "LPSN|genus/staphylococcus", "NeoIPC|63",
+           "NeoIPC|63~n.o.s.", "LPSN|order/enterobacterales",
+           "NeoIPC|65", "NeoIPC|65~n.o.s.")
+  residual <- c(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE)
+  expect_equal(ia_above_genus(tbl, ids, residual),
+               c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE))
+
+  # The fixture table holds the same shape: the coagulase-negative
+  # staphylococci residual gathers the group's agents within the genus.
+  onto <- fixture_agent_per_infection_ontology()
+  onto_ids <- as.character(onto$node_id)
+  onto_residual <- !is.na(onto_ids) & grepl("~n\\.o\\.s\\.$", onto_ids)
+  # Neither residual earns the note: the genus' own and the group's within
+  # the genus both gather agents of a node at or below the genus.
+  expect_equal(ia_above_genus(onto, onto_ids, onto_residual),
+               rep(FALSE, nrow(onto)))
 })
 
 test_that("ia_above_genus falls back to the id word without the parent row", {

@@ -79,28 +79,28 @@ if (!is.null(tbl_data) &&
   ci_pattern <- ci_pattern_inline
 
   # Row styling: the engine styles by `rank` and the row identity; the older
-  # table styled by `taxon`.
+  # table styled by `taxon`. The summary block sits at level 1 without rank or
+  # parent, and its identifiers are the attribute value's `<attribute>|<key>`;
+  # a tree top of the ontology version carries a rank and a groups identifier
+  # carries no `|`, so neither is mistaken for a summary row.
   ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
   ia_summary <- if (ia_engine)
-    !is.na(ia_node_id) & grepl("^[a-z_]+\\|", ia_node_id) else
+    tbl_data$level == 1 & is.na(tbl_data$parent_id) & is.na(tbl_data$rank) &
+      grepl("^[a-z_]+\\|", ia_node_id) else
     rep(FALSE, nrow(tbl_data))
   ia_bold <- if (ia_engine) {
     ia_summary |
-      (ia_groups & !is.na(ia_node_id)) |
-      (!ia_groups & !is.na(tbl_data$rank) & tbl_data$rank %in%
+      (ia_groups & tbl_data$level == 1 & !ia_summary) |
+      (!ia_groups & tbl_data$rank %in%
          c("Domain", "Kingdom", "Realm", "Subkingdom", "Phylum",
            "Order", "Genus", "Group"))
   } else {
     tbl_data$taxon %in% c("genus")
   }
-  ia_italic <- if (ia_engine) {
-    !is.na(tbl_data$rank) & tbl_data$rank %in% c(
-      "Realm", "Domain", "Subkingdom", "Kingdom", "Phylum", "Subphylum",
-      "Class", "Subclass", "Order", "Suborder", "Family", "Subfamily",
-      "Species", "Subspecies", "Serotype", "Variety")
-  } else {
+  ia_italic <- if (ia_engine)
+    tbl_data$rank %in% ia_italic_ranks
+  else
     tbl_data$taxon %in% c("species")
-  }
 
   tbl <- tbl_data |>
     dplyr::select(-tidyselect::any_of(c(
@@ -127,6 +127,12 @@ if (!is.null(tbl_data) &&
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
       !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
       !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
+
+  # `gt::tab_stub_indent()` caps its per-level indent at five levels, so the
+  # engine's deeper tree rows take their indent beyond the cap from the
+  # label itself; see `ia_indent_labels()`.
+  if (ia_engine)
+    tbl <- tbl |> dplyr::mutate(group = ia_indent_labels(group, level))
 
   ci_cols_to_drop <- character(0)
   if (!include_rate_ci)

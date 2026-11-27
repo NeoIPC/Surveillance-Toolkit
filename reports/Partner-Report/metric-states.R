@@ -34,12 +34,14 @@ classify_metrics <- function(table_data, identifier_col = NULL,
   # Get row identifiers
   if (!is.null(identifiers)) {
     if (length(identifiers) != nrow(table_data)) {
-      rlang::abort(c(
-        "`identifiers` must have one value per row of `table_data`.",
-        i = paste0(
-          "The engine keys every row of its infectious-agent tables; the ",
-          "caller passes one identity per row."),
-        class = "reports_bad_identifiers"))
+      rlang::abort(
+        c(
+          "`identifiers` must have one value per row of `table_data`.",
+          i = paste0(
+            "The engine keys every row of its infectious-agent tables; the ",
+            "caller passes one identity per row.")
+        ),
+        class = "reports_bad_identifiers")
     }
   } else if (!is.null(combine_cols) && all(combine_cols %in% names(table_data))) {
     identifiers <- apply(table_data[, combine_cols, drop = FALSE], 1, function(row) {
@@ -147,11 +149,38 @@ get_outliers_above <- function(state_map) {
   get_metrics_in_state(state_map, "above_q3")
 }
 
+# The display label of a resistance category key, as the resistance tables
+# print it. The mapping is not the identity, and it is the one the resistance
+# tables apply to their row labels — which the outlier prose has to match. The
+# dataset abbreviates carbapenem and colistin resistance as `car`/`cor` while
+# the categories are CARBR and COLR; and the descriptive label lives under a
+# `_label` key, because the bare glossary term is carried separately as
+# terminology.
+localize_resistance_category <- function(abr_key, sR) {
+  abr_label_key <- list(
+    "3gcr" = "3gcr_label",
+    car = "carbr_label",
+    cor = "colr_label",
+    mrsa = "mrsa_label",
+    vre = "vre_label"
+  )[[abr_key]]
+  if (!is.null(abr_label_key) && !is.null(sR[[abr_label_key]])) {
+    return(sR[[abr_label_key]])
+  }
+  logDebug(paste0(
+    "localize_metric_name: no display label found for resistance ",
+    "category '{abr_key}'. Using raw identifier as fallback."))
+  abr_key
+}
+
 # Localize metric name by looking up in string resources.
 # `labels` is the printed label of every row identity, as the rendered table
 # holds it (`ia_metric_labels()` of `infectious-agent-rows.R`): an identity in
 # it takes that label, since the outlier prose must name the row as the table
-# shows it. `labels` wins over the glossary, whose English keys cannot name an
+# shows it. A resistance table's identity names its category beside its node,
+# and the text names the category too — the table prints the same row in every
+# category's block, so the bare label would name one row of a block as any
+# other's. `labels` wins over the glossary, whose English keys cannot name an
 # identity. For glossary identifiers, when table_name is provided, that table's
 # section is checked first so that table-specific labels (e.g.,
 # "CVC-associated sepsis/BSI" in Table 2 vs plain "CVC" in Table 8) take
@@ -159,6 +188,11 @@ get_outliers_above <- function(state_map) {
 localize_metric_name <- function(metric_id, sR, table_name = NULL,
                                  labels = NULL) {
   if (!is.null(labels) && metric_id %in% names(labels)) {
+    if (grepl(":", metric_id, fixed = TRUE)) {
+      abr_key <- strsplit(metric_id, ":", fixed = TRUE)[[1]][1]
+      return(paste0(localize_resistance_category(abr_key, sR), ": ",
+                    labels[[metric_id]]))
+    }
     return(labels[[metric_id]])
   }
 
@@ -168,27 +202,7 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL,
     if (length(parts) == 2) {
       abr_key <- parts[1]
       condition_key <- parts[2]
-      # Localize the resistance category. Neither mapping is the identity, and
-      # both are the ones the resistance tables apply to their row labels — which
-      # this text has to match. The dataset abbreviates carbapenem and colistin
-      # resistance as `car`/`cor` while the categories are CARBR and COLR; and the
-      # descriptive label lives under a `_label` key, because the bare glossary
-      # term is carried separately as terminology.
-      abr_label_key <- list(
-        "3gcr" = "3gcr_label",
-        car = "carbr_label",
-        cor = "colr_label",
-        mrsa = "mrsa_label",
-        vre = "vre_label"
-      )[[abr_key]]
-      localized_abr <- if (!is.null(abr_label_key) && !is.null(sR[[abr_label_key]])) {
-        sR[[abr_label_key]]
-      } else {
-        logDebug(paste0(
-          "localize_metric_name: no display label found for resistance ",
-          "category '{abr_key}'. Using raw identifier as fallback."))
-        abr_key
-      }
+      localized_abr <- localize_resistance_category(abr_key, sR)
       # Routine is the default — omit the suffix. Only show the condition
       # for non-routine cases (e.g., "in case of 3GCR").
       if (condition_key == "routine") {

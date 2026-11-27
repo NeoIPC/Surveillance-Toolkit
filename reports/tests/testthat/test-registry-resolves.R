@@ -46,12 +46,25 @@ for (sym in unique(unlist(regmatches(
     deparse(og_expr), gregexpr("interpret_[a-z0-9_]+", deparse(og_expr))))))
   assign(sym, function(...) NULL, envir = stub_env)
 og <- eval(og_expr, stub_env)
-grouping_keys <- unlist(lapply(
-  c("infectious_agent_detection_rate_per_agent_table",
-    "abr_infection_rate_table"),
-  \(tbl) unlist(lapply(og[[tbl]], `[[`, "metrics"))))
+# Each grouping entry stands under its slot and is resolved only against the
+# fixture of that version: a key of one version that does not name a row of
+# the other is exactly the mismatch that went unnoticed when one entry served
+# both.
+grouping_slots <- list(
+  infectious_agent_detection_rate_per_agent_table =
+    fixture_registry_agent_groups,
+  infectious_agent_detection_rate_per_agent_ontology_table =
+    fixture_registry_agent_ontology,
+  abr_infection_rate_table = fixture_registry_abr_groups,
+  abr_infection_rate_ontology_table = fixture_registry_abr_ontology)
+stopifnot(all(names(grouping_slots) %in% names(og)))
 
-named_keys <- unique(c(interpreter_keys, grouping_keys))
+# The interpretation functions read their state map from whichever version
+# rendered, so their candidate keys may name rows of either.
+named_keys <- unique(c(
+  interpreter_keys,
+  unlist(lapply(names(grouping_slots),
+                \(slot) unlist(lapply(og[[slot]], `[[`, "metrics"))))))
 # The old-shape texts keyed their metrics by printed labels, which contain a
 # space or a full stop; the engine identities never do.
 engine_keys <- tolower(named_keys[!grepl("[ .]", named_keys)])
@@ -66,6 +79,11 @@ test_that("the named infectious-agent identities are a non-empty set", {
                     engine_keys))
 })
 
+resolves_in <- function(tbl, key) {
+  !inherits(try(ia_row_index(tbl, key, "table"), silent = TRUE),
+            "try-error")
+}
+
 test_that("every infectious-agent identity named by the setup resolves to one
            row of an engine-shaped table", {
   agent_tables <- list(fixture_registry_agent_groups(),
@@ -75,16 +93,25 @@ test_that("every infectious-agent identity named by the setup resolves to one
   agent <- engine_keys[!grepl(abr_prefix, engine_keys)]
   abr <- engine_keys[grepl(abr_prefix, engine_keys)]
   for (key in agent) {
-    resolves <- vapply(agent_tables, function(tbl)
-      !inherits(try(ia_row_index(tbl, key, "table"), silent = TRUE),
-                "try-error"), logical(1))
-    expect_true(any(resolves), info = key)
+    expect_true(any(vapply(agent_tables, resolves_in, logical(1), key)),
+                info = key)
   }
   for (key in abr) {
-    resolves <- vapply(abr_tables, function(tbl)
-      !inherits(try(ia_row_index(tbl, key, "table"), silent = TRUE),
-                "try-error"), logical(1))
-    expect_true(any(resolves), info = key)
+    expect_true(any(vapply(abr_tables, resolves_in, logical(1), key)),
+                info = key)
+  }
+})
+
+test_that("every grouped identity resolves in the table of its own slot", {
+  for (slot in names(grouping_slots)) {
+    fixture <- grouping_slots[[slot]]()
+    for (metric in unlist(lapply(og[[slot]], `[[`, "metrics"))) {
+      key <- tolower(metric)
+      # Printed labels key the tables that predate the engine; engine
+      # identities must resolve in their own slot's table.
+      if (grepl("[ .]", key)) next
+      expect_true(resolves_in(fixture, key), info = paste(slot, key))
+    }
   }
 })
 

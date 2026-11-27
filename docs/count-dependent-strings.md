@@ -58,14 +58,17 @@ the obvious heuristic, which is why the list below was built by reading the sele
 | `fig_sample_size` | `reports/common.yaml` | `(N = {count} patients)`. Receives a patient count. The noun follows the numeral directly and must agree. |
 | `sparse_data_footnote` | `reports/common.yaml` | `Fewer than {threshold} events; …`. Receives the sparse-data threshold. |
 | `sparse_data_footnote_no_ci` | `reports/common.yaml` | As above, the variant rendered when confidence intervals are off. |
+| `total_only_footnote` | `reports/common.yaml` | `{count} infectious agents were recorded as Unidentifiable…; they count in the Total only.` Receives an infectious-agent count; the noun and the verb agree with it. |
+| `block_total_only_footnote` | `reports/common.yaml` | `{count} of the infections in this Total have no row in this block…`. Receives an infection count; "have" agrees with it. |
 | `content[5]` | `reports/Partner-Certificate/content/_sR.yaml` | `…monitoring of {patient_count} newborns with birth weights…`. Receives a newborn count. |
 | `headerList.country` / `.countries` | Partner-Report, Reference-Report | Selected in R by `length(countries) > 1`. No count is printed; the noun still agrees with one. |
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
 | `days` | `reports/Patient-Data-Report/content/_sR.yaml` | `format_days_value()` in `_content.qmd` joins a count of days to the noun with `sR$unit_separator`, so one day reads "1 days". |
 
-**Seven, where the design note that preceded this named three.** The three it named were found by
-inspecting `reports/common.yaml`; the other four live in a report's own `_sR.yaml` or in R code, which is
-why inspecting one file could not have found them.
+**Nine now, where the design note that preceded this named three.** The three it named were found by
+inspecting `reports/common.yaml`; four more live in a report's own `_sR.yaml` or in R code, which is
+why inspecting one file could not have found them, and the two infectious-agent Total-only footnotes
+joined the list with the classification-engine tables.
 
 ### The hand-rolled selections are already slightly wrong
 
