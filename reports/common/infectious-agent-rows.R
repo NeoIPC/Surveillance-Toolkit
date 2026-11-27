@@ -90,3 +90,21 @@ first_state <- function(state_map, keys) {
   hit <- tolower(keys)[tolower(keys) %in% names(state_map)]
   if (length(hit) == 0L) NULL else state_map[[hit[1]]]
 }
+
+# True for the residual (`~n.o.s.`) rows that stand above the genus: the
+# engine gives a residual row no rank of its own, and its `parent_id` names
+# the node it gathers the unlisted agents of — whose rank the same table's
+# node rows carry. A node at or below the genus is what the `nos_footnote`
+# explains, so only a parent rank above the genus earns the other note; a
+# parent row the table does not show falls back to the id's rank word, which
+# only some identifier sources carry.
+ia_above_genus <- function(table_data, node_ids, residual) {
+  known <- !is.na(node_ids) & !is.na(table_data$rank)
+  rank_by_node <- stats::setNames(as.character(table_data$rank)[known],
+                                  node_ids[known])
+  parent_rank <- rank_by_node[as.character(table_data$parent_id)]
+  at_or_below_genus <- c("Genus", "Subgenus", "Species", "Subspecies",
+                         "Serotype", "Variety")
+  unname(residual & (!is.na(parent_rank) & !(parent_rank %in% at_or_below_genus) |
+                      is.na(parent_rank) & !grepl("\\|genus/", node_ids)))
+}

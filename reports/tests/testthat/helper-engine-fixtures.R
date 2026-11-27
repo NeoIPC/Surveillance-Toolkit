@@ -5,13 +5,7 @@
 # data, only row structure, and they keep the engine's key formats: a node's
 # `<ConceptSource>|<ConceptId>`, an ICTV virus's `ICTV|<IctvId>`, a reporting
 # group's kebab-case key, a summary row's `<attribute>|<value>`, and a residual
-# row's `<node_id>~n.o.s.`.
-
-agent_table_columns <- function() {
-  c("level", "rank", "node_id", "parent_id", "group",
-    "n", "total", "pooled", "ci_lower", "ci_upper",
-    "q1", "q2", "q3", "quartile_departments", "n_total_only")
-}
+# row's `<node_id>~n.o.s.`. Each fixture is a tibble in that shape.
 
 # The table of the infectious agents detected, over the reporting groups: a
 # Total, the summary block above the tree, the tree with a group nested in its

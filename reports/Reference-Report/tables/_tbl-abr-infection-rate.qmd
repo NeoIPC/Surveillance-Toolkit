@@ -306,7 +306,7 @@ ia_residual <- if (ia_engine)
 if (any(ia_residual, na.rm = TRUE)) {
   gt_tbl <- gt_tbl |>
     gt::tab_source_note(source_note = sR$nos_footnote)
-  if (ia_engine && any(ia_residual & !grepl("\\|genus/", ia_node_id),
+      if (ia_engine && any(ia_above_genus(tbl_data, ia_node_id, ia_residual),
                        na.rm = TRUE))
     gt_tbl <- gt_tbl |>
       gt::tab_source_note(source_note = sR$residual_above_genus_footnote)

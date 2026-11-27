@@ -76,3 +76,37 @@ test_that("ia_metric_labels maps every identity to the label the table prints", 
   expect_identical(
     onto_labels[["lpsn|genus/staphylococcus~n.o.s."]], "Staphylococcus n.o.s.")
 })
+
+test_that("ia_above_genus keys on the parent node's rank, not the id shape", {
+  tbl <- tibble::tribble(
+    ~rank, ~node_id, ~parent_id,
+    NA_character_, NA_character_, NA_character_,
+    "Order", "LPSN|order/enterobacterales", NA_character_,
+    NA_character_, "LPSN|order/enterobacterales~n.o.s.",
+    "LPSN|order/enterobacterales",
+    "Genus", "MycoBank|455206", NA_character_,
+    NA_character_, "MycoBank|455206~n.o.s.", "MycoBank|455206",
+    NA_character_, "enterobacterales", NA_character_)
+  ids <- c(NA, "LPSN|order/enterobacterales",
+           "LPSN|order/enterobacterales~n.o.s.", "MycoBank|455206",
+           "MycoBank|455206~n.o.s.", "enterobacterales")
+  residual <- c(FALSE, FALSE, TRUE, FALSE, TRUE, FALSE)
+  expect_equal(ia_above_genus(tbl, ids, residual),
+               c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE))
+})
+
+test_that("ia_above_genus falls back to the id word without the parent row", {
+  tbl <- tibble::tribble(
+    ~rank, ~node_id, ~parent_id,
+    NA_character_, NA_character_, NA_character_,
+    NA_character_, "LPSN|order/enterobacterales~n.o.s.",
+    "LPSN|order/enterobacterales",
+    NA_character_, "enterobacterales~n.o.s.", "enterobacterales")
+  ids <- c(NA, "LPSN|order/enterobacterales~n.o.s.",
+           "enterobacterales~n.o.s.")
+  residual <- c(FALSE, TRUE, TRUE)
+  # Parent rows absent: an id that carries no genus word still earns the
+  # note, as a residual of a node at or under the genus is the rarer case.
+  expect_equal(ia_above_genus(tbl, ids, residual),
+               c(FALSE, TRUE, TRUE))
+})

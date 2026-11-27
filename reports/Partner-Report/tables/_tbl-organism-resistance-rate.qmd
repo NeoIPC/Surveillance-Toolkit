@@ -37,10 +37,10 @@ include_localised("_methods-organism-resistance.Rmd")
 #| tbl-cap-location: top
 
 # The version of the table the report renders, as for the infectious-agent
-# table; see the marker of the same scope there. `get_benchmark_data()` reads
-# an unstamped benchmark's older-name table and hands it over under the
-# engine's name, so the joined data needs no older-name lookup.
-# NEOIPC-COMPAT(infectious-agent-engine): remove the fallback once
+# table; see the marker of the same scope there. The engine's resistance
+# table is named for the infectious agents on its rows; a join from a neoipcr
+# that predates the engine still hands the table over under the older name.
+# NEOIPC-COMPAT(infectious-agent-engine): remove the older-name fallback once
 # reports/compatibility.yml lists v0.0.0.9009 or later as tested and minimum
 # together.
 ia_slot <- if (identical(infectious_agent_rows, "ontology"))
@@ -49,6 +49,10 @@ ia_slot <- if (identical(infectious_agent_rows, "ontology"))
 tbl_data <- benchmark_data[[ia_slot]]
 if (is.null(tbl_data)) {
   ia_slot <- "infectious_agent_resistance_rate_table"
+  tbl_data <- benchmark_data[[ia_slot]]
+}
+if (is.null(tbl_data)) {
+  ia_slot <- "organism_resistance_rate_table"
   tbl_data <- benchmark_data[[ia_slot]]
 }
 
@@ -370,7 +374,7 @@ if (!is.null(tbl_data) &&
   if (any(ia_residual, na.rm = TRUE)) {
     tbl <- tbl |>
       gt::tab_source_note(source_note = sR$nos_footnote)
-    if (ia_engine && any(ia_residual & !grepl("\\|genus/", ia_node_id),
+    if (ia_engine && any(ia_above_genus(tbl_data, ia_node_id, ia_residual),
                          na.rm = TRUE))
       tbl <- tbl |>
         gt::tab_source_note(source_note = sR$residual_above_genus_footnote)
