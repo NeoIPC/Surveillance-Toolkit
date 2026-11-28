@@ -51,6 +51,7 @@ principles, the capability matrix, and the verification gates — lives in
 | `Public/PatientRemoval.ps1` + `Private/PatientRemoval.ps1` | **Remove patients** entered in error (`Remove-NeoIPCPatient`): select them by department and patient ID or by UID, refuse what a deletion would take with it unseen, preview with DHIS2's own dry run, confirm once, delete one patient per request, and prove each deletion by reading it back; the planning half is free of I/O ([Removing Patients](#removing-patients)) |
 | `Public/ReportHelpers.ps1` | Report-build helpers — scoped auth env vars, Quarto/Rscript invocation, locale resolution, build summaries |
 | `Public/BuildReport.ps1` | The build report every report wrapper writes (`Write-NeoIPCBuildReport`), its steps, and the parameters it records, with the report's JSON schema owned in one place |
+| `Public/ReportEdition.ps1` | The report edition surface: the render parameters of one preset in a report's `presets.json` (`Get-NeoIPCReportPreset`), and the number of departments a serialized reference dataset was built from (`Get-NeoIPCReferenceDatasetDepartmentCount`), which R decodes with `jsonlite::unserializeJSON` and which `Build-ReferenceReport.ps1` gates its floor of contributing departments on |
 | `Private/TextFile.ps1` | The module's one write point for generated text files (`Write-NeoIPCTextFile`): UTF-8 without a BOM, with LF line endings, on every platform; the reader of the files a caller hashes (`Read-NeoIPCTextFile`), which returns a file's bytes and text from one read and refuses a byte order mark or invalid UTF-8; the resolution of a path to the file-system path both hand to .NET, refusing a path on a drive of another provider or one that cannot be resolved, and never handing on a path it refused (`Resolve-NeoIPCFileSystemPath`); and the refusal of a text that is not valid YAML, naming the line and the column where the parser stopped, or the end of the file (`Get-NeoIPCYamlRefusalMessage`) |
 | `Public/InfectiousAgents.ps1` + `Private/InfectiousAgentValidation.ps1` | Infectious-agent ontology helpers (the next free `Id`, a random UID in the sidecar for each `Id` without one, and the option codes and the code sets the generated rules enumerate, with each `Id`'s reporting group and attribute values from the reporting classification, returned or written as JSON with the SHA-256 of the list and of the classification) and the list's checks: its keys, structure, and value forms, its nodes, the option labels, the UID sidecar, append-only releases against the `infectious-agents-v*` tags, the frozen CSVs, the identity of its nodes, and where its common-commensal flags sit, with the reasons for them, all of which `MetadataContent.Tests.ps1` applies to the committed list |
 | `Private/InfectiousAgentReportingGroupValidation.ps1` | The reporting classification's checks: its keys and structure, its groups' keys, names, and ECDC categories, the evidence of every group, member, and attribute assignment, and that every `Id`-bearing node of the ontology but the `Id`s 0 and 3561 takes one leaf group, and every bacterium one value of each attribute, through placements that each name one node, give a reason where they override or where their group shares its ECDC category with another, and serve some `Id`; that the po4a configuration offers the translation catalogue the classification's labels and the list's names, ranks, and terms, by path; and that a localized classification differs from the canonical one only in its labels. `MetadataContent.Tests.ps1` applies all but the last to the committed files, and CI applies the last to the localized classifications po4a writes. It also finds the classification `Get-NeoIPCInfectiousAgentCodeSet` reads, the one beside the list or the one `-ClassificationPath` names (`Resolve-NeoIPCReportingClassificationPath`), and hands on each `Id`'s group and attribute values from the one resolution the member and attribute checks judge (`Resolve-NeoIPCReportingGroupMember`, `Resolve-NeoIPCReportingGroupAttribute`, `Get-NeoIPCInfectiousAgentClassificationRow`) |
@@ -792,6 +793,18 @@ $pairs = Build-QmdParamPairs -Values @{
 # @('-P', 'unitCodes:NEO_DE_01', '-P', 'reportingPeriodFrom:2025-01-01')
 ```
 
+### Report Editions and the Department Floor
+
+```powershell
+# The render parameters one preset of a report's presets.json sets,
+# to seed a build with (Build-ReferenceReport.ps1 -Preset does this itself)
+$preset = Get-NeoIPCReportPreset -PresetsFilePath ./reports/Reference-Report/presets.json -Name 'class-range-edition'
+
+# How many departments a serialized reference dataset was built from. R does
+# the decoding, so Rscript must be on PATH and its R must carry jsonlite.
+$departments = Get-NeoIPCReferenceDatasetDepartmentCount -DatasetFilePath ./reference-data.json
+```
+
 ## Tab Completion
 
 `-OrgUnitCode` (on `Read-OrgUnitInfo`, `Read-UserInfo`, `Read-PatientInfo`,
@@ -914,3 +927,4 @@ runs `msgfmt -c` (via WSL on Windows) when gettext is available.
 | Play data | `New-NeoIPCPlayDataPackage`, `Import-NeoIPCPlayData`, `Export-NeoIPCPlayDataCsv` |
 | Metadata generation | `New-NeoIPCPathogenOptionSet`, `New-NeoIPCPathogenDataElement`, `New-NeoIPCPathogenVariable`, `New-NeoIPCPathogenRule`, `New-NeoIPCPathogenFieldGatingVariable`, `New-NeoIPCPathogenFieldGatingRule`, `New-NeoIPCPathogenVirusVariable`, `New-NeoIPCPathogenVirusRule`, `New-NeoIPCSubstanceDataElement`, `New-NeoIPCSubstanceVariable`, `New-NeoIPCSubstanceRule`, `New-NeoIPCAntimicrobialOptionSet`, `New-NeoIPCAntibioticOptionGroup`, `New-NeoIPCAntibioticOptionGroupSet`, `Export-NeoIPCAntibioticTranslation`, `Compare-NeoIPCGeneratedMetadata`, `Update-NeoIPCGeneratedMetadataDirectory` |
 | Data dictionary | `Export-NeoIPCDataDictionary` |
+| Report Editions | `Get-NeoIPCReportPreset`, `Get-NeoIPCReferenceDatasetDepartmentCount` |

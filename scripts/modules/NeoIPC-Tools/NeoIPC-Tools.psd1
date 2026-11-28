@@ -60,6 +60,9 @@
         'Test-QuartoInstallation'
         'Split-NeoIPCLocale'
         'Resolve-NeoIPCLocaleQmd'
+        # ReportEdition
+        'Get-NeoIPCReportPreset'
+        'Get-NeoIPCReferenceDatasetDepartmentCount'
         # PAT
         'Read-DHIS2PersonalAccessToken'
         'Remove-DHIS2PersonalAccessToken'

@@ -13,8 +13,22 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Added
+
+- `Build-ReferenceReport.ps1` takes `-Preset`: a named preset of the report's
+  `presets.json`, applied beneath the parameters named on the command line, so an explicit
+  parameter wins over the preset's value for it. The file adds `class-range-edition`, the
+  preset that leaves out the parts a report of a birth-weight class or gestational-age
+  range does not print.
+
 ### Changed
 
+- `Build-ReferenceReport.ps1` reads from the dataset it renders how many departments
+  contribute to it: an online build acquires its dataset through R before rendering even
+  when it asks for no json output, and a `-DataFile` build counts the file it names, so
+  both modes need Rscript now. A build whose dataset has fewer than 5 warns with the count
+  it found, renders nothing, keeps the dataset for inspection, and reports itself cancelled
+  with exit code 1; the dataset of a build that completed stays removed as before.
 - `Build-ValidationReport.ps1` whose filter matches no department warns, reports the build
   cancelled in its build report, and ends with exit code 1, where it ended with 0 and no report;
   a batch calling it can now tell an empty scope from a build that ran.
