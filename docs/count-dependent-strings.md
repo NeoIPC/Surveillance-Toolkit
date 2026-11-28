@@ -62,10 +62,14 @@ the obvious heuristic, which is why the list below was built by reading the sele
 | `headerList.country` / `.countries` | Partner-Report, Reference-Report | Selected in R by `length(countries) > 1`. No count is printed; the noun still agrees with one. |
 | `header.department` / `.departments` | Validation-Report | Selected in R by `nrow(departments) > 1`. Same shape. |
 | `days` | `reports/Patient-Data-Report/content/_sR.yaml` | `format_days_value()` in `_content.qmd` joins a count of days to the noun with `sR$unit_separator`, so one day reads "1 days". |
+| `agent-type-clauses` variants (`*_total_one`, `*_tested_one`, `*_total_one_tested_one`, `*_not_tested`, `*_total_one_not_tested`) | `reports/common.yaml` | `agent_type_clauses()` in `reports/common/helpers.R` selects the clause of each infection type by its raw totals and tested counts. The untested forms leave no figure to disagree with; the singular forms carry the agreement. |
+| `nosocomial_patients_clause` / `_one` | `reports/common.yaml` | Selected in both setups by the raw count of patients, on the kind 3 shape. |
+| `nosocomial_reference_infections` / `_one` | `reports/Partner-Report/content/_sR.yaml` | Selected in `Partner-Report/_setup.qmd` by the reference dataset's raw severe-infection count. |
 
-**Seven, where the design note that preceded this named three.** The three it named were found by
+**Ten, where the design note that preceded this named three.** The three it named were found by
 inspecting `reports/common.yaml`; the other four live in a report's own `_sR.yaml` or in R code, which is
-why inspecting one file could not have found them.
+why inspecting one file could not have found them. The three last entered with the reworked report
+openings, each introduced together with the selection that reads its forms.
 
 ### The hand-rolled selections are already slightly wrong
 

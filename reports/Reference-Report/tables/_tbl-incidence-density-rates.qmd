@@ -23,6 +23,17 @@ include_localised("_methods-incidence-density.Rmd")
 tbl_data <- reference_data |>
   neoipcr::get_incidence_density_rate_table()
 
+# The kinds rows carry the 3 kinds of primary sepsis/BSI and the 2 of NEC under
+# their own keys; a dataset computed before they exist carries no such rows,
+# and the table then shows the types it has.
+kinds_labels <- list(
+  bsi_recognized = sR$`tbl-incidence-density-rates`$bsi_recognized,
+  bsi_commensal = sR$`tbl-incidence-density-rates`$bsi_commensal,
+  bsi_clinical = sR$`tbl-incidence-density-rates`$bsi_clinical,
+  nec_surgical = sR$`tbl-incidence-density-rates`$nec_surgical,
+  nec_medical = sR$`tbl-incidence-density-rates`$nec_medical
+)
+
 tbl <- tbl_data |>
   dplyr::rename(
     !!sR$table_headers$count := "n",
@@ -35,8 +46,15 @@ tbl <- tbl_data |>
       as.character(.data$inf),
       "si" ~ sR$si,
       "bsi" ~ sR$primary_sepsis_bsi_sc,
+      "bsi_recognized" ~ kinds_labels$bsi_recognized,
+      "bsi_commensal" ~ kinds_labels$bsi_commensal,
+      "bsi_clinical" ~ kinds_labels$bsi_clinical,
       "hap" ~ sR$pneumonia_sc,
-      "nec" ~ sR$necrotizing_enterocolitis_sc))
+      "nec" ~ sR$necrotizing_enterocolitis_sc,
+      "nec_surgical" ~ kinds_labels$nec_surgical,
+      "nec_medical" ~ kinds_labels$nec_medical)) |>
+  # The footnote below reads it from tbl_data; the table does not print it.
+  dplyr::select(-tidyselect::any_of("n_agent_unclassified"))
 
 cw <- compute_col_widths(tbl_data, stub_min = 25)
 
@@ -111,11 +129,17 @@ gt_tbl <- gt_tbl |>
     rows = tidyselect::any_of(c(
       sR$si,
       sR$primary_sepsis_bsi_sc,
+      sR$`tbl-incidence-density-rates`$bsi_recognized,
+      sR$`tbl-incidence-density-rates`$bsi_commensal,
+      sR$`tbl-incidence-density-rates`$bsi_clinical,
       sR$pneumonia_sc)),
     id = "grp_si") |>
   tab_row_group(
     label = sR$other,
-    rows = tidyselect::any_of(sR$necrotizing_enterocolitis_sc),
+    rows = tidyselect::any_of(c(
+      sR$necrotizing_enterocolitis_sc,
+      sR$`tbl-incidence-density-rates`$nec_surgical,
+      sR$`tbl-incidence-density-rates`$nec_medical)),
     id = "grp_othr") |>
   row_group_order(groups = c("grp_si", "grp_othr")) |>
   gt::tab_stub_indent(
@@ -123,6 +147,14 @@ gt_tbl <- gt_tbl |>
       sR$primary_sepsis_bsi_sc,
       sR$pneumonia_sc)),
     indent = 2) |>
+  gt::tab_stub_indent(
+    rows = tidyselect::any_of(c(
+      sR$`tbl-incidence-density-rates`$bsi_recognized,
+      sR$`tbl-incidence-density-rates`$bsi_commensal,
+      sR$`tbl-incidence-density-rates`$bsi_clinical,
+      sR$`tbl-incidence-density-rates`$nec_surgical,
+      sR$`tbl-incidence-density-rates`$nec_medical)),
+    indent = 3) |>
   tab_spanner(
     label = sR$`tbl-incidence-density-rates`$incidence_density_rate,
     columns = tidyselect::any_of(
@@ -175,6 +207,40 @@ gt_tbl <- gt_tbl |>
       endpoint = sR$si),
     locations = gt::cells_stub(rows = sR$si),
     placement = "right")
+
+# The kinds footnote names the BSIs whose positive culture carries an
+# unclassifiable infectious agent, a count the dataset carries on the bsi row;
+# without the column, or without a count there, the footnote gives the rule
+# without the count.
+bsi_kinds_footnote <- NULL
+if ("n_agent_unclassified" %in% names(tbl_data)) {
+  n_unclassified <- tbl_data$n_agent_unclassified[tbl_data$inf == "bsi"]
+  if (length(n_unclassified) == 1L && !is.na(n_unclassified)) {
+    bsi_kinds_footnote <- interpolate_translation(
+      sR$`tbl-incidence-density-rates`$bsi_kinds_footnote,
+      count = format_integer(n_unclassified))
+  }
+}
+if (is.null(bsi_kinds_footnote)) {
+  bsi_kinds_footnote <- sR$`tbl-incidence-density-rates`$bsi_kinds_footnote_no_count
+}
+
+# A dataset computed before the kinds rows exist has neither rows nor
+# footnotes; an empty footnote location would dangle.
+if ("bsi_recognized" %in% as.character(tbl_data$inf)) {
+  gt_tbl <- gt_tbl |>
+    tab_footnote(
+      footnote = bsi_kinds_footnote,
+      locations = gt::cells_stub(rows = kinds_labels$bsi_recognized),
+      placement = "right")
+}
+if ("nec_surgical" %in% as.character(tbl_data$inf)) {
+  gt_tbl <- gt_tbl |>
+    tab_footnote(
+      footnote = sR$`tbl-incidence-density-rates`$nec_kinds_footnote,
+      locations = gt::cells_stub(rows = kinds_labels$nec_surgical),
+      placement = "right")
+}
 
 # Sparse-data footnote for N < sparse_threshold
 if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {

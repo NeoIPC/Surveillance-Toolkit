@@ -716,10 +716,6 @@ interpret_agent_detection_per_inf_type <- function(state_map, sR, registry = NUL
   })
   cs <- cs[!is.na(cs)]
   if (length(cs) == 0) return(character(0))
-  if (all(cs == "low"))
-    return(Filter(Negate(is.null), interp(sR, "agent_detection_per_inf_type_interpretation_all_below")))
-  if (all(cs == "high"))
-    return(Filter(Negate(is.null), interp(sR, "agent_detection_per_inf_type_interpretation_all_above")))
   parts <- character(0)
   if (any(cs == "high"))
     parts <- c(parts, interp(sR, "agent_detection_per_inf_type_interpretation_some_above"))
@@ -818,8 +814,7 @@ outlier_groupings <- list(
   ),
   infectious_agent_detection_rate_per_inf_type_table = list(
     agent_detection_per_inf_type = list(
-      metrics = c("all", "bsi", "hap", "nec", "ssi"),
-      total_metric = "all",
+      metrics = c("bsi", "hap", "nec", "ssi"),
       template_prefix = "agent_detection_per_inf_type",
       interpret = interpret_agent_detection_per_inf_type
     )
@@ -1162,7 +1157,6 @@ localize_metric_name <- function(metric_id, sR, table_name = NULL) {
     bsi = "primary_sepsis_bsi_sc",
     hap = "pneumonia_sc",
     probiotic = "probiotics",
-    all = "total",
     a = "access",
     w = "watch",
     r = "reserve"
@@ -1844,16 +1838,24 @@ extract_counts <- function(bm, suffix) {
     n_patients = pull_col(bm$n_patients, "total"),
     n_enrollments = pull_col(bm$n_enrollments, "total"),
     n_patient_days = pull_col(bm$n_patient_days, "total"),
+    # NEOIPC-PERMANENT(dataset-format): see the marker in common/helpers.R; a
+    # stored dataset outlives every release, and its opening gets no clause.
+    n_patients_with_severe_infection = pull_col(
+      bm$n_patients_with_severe_infection, "n"),
     n_severe_infections = pull_filtered(
       bm$incidence_density_rate_table, "inf", "si", "n"),
     n_infectious_agents = pull_filtered(
       bm$infectious_agent_detection_rate_per_agent_table, "group", "Total", "n"),
     n_infections_with_agent = pull_filtered(
-      bm$infectious_agent_detection_rate_per_inf_type_table, "inf", "all", "n"),
-    n_infections_overall = pull_filtered(
-      bm$n_infections, "inf_type", "overall", "total")
+      bm$infectious_agent_detection_rate_per_inf_type_table, "inf", "all", "n")
   )
 }
+
+# The raw counts behind both figures: the formatted fields carry digit-group
+# separators, so a sentence that agrees with a count reads the raw value.
+own_counts <- extract_counts(benchmark_data, "_own")
+ref_counts <- if ("ref" %in% benchmark_data$dataset_names)
+  extract_counts(benchmark_data, "_ref") else NULL
 
 dR <- list(
   own = c(
@@ -1861,36 +1863,107 @@ dR <- list(
       lubridate::now("UTC"), format = "%x %X", tz = "UTC", usetz = TRUE)),
     format_dataset_resources(
       benchmark_data$metadata$own,
-      extract_counts(benchmark_data, "_own"), sR)
+      own_counts, sR)
   ),
-  ref = if ("ref" %in% benchmark_data$dataset_names) {
+  ref = if (!is.null(ref_counts)) {
     c(
       list(creationTimestamp = format(
         benchmark_data$metadata$ref$calculated,
         format = "%x %X", tz = "UTC", usetz = TRUE)),
       format_dataset_resources(
         benchmark_data$metadata$ref,
-        extract_counts(benchmark_data, "_ref"), sR)
+        ref_counts, sR)
     )
   } else {
     NULL
   }
 )
 
-# The reference data's severe-infection figures, a sentence the nosocomial
-# infections introduction adds when the report carries reference data. A
-# reference dataset that carries no incidence-density table, or no count in it,
-# has no figure to give, and the sentence is left out: interpolate_translation()
-# refuses a value that is not there.
-reference_severe_infections <- dR$ref[c("numberOfSevereInfections", "numberOfPatients",
-                                        "averageSevereInfectionsPerPatient")]
-nosocomial_reference_comparison <- if (!is.null(dR$ref) &&
-                                       all(lengths(reference_severe_infections) == 1L))
-  paste0(" ", interpolate_translation(
-    sR$nosocomial_reference_comparison,
-    infection_count = dR$ref$numberOfSevereInfections,
-    patient_count = dR$ref$numberOfPatients,
-    average = dR$ref$averageSevereInfectionsPerPatient)) else ""
+# The per-infection-type infectious-agent figures the section text gives: a
+# pooled share would follow the department's mix of infection types rather
+# than what it tests, so the text gives the shares per type from the
+# per-infection-type table, which counts the tested infections of each type
+# beside its infections with an agent; the table has no NEC row. A type
+# missing from the table is absent from the result, and its clause too.
+agent_type_fields <- function(suffix) {
+  detection <- benchmark_data$infectious_agent_detection_rate_per_inf_type_table
+  pick <- function(tbl, col, key_col, type) {
+    col_name <- paste0(col, suffix)
+    if (is.null(tbl) || !col_name %in% names(tbl)) return(NULL)
+    v <- tbl[[col_name]][tbl[[key_col]] == type]
+    if (length(v) == 1L) v else NULL
+  }
+  types <- c("bsi", "hap", "ssi")
+  type_list <- function(col) {
+    stats::setNames(lapply(types, \(t) pick(detection, col, "inf", t)), types)
+  }
+  format_agent_type_fields(
+    type_list("n"), type_list("tested"), type_list("total"), sR)
+}
+dR$own <- c(dR$own, list(agentTypes = agent_type_fields("_own")))
+dR$own <- c(dR$own, list(agentTypeClauses = agent_type_clauses(
+  dR$own$agentTypes, sR)))
+
+# The clause the section's opening adds after the severe infections: the
+# patients with at least one among the department's patients. A dataset
+# calculated before the slot carries nothing to fill it, and the opening then
+# ends at the infections.
+# NEOIPC-PERMANENT(dataset-format): see the marker in common/helpers.R; a
+# stored dataset outlives every release and gets no clause.
+# The clause agrees with the patients it counts: one patient reads
+# "1 of 1 patient", English taking the plural at zero and at two or more.
+nosocomial_patients_clause <- if (length(dR$own$numberOfPatientsWithSevereInfection) == 1L &&
+                                  length(dR$own$numberOfPatients) == 1L) {
+  if (length(own_counts$n_patients) == 1L && own_counts$n_patients == 1) {
+    interpolate_translation(
+      sR$nosocomial_patients_clause_one,
+      infected_count = dR$own$numberOfPatientsWithSevereInfection,
+      patient_count = dR$own$numberOfPatients)
+  } else {
+    interpolate_translation(
+      sR$nosocomial_patients_clause,
+      infected_count = dR$own$numberOfPatientsWithSevereInfection,
+      patient_count = dR$own$numberOfPatients)
+  }
+} else ""
+
+# The reference data's severe-infection figure, a sentence the nosocomial
+# infections introduction adds when the report carries reference data. The
+# figure needs only the infection count: a reference dataset stored before the
+# patients slot carries it, and the comparison then ends at the recorded
+# infections, as the department's own opening does where the department's own
+# dataset lacks the count.
+# NEOIPC-PERMANENT(dataset-format): see the marker in common/helpers.R; a
+# stored reference dataset predating the patients slot gets the sentence
+# without the patients clause.
+nosocomial_reference_comparison <- if (!is.null(ref_counts) &&
+                                       length(ref_counts$n_severe_infections) == 1L &&
+                                       length(dR$ref$numberOfSevereInfections) == 1L) {
+  ref_patients_clause <- if (length(dR$ref$numberOfPatientsWithSevereInfection) == 1L &&
+                             length(dR$ref$numberOfPatients) == 1L) {
+    if (length(ref_counts$n_patients) == 1L && ref_counts$n_patients == 1) {
+      interpolate_translation(
+        sR$nosocomial_patients_clause_one,
+        infected_count = dR$ref$numberOfPatientsWithSevereInfection,
+        patient_count = dR$ref$numberOfPatients)
+    } else {
+      interpolate_translation(
+        sR$nosocomial_patients_clause,
+        infected_count = dR$ref$numberOfPatientsWithSevereInfection,
+        patient_count = dR$ref$numberOfPatients)
+    }
+  } else ""
+  reference_infections <- if (ref_counts$n_severe_infections == 1) {
+    interpolate_translation(
+      sR$nosocomial_reference_infections_one,
+      infection_count = dR$ref$numberOfSevereInfections)
+  } else {
+    interpolate_translation(
+      sR$nosocomial_reference_infections,
+      infection_count = dR$ref$numberOfSevereInfections)
+  }
+  paste0(" ", reference_infections, ref_patients_clause, ".")
+} else ""
 
 # Detect metadata differences for highlighting
 metadata_diff <- if (!is.null(dR$ref)) {

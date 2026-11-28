@@ -412,6 +412,8 @@ include_localised("_risk-factors.Rmd")
 
 {{< include tables/_tbl-risk-density-rates.qmd >}}
 
+{{< include tables/_tbl-patients-exposed.qmd >}}
+
 {{< pagebreak >}}
 
 ```{r}

@@ -29,12 +29,12 @@ params:
   includeAgentPerInfectionRateTable: true
   includeInfectiousAgentDetectionRateTable: true
   includeRiskDensityRateTable: true
-  includeAntibioticUtilisationTable: false
+  includeAntibioticUtilisationTable: true
   includeSurgicalProcedureRateTable: true
   includeResistantPathogenInfectionRateTable: false
   includeOrganismResistanceRateTable: false
   includeAntibioticResistanceTestRateTable: false
-  includeSecondaryBsiRateTable: false
+  includeSecondaryBsiRateTable: true
   sparseDataThreshold: 16
 subtitle: '`r paste0(params$unitCodes, collapse = ", ")`'
 ---

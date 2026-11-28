@@ -1,1 +1,1 @@
-Nosocomial infections represent the primary endpoint of NeoIPC surveillance. Overall `r dR$numberOfSevereInfections` severe infections were recorded in `r dR$numberOfPatients` patients resulting in an average number of `r dR$averageSevereInfectionsPerPatient` infections per patient.
+Nosocomial infections are the primary end point of the NeoIPC Surveillance. Overall, `r dR$numberOfSevereInfections` severe infections were recorded`r nosocomial_patients_clause`.

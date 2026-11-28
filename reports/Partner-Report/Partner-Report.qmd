@@ -134,7 +134,7 @@ params:
 
   # Include the antibiotic-utilization table.
   # @type logical
-  includeAntibioticUtilisationTable: false
+  includeAntibioticUtilisationTable: true
 
   # Include the surgical-procedure rate table.
   # @type logical
@@ -154,7 +154,7 @@ params:
 
   # Include the secondary-BSI rate table.
   # @type logical
-  includeSecondaryBsiRateTable: false
+  includeSecondaryBsiRateTable: true
 
   # Threshold for sparse-data handling.
   # @type integer

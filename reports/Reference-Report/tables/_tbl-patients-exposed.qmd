@@ -1,0 +1,188 @@
+```{r}
+#| output: asis
+#| label: tbl-patients-exposed
+#| tbl-cap: !expr 'sR$`tbl-patients-exposed`$`tbl-cap`'
+#| tbl-cap-location: top
+
+# The table stands in a slot of its own of the calculated datasets; a dataset
+# saved before it carries neither the slot nor the inputs the getter reads,
+# and the table prints its no-data note then.
+# NEOIPC-PERMANENT(dataset-format): never let this read fail. A stored
+# reference dataset outlives every release, and this report renders a dataset
+# saved before the table existed no matter how far compatibility moves on.
+pe_data <- if (!is.null(reference_data$patients_exposed_table)) {
+  reference_data$patients_exposed_table
+} else {
+  tryCatch(neoipcr::get_patients_exposed_table(reference_data),
+           error = function(e) NULL)
+}
+
+# The dataset table arrives long, one row per factor and measure; the table
+# gives each measure its own columns over the eight factors. The count of
+# departments behind the quartiles is dropped: beside the quartiles it would
+# print a bare number that no text of the table explains. The mean days come
+# without intervals: the dataset carries none for the mean, whose bootstrap
+# would count a department's exposed patients as independent of one another.
+if (is.null(pe_data)) {
+  no_data_table(sR$`tbl-patients-exposed`$no_data)
+} else {
+  tbl_data <- pe_data |>
+    tidyr::pivot_wider(
+      id_cols = "factor",
+      names_from = "measure",
+      values_from = -c("factor", "measure"),
+      names_glue = "{.value}_{measure}") |>
+    dplyr::select(-tidyselect::starts_with("quartile_departments")) |>
+    dplyr::select(-tidyselect::any_of(c(
+      "ci_lower_mean_days", "ci_upper_mean_days",
+      "q1_ci_lower_mean_days", "q1_ci_upper_mean_days",
+      "q2_ci_lower_mean_days", "q2_ci_upper_mean_days",
+      "q3_ci_lower_mean_days", "q3_ci_upper_mean_days"))) |>
+    dplyr::rename(
+      count_exp = "n_patients_exposed",
+      pooled_exp = "pooled_patients_exposed",
+      ci_lower_exp = "ci_lower_patients_exposed",
+      ci_upper_exp = "ci_upper_patients_exposed",
+      q1_exp = "q1_patients_exposed",
+      q2_exp = "q2_patients_exposed",
+      q3_exp = "q3_patients_exposed",
+      q1_ci_lower_exp = "q1_ci_lower_patients_exposed",
+      q1_ci_upper_exp = "q1_ci_upper_patients_exposed",
+      q2_ci_lower_exp = "q2_ci_lower_patients_exposed",
+      q2_ci_upper_exp = "q2_ci_upper_patients_exposed",
+      q3_ci_lower_exp = "q3_ci_lower_patients_exposed",
+      q3_ci_upper_exp = "q3_ci_upper_patients_exposed",
+      count_days = "n_mean_days",
+      pooled_days = "pooled_mean_days",
+      q1_days = "q1_mean_days",
+      q2_days = "q2_mean_days",
+      q3_days = "q3_mean_days")
+
+  ci_pattern <- ci_pattern_inline
+
+  tbl <- tbl_data |>
+    dplyr::mutate(
+      factor = dplyr::recode_values(
+        as.character(.data$factor),
+        "cvc" ~ sR$cvc,
+        "pvc" ~ sR$pvc,
+        "inv" ~ sR$inv,
+        "niv" ~ sR$niv,
+        "ab" ~ sR$`tbl-risk-density-rates`$any_antibiotic,
+        "human_milk" ~ sR$human_milk_sc,
+        "probiotic" ~ sR$probiotics_sc,
+        "kangaroo_care" ~ sR$kangaroo_care_sc)) |>
+    gt(rowname_col = "factor") |>
+    sub_missing() |>
+    gt::tab_options(
+      latex.use_longtable = TRUE,
+      table.width = pct(100),
+      table.font.size = if (ci_config == "none") 10 else 9,
+      footnotes.marks = "extended"
+    ) |>
+    # Every value column but the counts, the interval bounds included: the
+    # merges below splice what these formats print, so an unformatted bound
+    # would reach the cell at full precision and the wrong decimal mark.
+    fmt_number(
+      columns = !tidyselect::any_of(c("count_exp", "count_days")),
+      decimals = 1,
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2,
+      locale = locale_gt) |>
+    fmt_integer(
+      columns = tidyselect::all_of(c("count_exp", "count_days")),
+      sep_mark = sR$digit_group_separator,
+      min_sep_threshold = 2) |>
+    cols_label(
+      count_exp = sR$table_headers$count,
+      pooled_exp = sR$table_headers$pooled,
+      q1_exp = sR$table_headers$q1,
+      q2_exp = sR$table_headers$q2,
+      q3_exp = sR$table_headers$q3,
+      count_days = sR$`tbl-patients-exposed`$total_days,
+      pooled_days = sR$table_headers$pooled,
+      q1_days = sR$table_headers$q1,
+      q2_days = sR$table_headers$q2,
+      q3_days = sR$table_headers$q3) |>
+    tab_spanner(
+      label = sR$`tbl-patients-exposed`$patients_exposed,
+      columns = tidyselect::all_of(c(
+        "count_exp", "pooled_exp", "q1_exp", "q2_exp", "q3_exp")),
+      id = "span_exposed") |>
+    tab_spanner(
+      label = sR$`tbl-patients-exposed`$mean_days,
+      columns = tidyselect::all_of(c(
+        "count_days", "pooled_days", "q1_days", "q2_days", "q3_days")),
+      id = "span_days") |>
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = list(
+        cells_column_spanners(),
+        cells_column_labels(),
+        cells_row_groups()
+      )
+    )
+
+  # Pooled and quartile intervals, on the share's own columns: the mean days
+  # print without any.
+  if (include_pooled_ci && "ci_lower_exp" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(pooled_exp, ci_lower_exp, ci_upper_exp),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$pooled_exp))
+  } else if ("ci_lower_exp" %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |> gt::cols_hide(
+      columns = tidyselect::any_of(c("ci_lower_exp", "ci_upper_exp")))
+  }
+
+  if ("q1_ci_lower_exp" %in% colnames(tbl$`_data`)) {
+    if (include_quartile_ci) {
+      has_boot <- !is.na(tbl$`_data`[["q1_ci_lower_exp"]])
+      tbl <- tbl |>
+        gt::cols_merge(columns = c(q1_exp, q1_ci_lower_exp, q1_ci_upper_exp),
+                       pattern = ci_pattern, rows = has_boot) |>
+        gt::cols_merge(columns = c(q2_exp, q2_ci_lower_exp, q2_ci_upper_exp),
+                       pattern = ci_pattern, rows = has_boot) |>
+        gt::cols_merge(columns = c(q3_exp, q3_ci_lower_exp, q3_ci_upper_exp),
+                       pattern = ci_pattern, rows = has_boot)
+    } else {
+      tbl <- tbl |> gt::cols_hide(columns = tidyselect::any_of(c(
+        "q1_ci_lower_exp", "q1_ci_upper_exp",
+        "q2_ci_lower_exp", "q2_ci_upper_exp",
+        "q3_ci_lower_exp", "q3_ci_upper_exp")))
+    }
+  }
+
+  tbl <- tbl |>
+    cols_width(
+      stub() ~ pct(16),
+      count_exp ~ pct(7), pooled_exp ~ pct(13),
+      q1_exp ~ pct(9), q2_exp ~ pct(9), q3_exp ~ pct(9),
+      count_days ~ pct(7), pooled_days ~ pct(13),
+      q1_days ~ pct(9), q2_days ~ pct(9), q3_days ~ pct(9)) |>
+    tab_footnote(
+      footnote = sR$`tbl-patients-exposed`$abbreviations_footnote,
+      locations = cells_column_spanners(spanners = "span_exposed"),
+      placement = "right")
+
+  # Sparse-data footnote for N < sparse_threshold
+  if (any(!is.na(tbl_data$pooled_exp) & tbl_data$count_exp < sparse_threshold,
+          na.rm = TRUE)) {
+    fn_text <- interpolate_translation(
+      if (include_pooled_ci) sR$sparse_data_footnote
+      else sR$sparse_data_footnote_no_ci,
+      threshold = sparse_threshold)
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = fn_text,
+        locations = cells_body(
+          columns = count_exp,
+          rows = !is.na(tbl_data$pooled_exp) &
+            tbl_data$count_exp < sparse_threshold),
+        placement = "right")
+  }
+
+  tbl
+}
+```

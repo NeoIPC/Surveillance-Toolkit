@@ -186,6 +186,14 @@ get_string_resources <- function(x) {
     }
   }
 
+  # The report language's decimal mark, the same one gt prints in the tables
+  # through options(gt.locale). A text formatter cannot read the mark from
+  # the session: the Windows output routines ignore LC_NUMERIC and R's
+  # formatting family follows options("OutDec") instead of the locale. The
+  # languages these reports ship — German, Greek, Spanish (Spain), Estonian,
+  # Italian — take the comma; English takes the dot.
+  sR$decimal_mark <- if (localeObj$language %in% c("de", "el", "es", "et", "it")) "," else "."
+
   return(sR)
 }
 
@@ -1395,11 +1403,20 @@ format_dataset_resources <- function(metadata, counts, sR) {
     averageSurveillancePeriod = fmt_decimal(
       counts$n_patient_days / counts$n_patients
     ),
-    numberOfSevereInfections = format_integer(counts$n_severe_infections),
-    averageSevereInfectionsPerPatient = fmt_decimal(
-      counts$n_severe_infections / counts$n_patients
-    )
+    numberOfSevereInfections = format_integer(counts$n_severe_infections)
   )
+
+  # The patients with at least one severe infection: an optional field like the
+  # infectious agents', so a dataset without the slot leaves no field for the
+  # opening sentence to print, and its clause is left out.
+  # NEOIPC-PERMANENT(dataset-format): never make this field required. A stored
+  # dataset outlives every release, and these reports render a dataset saved
+  # before the slot existed no matter how far compatibility moves on.
+  if (!is.null(counts$n_patients_with_severe_infection)) {
+    result$numberOfPatientsWithSevereInfection <- format_integer(
+      counts$n_patients_with_severe_infection
+    )
+  }
 
   # Infectious agent fields (optional — present in Reference-Report and Partner-Report)
   if (!is.null(counts$n_infectious_agents)) {
@@ -1407,14 +1424,6 @@ format_dataset_resources <- function(metadata, counts, sR) {
   }
   if (!is.null(counts$n_infections_with_agent)) {
     result$numberOfInfectionsWithAgent <- format_integer(counts$n_infections_with_agent)
-  }
-  if (!is.null(counts$n_infections_overall)) {
-    result$overallNumberOfInfections <- format_integer(counts$n_infections_overall)
-  }
-  if (!is.null(counts$n_infections_with_agent) && !is.null(counts$n_infections_overall)) {
-    result$infectiousAgentDetectionRate <- fmt_decimal(
-      counts$n_infections_with_agent / counts$n_infections_overall * 100
-    )
   }
 
   # Surgery fields (optional — present in Reference-Report)
@@ -1443,6 +1452,219 @@ format_dataset_resources <- function(metadata, counts, sR) {
   }
 
   result
+}
+
+#' Format the per-infection-type infectious-agent figures the texts give
+#'
+#' The infectious-agent sections of both reports give, per infection type, the
+#' infections with an infectious agent recorded and the share of the tested
+#' infections they are, and for the types whose form records testing also how
+#' many of the type's infections were tested and the share they are. A pooled
+#' share over all types would follow each department's mix of infection types
+#' rather than what the departments test. A type without a count in one of the
+#' inputs, or with no infection of it at all, is absent from the result, and
+#' the text then omits its clause; a tested count of 0 leaves the share among
+#' the tested without a denominator, and the clause assembler takes the form
+#' that names no figure for the agent.
+#'
+#' @param with_agent Named list of the infections with an infectious agent
+#'   recorded, by type key (`bsi`, `hap`, `ssi`).
+#' @param tested Named list of the tested infections of the same keys.
+#' @param totals Named list of the infection counts of the same keys.
+#' @param sR String resources; the percent is formatted with one decimal at the
+#'   resources' `decimal_mark`, the unit separator and the percent symbol of
+#'   the resources.
+#' @return Named list per type, of the formatted `count`, `tested`, `total`,
+#'   `tested_share` and `share`, and the raw `total_n` and `tested_n` the
+#'   clause selection reads.
+format_agent_type_fields <- function(with_agent, tested, totals, sR = NULL) {
+  types <- intersect(names(with_agent), names(tested))
+  types <- intersect(types, names(totals))
+  types <- types[vapply(types, \(t) !is.null(with_agent[[t]]) &&
+                                     !is.null(tested[[t]]) &&
+                                     !is.null(totals[[t]]) &&
+                                     totals[[t]] > 0, logical(1))]
+  fmt_pct <- function(x) {
+    mark <- if (!is.null(sR$decimal_mark)) sR$decimal_mark else "."
+    paste0(sub(".", mark, sprintf("%.1f", x), fixed = TRUE),
+           if (!is.null(sR$unit_separator)) sR$unit_separator else "",
+           if (!is.null(sR$percent_symbol)) sR$percent_symbol else "")
+  }
+  not_available <- if (!is.null(sR$not_available)) sR$not_available else "n/a"
+  lapply(types, function(type) {
+    count <- with_agent[[type]]
+    n_tested <- tested[[type]]
+    total <- totals[[type]]
+    list(
+      count = format_integer(count),
+      tested = format_integer(n_tested),
+      total = format_integer(total),
+      tested_share = fmt_pct(if (total > 0) n_tested / total * 100 else 0),
+      share = if (n_tested > 0) fmt_pct(count / n_tested * 100) else not_available,
+      # The raw counts the clause selection reads: the formatted figures carry
+      # digit-group separators and cannot be compared.
+      total_n = total,
+      tested_n = n_tested
+    )
+  }) |> stats::setNames(types)
+}
+
+#' Assemble the infectious-agent sentences from the formatted type fields
+#'
+#' The sentences of the section's opening, as the template's review settled
+#' them: the BSI sentence stands alone, and the pneumonia and SSI clauses join
+#' into one sentence over a semicolon. A type absent from the fields leaves
+#' its clause out, and no sentence stands where none of its types is present;
+#' the tail then stands alone, so the paragraph still refers to the table.
+#' Each clause takes the form that agrees with its counts: one infection of
+#' the type, one tested infection, and none tested at all, where the sentence
+#' names no figure for the agent.
+#' @param fields The result of [format_agent_type_fields()].
+#' @param sR String resources; the `agent-type-clauses` block gives them.
+#' @param tail Text closed by the final full stop, the sentence's table
+#'   reference where the report prints one.
+#' @return One character string; where no type is present, the tail alone
+#'   closed, or empty where no tail was given.
+agent_type_clauses <- function(fields, sR, tail = "") {
+  clauses <- character(0)
+  if (!is.null(fields$bsi)) {
+    clauses <- c(clauses, if (fields$bsi$total_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$bsi_total_one, total = fields$bsi$total,
+        count = fields$bsi$count, share = fields$bsi$share)
+    } else {
+      interpolate_translation(
+        sR$`agent-type-clauses`$bsi, total = fields$bsi$total,
+        count = fields$bsi$count, share = fields$bsi$share)
+    })
+  }
+  mid <- character(0)
+  if (!is.null(fields$hap)) {
+    # Each clause is interpolated by name so the placeholders and the values
+    # stay visible beside each other.
+    mid <- c(mid, if (fields$hap$tested_n == 0) {
+      if (fields$hap$total_n == 1) {
+        interpolate_translation(
+          sR$`agent-type-clauses`$hap_total_one_not_tested,
+          total = fields$hap$total, tested = fields$hap$tested,
+          tested_share = fields$hap$tested_share)
+      } else {
+        interpolate_translation(
+          sR$`agent-type-clauses`$hap_not_tested,
+          total = fields$hap$total, tested = fields$hap$tested,
+          tested_share = fields$hap$tested_share)
+      }
+    } else if (fields$hap$total_n == 1 && fields$hap$tested_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$hap_total_one_tested_one,
+        total = fields$hap$total, tested = fields$hap$tested,
+        tested_share = fields$hap$tested_share,
+        count = fields$hap$count, share = fields$hap$share)
+    } else if (fields$hap$total_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$hap_total_one,
+        total = fields$hap$total, tested = fields$hap$tested,
+        tested_share = fields$hap$tested_share,
+        count = fields$hap$count, share = fields$hap$share)
+    } else if (fields$hap$tested_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$hap_tested_one,
+        total = fields$hap$total, tested = fields$hap$tested,
+        tested_share = fields$hap$tested_share,
+        count = fields$hap$count, share = fields$hap$share)
+    } else {
+      interpolate_translation(
+        sR$`agent-type-clauses`$hap,
+        total = fields$hap$total, tested = fields$hap$tested,
+        tested_share = fields$hap$tested_share,
+        count = fields$hap$count, share = fields$hap$share)
+    })
+  }
+  if (!is.null(fields$ssi)) {
+    # The SSI clause begins mid-sentence behind the pneumonia clause and opens
+    # a sentence of its own alone, so it carries both families of forms.
+    mid <- c(mid, if (fields$ssi$tested_n == 0) {
+      if (length(mid) > 0L) {
+        if (fields$ssi$total_n == 1) {
+          interpolate_translation(
+            sR$`agent-type-clauses`$ssi_total_one_not_tested,
+            total = fields$ssi$total, tested = fields$ssi$tested,
+            tested_share = fields$ssi$tested_share)
+        } else {
+          interpolate_translation(
+            sR$`agent-type-clauses`$ssi_not_tested,
+            total = fields$ssi$total, tested = fields$ssi$tested,
+            tested_share = fields$ssi$tested_share)
+        }
+      } else if (fields$ssi$total_n == 1) {
+        interpolate_translation(
+          sR$`agent-type-clauses`$ssi_alone_total_one_not_tested,
+          total = fields$ssi$total, tested = fields$ssi$tested,
+          tested_share = fields$ssi$tested_share)
+      } else {
+        interpolate_translation(
+          sR$`agent-type-clauses`$ssi_alone_not_tested,
+          total = fields$ssi$total, tested = fields$ssi$tested,
+          tested_share = fields$ssi$tested_share)
+      }
+    } else if (length(mid) > 0L) {
+      if (fields$ssi$total_n == 1 && fields$ssi$tested_n == 1) {
+        interpolate_translation(
+          sR$`agent-type-clauses`$ssi_total_one_tested_one,
+          total = fields$ssi$total, tested = fields$ssi$tested,
+          tested_share = fields$ssi$tested_share,
+          count = fields$ssi$count, share = fields$ssi$share)
+      } else if (fields$ssi$total_n == 1) {
+        interpolate_translation(
+          sR$`agent-type-clauses`$ssi_total_one,
+          total = fields$ssi$total, tested = fields$ssi$tested,
+          tested_share = fields$ssi$tested_share,
+          count = fields$ssi$count, share = fields$ssi$share)
+      } else if (fields$ssi$tested_n == 1) {
+        interpolate_translation(
+          sR$`agent-type-clauses`$ssi_tested_one,
+          total = fields$ssi$total, tested = fields$ssi$tested,
+          tested_share = fields$ssi$tested_share,
+          count = fields$ssi$count, share = fields$ssi$share)
+      } else {
+        interpolate_translation(
+          sR$`agent-type-clauses`$ssi,
+          total = fields$ssi$total, tested = fields$ssi$tested,
+          tested_share = fields$ssi$tested_share,
+          count = fields$ssi$count, share = fields$ssi$share)
+      }
+    } else if (fields$ssi$total_n == 1 && fields$ssi$tested_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$ssi_alone_total_one_tested_one,
+        total = fields$ssi$total, tested = fields$ssi$tested,
+        tested_share = fields$ssi$tested_share,
+        count = fields$ssi$count, share = fields$ssi$share)
+    } else if (fields$ssi$total_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$ssi_alone_total_one,
+        total = fields$ssi$total, tested = fields$ssi$tested,
+        tested_share = fields$ssi$tested_share,
+        count = fields$ssi$count, share = fields$ssi$share)
+    } else if (fields$ssi$tested_n == 1) {
+      interpolate_translation(
+        sR$`agent-type-clauses`$ssi_alone_tested_one,
+        total = fields$ssi$total, tested = fields$ssi$tested,
+        tested_share = fields$ssi$tested_share,
+        count = fields$ssi$count, share = fields$ssi$share)
+    } else {
+      interpolate_translation(
+        sR$`agent-type-clauses`$ssi_alone,
+        total = fields$ssi$total, tested = fields$ssi$tested,
+        tested_share = fields$ssi$tested_share,
+        count = fields$ssi$count, share = fields$ssi$share)
+    })
+  }
+  if (length(mid) > 0L) clauses <- c(clauses, paste(mid, collapse = "; "))
+  if (length(clauses) == 0L) {
+    if (nzchar(tail)) paste0(trimws(tail), ".") else ""
+  } else {
+    paste0(paste(clauses, collapse = ". "), tail, ".")
+  }
 }
 
 #' Escape text for insertion into LaTeX as literal text

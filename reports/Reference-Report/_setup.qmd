@@ -253,14 +253,13 @@ ref_counts <- list(
   n_patients = reference_data$n_patients$total,
   n_enrollments = reference_data$n_enrollments$total,
   n_patient_days = reference_data$n_patient_days$total,
+  n_patients_with_severe_infection = reference_data$n_patients_with_severe_infection,
   n_severe_infections = reference_data$incidence_density_rate_table |>
     dplyr::filter(inf == "si") |> dplyr::pull("n"),
   n_infectious_agents = reference_data$infectious_agent_detection_rate_per_agent_table |>
     dplyr::filter(group == "Total") |> dplyr::pull("n"),
   n_infections_with_agent = reference_data$infectious_agent_detection_rate_per_inf_type_table |>
     dplyr::filter(inf == "all") |> dplyr::pull("n"),
-  n_infections_overall = reference_data$n_infections |>
-    dplyr::filter(inf_type == "overall") |> dplyr::pull("total"),
   n_surgical_departments = reference_data$n_surgical_departments,
   n_surgical_patients = reference_data$n_surgical_patients |> dplyr::pull("total"),
   # Use the table's Overall row to match the displayed N (excludes "not_surgery")
@@ -279,10 +278,54 @@ dR <- c(
 )
 
 # ── Conditional cross-references ──────────────────────────────────
-dR$refDetectionTable <- if (params$includeInfectiousAgentDetectionRateTable)
-  " (@tbl-infectious-agent-detection-rate)" else ""
 dR$refAgentPerInfTable <- if (params$includeAgentPerInfectionRateTable)
   " (@tbl-agent-per-infection-rate)" else ""
+
+# The clause the section's opening adds after the severe infections: the
+# patients with at least one among all patients. A dataset calculated before
+# the slot carries nothing to fill it, and the opening then ends at the
+# infections.
+# NEOIPC-PERMANENT(dataset-format): see the marker in common/helpers.R; a
+# stored reference dataset outlives every release and gets no clause.
+# The clause agrees with the patients it counts: one patient reads
+# "1 of 1 patient", English taking the plural at zero and at two or more.
+nosocomial_patients_clause <- if (length(dR$numberOfPatientsWithSevereInfection) == 1L &&
+                                  length(dR$numberOfPatients) == 1L) {
+  if (length(ref_counts$n_patients) == 1L && ref_counts$n_patients == 1) {
+    interpolate_translation(
+      sR$nosocomial_patients_clause_one,
+      infected_count = dR$numberOfPatientsWithSevereInfection,
+      patient_count = dR$numberOfPatients)
+  } else {
+    interpolate_translation(
+      sR$nosocomial_patients_clause,
+      infected_count = dR$numberOfPatientsWithSevereInfection,
+      patient_count = dR$numberOfPatients)
+  }
+} else ""
+
+# The per-infection-type infectious-agent figures the section text gives: a
+# pooled share would follow the cohort's mix of infection types rather than
+# what the departments test, so the text gives the shares per type from the
+# per-infection-type table, which counts the tested infections of each type
+# beside its infections with an agent; the table has no NEC row. A type
+# missing from the table is absent from the result, and its clause too.
+agent_type_pick <- function(tbl, col, key_col, type) {
+  if (is.null(tbl) || !col %in% names(tbl)) return(NULL)
+  v <- tbl[[col]][tbl[[key_col]] == type]
+  if (length(v) == 1L) v else NULL
+}
+agent_types <- c("bsi", "hap", "ssi")
+agent_type_table <- reference_data$infectious_agent_detection_rate_per_inf_type_table
+agent_type_list <- function(col) {
+  stats::setNames(lapply(agent_types, \(t) agent_type_pick(
+    agent_type_table, col, "inf", t)), agent_types)
+}
+dR$agentTypes <- format_agent_type_fields(
+  agent_type_list("n"), agent_type_list("tested"),
+  agent_type_list("total"), sR)
+dR$agentTypeClauses <- agent_type_clauses(
+  dR$agentTypes, sR, tail = dR$refAgentPerInfTable)
 
 # ── Section visibility flags ─────────────────────────────────────
 show_section_surgical    <- params$includeSurgicalProcedureRateTable

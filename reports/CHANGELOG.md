@@ -13,8 +13,39 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Added
+
+- A new table, "Patients Exposed to Risk and Protective Factors and Their
+  Days of Exposure", stands beside the risk-factor table in the Partner and
+  Reference Reports: for each of the eight factors, the share of infants with
+  at least one day of it and the mean days among the infants exposed to it,
+  the quartiles of the reference beside it in the Partner Report and the
+  reference's own in the Reference Report. The mean prints without an
+  interval: the calculated datasets carry none for it.
+
 ### Changed
 
+- The Partner Report now defaults the secondary bloodstream infection table
+  and the antibiotic utilization table on, where both needed a parameter.
+- The nosocomial infections section of both reports opens with the counts the
+  methods define, the severe infections recorded and the infants among all
+  infants with at least one among them. The patients with at least one stand
+  in a slot of the calculated datasets; a dataset saved before the slot ends
+  the sentence at the infections.
+- The infectious-agent section of both reports gives, per infection type, the
+  infections with an infectious agent recorded and the share of the tested
+  infections they are, and for pneumonia and surgical site infection how many
+  of the type's infections were tested; the pooled detection share, which
+  followed each department's mix of infection types, is gone, and a type the
+  dataset lacks or that has no infections leaves its clause out.
+- Where the calculated datasets carry them, the incidence density table grows
+  the kinds rows beneath primary sepsis/bloodstream infection and beneath
+  necrotizing enterocolitis: laboratory-confirmed bloodstream infection with
+  a recognized pathogen or a common commensal, clinical sepsis, and surgical
+  and medical NEC. The footnote of the recognized-pathogen row gives the
+  bloodstream infections whose positive culture names an infectious agent the
+  list cannot classify, and   the surgical NEC footnote gives the criterion of
+  the NeoIPC Core Protocol, extensive bowel necrosis over 2 cm of bowel.
 - `Build-ValidationReport.ps1` whose filter matches no department warns, reports the build
   cancelled in its build report, and ends with exit code 1, where it ended with 0 and no report;
   a batch calling it can now tell an empty scope from a build that ran.

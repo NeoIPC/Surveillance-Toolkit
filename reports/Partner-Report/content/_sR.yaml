@@ -86,33 +86,24 @@ headings:
   gestational_age_distribution: Gestational Age Distribution
   presence_of_risk_and_protective_factors: Presence of Risk and Protective Factors in Your Department
 
-nosocomial_reference_comparison: >-
-  In the reference data, {infection_count} severe infections were recorded in
-  {patient_count} patients, an average of {average} infections per patient.
+# The reference comparison the nosocomial introduction adds: this sentence,
+# then the shared `nosocomial_patients_clause` of common.yaml when the
+# reference dataset carries the patients' count, then the final full stop.
+# Translators: {infection_count} is the severe infections recorded in the
+# reference; the _one key agrees with one.
+nosocomial_reference_infections: "In the reference data, {infection_count} severe infections were recorded"
+nosocomial_reference_infections_one: "In the reference data, {infection_count} severe infection was recorded"
 
 outlier:
 
-  # ── Existing interpretation strings ───────────────────────────
-  agent_detection_per_inf_type_all_zero: >-
-    No pathogens were detected across any infection type during the
-    surveillance period.
-  agent_detection_per_inf_type_interpretation_all_above: >-
-    Pathogen detection rates are above the reference range across
-    infection types. Higher detection rates may reflect thorough
-    microbiological workup practices.
-
   # ── Agent detection interpretation ─────────────────────────────────
-  agent_detection_per_inf_type_interpretation_all_below: >-
-    Pathogen detection rates are below the reference range across
-    infection types. Lower detection rates may reflect differences in
-    microbiological sampling practices or laboratory capacity.
   agent_detection_per_inf_type_interpretation_some_above: >-
-    Higher pathogen detection rates may reflect thorough
-    microbiological workup practices for these infection types.
+    Higher shares of infections with an infectious agent recorded may reflect
+    thorough microbiological workup practices for these infection types.
   agent_detection_per_inf_type_interpretation_some_below: >-
-    Lower pathogen detection rates may reflect differences in
-    microbiological sampling practices or laboratory capacity for
-    these infection types.
+    Lower shares of infections with an infectious agent recorded may reflect
+    differences in microbiological sampling practices or laboratory capacity
+    for these infection types.
 
   # ── Zero early-exit strings (only for hierarchical total metrics) ─
   antibiotic_rate_ab_zero: >-

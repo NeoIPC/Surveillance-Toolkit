@@ -10,6 +10,42 @@
 # Language: en
 
 3gcr_label: "3^rd^ gen. cephalosporin resistance (3GCR)"
+agent-type-clauses:
+  # Translators:
+  # The sentences opening the infectious-agent section of the Partner and
+  # Reference Reports. {total} is the infections of the type, {tested} those
+  # whose test searched for an infectious agent, {tested_share} their share of
+  # the {total}, {count} the infections with an infectious agent recorded and
+  # {share} their share of the {tested}. The pneumonia clause and the
+  # surgical-site-infection clause join one sentence over a semicolon, the
+  # latter beginning in mid-sentence; {ssi_alone} is the same clause opening a
+  # sentence of its own where no pneumonia clause precedes it. The code joins
+  # the sentences and closes the text with the final full stop.
+  # Keys ending in _total_one agree with one infection of the type, keys
+  # ending in _tested_one with one tested infection, and keys ending in
+  # _not_tested stand where none of the type's infections was tested and so
+  # name no figure for the agent; the code selects them from the raw counts,
+  # and English takes the plural at zero.
+  bsi: "Of the {total} episodes of primary sepsis/BSI, {count} ({share}) had an infectious agent recorded"
+  bsi_total_one: "Of the {total} episode of primary sepsis/BSI, {count} ({share}) had an infectious agent recorded"
+  hap: "Of the {total} pneumonias, {tested} ({tested_share}) were tested microbiologically, and the test recorded an infectious agent in {count} ({share}) of them"
+  hap_tested_one: "Of the {total} pneumonias, {tested} ({tested_share}) was tested microbiologically, and the test recorded an infectious agent in {count} ({share}) of them"
+  hap_total_one: "Of the {total} pneumonia, {tested} ({tested_share}) were tested microbiologically, and the test recorded an infectious agent in {count} ({share}) of them"
+  hap_total_one_tested_one: "Of the {total} pneumonia, {tested} ({tested_share}) was tested microbiologically, and the test recorded an infectious agent in {count} ({share}) of them"
+  hap_not_tested: "Of the {total} pneumonias, {tested} ({tested_share}) were tested microbiologically"
+  hap_total_one_not_tested: "Of the {total} pneumonia, {tested} ({tested_share}) were tested microbiologically"
+  ssi: "of the {total} SSIs, {tested} ({tested_share}) were tested, and the test recorded one in {count} ({share})"
+  ssi_tested_one: "of the {total} SSIs, {tested} ({tested_share}) was tested, and the test recorded one in {count} ({share})"
+  ssi_total_one: "of the {total} SSI, {tested} ({tested_share}) were tested, and the test recorded one in {count} ({share})"
+  ssi_total_one_tested_one: "of the {total} SSI, {tested} ({tested_share}) was tested, and the test recorded one in {count} ({share})"
+  ssi_not_tested: "of the {total} SSIs, {tested} ({tested_share}) were tested"
+  ssi_total_one_not_tested: "of the {total} SSI, {tested} ({tested_share}) were tested"
+  ssi_alone: "Of the {total} SSIs, {tested} ({tested_share}) were tested, and the test recorded one in {count} ({share})"
+  ssi_alone_tested_one: "Of the {total} SSIs, {tested} ({tested_share}) was tested, and the test recorded one in {count} ({share})"
+  ssi_alone_total_one: "Of the {total} SSI, {tested} ({tested_share}) were tested, and the test recorded one in {count} ({share})"
+  ssi_alone_total_one_tested_one: "Of the {total} SSI, {tested} ({tested_share}) was tested, and the test recorded one in {count} ({share})"
+  ssi_alone_not_tested: "Of the {total} SSIs, {tested} ({tested_share}) were tested"
+  ssi_alone_total_one_not_tested: "Of the {total} SSI, {tested} ({tested_share}) were tested"
 carbr_label: "Carbapenem resistance (CARBR)"
 colr_label: "Colistin resistance (COLR)"
 countryNames:
@@ -100,6 +136,11 @@ patient_days: "Patient days"
 percent_symbol: "%"
 si: "Severe infection"
 surgical_procedures: "Surgical Procedures"
+# The clause the nosocomial openings add after the severe infections.
+# Translators: {patient_count} is the patients, {infected_count} those with at
+# least one severe infection. The _one key agrees with one patient.
+nosocomial_patients_clause: ", and {infected_count} of {patient_count} patients had at least one"
+nosocomial_patients_clause_one: ", and {infected_count} of {patient_count} patient had at least one"
 nos_footnote: "n.o.s. = not otherwise specified; isolates identified to genus but not species level."
 sparse_data_footnote: "Fewer than {threshold} events; interpret rate and confidence interval with caution."
 sparse_data_footnote_no_ci: "Fewer than {threshold} events; interpret rate with caution."
@@ -173,10 +214,38 @@ tbl-device-associated-incidence-density-rates:
   pvc: "PVC-associated sepsis/BSI"
   vs: "Any ventilatory support-associated pneumonia"
 tbl-incidence-density-rates:
+  bsi_clinical: "Clinical sepsis"
+  bsi_commensal: "Laboratory-confirmed BSI with a common commensal"
+  bsi_kinds_footnote: >-
+    The 3 kinds of primary sepsis/BSI add up to it. A BSI with both a recognized
+    pathogen and a common commensal counts with the recognized pathogen;
+    'Not listed', 'Unidentifiable', and a positive culture whose infectious agent
+    the infectious-agent list cannot classify count as recognized pathogens, the
+    last in {count} BSIs; the common commensals are those the NeoIPC
+    infectious-agent list marks as such. Clinical sepsis includes sepsis without
+    a blood culture.
+  bsi_kinds_footnote_no_count: >-
+    The 3 kinds of primary sepsis/BSI add up to it. A BSI with both a recognized
+    pathogen and a common commensal counts with the recognized pathogen;
+    'Not listed', 'Unidentifiable', and a positive culture whose infectious agent
+    the infectious-agent list cannot classify count as recognized pathogens; the
+    common commensals are those the NeoIPC infectious-agent list marks as such.
+    Clinical sepsis includes sepsis without a blood culture.
+  bsi_recognized: "Laboratory-confirmed BSI with a recognized pathogen"
   grp_si: "Primary sepsis/BSI/Pneumonia"
   incidence_density_rate: "Incidence Density Rate"
   n_footnote: "{column}: The aggregated number of infections in all infants."
   n_inf: "Number of infections"
+  nec_kinds_footnote: >-
+    Surgical NEC has extensive bowel necrosis (> 2 cm of bowel affected) or
+    pneumatosis intestinalis found at surgery or on pathology, or a
+    pneumoperitoneum on imaging, which stands in for the intestinal
+    perforation the form does not record. It is thus wider than the surgical
+    criteria of the NeoIPC Core Protocol's definition of NEC, which counts a
+    pneumoperitoneum on imaging as a radiological sign. Medical NEC, a term
+    the protocol does not use, is the rest. Together they make up NEC.
+  nec_medical: "Medical NEC"
+  nec_surgical: "Surgical NEC"
   no_data: "No infection data available for these report settings."
   pooled_footnote: "{column}: The Incidence Density Rate calculated across all infants from all departments."
   si_footnote: "{endpoint} is a composite endpoint combining primary sepsis/BSI and pneumonia."
@@ -189,6 +258,15 @@ tbl-infectious-agent-detection-rate:
   rate_name: "Infectious Agent Detection Rate"
   rate_numerator: "No of infections with agent"
   tbl-cap: "Infections in which an infectious agent has been identified, including secondary BSI following the infection."
+tbl-patients-exposed:
+  abbreviations_footnote: "Abbreviations: CI, confidence interval; CVC, central venous catheter; INV, invasive ventilation; NIV, non-invasive ventilation; PVC, peripheral venous catheter."
+  mean: "Mean"
+  mean_days: "Mean days per exposed patient"
+  no_data: "No exposure data available for these report settings."
+  patients_exposed: "Patients exposed (%)"
+  percent: "%"
+  tbl-cap: "Patients Exposed to Risk and Protective Factors and Their Days of Exposure"
+  total_days: "Total days"
 tbl-reconciliation-summary:
   tbl-cap: "Records the NeoIPC coordinating centre reconciled"
   reconciliations:
