@@ -110,6 +110,126 @@ fixture_abr_infection_rate_groups <- function() {
                        0L, NA_integer_))
 }
 
+# A resistance table in the shape the engine returns to the Partner Report:
+# the department's own columns and the reference's joined under `_own` and
+# `_ref`, the five Tested columns of each beside the rate's. One row's
+# `tested_total_own` sits below the sparse-data threshold while its `n_own`
+# stands well above it, so a test can tell the Tested share's own flag from
+# the rate's. `test-resistance-tested-share.R` builds the table from this.
+fixture_resistance_own <- function() {
+  tibble::tribble(
+    ~abr, ~level, ~rank, ~node_id, ~parent_id, ~group,
+    "3gcr", 0L, NA_character_, NA_character_, NA_character_, "Total",
+    "3gcr", 1L, "Genus", "LPSN|genus/klebsiella", NA_character_,
+    "Klebsiella",
+    "mrsa", 1L, "Genus", "LPSN|genus/staphylococcus", NA_character_,
+    "Staphylococcus",
+  ) |>
+    dplyr::mutate(
+      abr = factor(.data$abr,
+                   levels = c("3gcr", "car", "cor", "mrsa", "vre")),
+      n_own = c(40L, 30L, 20L),
+      total_own = c(1200, 900, 500),
+      pooled_own = c(20.0, 23.3, 25.0),
+      ci_lower_own = c(16.4, 19.2, 20.4),
+      ci_upper_own = c(23.9, 27.9, 30.1),
+      n_ref = c(400L, 300L, 200L),
+      pooled_ref = c(22.0, 24.0, 26.0),
+      ci_lower_ref = c(21.0, 23.0, 25.0),
+      ci_upper_ref = c(23.1, 25.1, 27.1),
+      q1_ref = c(15.0, 17.0, 19.0),
+      q2_ref = c(22.0, 24.0, 26.0),
+      q3_ref = c(29.0, 31.0, 33.0),
+      q1_ci_lower_ref = c(14.0, 16.0, 18.0),
+      q1_ci_upper_ref = c(16.0, 18.0, 20.0),
+      q2_ci_lower_ref = c(21.0, 23.0, 25.0),
+      q2_ci_upper_ref = c(23.0, 25.0, 27.0),
+      q3_ci_lower_ref = c(28.0, 30.0, 32.0),
+      q3_ci_upper_ref = c(30.0, 32.0, 34.0),
+      quartile_departments_ref = c(20L, 20L, 20L),
+      tested_n_own = c(28L, 6L, 18L),
+      tested_total_own = c(40L, 8L, 20L),
+      tested_pooled_own = c(70.0, 75.0, 90.0),
+      tested_ci_lower_own = c(55.9, 44.3, 71.0),
+      tested_ci_upper_own = c(81.7, 93.7, 98.5),
+      tested_n_ref = c(280L, 210L, 150L),
+      tested_total_ref = c(400L, 300L, 200L),
+      tested_pooled_ref = c(70.0, 70.0, 75.0),
+      tested_ci_lower_ref = c(65.1, 63.8, 68.6),
+      tested_ci_upper_ref = c(74.6, 75.9, 80.7))
+}
+
+# The same shape as the Reference Report reads it: the reference's own
+# columns, unsuffixed. Its second row's `tested_total` is the sparse one.
+fixture_resistance_ref <- function() {
+  tibble::tribble(
+    ~abr, ~level, ~rank, ~node_id, ~parent_id, ~group,
+    "3gcr", 0L, NA_character_, NA_character_, NA_character_, "Total",
+    "3gcr", 1L, "Genus", "LPSN|genus/klebsiella", NA_character_,
+    "Klebsiella",
+    "mrsa", 1L, "Genus", "LPSN|genus/staphylococcus", NA_character_,
+    "Staphylococcus",
+  ) |>
+    dplyr::mutate(
+      abr = factor(.data$abr,
+                   levels = c("3gcr", "car", "cor", "mrsa", "vre")),
+      n = c(400L, 300L, 200L),
+      total = c(12000, 9000, 5000),
+      pooled = c(20.0, 23.3, 25.0),
+      ci_lower = c(19.0, 22.0, 23.5),
+      ci_upper = c(21.1, 24.7, 26.6),
+      q1 = c(15.0, 17.0, 19.0),
+      q2 = c(22.0, 24.0, 26.0),
+      q3 = c(29.0, 31.0, 33.0),
+      q1_ci_lower = c(14.0, 16.0, 18.0),
+      q1_ci_upper = c(16.0, 18.0, 20.0),
+      q2_ci_lower = c(21.0, 23.0, 25.0),
+      q2_ci_upper = c(23.0, 25.0, 27.0),
+      q3_ci_lower = c(28.0, 30.0, 32.0),
+      q3_ci_upper = c(30.0, 32.0, 34.0),
+      quartile_departments = c(20L, 20L, 20L),
+      tested_n = c(280L, 9L, 150L),
+      tested_total = c(400L, 12L, 200L),
+      tested_pooled = c(70.0, 75.0, 75.0),
+      tested_ci_lower = c(65.1, 63.8, 68.6),
+      tested_ci_upper = c(74.6, 75.9, 80.7))
+}
+
+# A resistance table as a neoipcr from before the engine returns it: rows
+# keyed by the printed label under `taxon`, no `node_id`, and the Tested
+# columns absent — the reports render those tables without the column.
+fixture_resistance_old <- function() {
+  tibble::tribble(
+    ~abr, ~level, ~taxon, ~group,
+    "3gcr", 1L, "order", "Enterobacterales",
+    "mrsa", 1L, "genus", "Staphylococcus",
+  ) |>
+    dplyr::mutate(
+      abr = factor(.data$abr,
+                   levels = c("3gcr", "car", "cor", "mrsa", "vre")),
+      n_own = c(10L, 8L),
+      ia_tst_tot_own = c(300L, 200L),
+      pooled_own = c(15.0, 18.0),
+      ci_lower_own = c(12.0, 14.5),
+      ci_upper_own = c(18.4, 22.1),
+      n_ref = c(100L, 80L),
+      ia_tst_tot_ref = c(3000L, 2000L),
+      pooled_ref = c(16.0, 19.0),
+      ci_lower_ref = c(15.0, 18.0),
+      ci_upper_ref = c(17.1, 20.1),
+      q1_ref = c(12.0, 15.0),
+      q2_ref = c(16.0, 19.0),
+      q3_ref = c(20.0, 23.0),
+      # The pre-engine table carries its own Tested columns; the reports drop
+      # them, since only the engine's are the §13.8.6 measure the column
+      # claims to print.
+      tested_n_own = c(7L, 6L),
+      tested_total_own = c(10L, 8L),
+      tested_pooled_own = c(70.0, 75.0),
+      tested_ci_lower_own = c(41.2, 44.3),
+      tested_ci_upper_own = c(90.9, 93.7))
+}
+
 # The rows the Partner Report's outlier texts name for the two grouped
 # infectious-agent tables, per version, as `outlier_groupings` and the
 # `first_state()` candidate lists name them: `test-registry-resolves.R`

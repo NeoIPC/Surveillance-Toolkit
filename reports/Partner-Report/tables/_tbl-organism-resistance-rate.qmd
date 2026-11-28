@@ -128,13 +128,15 @@ if (!is.null(tbl_data) &&
       !!sR$table_headers$tested := tidyselect::any_of(
         if (ia_engine) "tested_pooled_own" else character(0)))
 
-  # The engine appends the tested columns after the quartiles; the column
-  # belongs beside the department's own rate, under the same spanner, so
-  # move it there before gt fixes the column order.
+  # The engine appends the tested columns after the quartiles; the Tested
+  # share is a measure of its own, so it stands between the department's
+  # count and the rate spanner rather than inside the spanner, which would
+  # split it. The Reference Report places it at the same distance from the
+  # count.
   if (sR$table_headers$tested %in% names(tbl))
     tbl <- tbl |> dplyr::relocate(
       tidyselect::any_of(sR$table_headers$tested),
-      .after = tidyselect::any_of(sR$table_headers$rate))
+      .after = tidyselect::any_of(sR$table_headers$count))
 
   # `gt::tab_stub_indent()` caps its per-level indent at five levels, so the
   # engine's deeper tree rows take their indent beyond the cap from the
@@ -143,9 +145,14 @@ if (!is.null(tbl_data) &&
     tbl <- tbl |> dplyr::mutate(group = ia_indent_labels(group, level))
 
   # The tested column's width comes out of the stub, as the per-agent
-  # table does for its infection-type columns.
+  # table does for its infection-type columns. The stub's floor can absorb
+  # less than the column asks for, so the data columns share the shortfall
+  # in proportion and the declared widths keep their promise of 100%.
   tested_w <- if (ia_engine &&
                   "tested_pooled_own" %in% names(tbl_data)) cw$q else 0
+  stub_w <- if (tested_w > 0) max(cw$stub - tested_w, 22) else cw$stub
+  data_scale <- if (tested_w > 0)
+    (100 - stub_w - tested_w) / (100 - cw$stub) else 1
 
   ci_cols_to_drop <- character(0)
   if (!include_rate_ci)
@@ -348,14 +355,14 @@ if (!is.null(tbl_data) &&
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(max(cw$stub - tested_w, 22)),
-        sR$table_headers$count ~ pct(cw$n),
-        sR$table_headers$rate ~ pct(cw$rate),
+        stub() ~ pct(stub_w),
+        sR$table_headers$count ~ pct(cw$n * data_scale),
+        sR$table_headers$rate ~ pct(cw$rate * data_scale),
         tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w),
-        sR$table_headers$pooled ~ pct(cw$pooled),
-        sR$table_headers$q1 ~ pct(cw$q),
-        sR$table_headers$q2 ~ pct(cw$q),
-        sR$table_headers$q3 ~ pct(cw$q)
+        sR$table_headers$pooled ~ pct(cw$pooled * data_scale),
+        sR$table_headers$q1 ~ pct(cw$q * data_scale),
+        sR$table_headers$q2 ~ pct(cw$q * data_scale),
+        sR$table_headers$q3 ~ pct(cw$q * data_scale)
       ) |>
       tab_spanner(
         label = sR$own_data_label,
@@ -382,21 +389,37 @@ if (!is.null(tbl_data) &&
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(max(cw$stub - tested_w, 22)),
-        sR$table_headers$count ~ pct(cw$n),
-        sR$table_headers$rate ~ pct(cw$rate),
+        stub() ~ pct(stub_w),
+        sR$table_headers$count ~ pct(cw$n * data_scale),
+        sR$table_headers$rate ~ pct(cw$rate * data_scale),
         tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w)
       )
   }
 
-  if (any(!is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+  # The Tested share is flagged on its own denominator: a department may
+  # have few tested infections under a well-tested rate, or the reverse.
+  ia_rate_sparse <- !is.na(tbl_data$pooled_own) &
+    tbl_data$n_own < sparse_threshold
+  ia_tested_sparse <- if (ia_engine &&
+                          "tested_pooled_own" %in% names(tbl_data))
+    !is.na(tbl_data$tested_pooled_own) &
+      tbl_data$tested_total_own < sparse_threshold else
+    rep(FALSE, nrow(tbl_data))
+  if (any(ia_rate_sparse, na.rm = TRUE) ||
+      any(ia_tested_sparse, na.rm = TRUE)) {
     sparse_note <- interpolate_translation(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
+    sparse_locations <- list()
+    if (any(ia_rate_sparse, na.rm = TRUE))
+      sparse_locations <- c(sparse_locations, list(cells_body(
+        columns = sR$table_headers$count, rows = ia_rate_sparse)))
+    if (any(ia_tested_sparse, na.rm = TRUE))
+      sparse_locations <- c(sparse_locations, list(cells_body(
+        columns = tidyselect::any_of(sR$table_headers$tested),
+        rows = ia_tested_sparse)))
     tbl <- tbl |>
       gt::tab_footnote(
         footnote = sparse_note,
-        locations = cells_body(
-          columns = sR$table_headers$count,
-          rows = !is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold),
+        locations = sparse_locations,
         placement = "right")
   }
 

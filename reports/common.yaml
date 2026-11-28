@@ -192,17 +192,21 @@ tbl-organism-resistance-rate:
     recorded resistant in the category
   tbl-cap: "Organism-specific resistance rates"
   # Translators: {column} stands for the column's own header, which the
-  # footnote quotes at its start. A detection is undocumented when its
-  # resistance test was left blank.
+  # footnote quotes at its start. An infection is undocumented where its
+  # infectious agent has no result for the category. The unit is the
+  # infection, counted once per row, never the detection: one infection
+  # with two applicable infectious agents counts once here, twice in the
+  # completeness-of-testing table.
   tested_pooled_footnote: >-
     {column}: The resistance test rate calculated across all departments: the
-    detections with a resistance test result among all detections of an
-    infectious agent to which this category applies, as a percentage; a blank
-    test result counts as undocumented.
+    infections with a resistance test result for the category among all
+    infections with an infectious agent to which this category applies, as a
+    percentage; a blank test result counts as undocumented.
   tested_rate_footnote: >-
-    {column}: The detections of your department with a resistance test result
-    among all its detections of an infectious agent to which this category
-    applies, as a percentage; a blank test result counts as undocumented.
+    {column}: The infections of your department with a resistance test result
+    for the category among all its infections with an infectious agent to
+    which this category applies, as a percentage; a blank test result counts
+    as undocumented.
 tbl-agent-per-infection-rate:
   n_footnote: "{column}: The aggregated number of infectious agents in all infections."
   n_footnote_engine: >-
