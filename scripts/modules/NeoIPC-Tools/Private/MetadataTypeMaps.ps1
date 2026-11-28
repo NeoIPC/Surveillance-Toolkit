@@ -60,12 +60,14 @@ $script:NeoIPCMetadataDomainOptionSetCodes = [System.Collections.Generic.HashSet
 
 # Program rules that are GENERATED elsewhere — the pathogen / substance / resistance / field-gating machinery the
 # ontology + capability matrix produce (Add-NeoIPCGeneratedMetadata). Identified by the generator PLANS, not a
-# regex (see Get-NeoIPCMetadataGeneratedKeys), and dropped from the materialized directory and the comparator the
-# same way the domain option sets are — the YAML / matrix are their single source. This list holds only the
+# regex (see Get-NeoIPCMetadataGeneratedKeys), and, while ACTIVE, dropped from the materialized directory and the
+# id-matched comparator — the YAML / matrix are their single source; the exception is a retirement's INERT copy,
+# which ships as a row below and is compared by name against another inert copy. This list holds only the
 # DEPLOYED rules a generator family does NOT reproduce by name yet still supersedes, so the family predicate alone
 # would miss them: the stale HAP aggregate 'NeoIPC HAP - set pathogen attribute variables' (15 dead ASSIGNs the
-# per-slot resistance rules replace — the colistin #22/#23 residue), which the directory, like the assembled
-# package, sheds as superseded cruft.
+# per-slot resistance rules replace — the colistin #22/#23 residue), which the directory and the assembled package
+# shed while it is ACTIVE; an INERT copy (condition 'false', no actions) instead ships as an ordinary row, the
+# first write of the two-deployment retirement (docs/metadata-deployment.md §5).
 $script:NeoIPCMetadataRetiredRuleNames = [System.Collections.Generic.HashSet[string]]::new(
     [string[]]@('NeoIPC HAP - set pathogen attribute variables'), [System.StringComparer]::Ordinal)
 

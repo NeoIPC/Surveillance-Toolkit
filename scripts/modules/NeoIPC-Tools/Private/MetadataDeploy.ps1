@@ -680,10 +680,34 @@ function Test-NeoIPCDeployInertRule {
     # deployments, because clients keep running a cached rule after the server deletes it (Tracker Capture stores
     # rules in IndexedDB and only ever upserts them): the first makes it inert and moves the program version, so
     # clients reload it as inert, and a later one deletes it.
+    # The comparison is case-sensitive because lowercase false is the only spelling DHIS2 reads as boolean false:
+    # dhis2/expression-parser registers the constant exactly ('constant(NodeType.BOOLEAN, "false")' in
+    # ExpressionGrammar.kt) and a bare condition resolves it by exact-name lookup over the registered fragments,
+    # so any other spelling is no false literal at all — a rule written 'False' is a parse failure and broken
+    # metadata, never an inert one to ship or to detach.
     [CmdletBinding()]
     [OutputType([bool])]
     param([Parameter(Mandatory)][System.Collections.IDictionary]$Rule)
-    ([string]$Rule['condition']).Trim() -eq 'false' -and (Get-NeoIPCDeployRefIdList $Rule['programRuleActions']).Count -eq 0
+    ([string]$Rule['condition']).Trim() -ceq 'false' -and (Get-NeoIPCDeployRefIdList $Rule['programRuleActions']).Count -eq 0
+}
+
+function Assert-NeoIPCInertRetirementWrite {
+    # A retired rule written with condition 'false' but actions still attached is a miswritten retirement, not an
+    # inert write: every consumer reads it as active (so the generated paths shed the retirement write in silence),
+    # while a directory ships its rows verbatim and the deployment then re-creates the dead actions under the
+    # supposedly-inert rule. A wrongly-cased spelling ('False') is the same fault in another shape: the grammar
+    # registers the constant exactly lowercase, so DHIS2 cannot even parse the condition — the row is neither the
+    # live rule nor the inert write. No build path ships either intermediate, so each refuses it here rather than
+    # reading it as one state or the other.
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][System.Collections.IDictionary]$Rule)
+    $condition = ([string]$Rule['condition']).Trim()
+    if ($condition -ieq 'false' -and $condition -cne 'false') {
+        throw "Program rule '$([string]$Rule['name'])' carries condition '$([string]$Rule['condition'])', which DHIS2 does not read as boolean false: its grammar registers the constant exactly lowercase 'false', so the rule is neither live nor inert; write the inert condition exactly 'false' or restore the rule's live condition."
+    }
+    if ($condition -ceq 'false' -and (Get-NeoIPCDeployRefIdList $Rule['programRuleActions']).Count -gt 0) {
+        throw "Program rule '$([string]$Rule['name'])' is written inert (condition 'false') but still carries actions; the retirement's inert write carries none, so give the row its actions' removal or its live condition."
+    }
 }
 
 # The references that keep DHIS2 from deleting what they point at, by the type that holds them: referring type ->

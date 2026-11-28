@@ -43,7 +43,7 @@ function Update-NeoIPCMetadataDirectory {
     .DESCRIPTION
         The reverse path. Reduces the fresh export to the NeoIPC SCOPE (Get-NeoIPCMetadataScopedConfig: the
         NEOIPC_CORE closure + the non-closure config definitions, noise-stripped — the SAME scope
-        New-NeoIPCMetadataPackage builds its config from and the directory was materialised at), diffs the
+        New-NeoIPCMetadataPackage builds its config from and the directory was materialized at), diffs the
         directory's current package against THAT scoped package, and classifies the drift by who OWNS each object.
         No code path ever sees the raw full export, so the foreign objects and deployment junk a shared DHIS2
         instance carries are invisible — not a single out-of-scope object is compared, translated, reported or

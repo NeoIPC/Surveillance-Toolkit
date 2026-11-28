@@ -309,7 +309,7 @@ function Get-NeoIPCMetadataClosure {
 function Get-NeoIPCMetadataScopedConfig {
     # THE single definition of the NeoIPC SCOPE: the NEOIPC_CORE dependency closure PLUS the non-closure config
     # DEFINITION types the program references only by code (org-unit groups / group-sets / levels, user roles /
-    # groups), noise-stripped. This is exactly what the materialised directory represents and what
+    # groups), noise-stripped. This is exactly what the materialized directory represents and what
     # New-NeoIPCMetadataPackage assembles its config from, so the assembler AND the reverse path
     # (Update-NeoIPCMetadataDirectory) share ONE scope so every comparison is like-against-like and no reconcile
     # code path ever sees the raw full export (which would diff out-of-closure foreign objects as spurious drift).

@@ -110,7 +110,7 @@ function Add-NeoIPCGeneratedOptionMetadata {
         Splice the still-generated OPTION-DOMAIN families into a directory-sourced config — export-free.
     .DESCRIPTION
         The export-independent build path. The matrix families (per-slot DEs / PRVs / rules / actions) are now
-        MATERIALISED in the directory config, so only the option-domain stays generated from its richer directory
+        MATERIALIZED in the directory config, so only the option-domain stays generated from its richer directory
         source: the NEOIPC_PATHOGENS option set + options (from the infectious-agent YAML + the UID sidecar), the
         NEOIPC_ANTIMICROBIAL_SUBSTANCES option set + options, the 34 ATC-4 + 3 AWaRe option groups, and the
         ATC5 / WHO_AWARE option-group-sets (from the antibiotics curation CSVs, whose `uid` columns carry the
@@ -217,6 +217,10 @@ function Add-NeoIPCGeneratedMetadata {
           - the stale aggregate rule 'NeoIPC HAP - set pathogen attribute variables' (+ its actions), which the
             per-slot resistance rules supersede, is dropped WITHOUT a generated replacement (the other five HAP
             aggregates feed the pneumonia definition and are kept, because the generators do not reproduce them);
+            an INERT copy of it (condition 'false', no actions — the first deployment of the two-deployment
+            retirement in docs/metadata-deployment.md §5) is instead KEPT, so a directory that carries the row
+            ships the inert write and the deployment lands it on the deployed rule's UID; its actions stay dropped
+            either way, since the inert write is what deletes them;
           - a deployed action on a reproduced rule whose target data element is OUTSIDE the generated families
             (e.g. the BSI 'when set' rule's HIDEFIELD on NEOIPC_BSI_NO_POS_CULTURE) is a hand-authored action,
             not part of the per-slot cluster, so it is SALVAGED onto the generated rule rather than dropped.
@@ -335,8 +339,14 @@ function Add-NeoIPCGeneratedMetadata {
     $keptVars = @(@($Config['programRuleVariables']) | Where-Object { $_ -is [System.Collections.IDictionary] -and -not ($genVarNames.Contains([string]$_['name']) -or $genVarIds.Contains([string]$_['id'])) })
     $Config['programRuleVariables'] = @($keptVars + $genVariables)
 
-    # ---- programRules + programRuleActions (by name or id; stale aggregate dropped; non-family actions salvaged) --
-    $staleAggregateRuleNames = New-NeoIPCKeySet @('NeoIPC HAP - set pathogen attribute variables')
+    # ---- programRules + programRuleActions (by name or id; active stale aggregate dropped, inert copy kept; non-family actions salvaged) --
+    # The stale aggregate is shed while ACTIVE, its dead ASSIGNs superseded (counted where the set is named, in
+    # MetadataTypeMaps.ps1); an INERT copy (condition 'false', no actions) is the first deployment of the
+    # two-deployment retirement (docs/metadata-deployment.md §5) and is KEPT, so the package carries the inert
+    # write onto the deployed rule's UID. Its actions stay dropped either way. The name is matched slot-normalized,
+    # as the directory emit and the comparator match it too, so those consumers agree on which deployed rule is the
+    # stale aggregate whatever spacing the source carries.
+    $staleAggregateRuleNames = New-NeoIPCKeySet @($script:NeoIPCMetadataRetiredRuleNames | ForEach-Object { ConvertTo-NeoIPCSubstanceUnpaddedName $_ })
     $genRuleNames  = New-NeoIPCKeySet @($genRules | ForEach-Object { [string]$_['name'] })
     $genRuleIds    = New-NeoIPCKeySet @($genRules | ForEach-Object { [string]$_['id'] })
     $genActionIds  = New-NeoIPCKeySet @($genActions | ForEach-Object { [string]$_['id'] })
@@ -354,10 +364,19 @@ function Add-NeoIPCGeneratedMetadata {
         }
     }
 
+    $staleAggregateRuleIds = New-NeoIPCKeySet @(@($Config['programRules']) | Where-Object {
+            $_ -is [System.Collections.IDictionary] -and $staleAggregateRuleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$_['name'])))
+        } | ForEach-Object { [string]$_['id'] })
+    foreach ($staleRule in @($Config['programRules'])) {
+        if ($staleRule -is [System.Collections.IDictionary] -and
+            $staleAggregateRuleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$staleRule['name'])))) {
+            Assert-NeoIPCInertRetirementWrite -Rule $staleRule
+        }
+    }
     $keptRules = @(@($Config['programRules']) | Where-Object {
             $_ -is [System.Collections.IDictionary] -and
             -not ($genRuleNames.Contains([string]$_['name']) -or $genRuleIds.Contains([string]$_['id'])) -and
-            -not $staleAggregateRuleNames.Contains([string]$_['name'])
+            (-not $staleAggregateRuleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$_['name']))) -or (Test-NeoIPCDeployInertRule -Rule $_))
         })
     $keptRuleIds = New-NeoIPCKeySet @($keptRules | ForEach-Object { [string]$_['id'] })
 
@@ -391,7 +410,8 @@ function Add-NeoIPCGeneratedMetadata {
             if ($_ -isnot [System.Collections.IDictionary]) { return $false }
             $pr = $_['programRule']
             $rid = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { $null }
-            $rid -and $keptRuleIds.Contains($rid)
+            # A kept INERT stale aggregate carries no actions: its deployment deletes the live ones (docs §5).
+            $rid -and $keptRuleIds.Contains($rid) -and -not $staleAggregateRuleIds.Contains($rid)
         })
 
     $Config['programRules'] = @($keptRules + $genRules)

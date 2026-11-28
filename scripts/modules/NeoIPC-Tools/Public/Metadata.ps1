@@ -17,7 +17,9 @@ function ConvertFrom-NeoIPCMetadataJson {
         column, expressions externalized under expressions/). What stays excluded — because a richer file is its
         canonical source and it is generated at build instead — is: the two domain option sets (NEOIPC_PATHOGENS,
         NEOIPC_ANTIMICROBIAL_SUBSTANCES) + their options (from the infectious-agents YAML / antibiotics CSVs), the
-        antibiotic option groups / group-sets, and the superseded (retired) HAP aggregate rule + its actions.
+        antibiotic option groups / group-sets, and the superseded (retired) HAP aggregate rule + its actions —
+        that rule while it is still active: a directory may carry its inert retirement copy, and that row ships
+        like any other (docs/metadata-deployment.md §5).
         Idempotent: replaces only the per-type files it owns. No DHIS2 API calls.
     .PARAMETER Path
         Path to the DHIS2 metadata.json export.
@@ -135,7 +137,54 @@ function Read-NeoIPCMetadataDirectoryPackage {
     }
     # Re-inline any externalized expression files (a cell that is an expressions/...dhis2 reference) before re-nesting.
     Read-NeoIPCMetadataExpressionFiles -Rows $rows -Directory $Path
-    ConvertTo-NeoIPCMetadataPackage -Rows $rows
+    $package = ConvertTo-NeoIPCMetadataPackage -Rows $rows
+    # A retired rule (docs/metadata-deployment.md §5) belongs in a directory only as the retirement's inert write:
+    # one row, condition lowercase 'false' — case-sensitive, surrounding whitespace aside, since DHIS2's grammar
+    # skips whitespace but registers the constant only in that spelling — no actions listed, and no action row
+    # pointing at it. The directory ships its rows verbatim, so any other
+    # retired-name row reaches the instance: an active one keeps the retirement from happening at all, a wrongly-
+    # cased or action-carrying one ships metadata DHIS2 cannot use. Refuse before any consumer — the package
+    # build, the round-trip gate, the refresh — reads the directory.
+    $retiredRuleNames = [System.Collections.Generic.HashSet[string]]::new(
+        [string[]]@($script:NeoIPCMetadataRetiredRuleNames | ForEach-Object { ConvertTo-NeoIPCSubstanceUnpaddedName $_ }), [System.StringComparer]::Ordinal)
+    $retiredRows = @(@($package['programRules']) | Where-Object {
+        $_ -is [System.Collections.IDictionary] -and [string]$_['name'] -and
+        $retiredRuleNames.Contains((ConvertTo-NeoIPCSubstanceUnpaddedName ([string]$_['name'])))
+    })
+    if ($retiredRows.Count -gt 1) {
+        throw "The metadata directory carries $($retiredRows.Count) rows for the retired program rule '$([string]$retiredRows[0]['name'])'; the retirement is one row, the inert write."
+    }
+    if ($retiredRows.Count -eq 1) {
+        $retiredRow = $retiredRows[0]
+        $condition = ([string]$retiredRow['condition']).Trim()
+        if ($condition -ceq 'false') {
+            if ((Get-NeoIPCDeployRefIdList $retiredRow['programRuleActions']).Count -gt 0) {
+                throw "Program rule '$([string]$retiredRow['name'])' is written inert (condition 'false') but still lists actions; the retirement's inert write carries none — remove the actions or drop the row."
+            }
+            $retiredRuleId = [string]$retiredRow['id']
+            # DHIS2 UIDs are case-sensitive, so the programRule foreign-key match is too; an empty id on either
+            # side is not a match (rows without a UID are broken metadata for other checks, not this guard's to
+            # diagnose).
+            if ($retiredRuleId) {
+                $survivor = @(@($package['programRuleActions']) | Where-Object {
+                        if ($_ -isnot [System.Collections.IDictionary]) { return $false }
+                        $pr = $_['programRule']
+                        $ownerId = if ($pr -is [System.Collections.IDictionary]) { [string]$pr['id'] } else { [string]$pr }
+                        $ownerId -and $ownerId -ceq $retiredRuleId
+                    }) | Select-Object -First 1
+                if ($survivor) {
+                    throw "Program rule '$([string]$retiredRow['name'])' is written inert (condition 'false') while its action rows are still present; the retirement's inert write carries no action, so delete those action rows."
+                }
+            }
+        }
+        elseif ($condition -ieq 'false') {
+            throw "Program rule '$([string]$retiredRow['name'])' carries condition '$([string]$retiredRow['condition'])', which DHIS2 does not read as boolean false: its grammar registers the constant exactly lowercase 'false'; write the inert write exactly or drop the row."
+        }
+        else {
+            throw "Program rule '$([string]$retiredRow['name'])' is retired but the directory carries its condition as '$([string]$retiredRow['condition'])'; the directory holds a retired rule only as the retirement's inert write (condition 'false', no actions) or not at all — write the inert row or drop it."
+        }
+    }
+    $package
 }
 
 function Compare-NeoIPCMetadata {
@@ -527,6 +576,8 @@ function New-NeoIPCMetadataPackage {
 
     # Config + the materialized matrix families come from the directory ALONE — no export. Drop the excluded
     # authored types (the org-unit scaffold, users): they are read separately below from the selected overlay.
+    # (A miswritten retired rule is refused inside Read-NeoIPCMetadataDirectoryPackage, before the package
+    #  reaches any consumer.)
     $config = Read-NeoIPCMetadataDirectoryPackage -Path $commonDir
     foreach ($t in $script:NeoIPCMetadataExcludedTypes) { if ($config.Contains($t)) { $config.Remove($t) } }
 
