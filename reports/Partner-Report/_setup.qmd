@@ -17,6 +17,8 @@ library(gt, warn.conflicts = FALSE, quietly = TRUE)
 
 source("../common/helpers.R")
 source("../common/logging.R")
+source("../common/infectious-agent-rows.R")
+source("metric-states.R")
 configure_logging(report = "partner-report")
 # Under Quarto/knitr, configure_logging() installs an output hook that routes R
 # warnings and messages into the unified log channel and keeps them out of the
@@ -245,10 +247,12 @@ interpret_antibiotic_rates <- function(state_map, sR, registry = NULL) {
 # ── Infectious agent groupings (tbl-agent-per-infection-rate) ──────
 # Note: classify_metrics() lowercases all metric IDs (identifiers).
 interpret_agent_staphylococci <- function(state_map, sR, registry = NULL) {
-  cns <- if ("coagulase-negative staphylococci" %in% names(state_map))
-    coarse_state(state_map[["coagulase-negative staphylococci"]]) else NA
-  cops <- if ("coagulase-positive staphylococci" %in% names(state_map))
-    coarse_state(state_map[["coagulase-positive staphylococci"]]) else NA
+  cns <- first_state(state_map, c("neoipc|63",
+                                  "coagulase-negative staphylococci"))
+  cops <- first_state(state_map, c("neoipc|64",
+                                   "coagulase-positive staphylococci"))
+  cns <- if (is.null(cns)) NA else coarse_state(cns)
+  cops <- if (is.null(cops)) NA else coarse_state(cops)
   parts <- character(0)
   if (!is.na(cns) && cns == "low")
     parts <- c(parts, interp(sR, "agent_staphylococci_cns_low"))
@@ -260,8 +264,9 @@ interpret_agent_staphylococci <- function(state_map, sR, registry = NULL) {
 }
 
 interpret_agent_enterobacterales <- function(state_map, sR, registry = NULL) {
-  ent <- if ("enterobacterales" %in% names(state_map))
-    coarse_state(state_map[["enterobacterales"]]) else NA
+  ent <- first_state(state_map, c("enterobacterales",
+                                  "lpsn|order/enterobacterales"))
+  ent <- if (is.null(ent)) NA else coarse_state(ent)
   parts <- character(0)
   if (!is.na(ent) && ent == "high")
     parts <- c(parts, interp(sR, "agent_enterobacterales_high"))
@@ -291,10 +296,19 @@ interpret_abr_gram_negative <- function(state_map, sR, registry = NULL) {
 }
 
 interpret_abr_gram_positive <- function(state_map, sR, registry = NULL) {
-  mrsa <- if ("mrsa:staphylococcus aureus" %in% names(state_map))
-    coarse_state(state_map[["mrsa:staphylococcus aureus"]]) else NA
-  vre <- if ("vre:enterococcus spp." %in% names(state_map))
-    coarse_state(state_map[["vre:enterococcus spp."]]) else NA
+  # Over the reporting groups both rows collapse to the Gram-positive cocci
+  # row, which holds the staphylococci and the enterococci together; the
+  # ontology version keeps the two species apart.
+  mrsa <- first_state(state_map,
+                      c("mrsa:gram-positive-cocci",
+                        "mrsa:lpsn|species/staphylococcus-aureus",
+                        "mrsa:staphylococcus aureus"))
+  vre <- first_state(state_map,
+                     c("vre:gram-positive-cocci",
+                       "vre:lpsn|genus/enterococcus",
+                       "vre:enterococcus spp."))
+  mrsa <- if (is.null(mrsa)) NA else coarse_state(mrsa)
+  vre <- if (is.null(vre)) NA else coarse_state(vre)
   parts <- character(0)
   if (!is.na(mrsa) && mrsa == "high")
     parts <- c(parts, interp(sR, "abr_gram_positive_mrsa_high"))
@@ -831,6 +845,13 @@ outlier_groupings <- list(
       interpret = interpret_secondary_bsi
     )
   ),
+  # The groupings stand per slot: a grouping of one version cannot name
+  # rows of the other, and `group_outliers()` reads this list by slot. The
+  # groups version's entry carries the reporting-group identities of the
+  # engine's groups table and the labels the tables printed before the
+  # engine; the ontology entry carries only the identities of the nodes,
+  # which alone names a row of that version — the ontology version holds
+  # the staphylococci groups the groups version has none of.
   infectious_agent_detection_rate_per_agent_table = list(
     staphylococci = list(
       metrics = c("Staphylococcus spp.", "Coagulase-negative staphylococci",
@@ -841,7 +862,24 @@ outlier_groupings <- list(
     ),
     enterobacterales = list(
       metrics = c("Enterobacterales", "Klebsiella spp.", "Escherichia spp.",
-                  "Enterobacter spp.", "Serratia spp."),
+                  "Enterobacter spp.", "Serratia spp.",
+                  "enterobacterales"),
+      template_prefix = "agent_enterobacterales",
+      interpret = interpret_agent_enterobacterales
+    )
+  ),
+  infectious_agent_detection_rate_per_agent_ontology_table = list(
+    staphylococci = list(
+      metrics = c("lpsn|genus/staphylococcus", "neoipc|63", "neoipc|64",
+                  "lpsn|species/staphylococcus-epidermidis",
+                  "lpsn|species/staphylococcus-aureus"),
+      template_prefix = "agent_staphylococci",
+      interpret = interpret_agent_staphylococci
+    ),
+    enterobacterales = list(
+      metrics = c("lpsn|order/enterobacterales", "lpsn|genus/klebsiella",
+                  "lpsn|genus/escherichia", "lpsn|genus/enterobacter",
+                  "lpsn|genus/serratia"),
       template_prefix = "agent_enterobacterales",
       interpret = interpret_agent_enterobacterales
     )
@@ -853,146 +891,39 @@ outlier_groupings <- list(
       interpret = interpret_abr_gram_negative
     ),
     gram_positive_resistance = list(
-      metrics = c("mrsa:Staphylococcus aureus", "vre:Enterococcus spp."),
+      metrics = c("mrsa:Staphylococcus aureus", "vre:Enterococcus spp.",
+                  "mrsa:gram-positive-cocci", "vre:gram-positive-cocci"),
+      template_prefix = "abr_gram_positive",
+      interpret = interpret_abr_gram_positive
+    )
+  ),
+  # The ontology version's groupings beside the groups version's, for the
+  # same reason as the per-agent table's above.
+  abr_infection_rate_ontology_table = list(
+    gram_negative_resistance = list(
+      metrics = c("3gcr:Total", "car:Total", "cor:Total"),
+      template_prefix = "abr_gram_negative",
+      interpret = interpret_abr_gram_negative
+    ),
+    gram_positive_resistance = list(
+      metrics = c("mrsa:lpsn|species/staphylococcus-aureus",
+                  "vre:lpsn|genus/enterococcus"),
       template_prefix = "abr_gram_positive",
       interpret = interpret_abr_gram_positive
     )
   )
 )
 
-# ── Metric state levels (ordered) ──────────────────────────────────
-metric_state_levels <- c("na", "no_benchmark",
-                          "extreme_below_pooled", "extreme_above_pooled",
-                          "zero", "below_q1",
-                          "q1_to_q2", "q2_to_q3", "above_q3")
-
-# Classify each metric in a table into a state relative to reference quartiles.
-# Returns a named ordered factor (metric_id → state).
-classify_metrics <- function(table_data, identifier_col = NULL, combine_cols = NULL) {
-  if (is.null(table_data) || nrow(table_data) == 0) {
-    return(factor(character(0), levels = metric_state_levels, ordered = TRUE))
-  }
-
-  col_names <- names(table_data)
-  own_col_name_candidates <- c("pooled_own", "rate_own")
-  own_col_name <- own_col_name_candidates[own_col_name_candidates %in% col_names]
-
-  if (!(length(own_col_name) == 1 && all(c("q1_ref", "q3_ref") %in% col_names))) {
-    return(factor(character(0), levels = metric_state_levels, ordered = TRUE))
-  }
-
-  # Get row identifiers
-  if (!is.null(combine_cols) && all(combine_cols %in% names(table_data))) {
-    identifiers <- apply(table_data[, combine_cols, drop = FALSE], 1, function(row) {
-      paste(row, collapse = ":")
-    })
-  } else if (!is.null(identifier_col) && identifier_col %in% names(table_data)) {
-    identifiers <- as.character(table_data[[identifier_col]])
-  } else if (!is.null(rownames(table_data)) && !all(rownames(table_data) == as.character(seq_len(nrow(table_data))))) {
-    identifiers <- rownames(table_data)
-  } else {
-    # The table has at least the quartile columns checked above.
-    identifiers <- as.character(table_data[[1]])
-  }
-
-  own_values <- table_data[[own_col_name]]
-  q1 <- table_data$q1_ref
-  q3 <- table_data$q3_ref
-  q2 <- if ("q2_ref" %in% col_names) table_data$q2_ref else q1 + (q3 - q1) / 2
-
-  # CI columns for extreme-deviation classification when quartiles are
-  # suppressed. Uses CI overlap test: the department CI and pooled CI must
-  # not overlap, which is stronger than comparing the department point
-  # estimate alone (which ignores the department's own imprecision).
-  pooled_ref <- if ("pooled_ref" %in% col_names) table_data$pooled_ref else NULL
-  ci_lower_ref <- if ("ci_lower_ref" %in% col_names) table_data$ci_lower_ref else NULL
-  ci_upper_ref <- if ("ci_upper_ref" %in% col_names) table_data$ci_upper_ref else NULL
-  ci_lower_own <- if ("ci_lower_own" %in% col_names) table_data$ci_lower_own else NULL
-  ci_upper_own <- if ("ci_upper_own" %in% col_names) table_data$ci_upper_own else NULL
-  has_pooled_ci <- !is.null(pooled_ref) && !is.null(ci_lower_ref) && !is.null(ci_upper_ref)
-  has_own_ci <- !is.null(ci_lower_own) && !is.null(ci_upper_own)
-
-  # Classify states (check order matters)
-  states <- character(length(identifiers))
-  for (i in seq_along(identifiers)) {
-    own <- own_values[i]
-    if (is.na(own)) {
-      states[i] <- "na"
-    } else if (is.na(q1[i]) || is.na(q3[i])) {
-      # Quartiles suppressed — check if CIs indicate extreme deviation.
-      # Triple gate: non-overlapping CIs, magnitude > 10×, pooled CI
-      # narrow enough to be meaningful.
-      if (has_pooled_ci && !is.na(pooled_ref[i]) &&
-          !is.na(ci_lower_ref[i]) && !is.na(ci_upper_ref[i]) &&
-          pooled_ref[i] > 0) {
-        # Gate 1: CI non-overlap test. When the department CI is available,
-        # require that the two CIs don't overlap at all. Fall back to
-        # point-vs-CI when department CI is unavailable.
-        if (has_own_ci && !is.na(ci_lower_own[i]) && !is.na(ci_upper_own[i])) {
-          outside_ci <- ci_upper_own[i] < ci_lower_ref[i] ||
-                        ci_lower_own[i] > ci_upper_ref[i]
-        } else {
-          outside_ci <- own < ci_lower_ref[i] || own > ci_upper_ref[i]
-        }
-        magnitude <- own / pooled_ref[i]
-        extreme_magnitude <- magnitude > 10 || magnitude < 0.1
-        ci_width_ratio <- (ci_upper_ref[i] - ci_lower_ref[i]) / pooled_ref[i]
-        narrow_enough <- ci_width_ratio < 2.0
-        if (outside_ci && extreme_magnitude && narrow_enough) {
-          states[i] <- if (own > pooled_ref[i]) "extreme_above_pooled"
-                       else "extreme_below_pooled"
-        } else {
-          states[i] <- "no_benchmark"
-        }
-      } else {
-        states[i] <- "no_benchmark"
-      }
-    } else if (own == 0) {
-      states[i] <- "zero"
-    } else if (own < q1[i]) {
-      states[i] <- "below_q1"
-    } else if (!is.na(q2[i]) && own <= q2[i]) {
-      states[i] <- "q1_to_q2"
-    } else if (own <= q3[i]) {
-      states[i] <- "q2_to_q3"
-    } else {
-      states[i] <- "above_q3"
-    }
-  }
-
-  stats::setNames(
-    factor(states, levels = metric_state_levels, ordered = TRUE),
-    tolower(identifiers)
-  )
-}
-
-# ── Metric state query helpers ────────────────────────────────────
-
-# Get metric IDs in a specific state (or set of states)
-get_metrics_in_state <- function(state_map, states) {
-  names(state_map[state_map %in% states])
-}
-
-# Does this state_map contain any outliers?
-has_outliers <- function(state_map) {
-  !is.null(state_map) && length(state_map) > 0 &&
-    any(state_map %in% c("zero", "below_q1", "above_q3"))
-}
-
-# Get outlier metric IDs by direction
-get_outliers_below <- function(state_map) {
-  get_metrics_in_state(state_map, c("zero", "below_q1"))
-}
-
-get_outliers_above <- function(state_map) {
-  get_metrics_in_state(state_map, "above_q3")
-}
+# The metric-state framework — `metric_state_levels`, `classify_metrics()`, and
+# the state query helpers — is sourced from `metric-states.R` at the top of
+# this file, so that the tests in `../tests/` exercise the same code.
 
 # Compose structured output for a single group.
 # Returns NULL (skip), a string (zero early-exit), or a list with:
 #   $sections       — list of list(framing, labels) per outlier direction
 #   $interpretation — character vector (0-N interpretation sentences)
-compose_group_text <- function(group_config, state_map, sR, registry = NULL, table_name = NULL) {
+compose_group_text <- function(group_config, state_map, sR, registry = NULL,
+                               table_name = NULL, labels = NULL) {
   prefix <- group_config$template_prefix
   metrics <- tolower(group_config$metrics)
   total_metric <- group_config$total_metric
@@ -1028,9 +959,11 @@ compose_group_text <- function(group_config, state_map, sR, registry = NULL, tab
   for (metric in components) {
     s <- as.character(state_map[[metric]])
     if (s %in% c("zero", "below_q1")) {
-      below_labels <- c(below_labels, localize_metric_name(metric, sR, table_name))
+      below_labels <- c(below_labels,
+                        localize_metric_name(metric, sR, table_name, labels))
     } else if (s == "above_q3") {
-      above_labels <- c(above_labels, localize_metric_name(metric, sR, table_name))
+      above_labels <- c(above_labels,
+                        localize_metric_name(metric, sR, table_name, labels))
     }
   }
 
@@ -1068,14 +1001,16 @@ compose_group_text <- function(group_config, state_map, sR, registry = NULL, tab
 # Group related outliers using the compose approach.
 # state_map: named ordered factor from classify_metrics()
 # registry: full metric_registry for cross-table context
-group_outliers <- function(state_map, table_name = NULL, sR = NULL, registry = NULL) {
+group_outliers <- function(state_map, table_name = NULL, sR = NULL,
+                           registry = NULL, labels = NULL) {
   below <- get_outliers_below(state_map)
   above <- get_outliers_above(state_map)
 
   grouped <- list(
     grouped_text = list(),
     ungrouped = list(below_q1 = below, above_q3 = above),
-    table_name = table_name
+    table_name = table_name,
+    labels = labels
   )
 
   remove_case_insensitive <- function(values, values_to_remove) {
@@ -1089,7 +1024,8 @@ group_outliers <- function(state_map, table_name = NULL, sR = NULL, registry = N
       if (!is.null(group_config$classify_args)) next
       group_metrics <- tolower(group_config$metrics)
 
-      composed <- compose_group_text(group_config, state_map, sR, registry, table_name)
+      composed <- compose_group_text(group_config, state_map, sR, registry,
+                                     table_name, labels)
       if (!is.null(composed)) {
         grouped$grouped_text[[group_name]] <- composed
         grouped$ungrouped$below_q1 <- remove_case_insensitive(
@@ -1103,121 +1039,8 @@ group_outliers <- function(state_map, table_name = NULL, sR = NULL, registry = N
   return(grouped)
 }
 
-# Localize metric name by looking up in string resources.
-# When table_name is provided, that table's section is checked first so that
-# table-specific labels (e.g., "CVC-associated sepsis/BSI" in Table 2 vs
-# plain "CVC" in Table 8) take precedence over the generic glossary entry.
-localize_metric_name <- function(metric_id, sR, table_name = NULL) {
-  # Check for combined identifiers (e.g., "3gcr:Enterobacteriaceae")
-  if (grepl(":", metric_id)) {
-    parts <- strsplit(metric_id, ":", fixed = TRUE)[[1]]
-    if (length(parts) == 2) {
-      abr_key <- parts[1]
-      condition_key <- parts[2]
-      # Localize the resistance category. Neither mapping is the identity, and
-      # both are the ones the resistance tables apply to their row labels — which
-      # this text has to match. The dataset abbreviates carbapenem and colistin
-      # resistance as `car`/`cor` while the categories are CARBR and COLR; and the
-      # descriptive label lives under a `_label` key, because the bare glossary
-      # term is carried separately as terminology.
-      abr_label_key <- list(
-        "3gcr" = "3gcr_label",
-        car = "carbr_label",
-        cor = "colr_label",
-        mrsa = "mrsa_label",
-        vre = "vre_label"
-      )[[abr_key]]
-      localized_abr <- if (!is.null(abr_label_key) && !is.null(sR[[abr_label_key]])) {
-        sR[[abr_label_key]]
-      } else {
-        logDebug(paste0(
-          "localize_metric_name: no display label found for resistance ",
-          "category '{abr_key}'. Using raw identifier as fallback."))
-        abr_key
-      }
-      # Routine is the default — omit the suffix. Only show the condition
-      # for non-routine cases (e.g., "in case of 3GCR").
-      if (condition_key == "routine") {
-        return(localized_abr)
-      }
-      # Known testing conditions → parenthesized qualifier
-      condition_map <- list(
-        if_3gcr = "carbr_if_3gcr",
-        "if_3gcr&car" = "colr_if_3gcr_and_carbr"
-      )
-      cond_sR_key <- condition_map[[condition_key]]
-      if (!is.null(cond_sR_key) &&
-          !is.null(sR[["tbl-resistance-test-rate"]][[cond_sR_key]])) {
-        localized_cond <- sR[["tbl-resistance-test-rate"]][[cond_sR_key]]
-        return(paste0(localized_abr, " (", localized_cond, ")"))
-      }
-      # Other composite IDs (e.g., pathogen groups) → colon separator
-      return(paste0(localized_abr, ": ", tools::toTitleCase(condition_key)))
-    }
-  }
-
-  # Explicit metric identifier mappings for identifiers that don't match their
-  # display label key directly. Uses sR keys that the table rendering code uses.
-  metric_key_map <- list(
-    bsi = "primary_sepsis_bsi_sc",
-    hap = "pneumonia_sc",
-    probiotic = "probiotics",
-    all = "total",
-    a = "access",
-    w = "watch",
-    r = "reserve"
-  )
-
-  # Apply key mapping (e.g., "a" → "access", "bsi" → "primary_sepsis_bsi_sc")
-  mapped_key <- metric_key_map[[tolower(metric_id)]]
-  lookup_key <- if (!is.null(mapped_key)) mapped_key else tolower(metric_id)
-
-  # Map R internal table names to sR YAML keys
-  table_name_map <- list(
-    incidence_density_rate_table = "tbl-incidence-density-rates",
-    dev_ass_incidence_density_rate_table = "tbl-device-associated-incidence-density-rates",
-    usage_density_rate_table = "tbl-risk-density-rates",
-    surgery_rate_table = "tbl-surgical-procedure-rates",
-    infectious_agent_detection_rate_per_inf_type_table = "tbl-infectious-agent-detection-rate",
-    resistance_test_rate_table = "tbl-resistance-test-rate",
-    secondary_bsi_rate_table = "tbl-secondary-bsi-rates"
-  )
-  sR_table_key <- table_name_map[[table_name]] %||% table_name
-
-  # When a table_name is provided, check that table's section first so that
-  # table-specific overrides take precedence over the generic glossary.
-  if (!is.null(sR_table_key) && !is.null(sR[[sR_table_key]][[lookup_key]])) {
-    return(sR[[sR_table_key]][[lookup_key]])
-  }
-
-  # Try top-level keys
-  if (!is.null(sR[[lookup_key]])) {
-    return(sR[[lookup_key]])
-  }
-
-  # Try table-specific sections (fallback when no table_name provided)
-  table_sections <- c(
-    "tbl-risk-density-rates",
-    "tbl-device-associated-incidence-density-rates",
-    "tbl-surgical-procedure-rates",
-    "tbl-incidence-density-rates",
-    "tbl-infectious-agent-detection-rate",
-    "tbl-resistance-test-rate"
-  )
-
-  for (section in table_sections) {
-    if (!is.null(sR[[section]][[lookup_key]])) {
-      return(sR[[section]][[lookup_key]])
-    }
-  }
-
-  # Fall back to the raw identifier; record the gap in the log channel only (it
-  # never surfaces in the rendered report body).
-  logDebug(paste0(
-    "localize_metric_name: no display label found for metric ",
-    "identifier '{metric_id}'. Using raw identifier as fallback."))
-  return(metric_id)
-}
+# `localize_metric_name()` is sourced from `metric-states.R` at the top of
+# this file, so that the tests in `../tests/` exercise the same code.
 
 # Render a directional section (framing + bullet list of metric labels)
 render_outlier_section <- function(framing, labels) {
@@ -1237,6 +1060,7 @@ format_outlier_text <- function(outlier_groups, sR) {
   if (is.null(outlier_groups) || length(outlier_groups) == 0) return("")
 
   table_name <- outlier_groups$table_name
+  labels <- outlier_groups$labels
   early_exits <- character(0)
   all_below_labels <- character(0)
   all_above_labels <- character(0)
@@ -1275,13 +1099,14 @@ format_outlier_text <- function(outlier_groups, sR) {
   for (direction in c("below_q1", "above_q3")) {
     metrics <- outlier_groups$ungrouped[[direction]]
     if (length(metrics) > 0) {
-      labels <- sapply(metrics, localize_metric_name, sR = sR, table_name = table_name, USE.NAMES = FALSE)
+      direction_labels <- sapply(metrics, function(m)
+        localize_metric_name(m, sR, table_name, labels))
       if (direction == "below_q1") {
-        all_below_labels <- c(all_below_labels, labels)
+        all_below_labels <- c(all_below_labels, direction_labels)
       } else {
-        all_above_labels <- c(all_above_labels, labels)
+        all_above_labels <- c(all_above_labels, direction_labels)
       }
-      generic_labels <- c(generic_labels, labels)
+      generic_labels <- c(generic_labels, direction_labels)
     }
   }
 
@@ -1554,6 +1379,12 @@ show_section_patient_population <- params$includeIntroductionTexts ||
 # Source: https://doh.wa.gov/sites/default/files/legacy/Documents/1500/SmallNumbers.pdf
 sparse_threshold <- as.integer(params$sparseDataThreshold %||% 16L)
 
+# The rows the infectious-agent tables render: the reporting groups of the
+# released classification, or the full ontology when the parameter asks for
+# it. Any other value gives the groups, which both reports show by default.
+infectious_agent_rows <- if (identical(params$infectiousAgentRows, "ontology"))
+  "ontology" else "groups"
+
 # ── Confidence interval display ─────────────────────────────────────
 # Composable CI components: "rate", "pooled", "quartiles".
 # Pass individually or combined (comma-separated).
@@ -1809,6 +1640,34 @@ metric_classify_args <- list(
   resistance_test_rate_table = list(combine_cols = c("abr", "cond"))
 )
 
+# The rows of the infectious-agent tables are nodes of the released
+# infectious-agent list, and a node's printed label is no key: the list can
+# rename it, and the outlier texts would keep quoting the old name or drop the
+# row without a word. Where a table carries the engine's `node_id`, the state
+# map is keyed by the row identity (`ia_row_identities()`) and the texts name
+# the row by the very label the table prints (`ia_metric_labels()`), held per
+# table in `metric_labels` and passed to `group_outliers()` by the tables that
+# have them. A table without `node_id` predates the classification engine and
+# is keyed by its row label, as it always was.
+# NEOIPC-COMPAT(infectious-agent-engine): remove the label-keyed branch once
+# reports/compatibility.yml lists v0.0.0.9009 or later as tested and minimum
+# together; see the marker of the same scope in extract_counts().
+ia_identity_tables <- c("infectious_agent_detection_rate_per_agent_table",
+                        "infectious_agent_detection_rate_per_agent_ontology_table",
+                        "abr_infection_rate_table",
+                        "abr_infection_rate_ontology_table",
+                        "infectious_agent_resistance_rate_table",
+                        "infectious_agent_resistance_rate_ontology_table")
+metric_labels <- list()
+for (ia_table in ia_identity_tables) {
+  ia_data <- benchmark_data[[ia_table]]
+  if (is.data.frame(ia_data) && "node_id" %in% names(ia_data)) {
+    metric_classify_args[[ia_table]] <-
+      list(identifiers = ia_row_identities(ia_data))
+    metric_labels[[ia_table]] <- ia_metric_labels(ia_data)
+  }
+}
+
 # Classify all tables: table_name → named ordered factor (metric_id → state)
 metric_registry <- list()
 for (tbl_name in names(benchmark_data)) {
@@ -1820,6 +1679,16 @@ for (tbl_name in names(benchmark_data)) {
     c(list(table_data = tbl_data), args)
   )
 }
+
+# The slots of the tables `get_benchmark_data()` did not join with the
+# reference because their rate definitions differ; each such table shows its
+# department's rows without reference columns under a callout. The callout
+# itself is `not_comparable_here()` in `reports/common/infectious-agent-rows.R`
+# and stands under `NEOIPC-PERMANENT(dataset-format)`.
+not_comparable_tables <- character(0)
+nc <- benchmark_data$not_comparable
+if (!is.null(nc) && is.data.frame(nc) && nrow(nc) > 0)
+  not_comparable_tables <- unique(nc$table)
 ```
 
 ```{r Preparing localised data}
@@ -1846,10 +1715,41 @@ extract_counts <- function(bm, suffix) {
     n_patient_days = pull_col(bm$n_patient_days, "total"),
     n_severe_infections = pull_filtered(
       bm$incidence_density_rate_table, "inf", "si", "n"),
-    n_infectious_agents = pull_filtered(
-      bm$infectious_agent_detection_rate_per_agent_table, "group", "Total", "n"),
-    n_infections_with_agent = pull_filtered(
-      bm$infectious_agent_detection_rate_per_inf_type_table, "inf", "all", "n"),
+    # The engine's Total row is keyed by its identity, not its printed label.
+    # NEOIPC-COMPAT(infectious-agent-engine): remove the label branch once
+    # reports/compatibility.yml lists v0.0.0.9009 or later as tested and
+    # minimum together; see the marker of the same scope in the classify chunk.
+    n_infectious_agents = if (is.data.frame(
+        bm$infectious_agent_detection_rate_per_agent_table) &&
+        "node_id" %in% names(bm$infectious_agent_detection_rate_per_agent_table)) {
+      ia_data <- bm$infectious_agent_detection_rate_per_agent_table
+      ia_data[[paste0("n", suffix)]][
+        ia_row_index(ia_data, "total", "infectious-agent table")]
+    } else {
+      pull_filtered(
+        bm$infectious_agent_detection_rate_per_agent_table,
+        "group", "Total", "n")
+    },
+    # The infections with a detected infectious agent, for the dataset
+    # resources. On the classification-engine tables the per-infection-type
+    # table carries no total row — its rows are the infection types with a
+    # testing denominator — and the engine's own Total row of the per-agent
+    # table counts the confirmed infections, the denominator its shares use.
+    # NEOIPC-COMPAT(infectious-agent-engine): remove the per-infection-type
+    # branch once reports/compatibility.yml lists v0.0.0.9009 or later as
+    # tested and minimum together; see the marker of the same scope in the
+    # classify chunk.
+    n_infections_with_agent = if (is.data.frame(
+        bm$infectious_agent_detection_rate_per_agent_table) &&
+        "node_id" %in% names(bm$infectious_agent_detection_rate_per_agent_table)) {
+      ia_data <- bm$infectious_agent_detection_rate_per_agent_table
+      ia_data[[paste0("total", suffix)]][
+        ia_row_index(ia_data, "total", "infectious-agent table")]
+    } else {
+      pull_filtered(
+        bm$infectious_agent_detection_rate_per_inf_type_table,
+        "inf", "all", "n")
+    },
     n_infections_overall = pull_filtered(
       bm$n_infections, "inf_type", "overall", "total")
   )

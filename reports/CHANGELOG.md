@@ -13,6 +13,30 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Added
+
+- The three infectious-agent tables — the infections per detected infectious agent, the infection
+  rate with resistant infectious agents, and the infectious-agent resistance rate — render the
+  classification tables of the released infectious-agent list as neoipcr's engine returns them.
+  Rows are keyed by the identities the engine keeps for each node across releases rather than by
+  the printed labels, so the outlier texts follow a release's renames instead of going silent on a
+  renamed row. The rate footnotes, the residual notes and the Total-only note speak of the measures
+  the engine computes, including the resistance-category rate per 1000 patient-days the protocol
+  defines; a stored dataset that predates the engine renders as before, with its earlier wording,
+  intervals and rows.
+- The resistance tables of both reports print a Tested column beside the count: the share of the
+  row's infections with an infectious agent to which the resistance category applies that have a
+  result for it, which shows how far the rate rests on the testing. The interval rides folded into
+  the cell, a footnote defines the measure, and the sparse-data mark sits on the share's own
+  denominator. A neoipcr that predates the engine renders without the column.
+- `infectiousAgentRows`, a parameter of both reports and of their builders, chooses the version of
+  the tables: `"groups"`, the reporting groups of the released classification, or `"ontology"`,
+  the full infectious-agent ontology. A neoipcr that predates the engine has only the groups
+  version.
+- A unit-test suite under `reports/tests/`, run by CI, exercises the outlier framework and the
+  row-identity helpers the tables render with, and resolves every identity the Partner Report's
+  outlier texts name against tables in the engine's shape.
+
 ### Changed
 
 - `Build-ValidationReport.ps1` whose filter matches no department warns, reports the build

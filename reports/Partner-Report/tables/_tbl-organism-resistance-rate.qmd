@@ -36,24 +36,85 @@ include_localised("_methods-organism-resistance.Rmd")
 #| tbl-cap: !expr 'sR$`tbl-organism-resistance-rate`$`tbl-cap`'
 #| tbl-cap-location: top
 
+# The version of the table the report renders, as for the infectious-agent
+# table; see the marker of the same scope there. The engine's resistance
+# table is named for the infectious agents on its rows; a join from a neoipcr
+# that predates the engine still hands the table over under the older name.
+# NEOIPC-COMPAT(infectious-agent-engine): remove the older-name fallback once
+# reports/compatibility.yml lists v0.0.0.9009 or later as tested and minimum
+# together.
+ia_slot <- if (identical(infectious_agent_rows, "ontology"))
+  "infectious_agent_resistance_rate_ontology_table" else
+  "infectious_agent_resistance_rate_table"
+tbl_data <- benchmark_data[[ia_slot]]
+if (is.null(tbl_data)) {
+  ia_slot <- "infectious_agent_resistance_rate_table"
+  tbl_data <- benchmark_data[[ia_slot]]
+}
+if (is.null(tbl_data)) {
+  ia_slot <- "organism_resistance_rate_table"
+  tbl_data <- benchmark_data[[ia_slot]]
+}
+
 # Conditionally render table only if department data exists
-if (!is.null(benchmark_data$organism_resistance_rate_table) &&
-    "n_own" %in% rlang::names2(benchmark_data$organism_resistance_rate_table) &&
-    sum(benchmark_data$organism_resistance_rate_table$n_own, na.rm = TRUE) > 0) {
+if (!is.null(tbl_data) &&
+    "n_own" %in% rlang::names2(tbl_data) &&
+    sum(tbl_data$n_own, na.rm = TRUE) > 0) {
+
+  ia_engine <- "node_id" %in% names(tbl_data)
+  ia_groups <- !identical(ia_slot, "infectious_agent_resistance_rate_ontology_table")
 
   # Check if reference data columns exist
-  has_reference <- "pooled_ref" %in% names(benchmark_data$organism_resistance_rate_table)
+  has_reference <- "pooled_ref" %in% names(tbl_data) &&
+    any(!is.na(tbl_data$pooled_ref))
 
-  tbl_data <- benchmark_data$organism_resistance_rate_table
+  # A refused benchmark join still contributes all-NA `_ref` columns for the
+  # table. Dropping them when there is no reference is what makes the table
+  # show department rows only, as the not-comparable callout says it does.
+  if (!has_reference)
+    tbl_data <- tbl_data |> dplyr::select(!dplyr::ends_with("_ref"))
+
   cw <- compute_col_widths(tbl_data, stub_min = 27, has_reference = has_reference)
 
   ci_pattern <- ci_pattern_inline
 
+  # Row styling: the engine styles by `rank` and the row identity; the older
+  # table styled by `taxon`.
+  ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
+  ia_summary <- if (ia_engine) ia_summary_rows(tbl_data) else
+    rep(FALSE, nrow(tbl_data))
+  ia_bold <- if (ia_engine) {
+    ia_summary |
+      (ia_groups & tbl_data$level == 1 & !ia_summary) |
+      (!ia_groups & tbl_data$rank %in%
+         c("Domain", "Kingdom", "Realm", "Subkingdom", "Phylum",
+           "Order", "Genus", "Group"))
+  } else {
+    tbl_data$taxon %in% c("genus")
+  }
+  ia_italic <- if (ia_engine)
+    tbl_data$rank %in% ia_italic_ranks
+  else
+    tbl_data$taxon %in% c("species")
+
   tbl <- tbl_data |>
-    dplyr::select(-tidyselect::any_of(c("n_ref", ".ontology_path", "ia_tst_tot_own"))) |>
+    dplyr::select(-tidyselect::any_of(c(
+      "n_ref", ".ontology_path_own", ".ontology_path_ref", "ia_tst_tot_own",
+      "ia_tst_tot_ref", "node_id", "parent_id", "rank",
+      "quartile_departments_ref",
+      "total_own", "total_ref",
+      paste0("tested_", c("n", "total"), "_own"),
+      paste0("tested_", c("n", "total", "pooled",
+                          "ci_lower", "ci_upper"), "_ref"),
+      "tested_n", "tested_total", "tested_pooled",
+      "tested_ci_lower", "tested_ci_upper",
+      # The resistance-test rate is an engine measure; a join from before
+      # the engine keeps its earlier columns.
+      if (ia_engine) character(0) else
+        paste0("tested_", c("pooled", "ci_lower", "ci_upper"), "_own")))) |>
     dplyr::mutate(
       group = dplyr::if_else(
-        stringr::str_detect(group, "spp."),
+        !ia_engine & stringr::str_detect(group, "spp."),
         paste0("*", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 1), "* spp.", stringr::str_extract(group, "^(.+) spp\\.(.*)$", 2)),
         group
       )) |>
@@ -63,11 +124,40 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
       !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
       !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
-      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"),
+      !!sR$table_headers$tested := tidyselect::any_of(
+        if (ia_engine) "tested_pooled_own" else character(0)))
+
+  # The engine appends the tested columns after the quartiles; the Tested
+  # share is a measure of its own, so it stands between the department's
+  # count and the rate spanner rather than inside the spanner, which would
+  # split it. The Reference Report places it at the same distance from the
+  # count.
+  if (sR$table_headers$tested %in% names(tbl))
+    tbl <- tbl |> dplyr::relocate(
+      tidyselect::any_of(sR$table_headers$tested),
+      .after = tidyselect::any_of(sR$table_headers$count))
+
+  # `gt::tab_stub_indent()` caps its per-level indent at five levels, so the
+  # engine's deeper tree rows take their indent beyond the cap from the
+  # label itself; see `ia_indent_labels()`.
+  if (ia_engine)
+    tbl <- tbl |> dplyr::mutate(group = ia_indent_labels(group, level))
+
+  # The tested column's width comes out of the stub, as the per-agent
+  # table does for its infection-type columns. The stub's floor can absorb
+  # less than the column asks for, so the data columns share the shortfall
+  # in proportion and the declared widths keep their promise of 100%.
+  tested_w <- if (ia_engine &&
+                  "tested_pooled_own" %in% names(tbl_data)) cw$q else 0
+  stub_w <- if (tested_w > 0) max(cw$stub - tested_w, 22) else cw$stub
+  data_scale <- if (tested_w > 0)
+    (100 - stub_w - tested_w) / (100 - cw$stub) else 1
 
   ci_cols_to_drop <- character(0)
   if (!include_rate_ci)
-    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own",
+                         "tested_ci_lower_own", "tested_ci_upper_own")
   if (!include_pooled_ci)
     ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
   if (!include_quartile_ci)
@@ -79,7 +169,6 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
     tbl <- tbl |> dplyr::select(-tidyselect::any_of(ci_cols_to_drop))
 
   tbl <- tbl |>
-    dplyr::select(-tidyselect::any_of(c("ia_tst_tot_ref"))) |>
     dplyr::mutate(
       abr = dplyr::recode_values(
         .data$abr,
@@ -88,7 +177,7 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
         "cor" ~ sR$colr_label,
         "mrsa" ~ sR$mrsa_label,
         "vre" ~ sR$vre_label),
-      level = .data$level + 2) |>
+      level = .data$level + if (ia_engine) 0L else 2L) |>
     dplyr::group_by(.data$abr) |>
     gt(rowname_col = "group") |>
     sub_missing() |>
@@ -131,7 +220,7 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
         weight = "bold"
       ),
       locations = cells_stub(
-        rows = taxon %in% c("genus")
+        rows = ia_bold
       )
     ) |>
     tab_style(
@@ -139,7 +228,7 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
         style = "italic"
       ),
       locations = cells_stub(
-        rows = taxon %in% c("species")
+        rows = ia_italic
       )
     ) |>
     cols_hide(columns = any_of(c("level","taxon"))) |>
@@ -152,7 +241,8 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
       )
     ) |>
       tab_spanner(
-        label = sR$`tbl-organism-resistance-rate`$`rate_name`,
+        label = if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_name_engine else
+          sR$`tbl-organism-resistance-rate`$`rate_name`,
         columns = tidyselect::any_of(
           c(
             sR$table_headers$rate,
@@ -167,11 +257,14 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
       footnote = md(
         paste0(
           "$$\\text{",
-          sR$`tbl-organism-resistance-rate`$`rate_name`,
+          if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_name_engine else
+            sR$`tbl-organism-resistance-rate`$`rate_name`,
           "} = \\frac{\\text{",
-          sR$`tbl-organism-resistance-rate`$`rate_numerator`,
+          if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_numerator_engine else
+            sR$`tbl-organism-resistance-rate`$`rate_numerator`,
           "}}{\\text{",
-          sR$`tbl-organism-resistance-rate`$`rate_denominator`,
+          if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_denominator_engine else
+            sR$`tbl-organism-resistance-rate`$`rate_denominator`,
           "}} \\times ",
           format_integer(100),
           "$$"
@@ -181,14 +274,16 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
     ) |>
     tab_footnote(
       footnote = interpolate_translation(
-        sR$`tbl-organism-resistance-rate`$n_footnote,
+        if (ia_engine) sR$`tbl-organism-resistance-rate`$n_footnote_engine else
+          sR$`tbl-organism-resistance-rate`$n_footnote,
         column = sR$table_headers$count),
       locations = cells_column_labels(columns = sR$table_headers$count),
       placement = "right"
     ) |>
     tab_footnote(
       footnote = interpolate_translation(
-        sR$`tbl-organism-resistance-rate`$rate_footnote,
+        if (ia_engine) sR$`tbl-organism-resistance-rate`$rate_footnote_engine else
+          sR$`tbl-organism-resistance-rate`$rate_footnote,
         column = sR$table_headers$rate),
       locations = cells_column_labels(columns = sR$table_headers$rate),
       placement = "right"
@@ -201,6 +296,26 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
         pattern = ci_pattern,
         rows = !is.na(tbl_data$pooled_own)
       )
+  }
+  if (include_rate_ci && sR$table_headers$tested %in% colnames(tbl$`_data`) &&
+      all(c("tested_ci_lower_own", "tested_ci_upper_own") %in%
+          colnames(tbl$`_data`))) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$tested, "tested_ci_lower_own",
+                    "tested_ci_upper_own"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$tested_pooled_own)
+      )
+  }
+  if (sR$table_headers$tested %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = interpolate_translation(
+          sR$`tbl-organism-resistance-rate`$tested_rate_footnote,
+          column = sR$table_headers$tested),
+        locations = cells_column_labels(columns = sR$table_headers$tested),
+        placement = "right")
   }
   if (include_pooled_ci && "ci_lower_ref" %in% colnames(tbl$`_data`)) {
     tbl <- tbl |>
@@ -240,17 +355,20 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(cw$stub),
-        sR$table_headers$count ~ pct(cw$n),
-        sR$table_headers$rate ~ pct(cw$rate),
-        sR$table_headers$pooled ~ pct(cw$pooled),
-        sR$table_headers$q1 ~ pct(cw$q),
-        sR$table_headers$q2 ~ pct(cw$q),
-        sR$table_headers$q3 ~ pct(cw$q)
+        stub() ~ pct(stub_w),
+        sR$table_headers$count ~ pct(cw$n * data_scale),
+        sR$table_headers$rate ~ pct(cw$rate * data_scale),
+        tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w),
+        sR$table_headers$pooled ~ pct(cw$pooled * data_scale),
+        sR$table_headers$q1 ~ pct(cw$q * data_scale),
+        sR$table_headers$q2 ~ pct(cw$q * data_scale),
+        sR$table_headers$q3 ~ pct(cw$q * data_scale)
       ) |>
       tab_spanner(
         label = sR$own_data_label,
-        columns = tidyselect::any_of(c(sR$table_headers$count, sR$table_headers$rate)),
+        columns = tidyselect::any_of(
+          c(sR$table_headers$count, sR$table_headers$rate,
+            sR$table_headers$tested)),
         id = "department_data"
       ) |>
       tab_spanner(
@@ -271,20 +389,37 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(cw$stub),
-        sR$table_headers$count ~ pct(cw$n),
-        sR$table_headers$rate ~ pct(cw$rate)
+        stub() ~ pct(stub_w),
+        sR$table_headers$count ~ pct(cw$n * data_scale),
+        sR$table_headers$rate ~ pct(cw$rate * data_scale),
+        tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w)
       )
   }
 
-  if (any(!is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold, na.rm = TRUE)) {
+  # The Tested share is flagged on its own denominator: a department may
+  # have few tested infections under a well-tested rate, or the reverse.
+  ia_rate_sparse <- !is.na(tbl_data$pooled_own) &
+    tbl_data$n_own < sparse_threshold
+  ia_tested_sparse <- if (ia_engine &&
+                          "tested_pooled_own" %in% names(tbl_data))
+    !is.na(tbl_data$tested_pooled_own) &
+      tbl_data$tested_total_own < sparse_threshold else
+    rep(FALSE, nrow(tbl_data))
+  if (any(ia_rate_sparse, na.rm = TRUE) ||
+      any(ia_tested_sparse, na.rm = TRUE)) {
     sparse_note <- interpolate_translation(if (include_rate_ci) sR$sparse_data_footnote else sR$sparse_data_footnote_no_ci, threshold = sparse_threshold)
+    sparse_locations <- list()
+    if (any(ia_rate_sparse, na.rm = TRUE))
+      sparse_locations <- c(sparse_locations, list(cells_body(
+        columns = sR$table_headers$count, rows = ia_rate_sparse)))
+    if (any(ia_tested_sparse, na.rm = TRUE))
+      sparse_locations <- c(sparse_locations, list(cells_body(
+        columns = tidyselect::any_of(sR$table_headers$tested),
+        rows = ia_tested_sparse)))
     tbl <- tbl |>
       gt::tab_footnote(
         footnote = sparse_note,
-        locations = cells_body(
-          columns = sR$table_headers$count,
-          rows = !is.na(tbl_data$pooled_own) & tbl_data$n_own < sparse_threshold),
+        locations = sparse_locations,
         placement = "right")
   }
 
@@ -293,10 +428,23 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
     gt::tab_source_note(
       source_note = sR$`tbl-abr-infection-rate`$resistance_overlap_footnote)
 
+  # The summary block counts the same infections as the groups, apart from
+  # them; it is a property of the engine's groups version.
+  if (ia_engine && ia_groups && any(ia_summary, na.rm = TRUE))
+    tbl <- tbl |>
+      gt::tab_source_note(source_note = sR$summary_block_note)
+
   # n.o.s. definition source note
-  if (any(tbl_data$taxon == "species_nos", na.rm = TRUE)) {
+  ia_residual <- if (ia_engine)
+    !is.na(ia_node_id) & grepl("~n\\.o\\.s\\.$", ia_node_id) else
+    tbl_data$taxon == "species_nos"
+  if (any(ia_residual, na.rm = TRUE)) {
     tbl <- tbl |>
       gt::tab_source_note(source_note = sR$nos_footnote)
+    if (ia_engine && any(ia_above_genus(tbl_data, ia_node_id, ia_residual),
+                         na.rm = TRUE))
+      tbl <- tbl |>
+        gt::tab_source_note(source_note = sR$residual_above_genus_footnote)
   }
 
   tbl
@@ -308,10 +456,19 @@ if (!is.null(benchmark_data$organism_resistance_rate_table) &&
 
 ```{r}
 #| output: asis
+if (not_comparable_here(ia_slot, not_comparable_tables)) {
+  cat("\n\n::: {.callout-warning}\n")
+  cat(sR$not_comparable_note, "\n")
+  cat(":::\n")
+}
+```
+
+```{r}
+#| output: asis
 # Show explanation when no organism-specific data exists
-if (is.null(benchmark_data$organism_resistance_rate_table) ||
-    !("n_own" %in% rlang::names2(benchmark_data$organism_resistance_rate_table)) ||
-    sum(benchmark_data$organism_resistance_rate_table$n_own, na.rm = TRUE) == 0) {
+if (is.null(tbl_data) ||
+    !("n_own" %in% rlang::names2(tbl_data)) ||
+    sum(tbl_data$n_own, na.rm = TRUE) == 0) {
   cat("\n\n::: {.callout-note}\n")
   cat(sR$`tbl-organism-resistance-rate`$no_data, "\n")
   cat(":::\n")

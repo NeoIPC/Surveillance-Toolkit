@@ -16,6 +16,7 @@ library(gt, warn.conflicts = FALSE, quietly = TRUE)
 
 source("../common/helpers.R")
 source("../common/logging.R")
+source("../common/infectious-agent-rows.R")
 configure_logging(report = "reference-report")
 
 labels_bw <- function(x) {
@@ -195,6 +196,12 @@ summary_table_font_size <- compute_col_widths(tibble::tibble(), stub_min = 0)$fo
 # Default: 16 (relative standard error ≥ 25%, aligned with WA DOH criterion).
 # Relative standard error = 1/√n: n=10 → 31.6%, n=16 → 25.0%, n=20 → 22.4%.
 sparse_threshold <- as.integer(params$sparseDataThreshold %||% 16L)
+
+# The rows the infectious-agent tables render: the reporting groups of the
+# released classification, or the full ontology when the parameter asks for
+# it. Any other value gives the groups, which both reports show by default.
+infectious_agent_rows <- if (identical(params$infectiousAgentRows, "ontology"))
+  "ontology" else "groups"
 ```
 
 ```{r Importing data}
@@ -248,6 +255,14 @@ if (reference_data$n_departments < 5L) {
 ```{r Preparing localised data}
 #| include: false
 
+ia_agent_table <- reference_data$infectious_agent_detection_rate_per_agent_table
+if (is.null(ia_agent_table)) {
+  rlang::abort(
+    c(gettextf("The calculated dataset has no table %s.",
+               paste0("`infectious_agent_detection_rate_per_agent_table`")),
+      "i" = gettext("It was calculated by a version of neoipcr that did not compute this table; calculate it again from its raw dataset.")),
+    class = "neoipcr_table_not_in_dataset")
+}
 ref_counts <- list(
   n_departments = reference_data$n_departments,
   n_patients = reference_data$n_patients$total,
@@ -255,10 +270,33 @@ ref_counts <- list(
   n_patient_days = reference_data$n_patient_days$total,
   n_severe_infections = reference_data$incidence_density_rate_table |>
     dplyr::filter(inf == "si") |> dplyr::pull("n"),
-  n_infectious_agents = reference_data$infectious_agent_detection_rate_per_agent_table |>
-    dplyr::filter(group == "Total") |> dplyr::pull("n"),
-  n_infections_with_agent = reference_data$infectious_agent_detection_rate_per_inf_type_table |>
-    dplyr::filter(inf == "all") |> dplyr::pull("n"),
+  # The engine's Total row is keyed by its identity, not its printed label.
+  # NEOIPC-PERMANENT(dataset-format): never drop the label branch. A stored
+  # dataset outlives every release, and this report renders a dataset saved
+  # before the engine arrived no matter how far compatibility moves on.
+  n_infectious_agents = if ("node_id" %in% names(ia_agent_table)) {
+    ia_data <- ia_agent_table
+    ia_data[["n"]][ia_row_index(ia_data, "total", "infectious-agent table")]
+  } else {
+    ia_agent_table |>
+      dplyr::filter(group == "Total") |> dplyr::pull("n")
+  },
+  # The infections with a detected infectious agent. On the classification-
+  # engine tables the per-infection-type table carries no total row — its rows
+  # are the infection types with a testing denominator — and the engine's own
+  # Total row of the per-agent table counts the confirmed infections.
+  # NEOIPC-PERMANENT(dataset-format): never drop the per-infection-type
+  # branch. A stored dataset outlives every release, and this report renders
+  # a dataset saved before the engine arrived no matter how far compatibility
+  # moves on.
+  n_infections_with_agent = if ("node_id" %in% names(ia_agent_table)) {
+    ia_data <- ia_agent_table
+    ia_data[["total"]][
+      ia_row_index(ia_data, "total", "infectious-agent table")]
+  } else {
+    reference_data$infectious_agent_detection_rate_per_inf_type_table |>
+      dplyr::filter(inf == "all") |> dplyr::pull("n")
+  },
   n_infections_overall = reference_data$n_infections |>
     dplyr::filter(inf_type == "overall") |> dplyr::pull("total"),
   n_surgical_departments = reference_data$n_surgical_departments,
