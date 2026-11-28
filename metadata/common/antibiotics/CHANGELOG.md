@@ -11,6 +11,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+## [0.2.0-alpha] - 2026-11-28
+
 ### Added
 
 - `WHO-AWaRe-Classification-2025.csv`, a faithful extract of the classification worksheet of the
