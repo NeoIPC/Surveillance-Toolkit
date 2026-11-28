@@ -625,11 +625,16 @@ problems:
     summary: The day of occurrence after admission stored in the sepsis form does not match the value calculated from the dates.
   "29":
     # Translators:
-    # `{dol}` is replaced by the day of life stored in the sepsis form, a whole number below 4; the
-    # day of birth is day of life 1. Keep it as written.
+    # `{dol}` is replaced by the day of life on which the sepsis occurred, a whole number from 1 to
+    # 3, the day of birth being day 1. The report derives it rather than reading it off the sepsis
+    # form: it counts the days from the admission in the enrolment to the sepsis date, starting from
+    # the day of life recorded on the admission form for an admission recorded as a transfer or
+    # readmission after the day of birth and from day 1 for every other admission. Keep it as
+    # written.
     description: >-
-      The sepsis occurred within the first 3 days of life (day of life is
-      {dol}).
+      The sepsis occurred on day of life {dol}, within the first 3 days of life;
+      the report derived this day from the dates and the admission form, and did
+      not read it off the sepsis form.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
@@ -638,17 +643,20 @@ problems:
     summary: A sepsis occurred within the first three days of life.
   "30":
     # Translators:
-    # `{dos}` is replaced by the day of hospitalization on which the sepsis occurred, 1 or 2, the
-    # day of admission being day 1. Keep it as written.
+    # `{dos}` is replaced by the day of the stay on which the sepsis occurred, a whole number 1 or
+    # 2, the day of admission being day 1. The report derives the day by counting from the admission
+    # in the enrolment to the sepsis date, rather than reading the day of occurrence stored on the
+    # sepsis form. Keep it as written.
     description: >-
-      The sepsis occurred within the first two days of hospitalization of a
-      referred or (re-)admitted patient (day of hospitalization is {dos}).
+      The sepsis occurred on day {dos} of the stay, before its third day; the
+      report derived this day from the admission and sepsis dates, and did not
+      read it off the sepsis form.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
     # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
     # language's own apostrophe and quotation marks.
-    summary: A sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
+    summary: A sepsis occurred before the third day of the stay.
   "31":
     # Translators:
     # `{dol}` is replaced by the day of life stored in the pneumonia form and `{dol_calc}` by the
@@ -679,11 +687,16 @@ problems:
     summary: The day of occurrence after admission stored in the pneumonia form does not match the value calculated from the dates.
   "33":
     # Translators:
-    # `{dol}` is replaced by the day of life stored in the pneumonia form, a whole number below 4;
-    # the day of birth is day of life 1. Keep it as written.
+    # `{dol}` is replaced by the day of life on which the pneumonia occurred, a whole number from 1
+    # to 3, the day of birth being day 1. The report derives it rather than reading it off the
+    # pneumonia form: it counts the days from the admission in the enrolment to the pneumonia date,
+    # starting from the day of life recorded on the admission form for an admission recorded as a
+    # transfer or readmission after the day of birth and from day 1 for every other admission. Keep
+    # it as written.
     description: >-
-      The pneumonia occurred within the first 3 days of life (day of life is
-      {dol}).
+      The pneumonia occurred on day of life {dol}, within the first 3 days of
+      life; the report derived this day from the dates and the admission form,
+      and did not read it off the pneumonia form.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
@@ -692,17 +705,20 @@ problems:
     summary: A pneumonia occurred within the first three days of life.
   "34":
     # Translators:
-    # `{dos}` is replaced by the day of hospitalization on which the pneumonia occurred, 1 or 2, the
-    # day of admission being day 1. Keep it as written.
+    # `{dos}` is replaced by the day of the stay on which the pneumonia occurred, a whole number 1
+    # or 2, the day of admission being day 1. The report derives the day by counting from the
+    # admission in the enrolment to the pneumonia date, rather than reading the day of occurrence
+    # stored on the pneumonia form. Keep it as written.
     description: >-
-      The pneumonia occurred within the first two days of hospitalization of a
-      referred or (re-)admitted patient (day of hospitalization is {dos}).
+      The pneumonia occurred on day {dos} of the stay, before its third day; the
+      report derived this day from the admission and pneumonia dates, and did not
+      read it off the pneumonia form.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
     # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
     # language's own apostrophe and quotation marks.
-    summary: A pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
+    summary: A pneumonia occurred before the third day of the stay.
   "35":
     # Translators:
     # `{dol}` is replaced by the day of life stored in the necrotizing enterocolitis form and
@@ -735,11 +751,16 @@ problems:
     summary: The day of occurrence after admission stored in the necrotizing enterocolitis form does not match the value calculated from the dates.
   "37":
     # Translators:
-    # `{dol}` is replaced by the day of life stored in the necrotizing enterocolitis form, a whole
-    # number below 4; the day of birth is day of life 1. Keep it as written.
+    # `{dol}` is replaced by the day of life on which the necrotizing enterocolitis occurred, a
+    # whole number from 1 to 3, the day of birth being day 1. The report derives it rather than
+    # reading it off the necrotizing enterocolitis form: it counts the days from the admission in
+    # the enrolment to that form's date, starting from the day of life recorded on the admission
+    # form for an admission recorded as a transfer or readmission after the day of birth and from
+    # day 1 for every other admission. Keep it as written.
     description: >-
-      The necrotizing enterocolitis occurred within the first 3 days of life
-      (day of life is {dol}).
+      The necrotizing enterocolitis occurred on day of life {dol}, within the
+      first 3 days of life; the report derived this day from the dates and the
+      admission form, and did not read it off the necrotizing enterocolitis form.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
@@ -748,18 +769,20 @@ problems:
     summary: A necrotizing enterocolitis occurred within the first three days of life.
   "38":
     # Translators:
-    # `{dos}` is replaced by the day of hospitalization on which the necrotizing enterocolitis
-    # occurred, 1 or 2, the day of admission being day 1. Keep it as written.
+    # `{dos}` is replaced by the day of the stay on which the necrotizing enterocolitis occurred, a
+    # whole number 1 or 2, the day of admission being day 1. The report derives the day by counting
+    # from the admission in the enrolment to that form's date, rather than reading the day of
+    # occurrence stored on it. Keep it as written.
     description: >-
-      The necrotizing enterocolitis occurred within the first two days of
-      hospitalization of a referred or (re-)admitted patient (day of
-      hospitalization is {dos}).
+      The necrotizing enterocolitis occurred on day {dos} of the stay, before its
+      third day; the report derived this day from the admission and infection
+      dates, and did not read it off the necrotizing enterocolitis form.
     # Translators:
     # What the rule checks, in one sentence that stands on its own and has no placeholder: the
     # report's header lists it when the rule was not applied, and the NeoIPC app shows it beside the
     # rule's checkbox on its Validation Report form. The app shows it as typed, so type your
     # language's own apostrophe and quotation marks.
-    summary: A necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient.
+    summary: A necrotizing enterocolitis occurred before the third day of the stay.
   "39":
     # Translators:
     # `{dol}` is replaced by the day of life stored in the surgical procedure form and `{dol_calc}`

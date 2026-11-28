@@ -1,5 +1,5 @@
-### The Infection Occurred Within the First Two Days of Hospitalization of a Referred or (Re-)Admitted Patient {#sec-problem-details-20}
+### The Infection Occurred Before the Third Day of the Stay {#sec-problem-details-20}
 
-Infections that occur within the first two days in referred or (re-)admitted patients are not considered to be nosocomial infections according to the NeoIPC Surveillance Protocol and therefore cannot be recorded.
+An infection which occurred before the third day of the stay — day 1 or day 2 of it — was most probably already present when the infant came to the department, and the surveillance does not record it. For an infant transferred or readmitted to the department the NeoIPC Surveillance Protocol sets exactly this cut-off: an infection counts as hospital-acquired only where the symptoms begin on or after day 3 of the stay, the day of admission counting as day 1. This report applies that cut-off to every admission, since an infection before the third day of a stay is most probably not acquired in the department; an exception the NeoIPC support team has accepted keeps a record out of these findings.
 
-Please delete the forms for all infections that are not nosocomial infections according to this definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it is an input error.
+Please delete the forms of the infections which are not hospital-acquired under this definition (see @sec-solution-12), and correct the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) only where one of them was entered as the wrong date.

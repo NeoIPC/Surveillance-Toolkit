@@ -1,14 +1,11 @@
 ### The Infection Occurred Within the First Three Days of Life {#sec-problem-details-19}
 
-This message should not necessarily be interpreted as an error, but rather as a warning of a possible misunderstanding.
+This message should not necessarily be read as an entry error, but as a warning that an infection was recorded which the surveillance does not count as hospital-acquired.
 
-As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal departments, early-onset infections generally cannot be recorded.
-The NeoIPC Surveillance Protocol states that if an infection occurs earlier than 72 hours after birth, it is not considered a nosocomial infection and should not be included in NeoIPC surveillance unless it is clearly hospital-acquired (e.g. there is clear evidence of catheter infection).
+The purpose of NeoIPC surveillance is to monitor the infections with a potential for prevention in the neonatal department. Most early-onset infections come from pregnancy and delivery rather than from the department, so the NeoIPC Surveillance Protocol asks that an infection whose first symptoms occur within 72 hours after birth is not recorded in the core module. The Protocol allows that cut-off to be set aside for an infection which is clearly hospital-acquired despite the early timing — a clear catheter infection, for example — and such a record, once the NeoIPC support team has accepted it as an exception, stays out of these findings.
 
-We have found that this protocol specification is sometimes overlooked and that some of our partners are recording early-onset infections, which can distort the reference data and their own statistics.
+We have found that this rule is sometimes overlooked and that some of our partners record early-onset infections, which distorts their own statistics and the reference data.
 
-We have planned to allow the recording of early-onset infections as part of NeoIPC Surveillance, but this will in any case be done in a separate event form in order to separate those infections with a potential for prevention in the neonatal setting from those whose prevention is more in the domain of antenatal care and obstetrics.
+Please delete the forms of the infections which are not hospital-acquired under this definition (see @sec-solution-12), and correct the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) only where one of them was entered as the wrong date.
 
-Please delete the forms for all infections that are not nosocomial infections according to the above definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it was an input error.
-
-The day of life of the infection is calculated from the day of life at the time of admission recorded on the admission form; if that value is wrong, please correct it (see @sec-solution-18).
+The report reads the 72 hours as whole days and flags an infection on a day of life of 1, 2, or 3, the day of birth being day 1. It does not read the day of life stored on the infection form. It counts the days from the admission in the enrolment to the date of the infection, taking that day of admission as day of life 1; only an admission the form records as a transfer or readmission after the day of birth starts instead from the day of life recorded on the admission form. Where that recorded day is itself wrong, correcting it changes the day the report derives (see @sec-solution-18); for any other admission the day rests on that admission date alone.

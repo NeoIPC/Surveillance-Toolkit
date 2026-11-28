@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-10-09 00:38+0200\n"
+"POT-Creation-Date: 2026-11-28 08:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -4108,7 +4108,7 @@ msgstr ""
 #. type: Hash Value: problems 29 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The sepsis occurred within the first 3 days of life (day of life is {dol})."
+msgid "The sepsis occurred on day of life {dol}, within the first 3 days of life; the report derived this day from the dates and the admission form, and did not read it off the sepsis form."
 msgstr ""
 
 #. type: Hash Value: problems 29 summary
@@ -4132,13 +4132,13 @@ msgstr ""
 #. type: Hash Value: problems 30 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is {dos})."
+msgid "The sepsis occurred on day {dos} of the stay, before its third day; the report derived this day from the admission and sepsis dates, and did not read it off the sepsis form."
 msgstr ""
 
 #. type: Hash Value: problems 30 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "A sepsis occurred within the first two days of hospitalization of a referred or (re-)admitted patient."
+msgid "A sepsis occurred before the third day of the stay."
 msgstr ""
 
 #. type: Hash Value: problems 31 description
@@ -4168,7 +4168,7 @@ msgstr ""
 #. type: Hash Value: problems 33 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The pneumonia occurred within the first 3 days of life (day of life is {dol})."
+msgid "The pneumonia occurred on day of life {dol}, within the first 3 days of life; the report derived this day from the dates and the admission form, and did not read it off the pneumonia form."
 msgstr ""
 
 #. type: Hash Value: problems 33 summary
@@ -4180,13 +4180,13 @@ msgstr ""
 #. type: Hash Value: problems 34 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is {dos})."
+msgid "The pneumonia occurred on day {dos} of the stay, before its third day; the report derived this day from the admission and pneumonia dates, and did not read it off the pneumonia form."
 msgstr ""
 
 #. type: Hash Value: problems 34 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "A pneumonia occurred within the first two days of hospitalization of a referred or (re-)admitted patient."
+msgid "A pneumonia occurred before the third day of the stay."
 msgstr ""
 
 #. type: Hash Value: problems 35 description
@@ -4216,7 +4216,7 @@ msgstr ""
 #. type: Hash Value: problems 37 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotizing enterocolitis occurred within the first 3 days of life (day of life is {dol})."
+msgid "The necrotizing enterocolitis occurred on day of life {dol}, within the first 3 days of life; the report derived this day from the dates and the admission form, and did not read it off the necrotizing enterocolitis form."
 msgstr ""
 
 #. type: Hash Value: problems 37 summary
@@ -4228,13 +4228,13 @@ msgstr ""
 #. type: Hash Value: problems 38 description
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "The necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient (day of hospitalization is {dos})."
+msgid "The necrotizing enterocolitis occurred on day {dos} of the stay, before its third day; the report derived this day from the admission and infection dates, and did not read it off the necrotizing enterocolitis form."
 msgstr ""
 
 #. type: Hash Value: problems 38 summary
 #: reports/Validation-Report/content/_sR.yaml:1
 #, no-wrap
-msgid "A necrotizing enterocolitis occurred within the first two days of hospitalization of a referred or (re-)admitted patient."
+msgid "A necrotizing enterocolitis occurred before the third day of the stay."
 msgstr ""
 
 #. type: Hash Value: problems 39 description
@@ -5466,57 +5466,44 @@ msgstr ""
 #. type: Plain text
 #: reports/Validation-Report/en/_problem_detail_0019.Rmd:4
 #, markdown-text, no-wrap
-msgid "This message should not necessarily be interpreted as an error, but rather as a warning of a possible misunderstanding.\n"
+msgid "This message should not necessarily be read as an entry error, but as a warning that an infection was recorded which the surveillance does not count as hospital-acquired.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.Rmd:7
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:6
 #, markdown-text, no-wrap
-msgid ""
-"As the purpose of NeoIPC surveillance is to monitor nosocomial infections with the potential for prevention in neonatal departments, early-onset infections generally cannot be recorded.\n"
-"The NeoIPC Surveillance Protocol states that if an infection occurs earlier than 72 hours after birth, it is not considered a nosocomial infection and should not be included in NeoIPC surveillance unless it is clearly hospital-acquired (e.g. there is clear evidence of catheter infection).\n"
+msgid "The purpose of NeoIPC surveillance is to monitor the infections with a potential for prevention in the neonatal department. Most early-onset infections come from pregnancy and delivery rather than from the department, so the NeoIPC Surveillance Protocol asks that an infection whose first symptoms occur within 72 hours after birth is not recorded in the core module. The Protocol allows that cut-off to be set aside for an infection which is clearly hospital-acquired despite the early timing — a clear catheter infection, for example — and such a record, once the NeoIPC support team has accepted it as an exception, stays out of these findings.\n"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.Rmd:9
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:8
 #, markdown-text, no-wrap
-msgid "We have found that this protocol specification is sometimes overlooked and that some of our partners are recording early-onset infections, which can distort the reference data and their own statistics.\n"
+msgid "We have found that this rule is sometimes overlooked and that some of our partners record early-onset infections, which distorts their own statistics and the reference data.\n"
+msgstr ""
+
+#. type: Plain text
+#: reports/Validation-Report/en/_problem_detail_0019.Rmd:10
+#: reports/Validation-Report/en/_problem_detail_0020.Rmd:5
+#, markdown-text, no-wrap
+msgid "Please delete the forms of the infections which are not hospital-acquired under this definition (see @sec-solution-12), and correct the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) only where one of them was entered as the wrong date.\n"
 msgstr ""
 
 #. type: Plain text
 #: reports/Validation-Report/en/_problem_detail_0019.Rmd:11
 #, markdown-text, no-wrap
-msgid "We have planned to allow the recording of early-onset infections as part of NeoIPC Surveillance, but this will in any case be done in a separate event form in order to separate those infections with a potential for prevention in the neonatal setting from those whose prevention is more in the domain of antenatal care and obstetrics.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.Rmd:13
-#, markdown-text, no-wrap
-msgid "Please delete the forms for all infections that are not nosocomial infections according to the above definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it was an input error.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0019.Rmd:14
-#, markdown-text, no-wrap
-msgid "The day of life of the infection is calculated from the day of life at the time of admission recorded on the admission form; if that value is wrong, please correct it (see @sec-solution-18).\n"
+msgid "The report reads the 72 hours as whole days and flags an infection on a day of life of 1, 2, or 3, the day of birth being day 1. It does not read the day of life stored on the infection form. It counts the days from the admission in the enrolment to the date of the infection, taking that day of admission as day of life 1; only an admission the form records as a transfer or readmission after the day of birth starts instead from the day of life recorded on the admission form. Where that recorded day is itself wrong, correcting it changes the day the report derives (see @sec-solution-18); for any other admission the day rests on that admission date alone.\n"
 msgstr ""
 
 #. type: Title ###
 #: reports/Validation-Report/en/_problem_detail_0020.Rmd:1
 #, markdown-text, no-wrap
-msgid "The Infection Occurred Within the First Two Days of Hospitalization of a Referred or (Re-)Admitted Patient {#sec-problem-details-20}"
+msgid "The Infection Occurred Before the Third Day of the Stay {#sec-problem-details-20}"
 msgstr ""
 
 #. type: Plain text
 #: reports/Validation-Report/en/_problem_detail_0020.Rmd:4
 #, markdown-text, no-wrap
-msgid "Infections that occur within the first two days in referred or (re-)admitted patients are not considered to be nosocomial infections according to the NeoIPC Surveillance Protocol and therefore cannot be recorded.\n"
-msgstr ""
-
-#. type: Plain text
-#: reports/Validation-Report/en/_problem_detail_0020.Rmd:5
-#, markdown-text, no-wrap
-msgid "Please delete the forms for all infections that are not nosocomial infections according to this definition (see @sec-solution-12) or adjust the infection date (see @sec-solution-7) or the admission date (see @sec-solution-6) if it is an input error.\n"
+msgid "An infection which occurred before the third day of the stay — day 1 or day 2 of it — was most probably already present when the infant came to the department, and the surveillance does not record it. For an infant transferred or readmitted to the department the NeoIPC Surveillance Protocol sets exactly this cut-off: an infection counts as hospital-acquired only where the symptoms begin on or after day 3 of the stay, the day of admission counting as day 1. This report applies that cut-off to every admission, since an infection before the third day of a stay is most probably not acquired in the department; an exception the NeoIPC support team has accepted keeps a record out of these findings.\n"
 msgstr ""
 
 #. type: Title ###
@@ -6528,7 +6515,7 @@ msgid "Correcting the Day of Life at Admission {#sec-solution-18}"
 msgstr ""
 
 #. type: Plain text
-#: reports/Validation-Report/en/_solution_0018.Rmd:14
+#: reports/Validation-Report/en/_solution_0018.Rmd:16
 #, markdown-text, no-wrap
 msgid ""
 "The day of life on the infection and procedure forms of an enrolment is calculated from the day of life at admission recorded on its admission form, so a wrong value there makes the day of life on those forms wrong too.\n"
@@ -6538,4 +6525,6 @@ msgid ""
 "Check that the form now shows 1 and complete it again (see @sec-solution-8).\n"
 "Then, for each infection and procedure form of the enrolment, reopen it for editing if it is completed (see @sec-solution-9), refresh the page as described in @sec-solution-11 so that the platform calculates the form's day of life again, and complete it again if it was completed (see @sec-solution-8).\n"
 "If you reopened the enrolment to edit its forms, complete it again as well (see @sec-solution-4).\n"
+"For an infant transferred or readmitted after the day of birth, the day of life at admission is a value the team records on the admission form, not one the platform sets; if the recorded value is wrong, reopen the admission form for editing (see @sec-solution-9), correct the day of life, and complete it again (see @sec-solution-8).\n"
+"The infection and procedure forms of the enrolment then need the same treatment as above: reopen them if completed (see @sec-solution-9), refresh the page (see @sec-solution-11) so the platform calculates their day of life again, and complete them again (see @sec-solution-8), completing a reopened enrolment too (see @sec-solution-4).\n"
 msgstr ""

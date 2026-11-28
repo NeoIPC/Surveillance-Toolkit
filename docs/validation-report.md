@@ -199,7 +199,7 @@ admission (`en/_solution_0018.Rmd`) tells the partner that the report's values c
 forms' for this reason, and how to bring the stored values in line. The problem details on
 a day of life that does not match the calculated value and on an infection within the first three days
 of life cite it, so the report includes it wherever one of rules 27 to 42 fired except rules 30, 34 and
-38, which concern the day of hospitalization.
+38, which concern the day of the stay, derived from the dates.
 
 The report never lists a reconciliation. Repairing what the partner neither chooses nor sees is the
 coordinating centre's task, not the department's, so a reconciliation is not a finding. The Partner and
