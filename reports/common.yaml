@@ -121,6 +121,7 @@ table_headers:
   q2: "Q₂"
   q3: "Q₃"
   rate: "Rate"
+  tested: "Tested"
 tbl-abr-infection-rate:
   block_total_only_footnote: >-
     {count} of the infections in this Total have no row in this block because
@@ -190,6 +191,18 @@ tbl-organism-resistance-rate:
     Infections with at least one infectious agent at or beneath the row
     recorded resistant in the category
   tbl-cap: "Organism-specific resistance rates"
+  # Translators: {column} stands for the column's own header, which the
+  # footnote quotes at its start. A detection is undocumented when its
+  # resistance test was left blank.
+  tested_pooled_footnote: >-
+    {column}: The resistance test rate calculated across all departments: the
+    detections with a resistance test result among all detections of an
+    infectious agent to which this category applies, as a percentage; a blank
+    test result counts as undocumented.
+  tested_rate_footnote: >-
+    {column}: The detections of your department with a resistance test result
+    among all its detections of an infectious agent to which this category
+    applies, as a percentage; a blank test result counts as undocumented.
 tbl-agent-per-infection-rate:
   n_footnote: "{column}: The aggregated number of infectious agents in all infections."
   n_footnote_engine: >-

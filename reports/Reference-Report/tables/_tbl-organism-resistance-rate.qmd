@@ -45,14 +45,8 @@ if (is.null(tbl_data)) {
 ia_engine <- !is.null(tbl_data) && "node_id" %in% names(tbl_data)
 ia_groups <- !identical(ia_slot, "infectious_agent_resistance_rate_ontology_table")
 
-# The summary block sits at level 1 without rank or parent, and its
-# identifiers are the attribute value's `<attribute>|<key>`; a tree top of
-# the ontology version carries a rank and a groups identifier carries no
-# `|`, so neither is mistaken for a summary row.
 ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
-ia_summary <- if (ia_engine)
-  tbl_data$level == 1 & is.na(tbl_data$parent_id) & is.na(tbl_data$rank) &
-    grepl("^[a-z_]+\\|", ia_node_id) else
+ia_summary <- if (ia_engine) ia_summary_rows(tbl_data) else
   rep(FALSE, nrow(tbl_data))
 ia_bold <- if (ia_engine) {
   ia_summary |
@@ -73,8 +67,11 @@ tbl <- tbl_data |>
   dplyr::select(-tidyselect::any_of(c(
     ".ontology_path", "ia_tst_tot", "node_id", "parent_id", "rank",
     "quartile_departments", "total",
-    "tested_n", "tested_total", "tested_pooled",
-    "tested_ci_lower", "tested_ci_upper"))) |>
+    "tested_n", "tested_total",
+    # The resistance-test rate is an engine measure; a table from before the
+    # engine keeps its earlier columns.
+    if (ia_engine) character(0) else
+      c("tested_pooled", "tested_ci_lower", "tested_ci_upper"))) ) |>
   dplyr::mutate(
     # `gt::tab_stub_indent()` caps its per-level indent at five levels, so
     # the engine's deeper tree rows take their indent beyond the cap from
@@ -89,7 +86,9 @@ tbl <- tbl_data |>
     !!sR$table_headers$pooled := "pooled",
     !!sR$table_headers$q1 := "q1",
     !!sR$table_headers$q2 := "q2",
-    !!sR$table_headers$q3 := "q3") |>
+    !!sR$table_headers$q3 := "q3",
+    !!sR$table_headers$tested := tidyselect::any_of(
+      if (ia_engine) "tested_pooled" else character(0))) |>
   dplyr::mutate(
     abr = dplyr::recode_values(
       .data$abr,
@@ -102,6 +101,10 @@ tbl <- tbl_data |>
   dplyr::group_by(.data$abr)
 
 cw <- compute_col_widths(tbl_data, stub_min = 34)
+
+# The tested column's width comes out of the stub, as the per-agent table
+# does for its infection-type columns.
+tested_w <- if (ia_engine && "tested_pooled" %in% names(tbl_data)) cw$q else 0
 
 ci_pattern <- ci_pattern_inline
 
@@ -140,6 +143,23 @@ if (include_pooled_ci && "ci_lower" %in% colnames(gt_tbl$`_data`)) {
   gt_tbl <- gt_tbl |> gt::cols_hide(columns = c("ci_lower", "ci_upper"))
 }
 
+# Resistance-test rate CI merge
+if (sR$table_headers$tested %in% colnames(gt_tbl$`_data`) &&
+    all(c("tested_ci_lower", "tested_ci_upper") %in%
+          colnames(gt_tbl$`_data`))) {
+  if (include_pooled_ci) {
+    gt_tbl <- gt_tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$tested, "tested_ci_lower",
+                    "tested_ci_upper"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$tested_pooled))
+  } else {
+    gt_tbl <- gt_tbl |>
+      gt::cols_hide(columns = c("tested_ci_lower", "tested_ci_upper"))
+  }
+}
+
 # Quartile bootstrap CI merge
 if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
   if (include_quartile_ci) {
@@ -167,12 +187,13 @@ if ("q1_ci_lower" %in% colnames(gt_tbl$`_data`)) {
 
 gt_tbl <- gt_tbl |>
   cols_width(
-    stub() ~ pct(cw$stub),
+    stub() ~ pct(max(cw$stub - tested_w, 22)),
     sR$table_headers$count ~ pct(cw$n),
     sR$table_headers$pooled ~ pct(cw$pooled),
     sR$table_headers$q1 ~ pct(cw$q),
     sR$table_headers$q2 ~ pct(cw$q),
-    sR$table_headers$q3 ~ pct(cw$q))
+    sR$table_headers$q3 ~ pct(cw$q),
+    tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w))
 
 gt_tbl <- gt_tbl |>
   gt::tab_stub_indent(
@@ -257,6 +278,16 @@ gt_tbl <- gt_tbl |>
       column = sR$table_headers$pooled),
     locations = cells_column_labels(columns = sR$table_headers$pooled),
     placement = "right")
+
+if (sR$table_headers$tested %in% colnames(gt_tbl$`_data`))
+  gt_tbl <- gt_tbl |>
+    gt::tab_footnote(
+      footnote = interpolate_translation(
+        sR$`tbl-organism-resistance-rate`$tested_pooled_footnote,
+        column = sR$table_headers$tested),
+      locations = cells_column_labels(
+        columns = sR$table_headers$tested),
+      placement = "right")
 
 # Sparse-data footnote for N < sparse_threshold
 if (any(!is.na(tbl_data$pooled) & tbl_data$n < sparse_threshold, na.rm = TRUE)) {

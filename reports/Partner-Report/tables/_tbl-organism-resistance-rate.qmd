@@ -79,14 +79,9 @@ if (!is.null(tbl_data) &&
   ci_pattern <- ci_pattern_inline
 
   # Row styling: the engine styles by `rank` and the row identity; the older
-  # table styled by `taxon`. The summary block sits at level 1 without rank or
-  # parent, and its identifiers are the attribute value's `<attribute>|<key>`;
-  # a tree top of the ontology version carries a rank and a groups identifier
-  # carries no `|`, so neither is mistaken for a summary row.
+  # table styled by `taxon`.
   ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
-  ia_summary <- if (ia_engine)
-    tbl_data$level == 1 & is.na(tbl_data$parent_id) & is.na(tbl_data$rank) &
-      grepl("^[a-z_]+\\|", ia_node_id) else
+  ia_summary <- if (ia_engine) ia_summary_rows(tbl_data) else
     rep(FALSE, nrow(tbl_data))
   ia_bold <- if (ia_engine) {
     ia_summary |
@@ -108,12 +103,15 @@ if (!is.null(tbl_data) &&
       "ia_tst_tot_ref", "node_id", "parent_id", "rank",
       "quartile_departments_ref",
       "total_own", "total_ref",
-      paste0("tested_", c("n", "total", "pooled",
-                          "ci_lower", "ci_upper"), "_own"),
+      paste0("tested_", c("n", "total"), "_own"),
       paste0("tested_", c("n", "total", "pooled",
                           "ci_lower", "ci_upper"), "_ref"),
       "tested_n", "tested_total", "tested_pooled",
-      "tested_ci_lower", "tested_ci_upper"))) |>
+      "tested_ci_lower", "tested_ci_upper",
+      # The resistance-test rate is an engine measure; a join from before
+      # the engine keeps its earlier columns.
+      if (ia_engine) character(0) else
+        paste0("tested_", c("pooled", "ci_lower", "ci_upper"), "_own")))) |>
     dplyr::mutate(
       group = dplyr::if_else(
         !ia_engine & stringr::str_detect(group, "spp."),
@@ -126,7 +124,17 @@ if (!is.null(tbl_data) &&
       !!sR$table_headers$pooled := tidyselect::any_of("pooled_ref"),
       !!sR$table_headers$q1 := tidyselect::any_of("q1_ref"),
       !!sR$table_headers$q2 := tidyselect::any_of("q2_ref"),
-      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"))
+      !!sR$table_headers$q3 := tidyselect::any_of("q3_ref"),
+      !!sR$table_headers$tested := tidyselect::any_of(
+        if (ia_engine) "tested_pooled_own" else character(0)))
+
+  # The engine appends the tested columns after the quartiles; the column
+  # belongs beside the department's own rate, under the same spanner, so
+  # move it there before gt fixes the column order.
+  if (sR$table_headers$tested %in% names(tbl))
+    tbl <- tbl |> dplyr::relocate(
+      tidyselect::any_of(sR$table_headers$tested),
+      .after = tidyselect::any_of(sR$table_headers$rate))
 
   # `gt::tab_stub_indent()` caps its per-level indent at five levels, so the
   # engine's deeper tree rows take their indent beyond the cap from the
@@ -134,9 +142,15 @@ if (!is.null(tbl_data) &&
   if (ia_engine)
     tbl <- tbl |> dplyr::mutate(group = ia_indent_labels(group, level))
 
+  # The tested column's width comes out of the stub, as the per-agent
+  # table does for its infection-type columns.
+  tested_w <- if (ia_engine &&
+                  "tested_pooled_own" %in% names(tbl_data)) cw$q else 0
+
   ci_cols_to_drop <- character(0)
   if (!include_rate_ci)
-    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own")
+    ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_own", "ci_upper_own",
+                         "tested_ci_lower_own", "tested_ci_upper_own")
   if (!include_pooled_ci)
     ci_cols_to_drop <- c(ci_cols_to_drop, "ci_lower_ref", "ci_upper_ref")
   if (!include_quartile_ci)
@@ -276,6 +290,26 @@ if (!is.null(tbl_data) &&
         rows = !is.na(tbl_data$pooled_own)
       )
   }
+  if (include_rate_ci && sR$table_headers$tested %in% colnames(tbl$`_data`) &&
+      all(c("tested_ci_lower_own", "tested_ci_upper_own") %in%
+          colnames(tbl$`_data`))) {
+    tbl <- tbl |>
+      gt::cols_merge(
+        columns = c(sR$table_headers$tested, "tested_ci_lower_own",
+                    "tested_ci_upper_own"),
+        pattern = ci_pattern,
+        rows = !is.na(tbl_data$tested_pooled_own)
+      )
+  }
+  if (sR$table_headers$tested %in% colnames(tbl$`_data`)) {
+    tbl <- tbl |>
+      gt::tab_footnote(
+        footnote = interpolate_translation(
+          sR$`tbl-organism-resistance-rate`$tested_rate_footnote,
+          column = sR$table_headers$tested),
+        locations = cells_column_labels(columns = sR$table_headers$tested),
+        placement = "right")
+  }
   if (include_pooled_ci && "ci_lower_ref" %in% colnames(tbl$`_data`)) {
     tbl <- tbl |>
       gt::cols_merge(
@@ -314,9 +348,10 @@ if (!is.null(tbl_data) &&
   if (has_reference) {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(cw$stub),
+        stub() ~ pct(max(cw$stub - tested_w, 22)),
         sR$table_headers$count ~ pct(cw$n),
         sR$table_headers$rate ~ pct(cw$rate),
+        tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w),
         sR$table_headers$pooled ~ pct(cw$pooled),
         sR$table_headers$q1 ~ pct(cw$q),
         sR$table_headers$q2 ~ pct(cw$q),
@@ -324,7 +359,9 @@ if (!is.null(tbl_data) &&
       ) |>
       tab_spanner(
         label = sR$own_data_label,
-        columns = tidyselect::any_of(c(sR$table_headers$count, sR$table_headers$rate)),
+        columns = tidyselect::any_of(
+          c(sR$table_headers$count, sR$table_headers$rate,
+            sR$table_headers$tested)),
         id = "department_data"
       ) |>
       tab_spanner(
@@ -345,9 +382,10 @@ if (!is.null(tbl_data) &&
   } else {
     tbl <- tbl |>
       cols_width(
-        stub() ~ pct(cw$stub),
+        stub() ~ pct(max(cw$stub - tested_w, 22)),
         sR$table_headers$count ~ pct(cw$n),
-        sR$table_headers$rate ~ pct(cw$rate)
+        sR$table_headers$rate ~ pct(cw$rate),
+        tidyselect::any_of(sR$table_headers$tested) ~ pct(tested_w)
       )
   }
 
