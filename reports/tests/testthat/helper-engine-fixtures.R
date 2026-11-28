@@ -37,8 +37,9 @@ fixture_agent_per_infection_groups <- function() {
 
 # The same table over the full ontology: the domain row, an LPSN genus, the
 # ontology's own group under it, a species, the residual rows of the genus
-# and of that group — a group within the genus, not above it — and a virus
-# keyed by its ICTV identifier.
+# and of that group — a group within the genus, not above it — a virus
+# keyed by its ICTV identifier, and the ontology's Viruses top as the
+# released list holds it: a tree top with no parent and no rank.
 fixture_agent_per_infection_ontology <- function() {
   tibble::tribble(
     ~level, ~rank, ~node_id, ~parent_id, ~group,
@@ -53,20 +54,25 @@ fixture_agent_per_infection_ontology <- function() {
     "LPSN|genus/staphylococcus", "Staphylococcus n.o.s.",
     4L, NA_character_, "NeoIPC|63~n.o.s.", "NeoIPC|63",
     "Coagulase-negative staphylococci n.o.s.",
-    1L, NA_character_, "ICTV|191161", NA_character_, "Human respiratory syncytial virus",
+    1L, "Species", "ICTV|191161", NA_character_, "Human respiratory syncytial virus",
+    1L, NA_character_, "NeoIPC|100", NA_character_, "Viruses",
   ) |>
     dplyr::mutate(
-      n = c(12L, 11L, 6L, 4L, 2L, 2L, 2L, 1L),
-      total = c(8L, 8L, 6L, 4L, 2L, 2L, 2L, 1L),
-      pooled = c(150, 137.5, 100, 100, 100, 100, 100, 100),
-      ci_lower = c(77.2, 69.6, 41.5, 15.8, 1.5, 1.5, 1.5, 2.5),
-      ci_upper = c(250.4, 227.2, 193.3, 84.1, 64.6, 64.6, 64.6, 97.5),
-      q1 = c(100, 100, 50, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_),
-      q2 = c(120, 110, 60, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_),
-      q3 = c(140, 130, 90, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_),
-      quartile_departments = c(6L, 6L, 6L, 0L, 0L, 0L, 0L, 0L),
+      n = c(12L, 11L, 6L, 4L, 2L, 2L, 2L, 1L, 3L),
+      total = c(8L, 8L, 6L, 4L, 2L, 2L, 2L, 1L, 2L),
+      pooled = c(150, 137.5, 100, 100, 100, 100, 100, 100, 150),
+      ci_lower = c(77.2, 69.6, 41.5, 15.8, 1.5, 1.5, 1.5, 2.5, 3.2),
+      ci_upper = c(250.4, 227.2, 193.3, 84.1, 64.6, 64.6, 64.6, 97.5, 99.8),
+      q1 = c(100, 100, 50, NA_real_, NA_real_, NA_real_, NA_real_,
+             NA_real_, NA_real_),
+      q2 = c(120, 110, 60, NA_real_, NA_real_, NA_real_, NA_real_,
+             NA_real_, NA_real_),
+      q3 = c(140, 130, 90, NA_real_, NA_real_, NA_real_, NA_real_,
+             NA_real_, NA_real_),
+      quartile_departments = c(6L, 6L, 6L, 0L, 0L, 0L, 0L, 0L, 0L),
       n_total_only = c(1L, NA_integer_, NA_integer_, NA_integer_,
-                       NA_integer_, NA_integer_, NA_integer_, NA_integer_))
+                       NA_integer_, NA_integer_, NA_integer_, NA_integer_,
+                       NA_integer_))
 }
 
 # A resistance table's blocks: the same genus row in two categories' blocks,

@@ -1,7 +1,10 @@
 # `get_benchmark_data()` refuses each slot on its own stamp, so the two
 # versions of a table can be refused apart: a list release that only grew the
-# full tree records the ontology slot alone. The callout must appear on the
-# table actually rendered from a refused slot, and on no other.
+# full tree records the ontology slot alone. A rendered table's callout turns
+# on `not_comparable_here()` naming its own slot, so these tests pin that
+# decision: the refused slot flags the table it names, an ontology-only
+# refusal leaves the groups table unflagged, and no other table's slot is
+# touched.
 
 test_that("not_comparable_here flags the refused slot of the same table", {
   nc <- c("abr_infection_rate_table", "abr_infection_rate_ontology_table")

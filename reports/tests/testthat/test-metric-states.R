@@ -67,22 +67,23 @@ test_that("a wrong identifier length aborts under its own class", {
 })
 
 test_that("localize_metric_name returns the table's own label for an identity", {
+  # The labels differ from anything the identity's own words could print.
   labels <- c(
-    "total" = "Total",
-    "lpsn|genus/staphylococcus~n.o.s." = "Staphylococcus n.o.s.",
-    "3gcr:enterobacterales" = "Enterobacterales",
+    "total" = "All infectious agents",
+    "lpsn|genus/staphylococcus~n.o.s." = "Staphylococcus, other",
+    "3gcr:enterobacterales" = "Enterobacterales with resistance",
     "gram-positive-cocci" = "Gram-positive cocci")
   expect_identical(localize_metric_name("total", sR = NULL, labels = labels),
-                   "Total")
+                   "All infectious agents")
   expect_identical(
     localize_metric_name("lpsn|genus/staphylococcus~n.o.s.", sR = NULL,
                          labels = labels),
-    "Staphylococcus n.o.s.")
+    "Staphylococcus, other")
   # The text names the category beside the row: the table prints the same
   # row in every category's block, so the bare label names any of them.
   expect_identical(
     localize_metric_name("3gcr:enterobacterales", sR = NULL, labels = labels),
-    "3gcr: Enterobacterales")
+    "3gcr: Enterobacterales with resistance")
 })
 
 test_that("localize_metric_name still resolves the glossary identifiers", {
@@ -106,28 +107,34 @@ test_that("resistance-fixture rows are named by category and row together", {
   labels <- ia_metric_labels(fixture)
   expect_true(all(c("3gcr:total", "car:total", "3gcr:enterobacterales",
                     "car:enterobacterales") %in% names(labels)))
+  # Read under labels no title-cased key could print, so the assertions tell
+  # the table's label from a fallback that words the identity itself.
+  labels["3gcr:total"] <- "Agents (total)"
+  labels["car:total"] <- "Agents (total)"
+  labels["3gcr:enterobacterales"] <- "Enterobacterales with resistance"
+  labels["car:enterobacterales"] <- "Enterobacterales with carbapenemase"
   sR <- list("3gcr_label" = "3GCR", "carbr_label" = "CARBR")
   expect_identical(localize_metric_name("3gcr:total", sR, labels = labels),
-                   "3GCR: Total")
+                   "3GCR: Agents (total)")
   expect_identical(localize_metric_name("car:total", sR, labels = labels),
-                   "CARBR: Total")
+                   "CARBR: Agents (total)")
   expect_identical(
     localize_metric_name("3gcr:enterobacterales", sR, labels = labels),
-    "3GCR: Enterobacterales")
+    "3GCR: Enterobacterales with resistance")
   expect_identical(
     localize_metric_name("car:enterobacterales", sR, labels = labels),
-    "CARBR: Enterobacterales")
+    "CARBR: Enterobacterales with carbapenemase")
 })
 
 test_that("the labels of an identity win over the glossary, and the category
            stands beside them", {
   sR <- list("3gcr_label" = "3GCR")
-  labels <- c("3gcr:enterobacterales" = "Enterobacterales",
-              "3gcr:total" = "Total")
+  labels <- c("3gcr:enterobacterales" = "Enterobacterales with resistance",
+              "3gcr:total" = "Agents (total)")
   expect_identical(
     localize_metric_name("3gcr:enterobacterales", sR, labels = labels),
-    "3GCR: Enterobacterales")
+    "3GCR: Enterobacterales with resistance")
   # Every block's Total reads as its block's, not as any other's.
   expect_identical(localize_metric_name("3gcr:total", sR, labels = labels),
-                   "3GCR: Total")
+                   "3GCR: Agents (total)")
 })

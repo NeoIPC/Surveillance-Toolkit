@@ -161,14 +161,9 @@ if (!is.null(tbl_data) &&
   }
 
   # Row styling: the engine styles by `rank` and the row identity; the older
-  # table styled by `taxon`. The summary block sits at level 1 without rank or
-  # parent, and its identifiers are the attribute value's `<attribute>|<key>`;
-  # a tree top of the ontology version carries a rank and a groups identifier
-  # carries no `|`, so neither is mistaken for a summary row.
+  # table styled by `taxon`.
   ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
-  ia_summary <- if (ia_engine)
-    tbl_data$level == 1 & is.na(tbl_data$parent_id) & is.na(tbl_data$rank) &
-      grepl("^[a-z_]+\\|", ia_node_id) else
+  ia_summary <- if (ia_engine) ia_summary_rows(tbl_data) else
     rep(FALSE, nrow(tbl_data))
   ia_bold <- if (ia_engine) {
     tbl_data$level == 0 | ia_summary |

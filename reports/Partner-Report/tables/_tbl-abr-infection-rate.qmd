@@ -74,15 +74,9 @@ if (!is.null(tbl_data) &&
 
   # Row styling: the engine styles by `rank` and the row identity; the older
   # table styled by `taxon`. Within a block its Total heads the block, and a
-  # summary row counts bacteria by Gram reaction or oxygen requirement. The
-  # summary block sits at level 1 without rank or parent, and its identifiers
-  # are the attribute value's `<attribute>|<key>`; a tree top of the ontology
-  # version carries a rank and a groups identifier carries no `|`, so neither
-  # is mistaken for a summary row.
+  # summary row counts bacteria by Gram reaction or oxygen requirement.
   ia_node_id <- if (ia_engine) as.character(tbl_data$node_id) else character(0)
-  ia_summary <- if (ia_engine)
-    tbl_data$level == 1 & is.na(tbl_data$parent_id) & is.na(tbl_data$rank) &
-      grepl("^[a-z_]+\\|", ia_node_id) else
+  ia_summary <- if (ia_engine) ia_summary_rows(tbl_data) else
     rep(FALSE, nrow(tbl_data))
   ia_bold <- if (ia_engine) {
     tbl_data$level == 0 | ia_summary |
@@ -98,6 +92,11 @@ if (!is.null(tbl_data) &&
     tbl_data$rank %in% ia_italic_ranks
   else
     tbl_data$taxon %in% c("domain", "kingdom", "order", "species")
+  # The Total of each resistance category's block, named by its identity
+  # and not by the printed label the engine may rename.
+  ia_total_rows <- if (ia_engine)
+    grepl("(^|:)total$", tolower(ia_row_identities(tbl_data))) else
+    tbl_data$group == "Total"
 
   ci_pattern <- ci_pattern_inline
 
@@ -360,7 +359,7 @@ if (!is.null(tbl_data) &&
     gt::tab_footnote(
       footnote = sR$`tbl-abr-infection-rate`$total_dedup_footnote,
       locations = gt::cells_stub(
-        rows = tbl_data$group == "Total"),
+        rows = ia_total_rows),
       placement = "right")
 
   # Infections a block's Total counts but no row of the block counts: the

@@ -1715,8 +1715,21 @@ extract_counts <- function(bm, suffix) {
     n_patient_days = pull_col(bm$n_patient_days, "total"),
     n_severe_infections = pull_filtered(
       bm$incidence_density_rate_table, "inf", "si", "n"),
-    n_infectious_agents = pull_filtered(
-      bm$infectious_agent_detection_rate_per_agent_table, "group", "Total", "n"),
+    # The engine's Total row is keyed by its identity, not its printed label.
+    # NEOIPC-COMPAT(infectious-agent-engine): remove the label branch once
+    # reports/compatibility.yml lists v0.0.0.9009 or later as tested and
+    # minimum together; see the marker of the same scope in the classify chunk.
+    n_infectious_agents = if (is.data.frame(
+        bm$infectious_agent_detection_rate_per_agent_table) &&
+        "node_id" %in% names(bm$infectious_agent_detection_rate_per_agent_table)) {
+      ia_data <- bm$infectious_agent_detection_rate_per_agent_table
+      ia_data[[paste0("n", suffix)]][
+        ia_row_index(ia_data, "total", "infectious-agent table")]
+    } else {
+      pull_filtered(
+        bm$infectious_agent_detection_rate_per_agent_table,
+        "group", "Total", "n")
+    },
     # The infections with a detected infectious agent, for the dataset
     # resources. On the classification-engine tables the per-infection-type
     # table carries no total row — its rows are the infection types with a

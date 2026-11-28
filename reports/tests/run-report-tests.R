@@ -3,10 +3,12 @@
 #
 #   Rscript reports/tests/run-report-tests.R
 #
-# The helpers under test live in `reports/common/`; the report `.qmd` files
-# source them, and `testthat/helper-report-common.R` sources the same files,
-# so what the tests prove here holds in the render for everything the helpers
-# do.
+# The helpers under test live in `reports/common/` and in the reports' own
+# directories — the outlier framework `metric-states.R` stands in
+# `reports/Partner-Report/`, which that report's `_setup.qmd` sources alone —
+# and `testthat/helper-report-common.R` sources the same files the render
+# does, so what the tests prove here holds in the render for everything the
+# helpers do.
 
 if (!requireNamespace("testthat", quietly = TRUE)) {
   rlang::abort(

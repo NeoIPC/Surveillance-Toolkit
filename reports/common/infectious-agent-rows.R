@@ -91,6 +91,25 @@ first_state <- function(state_map, keys) {
   if (length(hit) == 0L) NULL else state_map[[hit[1]]]
 }
 
+# The engine's summary rows: the attribute value's `<attribute>|<key>`,
+# which the released engine builds from exactly the Gram reaction and the
+# oxygen requirement (its own `.is_summary_row` reads the attribute list
+# bundled with the infectious-agent list). The shape test — level 1, no
+# parent, no rank — stands beside the attribute so a node shaped like a
+# summary row still has to be keyed as one. The case of the identifier
+# tells nothing: the ontology holds a rankless tree top, `NeoIPC|100`
+# "Viruses", which a pipe in the identifier or a lower-case letter would
+# misjudge for a summary row. The two attributes are pinned to the
+# released list; a list release that adds a third summary attribute widens
+# this pair in the same change.
+ia_summary_attributes <- c("gram_reaction", "oxygen_requirement")
+ia_summary_rows <- function(table_data) {
+  attribute <- sub("\\|.*$", "", as.character(table_data$node_id))
+  attribute %in% ia_summary_attributes &
+    table_data$level == 1L & is.na(table_data$parent_id) &
+    is.na(table_data$rank)
+}
+
 # The ranks whose rows the infectious-agent tables set in italics. A genus
 # name is a Latin binomial's first word like a species' and stands italic
 # beside it, and a subgenus no less.
@@ -99,25 +118,31 @@ ia_italic_ranks <- c(
   "Class", "Subclass", "Order", "Suborder", "Family", "Subfamily",
   "Genus", "Subgenus", "Species", "Subspecies", "Serotype", "Variety")
 
-# The printed labels of the engine's deeper tree rows, with one em space
-# (U+2003) added per level before them. `gt::tab_stub_indent()` caps its
+# The printed labels of the engine's deeper tree rows, with one en space
+# (U+2002) added per level before them. `gt::tab_stub_indent()` caps its
 # per-level indent at five levels, so a row of level 6 or deeper would
-# otherwise print at level 5's indent alike; the em space rides along with the
+# otherwise print at level 5's indent alike; the en space rides along with the
 # label through `fmt_markdown()`, which passes it to the rendered text in both
-# the HTML and the LaTeX output, and indents one level past the cap per level
-# beyond it.
+# the HTML and the LaTeX output. gt's own per-level step is five pixels
+# (`stub.indent_length`, 3.75 points in the LaTeX output); an en space is half
+# the cell's font size, so at the rendered fonts of these tables — ten to
+# twelve pixels in HTML, eight to nine points in LaTeX, as
+# `compute_col_widths()` sizes them — it steps within about a pixel of gt's,
+# close enough that the indent past the cap reads continuous with the levels
+# below it.
 ia_indent_labels <- function(labels, levels) {
   extra <- ifelse(is.na(levels), 0L, as.integer(pmax(levels - 5L, 0L)))
-  paste0(strrep("\u2003", extra), labels)
+  paste0(strrep("\u2002", extra), labels)
 }
 
 # True for the residual (`~n.o.s.`) rows that stand above the genus: the
 # engine gives a residual row no rank of its own, and its `parent_id` names
 # the node it gathers the unlisted agents of. A node at or below the genus is
 # what the `nos_footnote` explains, so only a node above the genus earns the
-# other note. Rank alone does not tell: the classification's groups carry the
-# rank "Group" wherever the list places them, a group within the genus
-# *Staphylococcus* among them, so a parent of that rank is judged by its own
+# `residual_above_genus_footnote`. Rank alone does not tell: the
+# classification's groups carry the rank "Group" wherever the list places
+# them, a group within the genus *Staphylococcus* among them, so a parent of
+# that rank is judged by its own
 # parent, and the walk up the chain reads the node's path. Where the table
 # carries no row for a node, the path word of its own identifier decides,
 # which only some identifier sources carry.

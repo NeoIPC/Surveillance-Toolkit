@@ -16,7 +16,7 @@ test_that("a row's identity is its node_id, and the Total's is total", {
     c("total", "NeoIPC|1", "LPSN|genus/staphylococcus", "NeoIPC|63",
       "LPSN|species/staphylococcus-epidermidis",
       "LPSN|genus/staphylococcus~n.o.s.", "NeoIPC|63~n.o.s.",
-      "ICTV|191161"))
+      "ICTV|191161", "NeoIPC|100"))
 })
 
 test_that("an identity is unique in every table, a resistance table's included", {
@@ -140,4 +140,21 @@ test_that("ia_above_genus falls back to the id word without the parent row", {
   # note, as a residual of a node at or under the genus is the rarer case.
   expect_equal(ia_above_genus(tbl, ids, residual),
                c(FALSE, TRUE, TRUE))
+})
+
+test_that("ia_summary_rows names the summary block, not a rankless tree top", {
+  groups <- fixture_agent_per_infection_groups()
+  # The Gram-reaction row of the summary block, and no other row: not the
+  # Total, not a groups tree top keyed without a pipe.
+  expect_equal(which(ia_summary_rows(groups)), 2L)
+  onto <- fixture_agent_per_infection_ontology()
+  # The ontology holds no summary row, and its Viruses top — level 1, no
+  # parent, no rank, a pipe in its key — is no summary row for it.
+  expect_equal(which(ia_summary_rows(onto)), integer(0))
+  other <- tibble::tribble(
+    ~node_id, ~level, ~parent_id, ~rank,
+    "oxygen_requirement|microaerophilic", 1L, NA_character_, NA_character_,
+    "bacteria", 1L, NA_character_, NA_character_,
+    NA_character_, 0L, NA_character_, NA_character_)
+  expect_equal(ia_summary_rows(other), c(TRUE, FALSE, FALSE))
 })

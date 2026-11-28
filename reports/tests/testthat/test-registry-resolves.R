@@ -47,9 +47,9 @@ for (sym in unique(unlist(regmatches(
   assign(sym, function(...) NULL, envir = stub_env)
 og <- eval(og_expr, stub_env)
 # Each grouping entry stands under its slot and is resolved only against the
-# fixture of that version: a key of one version that does not name a row of
-# the other is exactly the mismatch that went unnoticed when one entry served
-# both.
+# fixture of that version, so a key of one version that does not name a row
+# of the other is caught here; an entry shared by both versions would face
+# the two versions' different rows at once and could hide the mismatch.
 grouping_slots <- list(
   infectious_agent_detection_rate_per_agent_table =
     fixture_registry_agent_groups,
