@@ -9,6 +9,8 @@ format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 The release workflow reads the section matching the released version out of this file and publishes
 it as the GitHub Release body, so a release cannot be cut for a version this file does not describe.
 
+## [Unreleased]
+
 ## [0.2.0-alpha] - 2026-11-28
 
 ### Added
