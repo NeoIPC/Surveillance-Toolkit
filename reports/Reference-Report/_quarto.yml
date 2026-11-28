@@ -21,18 +21,20 @@ format:
   pdf:
     template-partials:
       - before-body.tex
-    documentclass: scrartcl
+    documentclass: article
     # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which
     # needs LuaLaTeX. Pinning it here keeps every render path on one engine (the
     # .NET service injects the same value on its own path).
     pdf-engine: lualatex
-    # Archival only. PDF/UA-2 is deliberately NOT declared: it requires tagged
-    # structure, and KOMA-Script does not support LaTeX tagging — under
-    # `documentclass: scrartcl` it warns "Activated tagging detected but not
-    # supported!" and emits headings as ordinary paragraph text (no Sect /
-    # section / subsection structure elements), so declaring ua-2 would assert a
-    # conformance the file does not have. Re-declare it only once the reports
-    # move to a tagging-capable class.
+    # archival a-4: Quarto turns tagging on only for a standard that requires
+    # tagged structure, and Quarto's own pandoc filters load the caption
+    # package — which the LaTeX Tagging Project's status table
+    # (https://latex3.github.io/tagging-project/tagging-status/) records as
+    # currently incompatible with tagging — into the reports' PDF renders, so
+    # no accessibility claim stands verified here. The article class itself is
+    # recorded as compatible; with tagging off,
+    # scripts/Test-ReportPdfTagging.ps1 fails a rendered file that carries
+    # structure its declaration does not claim.
     pdf-standard: [a-4]
     # PDF/A-4 requires every font to be embedded. R's pdf() device, which
     # Quarto's `fig-format: pdf` selects, writes a figure's text in the standard
@@ -55,8 +57,7 @@ format:
     mainfont: "EB Garamond"
     monofont: "EB Garamond"
     fontsize: 10pt
-    classoption: [footsepline=true, plainfootsepline=true]
-    papersize: a4paper
+    papersize: a4
     fig-pos: 'H'
     tbl-pos: 'H'
     colorlinks: true
@@ -66,6 +67,12 @@ format:
       - left=25mm
       - right=25mm
       - heightrounded
+      # geometry computes the top margin when it loads, before the header
+      # block below runs, so the height the header occupies is its option,
+      # not a later \setlength: raising \headheight after geometry has left
+      # the text block ~39 pt below the declared top margin. A 4 cm logo
+      # with the line box around it needs 54.02 pt, rounded up to 54.1 pt.
+      - headheight=54.1pt
     number-sections: true
     include-in-header:
       text: |
@@ -74,17 +81,31 @@ format:
         \floatplacement{figure}{H}
         \floatplacement{table}{H}
         \usepackage{graphicx}
-        \usepackage{wrapfig}
-        \usepackage{scrlayer-scrpage}
-        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
-        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
-        \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
-        \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
-        \ofoot*{\pagemark}
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[L]{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
+        \fancyfoot[L]{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
+        \fancyfoot[R]{\thepage}
         \newcommand{\FooterText}{}
-        \cfoot*{%
+        \fancyfoot[C]{%
           \raggedright
           \hspace{1.6cm}\parbox{0.8\textwidth}{\FooterText}
+        }
+        % The reports carry a rule above the footer on every page including the
+        % title page: \footrulewidth draws it on both page styles, the plain
+        % (title) page mirrors the fancy footer, and with \headrule emptied the
+        % header carries no rule.
+        \renewcommand{\footrulewidth}{0.4pt}
+        \renewcommand{\headrule}{}
+        \fancypagestyle{plain}{%
+          \fancyhf{}
+          \fancyfoot[L]{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
+          \fancyfoot[R]{\thepage}
+          \fancyfoot[C]{%
+            \raggedright
+            \hspace{1.6cm}\parbox{0.8\textwidth}{\FooterText}
+          }
         }
   docx:
     highlight-style: github

@@ -12,22 +12,24 @@ format:
     link-external-newwindow: true
     css: validation-report.css
   pdf:
-    documentclass: scrartcl
+    documentclass: article
     # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which
     # needs LuaLaTeX. Pinning it here keeps every render path on one engine.
     pdf-engine: lualatex
-    # Archival only. PDF/UA-2 is deliberately NOT declared: it requires tagged
-    # structure, and KOMA-Script does not support LaTeX tagging — under
-    # `documentclass: scrartcl` it warns "Activated tagging detected but not
-    # supported!" and emits headings as ordinary paragraph text (no Sect /
-    # section / subsection structure elements), so declaring ua-2 would assert a
-    # conformance the file does not have. Re-declare it only once the reports
-    # move to a tagging-capable class.
+    # archival a-4: Quarto turns tagging on only for a standard that requires
+    # tagged structure, and Quarto's own pandoc filters load the caption
+    # package — which the LaTeX Tagging Project's status table
+    # (https://latex3.github.io/tagging-project/tagging-status/) records as
+    # currently incompatible with tagging — into the reports' PDF renders, so
+    # no accessibility claim stands verified here. The article class itself is
+    # recorded as compatible; with tagging off,
+    # scripts/Test-ReportPdfTagging.ps1 fails a rendered file that carries
+    # structure its declaration does not claim.
     pdf-standard: [a-4]
     mainfont: "Noto Sans"
     monofont: "Noto Sans"
     fontsize: 10pt
-    papersize: a4paper
+    papersize: a4
     fig-pos: 'h'
     colorlinks: true
 filters:

@@ -12,26 +12,23 @@ format:
     template-partials:
       - before-body.tex
       - title.tex
-    documentclass: scrartcl
+    documentclass: article
     # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which
     # needs LuaLaTeX. Pinning it here keeps every render path on one engine.
     # (No html format → no axe here.)
     pdf-engine: lualatex
     # Archival only. PDF/UA-2 is deliberately NOT declared: it requires tagged
-    # structure, and KOMA-Script does not support LaTeX tagging — under
-    # `documentclass: scrartcl` it warns "Activated tagging detected but not
-    # supported!" and emits headings as ordinary paragraph text (no Sect /
-    # section / subsection structure elements), so declaring ua-2 would assert a
-    # conformance the file does not have. Re-declare it only once the reports
-    # move to a tagging-capable class.
+    # structure, and the textpos package that lays out this certificate's single
+    # page is recorded as currently incompatible with LaTeX tagging in the LaTeX
+    # Tagging Project's status table
+    # (https://latex3.github.io/tagging-project/tagging-status/), so under
+    # tagging=on the structure would be wrong and the declaration would assert a
+    # conformance the file does not have.
     pdf-standard: [a-4]
-    classoption:
-      - footsepline=true
-      - plainfootsepline=true
     mainfont: "Noto Sans"
     monofont: "Noto Sans"
     fontsize: 12pt
-    papersize: a4paper
+    papersize: a4
     geometry:
       - top=15mm
       - bottom=20mm
@@ -47,11 +44,21 @@ format:
         \usepackage{float}
         \usepackage{placeins}
         \usepackage{graphicx}
-        \usepackage{wrapfig}
-        \usepackage{scrlayer-scrpage}
-        \pagenumbering{gobble}
-        \setlength{\footheight}{1.5cm}
-        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
-        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
-        \addtokomafont{pagefoot}{\footnotesize}
-        \ifoot*{\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \newcommand{\CertFooterText}{}
+        \fancyfoot[L]{\footnotesize\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
+        \fancyfoot[C]{\footnotesize\parbox[b]{\linewidth}{\raggedright\leftskip=1.5cm\relax\CertFooterText}}
+        % A rule spans the footer on every page: \footrulewidth draws it, and the
+        % plain (title) page mirrors the footer, so the \maketitle page carries
+        % the flag and the funding text too — the body renews \CertFooterText,
+        % and both page styles read it at ship-out. \footnotesize sizes the
+        % footer material because the certificate body is 12 pt.
+        \renewcommand{\footrulewidth}{0.4pt}
+        \renewcommand{\headrule}{}
+        \fancypagestyle{plain}{%
+          \fancyhf{}
+          \fancyfoot[L]{\footnotesize\includegraphics[width=1.37cm]{../logos/eu-flag.png}}
+          \fancyfoot[C]{\footnotesize\parbox[b]{\linewidth}{\raggedright\leftskip=1.5cm\relax\CertFooterText}}
+        }

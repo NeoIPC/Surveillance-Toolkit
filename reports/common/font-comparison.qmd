@@ -2,8 +2,8 @@
 title: "NeoIPC Font Comparison"
 format:
   pdf:
-    documentclass: scrartcl
-    papersize: a4paper
+    documentclass: article
+    papersize: a4
     fontsize: 10pt
     geometry:
       - top=25mm

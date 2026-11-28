@@ -9,22 +9,24 @@ format:
     link-external-icon: true
     link-external-newwindow: true
   pdf:
-    documentclass: scrartcl
+    documentclass: article
     # LuaLaTeX pinned: `pdf-standard` reaches LaTeX as \DocumentMetadata, which
     # needs LuaLaTeX. Pinning it here keeps every render path on one engine.
     pdf-engine: lualatex
-    # Archival only. PDF/UA-2 is deliberately NOT declared: it requires tagged
-    # structure, and KOMA-Script does not support LaTeX tagging — under
-    # `documentclass: scrartcl` it warns "Activated tagging detected but not
-    # supported!" and emits headings as ordinary paragraph text (no Sect /
-    # section / subsection structure elements), so declaring ua-2 would assert a
-    # conformance the file does not have. Re-declare it only once the reports
-    # move to a tagging-capable class.
+    # archival a-4: Quarto turns tagging on only for a standard that requires
+    # tagged structure, and Quarto's own pandoc filters load the caption
+    # package — which the LaTeX Tagging Project's status table
+    # (https://latex3.github.io/tagging-project/tagging-status/) records as
+    # currently incompatible with tagging — into the reports' PDF renders, so
+    # no accessibility claim stands verified here. The article class itself is
+    # recorded as compatible; with tagging off,
+    # scripts/Test-ReportPdfTagging.ps1 fails a rendered file that carries
+    # structure its declaration does not claim.
     pdf-standard: [a-4]
     mainfont: "Noto Sans"
     monofont: "Noto Sans"
     fontsize: 10pt
-    papersize: a4paper
+    papersize: a4
     fig-pos: 'H'
     colorlinks: true
     geometry:
@@ -33,22 +35,36 @@ format:
       - left=25mm
       - right=25mm
       - heightrounded
+      # geometry computes the top margin when it loads, before the header
+      # block below runs, so the height the header occupies is its option,
+      # not a later \setlength: raising \headheight after geometry left the
+      # text block below the declared top margin and pushed the footer off
+      # the page. A 4 cm logo with the line box around it needs 54.02 pt,
+      # rounded up to 54.1 pt, and the head must fit above the body inside
+      # the 25 mm top margin, which takes the default 25 pt headsep down to
+      # 10 pt.
+      - headheight=54.1pt
+      - headsep=10pt
     include-in-header:
       text: |
         \usepackage{float}
         \usepackage{placeins}
         \floatplacement{figure}{H}
         \usepackage{graphicx}
-        \usepackage{scrlayer-scrpage}
-        % Both page styles set the page number in the centre of the footer
-        % by default; clearing them leaves the outer edge as its one place,
-        % which the starred \ofoot* fills on the plain page style as well.
-        \clearpairofpagestyles
-        \ModifyLayer[addvoffset=-.6ex]{scrheadings.foot.above.line}
-        \ModifyLayer[addvoffset=-.6ex]{plain.scrheadings.foot.above.line}
-        \ihead{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
-        \ofoot*{\pagemark}
-    classoption: [footsepline=true, plainfootsepline=true]
+        \usepackage{fancyhdr}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[L]{\includegraphics[width=4cm]{../logos/LOGO_NEOIPC_2.png}}
+        \fancyfoot[R]{\thepage}
+        % The reports carry a rule above the footer on every page including the
+        % title page: \footrulewidth draws it on both page styles, and the plain
+        % (title) page carries the same outer page number and no header.
+        \renewcommand{\footrulewidth}{0.4pt}
+        \renewcommand{\headrule}{}
+        \fancypagestyle{plain}{%
+          \fancyhf{}
+          \fancyfoot[R]{\thepage}
+        }
 profile:
   group:
     - [en, de]

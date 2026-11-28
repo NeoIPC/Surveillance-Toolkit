@@ -6,17 +6,14 @@
 #| output: asis
 
 cat(
-  # The funding statement wraps beside the EU emblem the inner footer holds:
+  # The funding statement wraps beside the EU emblem the left footer holds:
   # the whole block is indented past the emblem, so where a line breaks is the
   # layout's decision rather than the translation's. It is the certificate's
   # own string rather than the glossary's term of the same text, because a
   # language's glossary reaches the reports only once that whole catalogue is
   # 80 % translated, and the certificate's translations would otherwise wait
   # on it.
-  paste0(
-    "\\cfoot*{\\parbox[b]{\\linewidth}{\\raggedright\\leftskip=1.5cm\\relax ",
-    sR$content[1],
-    "}}"),
+    paste0("\\renewcommand{\\CertFooterText}{", sR$content[1], "}"),
   "\\selectlanguage{british}",
   "",
   "\\begin{center}",
