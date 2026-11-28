@@ -11,6 +11,15 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
 
 ## [Unreleased]
 
+### Added
+
+- `WHO-AWaRe-Classification-2025.csv`, a faithful extract of the classification worksheet of the
+  2025 edition of the WHO AWaRe classification (doi:10.2471/B09489) — all 268 classified antibiotics
+  with their ATC codes, categories and 2025 EML flag.
+- The Pester content check `scripts/modules/NeoIPC-Tools/Tests/AntibioticsContent.Tests.ps1`: every
+  substance's `aware_category` must match the extract, and the attribution must name the edition the
+  fold follows.
+
 ### Changed
 
 - `README.md`: the section on why this catalogue is not on Weblate notes the infectious-agent list's factual-extract
@@ -20,6 +29,21 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
   group and an AWaRe category sort substances by schemes made for drug-utilization studies and antibiotic
   stewardship. The substance names are described as display forms of International Nonproprietary Names, not as
   reproduced from the ATC/DDD index.
+- The `aware_category` fold now follows the **2025** AWaRe classification. One option changes against
+  the 2021 fold: ticarcillin/clavulanic acid (`J01CR03`), which it left without a category, is now
+  **Watch**; the other 243 options keep the category the 2021 fold had them in.
+- The three AWaRe group `description`s are re-summarized to the 2025 definitions, and the
+  `WHO_AWARE` option-group-set description repeats the same summaries. Access is no
+  longer described as narrow-spectrum — the 2025 classification gives it activity against a wide
+  range of commonly encountered susceptible infectious agents, with lower resistance potential; Watch
+  carries the resistance-potential and stewardship-monitoring emphasis, Reserve the last-resort
+  restriction on use against multidrug-resistant infectious agents. No locale had translated these
+  three strings, so the catalogues regenerate with the new source strings and empty translations.
+- The two non-J01 ATC groups take the ATC/DDD index's own level-4 names, so every group name is now
+  the index's verbatim: `J04AB` becomes "Antibiotics" and `P01AB` "Nitroimidazole derivatives".
+- The attribution names the 2025 edition (doi:10.2471/B09489) in place of the 2021 publication
+  (WHO/MHP/HPS/EML/2021.04), and records the ATC codes and group names as following the 2026
+  ATC/DDD index.
 
 ## [0.1.0-alpha] - 2026-09-07
 

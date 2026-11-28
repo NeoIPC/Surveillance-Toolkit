@@ -24,6 +24,7 @@ combination and topical agents are excluded.
 | `NeoIPC-Antibiotics.csv` | The substance/option table — `id, atc_code, name, atc_group, aware_category, uid`. One row per DHIS2 option (the **systemic** antibiotics — the WHO ATC `J01` branch plus a few deliberately-added systemic non-J01 substances). The WHO **AWaRe** classification is folded in as the `aware_category` column. |
 | `NeoIPC-Antibiotic-Groups.csv` | The 34 WHO ATC **level-4** chemical subgroups — `code, name, shortName, uid`. A substance joins a group by its `atc_group` column; the `ATC5` option-group-set is built from these. Carries **no `description`**: only 17 of 34 groups ever had one, nothing consumed them, and being verbatim WHOCC prose they were this directory's largest block of reproduced upstream text, so the column was dropped (see [Translations](#translations)). |
 | `NeoIPC-Antibiotic-AWaRe-Groups.csv` | The 3 WHO **AWaRe** groups — `code, category, name, shortName, description, uid`. A substance joins by its `aware_category`; the `WHO_AWARE` option-group-set is built from these. |
+| `WHO-AWaRe-Classification-2025.csv` | A faithful extract of the classification worksheet of WHO's AWaRe classification of 2025 — `antibiotic, class, atc_code, category, listed_on_eml_2025, notes`, all 268 entries of `B09489-eng.xlsx` (doi:10.2471/B09489); faithful apart from WHO's non-breaking spaces normalized to plain ones, and without the worksheet's opening note on the classification's intended use, which stays in WHO's publication. Reproduced here under this directory's own terms; nothing generates from it — the content check `AntibioticsContent.Tests.ps1` holds every substance's `aware_category` to it, so the fold cannot drift from the edition it follows. |
 | `ListElements.csv` | The printed-list UI labels (the `New-AntibioticsList` table headers). |
 
 The DHIS2 metadata (option set + option groups + group-sets, with localized `translations[]`) is **generated** from
@@ -96,14 +97,19 @@ both consequences above reversed.
 ## Attribution
 
 - **WHO ATC/DDD** — the ATC codes, the substance names and the ATC group names are based on
-  information from the [WHO Collaborating Centre for Drug Statistics Methodology, Oslo](https://www.whocc.no/)
+  information from the [WHO Collaborating Centre for Drug Statistics Methodology, Oslo](https://www.whocc.no/),
+  edition **2026** (WHO Collaborating Centre for Drug Statistics Methodology, ATC classification index with DDDs,
+  2026. Oslo, Norway 2026)
   ([ATC/DDD copyright & disclaimer](https://atcddd.fhi.no/copyright_disclaimer/)). Reproduced here for NeoIPC's
   **non-commercial** infection-surveillance use, with attribution; the ATC classification is reproduced unchanged
-  (translations are added localizations, not alterations of the classification). To keep WHO ATC *codes* out of the
-  public translation files, the translation catalogue is keyed by the English **name**, never the ATC code.
-- **WHO AWaRe** — Access, Watch, Reserve (AWaRe) classification of antibiotics, 2021. Geneva: World Health
-  Organization; 2021 (WHO/MHP/HPS/EML/2021.04).
-  <https://www.who.int/publications/i/item/2021-aware-classification>. Licence:
+  (translations are added localizations, not alterations of the classification): every ATC code carried here exists
+  in the 2026 index under the group recorded beside it, and all 34 group names are that index's level-4 names
+  verbatim — including the index's own terse `J04AB` "Antibiotics" and `P01AB` "Nitroimidazole derivatives". To keep
+  WHO ATC *codes* out of the public translation files, the translation catalogue is
+  keyed by the English **name**, never the ATC code.
+- **WHO AWaRe** — The selection and use of essential medicines, 2025: WHO AWaRe (access, watch, reserve)
+  classification of antibiotics for evaluation and monitoring of use. Geneva: World Health
+  Organization; 2025. <https://doi.org/10.2471/B09489>. Licence:
   [CC BY-NC-SA 3.0 IGO](https://creativecommons.org/licenses/by-nc-sa/3.0/igo/).
 
 ## Licensing

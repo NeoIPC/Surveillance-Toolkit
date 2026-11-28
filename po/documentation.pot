@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: NeoIPC-Support@charite.de\n"
-"POT-Creation-Date: 2026-09-26 22:57+0200\n"
+"POT-Creation-Date: 2026-11-27 23:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -32,7 +32,7 @@ msgstr ""
 
 #. type: #sec-licence
 #: doc/protocol/NeoIPC-Core-Protocol.adoc:12
-msgid "The *<<sec-ab-list>>* is a NeoIPC compilation derived from the WHO https://www.who.int/publications/i/item/2021-aware-classification[AWaRe classification of antibiotics, 2021] (WHO/MHP/HPS/EML/2021.04), extended with systemic substances not in the AWaRe list. As an adaptation of the ShareAlike-licensed AWaRe classification it is licensed under the Creative Commons https://creativecommons.org/licenses/by-nc-sa/3.0/igo/[Attribution-NonCommercial-ShareAlike 3.0 IGO (CC BY-NC-SA 3.0 IGO)] licence. The ATC codes and group names it carries are reproduced verbatim from the WHO Collaborating Centre for Drug Statistics Methodology https://www.whocc.no/[ATC/DDD index] (© World Health Organization); the substance names are International Nonproprietary Names."
+msgid "The *<<sec-ab-list>>* is a NeoIPC compilation derived from the WHO AWaRe classification of antibiotics, 2025 (WHO. https://doi.org/10.2471/B09489[The selection and use of essential medicines, 2025: WHO AWaRe (access, watch, reserve) classification of antibiotics for evaluation and monitoring of use]. Geneva: World Health Organization; 2025. Licence: CC BY-NC-SA 3.0 IGO), and every systemic substance it carries is an entry of that classification. As an adaptation of the ShareAlike-licensed AWaRe classification it is licensed under the Creative Commons https://creativecommons.org/licenses/by-nc-sa/3.0/igo/[Attribution-NonCommercial-ShareAlike 3.0 IGO (CC BY-NC-SA 3.0 IGO)] licence. The ATC codes and group names it carries are reproduced verbatim from the WHO Collaborating Centre for Drug Statistics Methodology https://www.whocc.no/[ATC/DDD index] (© World Health Organization); the substance names are International Nonproprietary Names."
 msgstr ""
 
 #. type: #sec-licence

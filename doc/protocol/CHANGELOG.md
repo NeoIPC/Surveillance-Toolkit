@@ -28,6 +28,8 @@ it as the GitHub Release body, so a release cannot be cut for a version this fil
     S. thoraltensis;
   - they count as common commensals, where the printed list gives recognized pathogens, Staphylococcus
     schleiferi, Streptococcus massiliensis, and Parageobacillus thermoglucosidasius.
+- The printed antibiotics list follows WHO's AWaRe classification of 2025 — ticarcillin/clavulanic
+  acid prints under Watch — and the colophon cites that edition with WHO's suggested citation.
 
 ### Fixed
 

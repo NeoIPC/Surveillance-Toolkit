@@ -33,16 +33,17 @@ $script:NeoIPCAntimicrobialOptionSetUid = 'JE7ECBWKhWD'
 # The 2 antibiotic optionGroupSets — likewise structural singletons. Codes are fixed (neoipcr/the reports filter on
 # ATC5 / WHO_AWARE). Content (name/description) AND the DHIS2 UID (the Uid field) are canonical here; the option-set
 # reference, dataDimension and sharing are taken from the export when one is supplied. The long WHO_AWARE description
-# is assembled with explicit `\n` joins so it is independent of this file's newline encoding (it must match the
-# deployed value exactly — gate-verified).
+# is assembled with explicit `\n` joins so it is independent of this file's newline encoding. A content edit here
+# diverges from the deployed value until the next deploy: the classified-diff gate classifies it as
+# GroupSetNormalisation and does not fail, so reviewing it against the deployed export is the operator's step.
 $script:NeoIPCAntibioticGroupSet = [ordered]@{
     ATC5      = [ordered]@{ Uid = 'D1N8iz0Grqv'; Name = 'ATC-5 Groups'; Description = '' }
     WHO_AWARE = [ordered]@{ Uid = 'pvQ5WMrK25p'; Name = 'AWaRe Groups'; Description = (@(
                 'AWaRe is the WHO classification of antibiotics introduced by WHO as part of the 2017 Model List of Essential Medicines.'
                 'In the AWaRe classification, there are three categories of antibiotics:'
-                '• Access antibiotics that have a narrow spectrum of activity and a good safety profile in terms of side-effects.'
-                '• Watch antibiotics that are broader-spectrum antibiotics and are recommended as first-choice options for patients with more severe clinical presentations or for infections where the causative pathogens are more likely to be resistant to Access antibiotics.'
-                '• Reserve antibiotics that are last-choice antibiotics used to treat multidrug-resistant infections.'
+                '• Access antibiotics that have activity against a wide range of commonly encountered susceptible infectious agents and a lower resistance potential than antibiotics in the other groups; selected Access antibiotics are essential first or second choice empiric treatment options for common infectious syndromes.'
+                '• Watch antibiotics that have higher resistance potential, including most of the highest priority agents among the Critically Important Antimicrobials for Human Medicine, and are key targets of stewardship programmes and monitoring.'
+                '• Reserve antibiotics that are reserved for confirmed or suspected infections due to multidrug-resistant infectious agents and should be treated as last resort options.'
                 'This classification can be used to give an indirect indication of the appropriateness of antibiotic use. The World Health Organization (WHO) has defined a target that at least 70% of global antibiotic consumption at the national level should be from the Access group.'
             ) -join "`n") }
 }
