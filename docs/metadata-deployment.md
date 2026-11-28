@@ -491,6 +491,10 @@ Deploy-NeoIPCMetadata -Path ./neoipc-metadata.json -Auth $auth -Hostname dhis2.e
 
 The host is mandatory and has no default, so a deployment always names its target.
 
+The one-off migration of production from its deployed seed metadata to a released canonical package wraps this
+procedure in a delete-list, a collected-code data fix and later deletions: that ordering is in
+[production-migration-runbook.md](production-migration-runbook.md).
+
 ## 7. Tests
 
 `scripts/modules/NeoIPC-Tools/Tests/MetadataDeploy.Tests.ps1` exercises the planning functions and the whole
